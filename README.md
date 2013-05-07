@@ -262,24 +262,25 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ### General Usage (Without Widget)
 1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
 2. Add:
-<code>
-<?php if (function_exists('vote_poll') &amp;&amp; !in_pollarchive()): ?>
-	<li>
-		<h2>Polls</h2>
-		<ul>
-			<li><?php get_poll();?></li>
-		</ul>
-		<?php display_polls_archive_link(); ?>
-	</li>
+
+```
+<?php if (function_exists('vote_poll') && !in_pollarchive()): ?>  
+  <li>  
+    <h2>Polls</h2>  
+    <ul>  
+      <li><?php get_poll();?></li>  
+    </ul>  
+    <?php display_polls_archive_link(); ?>  
+  </li>  
 <?php endif; ?>
-</code>
+```
 * To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
 * To show random poll, use `<?php get_poll(-2); ?>`
 * To embed a specific poll in your post, use `[poll id="2"]` where 2 is your poll id.
 * To embed a random poll in your post, use `[poll id="-2"]`
 * To embed a specific poll's result in your post, use `[poll id="2" type="result"]` where 2 is your poll id.
 
-### General Usage (With Widget)=
+### General Usage (With Widget)
 1. Go to `WP-Admin -> Appearance -> Widgets`.
 2. You can add the Polls Widget by clicking on the 'Add' link besides it.
 3. After adding, you can configure the Polls Widget by clicking on the 'Edit' link besides it.
@@ -339,7 +340,8 @@ N/A
 * Courtesy Of [TreedBox.com](http://treedbox.com "TreedBox.com")
 * Open poll-css.css
 * Add to the end of the file:
-<code>
+
+```
 /* css3 for coloring each pollbars */
 .wp-polls-ul li:nth-child(01) .pollbar{ background:#8FA0C5}
 .wp-polls-ul li:nth-child(02) .pollbar{ background:#FF8}
@@ -354,7 +356,7 @@ N/A
 /* little transition */
 .wp-polls-ul li .pollbar{-webkit-transition: background 0.7s ease-in-out}
 .wp-polls-ul li .pollbar:hover{background:#F00}
-</code>
+```
 
 ### Polls Stats (Outside WP Loop)
 
