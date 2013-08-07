@@ -197,13 +197,13 @@ function poll_head_scripts() {
 add_action('wp_enqueue_scripts', 'poll_scripts');
 function poll_scripts() {
 	global $text_direction;
-	if(@file_exists(TEMPLATEPATH.'/polls-css.css')) {
+	if(@file_exists(get_stylesheet_directory().'/polls-css.css')) {
 		wp_enqueue_style('wp-polls', get_stylesheet_directory_uri().'/polls-css.css', false, '2.63', 'all');
 	} else {
 		wp_enqueue_style('wp-polls', plugins_url('wp-polls/polls-css.css'), false, '2.63', 'all');
 	}
 	if('rtl' == $text_direction) {
-		if(@file_exists(TEMPLATEPATH.'/polls-css-rtl.css')) {
+		if(@file_exists(get_stylesheet_directory().'/polls-css-rtl.css')) {
 			wp_enqueue_style('wp-polls-rtl', get_stylesheet_directory_uri().'/polls-css-rtl.css', false, '2.63', 'all');
 		} else {
 			wp_enqueue_style('wp-polls-rtl', plugins_url('wp-polls/polls-css-rtl.css'), false, '2.63', 'all');
