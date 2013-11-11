@@ -34,8 +34,8 @@ function poll_vote(current_poll_id) {
 		if(jQuery('#poll_multiple_ans_' + poll_id).length) {
 			poll_multiple_ans = parseInt(jQuery('#poll_multiple_ans_' + poll_id).val());
 		}
-		jQuery('#polls_form_' + poll_id + ' input:checkbox, #polls_form_' + poll_id + ' input:radio').each(function(i){
-			if (jQuery(this).is(':checked')) {					
+		jQuery('#polls_form_' + poll_id + ' input:checkbox, #polls_form_' + poll_id + ' input:radio, #polls_form_' + poll_id + ' option').each(function(i){
+			if (jQuery(this).is(':checked') || jQuery(this).is(':selected')) {
 				if(poll_multiple_ans > 0) {
 					poll_answer_id = jQuery(this).val() + ',' + poll_answer_id;
 					poll_multiple_ans_count++;
