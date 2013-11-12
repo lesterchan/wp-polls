@@ -430,6 +430,22 @@ function check_voted_username($poll_id) {
 	}
 }
 
+add_filter('poll_template_votebody_markup', 'poll_template_votebody_markup', 10, 4);
+
+function poll_template_votebody_markup($poll_id, $template_answer, $poll_multiple_ans, $template_variables) {
+
+    foreach($template_variables as $placeholder => $value) {
+        $template_answer = str_replace($placeholder, $value, $template_answer);
+    }
+
+    if($poll_multiple_ans > 0) {
+        $template_answer = str_replace("%POLL_CHECKBOX_RADIO%", 'checkbox', $template_answer);
+    } else {
+        $template_answer = str_replace("%POLL_CHECKBOX_RADIO%", 'radio', $template_answer);
+    }
+
+    return $template_answer;
+}
 
 ### Function: Display Voting Form
 function display_pollvote($poll_id, $display_loading = true) {
@@ -483,15 +499,14 @@ function display_pollvote($poll_id, $display_loading = true) {
 			$poll_answer_text = stripslashes($poll_answer->polla_answers);
 			$poll_answer_votes = intval($poll_answer->polla_votes);
 			$template_answer = stripslashes(get_option('poll_template_votebody'));
-			$template_answer = str_replace("%POLL_ID%", $poll_question_id, $template_answer);
-			$template_answer = str_replace("%POLL_ANSWER_ID%", $poll_answer_id, $template_answer);
-			$template_answer = str_replace("%POLL_ANSWER%", $poll_answer_text, $template_answer);
-			$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($poll_answer_votes), $template_answer);
-			if($poll_multiple_ans > 0) {
-				$template_answer = str_replace("%POLL_CHECKBOX_RADIO%", 'checkbox', $template_answer);
-			} else {
-				$template_answer = str_replace("%POLL_CHECKBOX_RADIO%", 'radio', $template_answer);
-			}
+
+            $template_answer = apply_filters('poll_template_votebody_markup', $poll_id, $template_answer, $poll_multiple_ans, array(
+                '%POLL_ID%' => $poll_question_id,
+                '%POLL_ANSWER_ID%' => $poll_answer_id,
+                '%POLL_ANSWER%' => $poll_answer_text,
+                '%POLL_ANSWER_VOTES%' => number_format_i18n($poll_answer_votes),
+            ));
+
 			// Print Out Voting Form Body Template
 			$temp_pollvote .= "\t\t$template_answer\n";
 		}
