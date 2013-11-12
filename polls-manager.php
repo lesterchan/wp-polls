@@ -16,7 +16,6 @@
 +----------------------------------------------------------------+
 */
 
-
 ### Check Whether User Can Manage Polls
 if(!current_user_can('manage_polls')) {
 	die('Access Denied');
@@ -47,7 +46,7 @@ if(!empty($_POST['do'])) {
 			// Poll Active
 			$pollq_active = intval($_POST['pollq_active']);
 			// Poll Start Date
-			$edit_polltimestamp = intval($_POST['edit_polltimestamp']);
+			$edit_polltimestamp = isset($_POST['edit_polltimestamp']) && intval($_POST['edit_polltimestamp']) == 1;
 			$timestamp_sql = '';
 			if($edit_polltimestamp == 1) {
 				$pollq_timestamp_day = intval($_POST['pollq_timestamp_day']);
@@ -117,7 +116,7 @@ if(!empty($_POST['do'])) {
 				$text .= '<p style="color: red">'.sprintf(__('Invalid Poll \'%s\'.', 'wp-polls'), stripslashes($pollq_question)).'</p>';
 			}
 			// Add Poll Answers (If Needed)
-			$polla_answers_new = $_POST['polla_answers_new'];
+			$polla_answers_new = isset($_POST['polla_answers_new']) ? $_POST['polla_answers_new'] : null;
 			if(!empty($polla_answers_new)) {
 				$i = 0;
 				$polla_answers_new_votes = $_POST['polla_answers_new_votes'];

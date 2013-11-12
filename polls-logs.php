@@ -38,6 +38,9 @@ $poll_answers_data = $wpdb->get_results("SELECT polla_aid, polla_answers FROM $w
 $poll_voters = $wpdb->get_col("SELECT DISTINCT pollip_user FROM $wpdb->pollsip WHERE pollip_qid = $poll_id AND pollip_user != '".__('Guest', 'wp-polls')."' ORDER BY pollip_user ASC");
 $poll_logs_count = $wpdb->get_var("SELECT COUNT(pollip_id) FROM $wpdb->pollsip WHERE pollip_qid = $poll_id");
 
+$exclude_registered = 0;
+$exclude_comment = 0;
+$exclude_guest = 0;
 
 ### Process Filters
 if(!empty($_POST['do'])) {
@@ -53,9 +56,9 @@ if(!empty($_POST['do'])) {
 	switch(intval($_POST['filter'])) {
 		case 1:
 			$users_voted_for = intval($_POST['users_voted_for']);
-			$exclude_registered = intval($_POST['exclude_registered']);
-			$exclude_comment = intval($_POST['exclude_comment']);
-			$exclude_guest = intval($_POST['exclude_guest']);
+			$exclude_registered = isset($_POST['exclude_registered']) && intval($_POST['exclude_registered']) == 1;
+			$exclude_comment = isset($_POST['exclude_comment']) && intval($_POST['exclude_comment']) == 1;
+			$exclude_guest = isset($_POST['exclude_guest']) && intval($_POST['exclude_guest']) == 1;
 			$users_voted_for_sql = "AND pollip_aid = $users_voted_for";
 			if($exclude_registered) {
 				$registered_sql = 'AND pollip_userid = 0';
@@ -281,7 +284,8 @@ if(!empty($_POST['do'])) {
 				$k = 1;
 				$j = 0;
 				$poll_last_aid = -1;
-				if(intval($_POST['filter']) > 1) {
+                $temp_pollip_user = null;
+				if(isset($_POST['filter']) && intval($_POST['filter']) > 1) {
 					echo "<tr class=\"thead\">\n";
 					echo "<th>".__('Answer', 'wp-polls')."</th>\n";
 					echo "<th>".__('IP', 'wp-polls')."</th>\n";
@@ -294,7 +298,9 @@ if(!empty($_POST['do'])) {
 						$pollip_ip = $poll_ip->pollip_ip;
 						$pollip_host = $poll_ip->pollip_host;
 						$pollip_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_ip->pollip_timestamp));
-						if($i%2 == 0) {
+
+                        $i = 0;
+                        if($i % 2 == 0) {
 							$style = '';
 						}  else {
 							$style = 'class="alternate"';
