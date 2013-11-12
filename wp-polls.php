@@ -430,22 +430,19 @@ function check_voted_username($poll_id) {
 	}
 }
 
-add_filter('poll_template_votebody_markup', 'poll_template_votebody_markup', 10, 4);
+add_filter('poll_template_voteheader_markup', 'poll_template_vote_markup', 10, 3);
+add_filter('poll_template_votebody_markup', 'poll_template_vote_markup', 10, 3);
+add_filter('poll_template_votefooter_markup', 'poll_template_vote_markup', 10, 3);
 
-function poll_template_votebody_markup($poll_id, $template_answer, $poll_multiple_ans, $template_variables) {
+function poll_template_vote_markup($template, $poll_db_object, $variables) {
 
-    foreach($template_variables as $placeholder => $value) {
-        $template_answer = str_replace($placeholder, $value, $template_answer);
+    foreach($variables as $placeholder => $value) {
+        $template = str_replace($placeholder, $value, $template);
     }
 
-    if($poll_multiple_ans > 0) {
-        $template_answer = str_replace("%POLL_CHECKBOX_RADIO%", 'checkbox', $template_answer);
-    } else {
-        $template_answer = str_replace("%POLL_CHECKBOX_RADIO%", 'radio', $template_answer);
-    }
-
-    return $template_answer;
+    return $template;
 }
+
 
 ### Function: Display Voting Form
 function display_pollvote($poll_id, $display_loading = true) {
@@ -454,6 +451,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 	$temp_pollvote = '';
 	// Get Poll Question Data
 	$poll_question = $wpdb->get_row("SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id LIMIT 1");
+
 	// Poll Question Variables
 	$poll_question_text = stripslashes($poll_question->pollq_question);
 	$poll_question_id = intval($poll_question->pollq_id);
@@ -467,20 +465,21 @@ function display_pollvote($poll_id, $display_loading = true) {
 		$poll_end_date  = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_expiry));
 	}
 	$poll_multiple_ans = intval($poll_question->pollq_multiple);
+
 	$template_question = stripslashes(get_option('poll_template_voteheader'));
-	$template_question = str_replace("%POLL_QUESTION%", $poll_question_text, $template_question);
-	$template_question = str_replace("%POLL_ID%", $poll_question_id, $template_question);
-	$template_question = str_replace("%POLL_TOTALVOTES%", $poll_question_totalvotes, $template_question);
-	$template_question = str_replace("%POLL_TOTALVOTERS%", $poll_question_totalvoters, $template_question);
-	$template_question = str_replace("%POLL_START_DATE%", $poll_start_date, $template_question);
-	$template_question = str_replace("%POLL_END_DATE%", $poll_end_date, $template_question);
-	if($poll_multiple_ans > 0) {
-		$template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", $poll_multiple_ans, $template_question);
-	} else {
-		$template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", '1', $template_question);
-	}
+
+    $template_question = apply_filters('poll_template_voteheader_markup', $template_question, $poll_question, array(
+        '%POLL_QUESTION%' => $poll_question_text,
+        '%POLL_ID%' => $poll_question_id,
+        '%POLL_TOTALVOTES%' => $poll_question_totalvotes,
+        '%POLL_TOTALVOTERS%' => $poll_question_totalvoters,
+        '%POLL_START_DATE%' => $poll_start_date,
+        '%POLL_END_DATE%' => $poll_end_date,
+        '%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
+    ));
+
 	// Get Poll Answers Data
-	$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY ".get_option('poll_ans_sortby').' '.get_option('poll_ans_sortorder'));
+	$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY ".get_option('poll_ans_sortby').' '.get_option('poll_ans_sortorder'));
 	// If There Is Poll Question With Answers
 	if($poll_question && $poll_answers) {
 		// Display Poll Voting Form
@@ -500,11 +499,12 @@ function display_pollvote($poll_id, $display_loading = true) {
 			$poll_answer_votes = intval($poll_answer->polla_votes);
 			$template_answer = stripslashes(get_option('poll_template_votebody'));
 
-            $template_answer = apply_filters('poll_template_votebody_markup', $poll_id, $template_answer, $poll_multiple_ans, array(
+            $template_answer = apply_filters('poll_template_votebody_markup', $template_answer, $poll_answer, array(
                 '%POLL_ID%' => $poll_question_id,
                 '%POLL_ANSWER_ID%' => $poll_answer_id,
                 '%POLL_ANSWER%' => $poll_answer_text,
                 '%POLL_ANSWER_VOTES%' => number_format_i18n($poll_answer_votes),
+                "%POLL_CHECKBOX_RADIO%" => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
             ));
 
 			// Print Out Voting Form Body Template
@@ -522,15 +522,15 @@ function display_pollvote($poll_id, $display_loading = true) {
 		}
 		// Voting Form Footer Variables
 		$template_footer = stripslashes(get_option('poll_template_votefooter'));
-		$template_footer = str_replace("%POLL_ID%", $poll_question_id, $template_footer);
-		$template_footer = str_replace("%POLL_RESULT_URL%", $poll_result_url, $template_footer);
-		$template_footer = str_replace("%POLL_START_DATE%", $poll_start_date, $template_footer);
-		$template_footer = str_replace("%POLL_END_DATE%", $poll_end_date, $template_footer);
-		if($poll_multiple_ans > 0) {
-			$template_footer = str_replace("%POLL_MULTIPLE_ANS_MAX%", $poll_multiple_ans, $template_footer);
-		} else {
-			$template_footer = str_replace("%POLL_MULTIPLE_ANS_MAX%", '1', $template_footer);
-		}
+
+        $template_footer = apply_filters('poll_template_votefooter_markup', $template_footer, $poll_question, array(
+            '%POLL_ID%' => $poll_question_id,
+            '%POLL_RESULT_URL%' => $poll_result_url,
+            '%POLL_START_DATE%' => $poll_start_date,
+            '%POLL_END_DATE%' => $poll_end_date,
+            '%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
+        ));
+
 		// Print Out Voting Form Footer Template
 		$temp_pollvote .= "\t\t$template_footer\n";
 		$temp_pollvote .= "\t</form>\n";
