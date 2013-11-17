@@ -363,31 +363,31 @@ N/A
 ### To Display Total Polls
 * Use:
 <code>
-<?php if (function_exists('get_pollquestions')): ?>
-	<?php get_pollquestions(); ?>
+<?php if (function_exists('get_pollquestions')): ?>  
+	<?php get_pollquestions(); ?>  
 <?php endif; ?>
 </code>
 
 ### To Display Total Poll Answers
 * Use:
 <code>
-<?php if (function_exists('get_pollanswers')): ?>
-	<?php get_pollanswers(); ?>
+<?php if (function_exists('get_pollanswers')): ?>  
+	<?php get_pollanswers(); ?>  
 <?php endif; ?>
 </code>
 
 ### To Display Total Poll Votes
 * Use:
 <code>
-<?php if (function_exists('get_pollvotes')): ?>
-	<?php get_pollvotes(); ?>
+<?php if (function_exists('get_pollvotes')): ?>  
+	<?php get_pollvotes(); ?>  
 <?php endif; ?>
 </code>
 
 ### To Display Total Poll Voters
 * Use:
 <code>
-<?php if (function_exists('get_pollvoters')): ?>
-	<?php get_pollvoters(); ?>
+<?php if (function_exists('get_pollvoters')): ?>  
+	<?php get_pollvoters(); ?>  
 <?php endif; ?>
 </code>
