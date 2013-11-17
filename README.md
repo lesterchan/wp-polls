@@ -262,7 +262,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ### General Usage (Without Widget)
 1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
 2. Add:
-
+<code>
 ```
 <?php if (function_exists('vote_poll') && !in_pollarchive()): ?>  
   <li>  
@@ -274,6 +274,8 @@ WP-Polls is extremely customizable via templates and css styles and there are to
   </li>  
 <?php endif; ?>
 ```
+</code>
+
 * To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
 * To show random poll, use `<?php get_poll(-2); ?>`
 * To embed a specific poll in your post, use `[poll id="2"]` where 2 is your poll id.
@@ -341,22 +343,20 @@ N/A
 * Open poll-css.css
 * Add to the end of the file:
 
-```
-/* css3 for coloring each pollbars */
-.wp-polls-ul li:nth-child(01) .pollbar{ background:#8FA0C5}
-.wp-polls-ul li:nth-child(02) .pollbar{ background:#FF8}
-.wp-polls-ul li:nth-child(03) .pollbar{ background:#ff8a3b}
-.wp-polls-ul li:nth-child(04) .pollbar{ background:#a61e2a}
-.wp-polls-ul li:nth-child(05) .pollbar{ background:#4ebbff}
-.wp-polls-ul li:nth-child(06) .pollbar{ background:#fbca54}
-.wp-polls-ul li:nth-child(07) .pollbar{ background:#aad34f}
-.wp-polls-ul li:nth-child(08) .pollbar{ background:#66cc9a}
-.wp-polls-ul li:nth-child(09) .pollbar{ background:#98CBCB}
-.wp-polls-ul li:nth-child(10) .pollbar{ background:#a67c52}
-/* little transition */
-.wp-polls-ul li .pollbar{-webkit-transition: background 0.7s ease-in-out}
-.wp-polls-ul li .pollbar:hover{background:#F00}
-```
+<code>
+.wp-polls-ul li:nth-child(01) .pollbar{ background:#8FA0C5}  
+.wp-polls-ul li:nth-child(02) .pollbar{ background:#FF8}  
+.wp-polls-ul li:nth-child(03) .pollbar{ background:#ff8a3b}  
+.wp-polls-ul li:nth-child(04) .pollbar{ background:#a61e2a}  
+.wp-polls-ul li:nth-child(05) .pollbar{ background:#4ebbff}  
+.wp-polls-ul li:nth-child(06) .pollbar{ background:#fbca54}  
+.wp-polls-ul li:nth-child(07) .pollbar{ background:#aad34f}  
+.wp-polls-ul li:nth-child(08) .pollbar{ background:#66cc9a}  
+.wp-polls-ul li:nth-child(09) .pollbar{ background:#98CBCB}  
+.wp-polls-ul li:nth-child(10) .pollbar{ background:#a67c52}  
+.wp-polls-ul li .pollbar{-webkit-transition: background 0.7s ease-in-out}  
+.wp-polls-ul li .pollbar:hover{background:#F00}  
+</code>
 
 ### Polls Stats (Outside WP Loop)
 
