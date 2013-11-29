@@ -267,7 +267,6 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
 2. Add:
 <code>
-```
 <?php if (function_exists('vote_poll') && !in_pollarchive()): ?>  
   <li>  
     <h2>Polls</h2>  
@@ -276,8 +275,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
     </ul>  
     <?php display_polls_archive_link(); ?>  
   </li>  
-<?php endif; ?>
-```
+<?php endif; ?>  
 </code>
 
 * To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
