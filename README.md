@@ -37,6 +37,9 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 
 ## Changelog
 
+### Version 2.65
+* FIXED: Use SITECOOKIEPATH instead of COOKIEPATH.
+
 ### Version 2.64
 * NEW: Add in various filters in the plugin. Props Machiel.
 * FIXED: Deveral undefined variable / undefined index notices. Props Machiel.
