@@ -1339,7 +1339,7 @@ function vote_poll() {
 							if($cookie_expiry == 0) {
 								$cookie_expiry = 30000000;
 							}
-							$vote_cookie = setcookie('voted_'.$poll_id, $poll_aid, ($pollip_timestamp + $cookie_expiry), SITECOOKIEPATH);
+							$vote_cookie = setcookie('voted_'.$poll_id, $poll_aid, ($pollip_timestamp + $cookie_expiry), apply_filters('wp_polls_cookiepath', SITECOOKIEPATH));
 						}
 						$i = 0;
 						foreach($poll_aid_array as $polla_aid) {
