@@ -26,7 +26,7 @@ if(!current_user_can('manage_polls')) {
 $base_name = plugin_basename('wp-polls/polls-manager.php');
 $base_page = 'admin.php?page='.$base_name;
 
-### Form Processing 
+### Form Processing
 if(!empty($_POST['do'])) {
 	// Decide What To Do
 	switch($_POST['do']) {
@@ -92,7 +92,7 @@ if(!empty($_POST['do'])) {
 			$latest_pollid = polls_latest_id();
 			$update_latestpoll = update_option('poll_latestpoll', $latest_pollid);
 			if(empty($text)) {
-				$text = '<p style="color: green;">'.sprintf(__('Poll \'%s\' Added Successfully.', 'wp-polls'), stripslashes($pollq_question)).' <a href="'.$base_page.'">'.__('Manage Polls', 'wp-polls').'</a></p>';
+				$text = '<p style="color: green;">'.sprintf(__('Poll \'%s\' (ID: %s) Added Successfully.', 'wp-polls'), stripslashes($pollq_question), $latest_pollid).' <a href="'.$base_page.'">'.__('Manage Polls', 'wp-polls').'</a></p>';
 			}
 			cron_polls_place();
 			break;

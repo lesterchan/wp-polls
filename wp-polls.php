@@ -30,9 +30,9 @@ Text Domain: wp-polls
 
 
 ### Create Text Domain For Translations
-add_action('init', 'polls_textdomain');
+add_action( 'plugins_loaded', 'polls_textdomain' );
 function polls_textdomain() {
-	load_plugin_textdomain('wp-polls', false, 'wp-polls');
+	load_plugin_textdomain( 'wp-polls', false, dirname( plugin_basename( __FILE__ ) ) );
 }
 
 

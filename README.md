@@ -38,6 +38,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ## Changelog
 
 ### Version 2.65
+* NEW: Added Poll ID after adding it
 * FIXED: Use SITECOOKIEPATH instead of COOKIEPATH.
 * FIXED: Use http://ipinfo.io instead of http://ws.arin.net to get check IP information.
 * FIXED: Wrapped all JS function in jQuery.ready(). It is ugly, but it will do till I have time to rewrite it.
