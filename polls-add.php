@@ -73,8 +73,10 @@ if(!empty($_POST['do'])) {
 			} else {
 				$pollq_multiple = 0;
 			}
+			$pollq_custom_1 = addslashes(trim($_POST['pollq_custom_1']));
+
 			// Insert Poll
-			$add_poll_question = $wpdb->query("INSERT INTO $wpdb->pollsq VALUES (0, '$pollq_question', '$pollq_timestamp', 0, $pollq_active, '$pollq_expiry', $pollq_multiple, 0)");
+			$add_poll_question = $wpdb->query("INSERT INTO $wpdb->pollsq VALUES (0, '$pollq_question', '$pollq_timestamp', 0, $pollq_active, '$pollq_expiry', $pollq_multiple, 0, '$pollq_custom_1')");
 			if(!$add_poll_question) {
 				$text .= '<p style="color: red;">'.sprintf(__('Error In Adding Poll \'%s\'.', 'wp-polls'), stripslashes($pollq_question)).'</p>';
 			}
@@ -173,6 +175,14 @@ $count = 0;
 		<tr>
 			<th width="20%" scope="row" valign="top"><?php _e('End Date/Time', 'wp-polls') ?></th>
 			<td width="80%"><input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" onclick="check_pollexpiry();" />&nbsp;&nbsp;<label for="pollq_expiry_no"><?php _e('Do NOT Expire This Poll', 'wp-polls'); ?></label><?php poll_timestamp(current_time('timestamp'), 'pollq_expiry', 'none'); ?></td>
+		</tr>
+	</table>
+	<!-- Poll Custom Field -->
+	<h3><?php _e('Poll Custom Fields', 'wp-polls'); ?></h3>
+	<table class="form-table">
+		<tr>
+			<th width="20%" scope="row" valign="top"><?php _e('Post ID', 'wp-polls') ?></th>
+			<td width="80%"><input type="text" size="70" name="pollq_custom_1" value="" /></td>
 		</tr>
 	</table>
 	<p style="text-align: center;"><input type="submit" name="do" value="<?php _e('Add Poll', 'wp-polls'); ?>"  class="button-primary" />&nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e('Cancel', 'wp-polls'); ?>" class="button" onclick="javascript:history.go(-1)" /></p>

@@ -268,6 +268,23 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<?php _e('Display the poll archive URL', 'wp-polls'); ?>
 			</td>
 		</tr>
+		<!-- add custom field token(s) -->
+		<tr class="alternate">
+			<td>
+				<strong>%POLL_CUSTOM_1%</strong><br />
+				<?php _e('Display the poll\'s custom_1 field', 'wp-polls'); ?>
+			</td>
+			<td>
+				<strong>%POLL_SITE_URL%</strong><br />
+				<?php _e('Display the site\'s home URL', 'wp-polls'); ?>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<strong>%POLL_COMMENT_COUNT%</strong><br />
+				<?php _e('Display the poll\'s number of comments if embedded in a post', 'wp-polls'); ?>
+			</td>
+		</tr>
 		<tr class="alternate">
 			<td colspan="2">
 				<?php _e('Note: <strong>%POLL_TOTALVOTES%</strong> and <strong>%POLL_TOTALVOTERS%</strong> will be different if your poll supports multiple answers. If your poll allows only single answer, both value will be the same.', 'wp-polls'); ?>

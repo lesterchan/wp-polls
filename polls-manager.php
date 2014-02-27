@@ -90,8 +90,11 @@ if(!empty($_POST['do'])) {
 			} else {
 				$pollq_multiple = 0;
 			}
+
+			$pollq_custom_1 = addslashes(trim($_POST['pollq_custom_1']));
+
 			// Update Poll's Question
-			$edit_poll_question = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_question = '$pollq_question', pollq_totalvotes = $pollq_totalvotes, pollq_expiry = '$pollq_expiry', pollq_active = $pollq_active, pollq_multiple = $pollq_multiple, pollq_totalvoters = $pollq_totalvoters $timestamp_sql WHERE pollq_id = $pollq_id");
+			$edit_poll_question = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_question = '$pollq_question', pollq_totalvotes = $pollq_totalvotes, pollq_expiry = '$pollq_expiry', pollq_active = $pollq_active, pollq_multiple = $pollq_multiple, pollq_totalvoters = $pollq_totalvoters, pollq_custom_1 = $pollq_custom_1 $timestamp_sql WHERE pollq_id = $pollq_id");
 			if(!$edit_poll_question) {
 				$text = '<p style="color: blue">'.sprintf(__('No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls'), stripslashes($pollq_question)).'</p>';
 			}
@@ -154,7 +157,7 @@ switch($mode) {
 	// Edit A Poll
 	case 'edit':
 		$last_col_align = ('rtl' == $text_direction) ? 'left' : 'right';
-		$poll_question = $wpdb->get_row("SELECT pollq_question, pollq_timestamp, pollq_totalvotes, pollq_active, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id");
+		$poll_question = $wpdb->get_row("SELECT pollq_question, pollq_timestamp, pollq_totalvotes, pollq_active, pollq_expiry, pollq_multiple, pollq_totalvoters, pollq_custom_1 FROM $wpdb->pollsq WHERE pollq_id = $poll_id");
 		$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_id ORDER BY polla_aid ASC");
 		$poll_noquestion = $wpdb->get_var("SELECT COUNT(polla_aid) FROM $wpdb->pollsa WHERE polla_qid = $poll_id");
 		$poll_question_text = stripslashes($poll_question->pollq_question);
@@ -164,6 +167,7 @@ switch($mode) {
 		$poll_expiry = trim($poll_question->pollq_expiry);
 		$poll_multiple = intval($poll_question->pollq_multiple);
 		$poll_totalvoters = intval($poll_question->pollq_totalvoters);
+		$pollq_custom_1 = stripslashes($poll_question->pollq_custom_1);
 ?>
 		<?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.stripslashes($text).'</div>'; } else { echo '<div id="message" class="updated" style="display: none;"></div>'; } ?>
 
@@ -290,6 +294,14 @@ switch($mode) {
 							}
 						?>
 					</td>
+				</tr>
+			</table>
+			<!-- Poll Custom Fields -->
+			<h3><?php _e('Poll Custom Fields', 'wp-polls'); ?></h3>
+			<table class="form-table">
+				<tr>
+					<th width="20%" scope="row" valign="top"><?php _e('Post ID', 'wp-polls') ?></th>
+					<td width="80%"><input type="text" size="70" name="pollq_custom_1" value="<?php echo htmlspecialchars($pollq_custom_1); ?>" /></td>
 				</tr>
 			</table>
 			<p style="text-align: center;">
