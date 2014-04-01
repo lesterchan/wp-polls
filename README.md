@@ -263,15 +263,15 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
 2. Add:
 <code>
-<?php if (function_exists('vote_poll') && !in_pollarchive()): ?>
-  <li>
-    <h2>Polls</h2>
-    <ul>
-      <li><?php get_poll();?></li>
-    </ul>
-    <?php display_polls_archive_link(); ?>
-  </li>
-<?php endif; ?>
+&lt;?php if (function_exists('vote_poll') && !in_pollarchive()): ?&gt;  
+  &lt;li&gt;  
+    &lt;h2&gt;Polls&lt;/h2&gt;  
+    &lt;ul&gt;  
+      &lt;li&gt;&lt;?php get_poll();?&gt;&lt;/li&gt;  
+    &lt;/ul&gt;  
+    &lt;?php display_polls_archive_link(); ?&gt;  
+  &lt;/li&gt;  
+&lt;?php endif; ?&gt;  
 </code>
 
 * To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
@@ -342,18 +342,18 @@ N/A
 * Add to the end of the file:
 
 <code>
-.wp-polls-ul li:nth-child(01) .pollbar{ background:#8FA0C5}
-.wp-polls-ul li:nth-child(02) .pollbar{ background:#FF8}
-.wp-polls-ul li:nth-child(03) .pollbar{ background:#ff8a3b}
-.wp-polls-ul li:nth-child(04) .pollbar{ background:#a61e2a}
-.wp-polls-ul li:nth-child(05) .pollbar{ background:#4ebbff}
-.wp-polls-ul li:nth-child(06) .pollbar{ background:#fbca54}
-.wp-polls-ul li:nth-child(07) .pollbar{ background:#aad34f}
-.wp-polls-ul li:nth-child(08) .pollbar{ background:#66cc9a}
-.wp-polls-ul li:nth-child(09) .pollbar{ background:#98CBCB}
-.wp-polls-ul li:nth-child(10) .pollbar{ background:#a67c52}
-.wp-polls-ul li .pollbar{-webkit-transition: background 0.7s ease-in-out}
-.wp-polls-ul li .pollbar:hover{background:#F00}
+.wp-polls-ul li:nth-child(01) .pollbar{ background:#8FA0C5}  
+.wp-polls-ul li:nth-child(02) .pollbar{ background:#FF8}  
+.wp-polls-ul li:nth-child(03) .pollbar{ background:#ff8a3b}  
+.wp-polls-ul li:nth-child(04) .pollbar{ background:#a61e2a}  
+.wp-polls-ul li:nth-child(05) .pollbar{ background:#4ebbff}  
+.wp-polls-ul li:nth-child(06) .pollbar{ background:#fbca54}  
+.wp-polls-ul li:nth-child(07) .pollbar{ background:#aad34f}  
+.wp-polls-ul li:nth-child(08) .pollbar{ background:#66cc9a}  
+.wp-polls-ul li:nth-child(09) .pollbar{ background:#98CBCB}  
+.wp-polls-ul li:nth-child(10) .pollbar{ background:#a67c52}  
+.wp-polls-ul li .pollbar{ transition: background 0.7s ease-in-out }  
+.wp-polls-ul li .pollbar:hover{ background:#F00 }
 </code>
 
 ### Polls Stats (Outside WP Loop)
@@ -361,31 +361,31 @@ N/A
 ### To Display Total Polls
 * Use:
 <code>
-<?php if (function_exists('get_pollquestions')): ?>
-	<?php get_pollquestions(); ?>
-<?php endif; ?>
+&lt;?php if (function_exists('get_pollquestions')): ?&gt;  
+	&lt;?php get_pollquestions(); ?&gt;  
+&lt;?php endif; ?&gt;
 </code>
 
 ### To Display Total Poll Answers
 * Use:
 <code>
-<?php if (function_exists('get_pollanswers')): ?>
-	<?php get_pollanswers(); ?>
-<?php endif; ?>
+&lt;?php if (function_exists('get_pollanswers')): ?&gt;  
+	&lt;?php get_pollanswers(); ?&gt;  
+&lt;?php endif; ?&gt;
 </code>
 
 ### To Display Total Poll Votes
 * Use:
 <code>
-<?php if (function_exists('get_pollvotes')): ?>
-	<?php get_pollvotes(); ?>
-<?php endif; ?>
+&lt;?php if (function_exists('get_pollvotes')): ?&gt;  
+	&lt;?php get_pollvotes(); ?&gt;  
+&lt;?php endif; ?&gt;
 </code>
 
 ### To Display Total Poll Voters
 * Use:
 <code>
-<?php if (function_exists('get_pollvoters')): ?>
-	<?php get_pollvoters(); ?>
-<?php endif; ?>
+&lt;?php if (function_exists('get_pollvoters')): ?&gt;  
+	&lt;?php get_pollvoters(); ?&gt;  
+&lt;?php endif; ?&gt;
 </code>
