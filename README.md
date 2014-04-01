@@ -2,9 +2,9 @@
 Contributors: GamerZ  
 Donate link: http://lesterchan.net/site/donation/  
 Tags: poll, polls, polling, vote, booth, democracy, ajax, survey, post, widget  
-Requires at least: 3.9
-Tested up to: 3.9
-Stable tag: 2.65
+Requires at least: 3.9  
+Tested up to: 3.9  
+Stable tag: 2.65  
 
 Adds an AJAX poll system to your WordPress blog. You can also easily add a poll into your WordPress's blog post/page.
 
@@ -261,16 +261,16 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 
 ### General Usage (Without Widget)
 1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
-2. Add:
+2. Add:  
 <code>
 &lt;?php if (function_exists('vote_poll') && !in_pollarchive()): ?&gt;  
-  &lt;li&gt;  
-    &lt;h2&gt;Polls&lt;/h2&gt;  
-    &lt;ul&gt;  
-      &lt;li&gt;&lt;?php get_poll();?&gt;&lt;/li&gt;  
-    &lt;/ul&gt;  
-    &lt;?php display_polls_archive_link(); ?&gt;  
-  &lt;/li&gt;  
+&nbsp;&nbsp;&lt;li&gt;  
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;h2&gt;Polls&lt;/h2&gt;  
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ul&gt;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;?php get_poll();?&gt;&lt;/li&gt;  
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ul&gt;  
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;?php display_polls_archive_link(); ?&gt;  
+&nbsp;&nbsp;&lt;/li&gt;  
 &lt;?php endif; ?&gt;  
 </code>
 
@@ -327,8 +327,8 @@ N/A
 * If you ARE NOT using nice permalinks, you need to go to `WP-Admin -> Polls -> Poll Options` and under `Poll Archive -> Polls Archive URL`, you need to fill in the URL to the Polls Archive Page you created above.
 
 ### How Does WP-Polls Load CSS?
-* WP-Polls will load 'polls-css.css' from your theme's directory if it exists.
-* If it doesn't exists, it will just load the default 'polls-css.css' that comes with WP-Polls.
+* WP-Polls will load `polls-css.css` from your theme's directory if it exists.
+* If it doesn't exists, it will just load the default `polls-css.css` that comes with WP-Polls.
 * This will allow you to upgrade WP-Polls without worrying about overwriting your polls styles that you have created.
 
 ### Why In Internet Explorer (IE) The poll's Text Appear Jagged?
@@ -359,33 +359,33 @@ N/A
 ### Polls Stats (Outside WP Loop)
 
 ### To Display Total Polls
-* Use:
+* Use:  
 <code>
 &lt;?php if (function_exists('get_pollquestions')): ?&gt;  
-	&lt;?php get_pollquestions(); ?&gt;  
+&nbsp;&nbsp;&lt;?php get_pollquestions(); ?&gt;  
 &lt;?php endif; ?&gt;
 </code>
 
 ### To Display Total Poll Answers
-* Use:
+* Use:  
 <code>
 &lt;?php if (function_exists('get_pollanswers')): ?&gt;  
-	&lt;?php get_pollanswers(); ?&gt;  
+&nbsp;&nbsp;&lt;?php get_pollanswers(); ?&gt;  
 &lt;?php endif; ?&gt;
 </code>
 
 ### To Display Total Poll Votes
-* Use:
+* Use:  
 <code>
 &lt;?php if (function_exists('get_pollvotes')): ?&gt;  
-	&lt;?php get_pollvotes(); ?&gt;  
+&nbsp;&nbsp;&lt;?php get_pollvotes(); ?&gt;  
 &lt;?php endif; ?&gt;
 </code>
 
 ### To Display Total Poll Voters
-* Use:
+* Use:  
 <code>
 &lt;?php if (function_exists('get_pollvoters')): ?&gt;  
-	&lt;?php get_pollvoters(); ?&gt;  
+&nbsp;&nbsp;&lt;?php get_pollvoters(); ?&gt;  
 &lt;?php endif; ?&gt;
 </code>
