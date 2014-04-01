@@ -2,31 +2,20 @@
 Contributors: GamerZ  
 Donate link: http://lesterchan.net/site/donation/  
 Tags: poll, polls, polling, vote, booth, democracy, ajax, survey, post, widget  
-Requires at least: 2.8  
-Tested up to: 3.8  
-Stable tag: trunk  
+Requires at least: 3.9
+Tested up to: 3.9
+Stable tag: 2.65
 
 Adds an AJAX poll system to your WordPress blog. You can also easily add a poll into your WordPress's blog post/page.
 
 ## Description
-
 WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
 
-### Previous Versions
-* [WP-Polls 2.40 For WordPress 2.7.x](http://downloads.wordpress.org/plugin/wp-polls.2.40.zip "WP-Polls 2.40 For WordPress 2.7.x")
-* [WP-Polls 2.31 For WordPress 2.5.x And 2.6.x](http://downloads.wordpress.org/plugin/wp-polls.2.31.zip "WP-Polls 2.31 For WordPress 2.5.x And 2.6.x")
-* [WP-Polls 2.20 For WordPress 2.1.x, 2.2.x And 2.3.x](http://downloads.wordpress.org/plugin/wp-polls.2.20.zip "WP-Polls 2.20 For WordPress 2.1.x, 2.2.x And 2.3.x")
-* [WP-Polls 2.13 For WordPress 2.0.x](http://downloads.wordpress.org/plugin/wp-polls.2.13.zip "WP-Polls 2.13 For WordPress 2.0.x")
-* [WP-Polls 2.02a For WordPress 1.5.2](http://downloads.wordpress.org/plugin/wp-polls.2.02a.zip "WP-Polls 2.02a For WordPress 1.5.2")
-
 ### Development
-* [http://dev.wp-plugins.org/browser/wp-polls/](http://dev.wp-plugins.org/browser/wp-polls/ "http://dev.wp-plugins.org/browser/wp-polls/")
+* [https://github.com/lesterchan/wp-polls](https://github.com/lesterchan/wp-polls "https://github.com/lesterchan/wp-polls")
 
 ### Translations
 * [http://dev.wp-plugins.org/browser/wp-polls/i18n/](http://dev.wp-plugins.org/browser/wp-polls/i18n/ "http://dev.wp-plugins.org/browser/wp-polls/i18n/")
-
-### Support Forums
-* [http://forums.lesterchan.net/index.php?board=15.0](http://forums.lesterchan.net/index.php?board=15.0 "http://forums.lesterchan.net/index.php?board=15.0")
 
 ### Credits
 * __ngetext() by [Anna Ozeritskaya](http://hweia.ru/ "Anna Ozeritskaya")
@@ -38,6 +27,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ## Changelog
 
 ### Version 2.65
+* NEW: Supports TinyMCE 4.0 For WordPress 3.9
 * NEW: Added Poll ID after adding it
 * FIXED: Use SITECOOKIEPATH instead of COOKIEPATH.
 * FIXED: Use http://ipinfo.io instead of http://ws.arin.net to get check IP information.
@@ -74,7 +64,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 * NEW: Renamed polls-js.js To polls-js.dev.js
 * NEW: Translate Javascript Variables Using wp_localize_script()
 * NEW: Add "Add Poll" To WordPress Favourite Actions
-* NEW: Minified editor_plugin.js And Added Non-Minified editor_plugin.dev.js
+* NEW: Minified plugin.js And Added Non-Minified plugin.min.js
 * NEW: Able To Remove Individual Answers When Adding Or Editing A Poll
 * NEW: Use _n() Instead Of __ngettext() And _n_noop() Instead Of __ngettext_noop()
 * NEW: Uses New Widget Class From WordPress
@@ -273,15 +263,15 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
 2. Add:
 <code>
-<?php if (function_exists('vote_poll') && !in_pollarchive()): ?>  
-  <li>  
-    <h2>Polls</h2>  
-    <ul>  
-      <li><?php get_poll();?></li>  
-    </ul>  
-    <?php display_polls_archive_link(); ?>  
-  </li>  
-<?php endif; ?>  
+<?php if (function_exists('vote_poll') && !in_pollarchive()): ?>
+  <li>
+    <h2>Polls</h2>
+    <ul>
+      <li><?php get_poll();?></li>
+    </ul>
+    <?php display_polls_archive_link(); ?>
+  </li>
+<?php endif; ?>
 </code>
 
 * To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
@@ -352,18 +342,18 @@ N/A
 * Add to the end of the file:
 
 <code>
-.wp-polls-ul li:nth-child(01) .pollbar{ background:#8FA0C5}  
-.wp-polls-ul li:nth-child(02) .pollbar{ background:#FF8}  
-.wp-polls-ul li:nth-child(03) .pollbar{ background:#ff8a3b}  
-.wp-polls-ul li:nth-child(04) .pollbar{ background:#a61e2a}  
-.wp-polls-ul li:nth-child(05) .pollbar{ background:#4ebbff}  
-.wp-polls-ul li:nth-child(06) .pollbar{ background:#fbca54}  
-.wp-polls-ul li:nth-child(07) .pollbar{ background:#aad34f}  
-.wp-polls-ul li:nth-child(08) .pollbar{ background:#66cc9a}  
-.wp-polls-ul li:nth-child(09) .pollbar{ background:#98CBCB}  
-.wp-polls-ul li:nth-child(10) .pollbar{ background:#a67c52}  
-.wp-polls-ul li .pollbar{-webkit-transition: background 0.7s ease-in-out}  
-.wp-polls-ul li .pollbar:hover{background:#F00}  
+.wp-polls-ul li:nth-child(01) .pollbar{ background:#8FA0C5}
+.wp-polls-ul li:nth-child(02) .pollbar{ background:#FF8}
+.wp-polls-ul li:nth-child(03) .pollbar{ background:#ff8a3b}
+.wp-polls-ul li:nth-child(04) .pollbar{ background:#a61e2a}
+.wp-polls-ul li:nth-child(05) .pollbar{ background:#4ebbff}
+.wp-polls-ul li:nth-child(06) .pollbar{ background:#fbca54}
+.wp-polls-ul li:nth-child(07) .pollbar{ background:#aad34f}
+.wp-polls-ul li:nth-child(08) .pollbar{ background:#66cc9a}
+.wp-polls-ul li:nth-child(09) .pollbar{ background:#98CBCB}
+.wp-polls-ul li:nth-child(10) .pollbar{ background:#a67c52}
+.wp-polls-ul li .pollbar{-webkit-transition: background 0.7s ease-in-out}
+.wp-polls-ul li .pollbar:hover{background:#F00}
 </code>
 
 ### Polls Stats (Outside WP Loop)
@@ -371,31 +361,31 @@ N/A
 ### To Display Total Polls
 * Use:
 <code>
-<?php if (function_exists('get_pollquestions')): ?>  
-	<?php get_pollquestions(); ?>  
+<?php if (function_exists('get_pollquestions')): ?>
+	<?php get_pollquestions(); ?>
 <?php endif; ?>
 </code>
 
 ### To Display Total Poll Answers
 * Use:
 <code>
-<?php if (function_exists('get_pollanswers')): ?>  
-	<?php get_pollanswers(); ?>  
+<?php if (function_exists('get_pollanswers')): ?>
+	<?php get_pollanswers(); ?>
 <?php endif; ?>
 </code>
 
 ### To Display Total Poll Votes
 * Use:
 <code>
-<?php if (function_exists('get_pollvotes')): ?>  
-	<?php get_pollvotes(); ?>  
+<?php if (function_exists('get_pollvotes')): ?>
+	<?php get_pollvotes(); ?>
 <?php endif; ?>
 </code>
 
 ### To Display Total Poll Voters
 * Use:
 <code>
-<?php if (function_exists('get_pollvoters')): ?>  
-	<?php get_pollvoters(); ?>  
+<?php if (function_exists('get_pollvoters')): ?>
+	<?php get_pollvoters(); ?>
 <?php endif; ?>
 </code>
