@@ -125,7 +125,6 @@ if(!empty($_POST['do'])) {
 ?>
 <?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.stripslashes($text).'</div>'; } else { echo '<div id="message" class="updated" style="display: none;"></div>'; } ?>
 <div class="wrap">
-	<div id="icon-wp-polls" class="icon32"><br /></div>
 	<h2><?php _e('Poll\'s Logs', 'wp-polls'); ?></h2>
 	<h3><?php echo $poll_question; ?></h3>
 	<p>

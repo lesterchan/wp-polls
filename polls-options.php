@@ -125,7 +125,6 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 <form id="poll_options_form" method="post" action="<?php echo admin_url('admin.php?page='.plugin_basename(__FILE__)); ?>">
 <?php wp_nonce_field('wp-polls_options'); ?>
 <div class="wrap">
-	<div id="icon-wp-polls" class="icon32"><br /></div>
 	<h2><?php _e('Poll Options', 'wp-polls'); ?></h2>
 	<!-- Poll Bar Style -->
 	<h3><?php _e('Poll Bar Style', 'wp-polls'); ?></h3>

@@ -27,6 +27,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ## Changelog
 
 ### Version 2.65
+* NEW: Use Dashicons
 * NEW: Supports TinyMCE 4.0 For WordPress 3.9
 * NEW: Added Poll ID after adding it
 * FIXED: Use SITECOOKIEPATH instead of COOKIEPATH.

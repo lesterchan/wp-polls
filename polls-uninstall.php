@@ -31,7 +31,7 @@ $polls_tables = array($wpdb->pollsq, $wpdb->pollsa, $wpdb->pollsip);
 $polls_settings = array('poll_template_voteheader', 'poll_template_votebody', 'poll_template_votefooter', 'poll_template_resultheader', 'poll_template_resultbody', 'poll_template_resultbody2', 'poll_template_resultfooter', 'poll_template_resultfooter2',  'poll_template_disable', 'poll_template_error', 'poll_currentpoll', 'poll_latestpoll', 'poll_archive_perpage', 'poll_ans_sortby', 'poll_ans_sortorder', 'poll_ans_result_sortby', 'poll_ans_result_sortorder', 'poll_logging_method', 'poll_allowtovote', 'poll_archive_show', 'poll_archive_url', 'poll_bar', 'poll_close', 'poll_ajax_style', 'poll_template_pollarchivelink', 'widget_polls', 'poll_archive_displaypoll', 'poll_template_pollarchiveheader', 'poll_template_pollarchivefooter', 'poll_cookielog_expiry', 'widget_polls-widget');
 
 
-### Form Processing 
+### Form Processing
 if(!empty($_POST['do'])) {
 	// Decide What To Do
 	switch($_POST['do']) {
@@ -58,7 +58,7 @@ if(!empty($_POST['do'])) {
 					}
 				}
 				echo '</p>';
-				echo '</div>'; 
+				echo '</div>';
 				$mode = 'end-UNINSTALL';
 			}
 			break;
@@ -72,7 +72,6 @@ switch($mode) {
 		case 'end-UNINSTALL':
 			$deactivate_url = wp_nonce_url('plugins.php?action=deactivate&amp;plugin=wp-polls/wp-polls.php', 'deactivate-plugin_wp-polls/wp-polls.php');
 			echo '<div class="wrap">';
-			echo '<div id="icon-wp-polls" class="icon32"><br /></div>';
 			echo '<h2>'.__('Uninstall WP-Polls', 'wp-polls').'</h2>';
 			echo '<p><strong>'.sprintf(__('<a href="%s">Click Here</a> To Finish The Uninstallation And WP-Polls Will Be Deactivated Automatically.', 'wp-polls'), $deactivate_url).'</strong></p>';
 			echo '</div>';
@@ -84,7 +83,6 @@ switch($mode) {
 <form method="post" action="<?php echo admin_url('admin.php?page='.plugin_basename(__FILE__)); ?>">
 <?php wp_nonce_field('wp-polls_uninstall'); ?>
 <div class="wrap">
-	<div id="icon-wp-polls" class="icon32"><br /></div>
 	<h2><?php _e('Uninstall WP-Polls', 'wp-polls'); ?></h2>
 	<p>
 		<?php _e('Deactivating WP-Polls plugin does not remove any data that may have been created, such as the poll data and the poll\'s voting logs. To completely remove this plugin, you can uninstall it here.', 'wp-polls'); ?>

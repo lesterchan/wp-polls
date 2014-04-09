@@ -12,7 +12,7 @@
 		editor.addButton('polls', {
 			text: false,
 			tooltip: pollsEdL10n.insert_poll,
-			image: url + '/img/poll.svg',
+			icon: 'polls dashicons-before dashicons-chart-bar',
 			onclick: function() {
 				tinyMCE.activeEditor.execCommand( 'WP-Polls-Insert_Poll' )
 			}

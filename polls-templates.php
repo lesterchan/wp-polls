@@ -46,7 +46,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$poll_template_disable = trim($_POST['poll_template_disable']);
 	$poll_template_error = trim($_POST['poll_template_error']);
 	$update_poll_queries = array();
-	$update_poll_text = array();	
+	$update_poll_text = array();
 	$update_poll_queries[] = update_option('poll_template_voteheader', $poll_template_voteheader);
 	$update_poll_queries[] = update_option('poll_template_votebody', $poll_template_votebody);
 	$update_poll_queries[] = update_option('poll_template_votefooter', $poll_template_votefooter);
@@ -153,8 +153,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 <form id="poll_template_form" method="post" action="<?php echo admin_url('admin.php?page='.plugin_basename(__FILE__)); ?>">
 <?php wp_nonce_field('wp-polls_templates'); ?>
 <div class="wrap">
-	<div id="icon-wp-polls" class="icon32"><br /></div>
-	<h2><?php _e('Poll Templates', 'wp-polls'); ?></h2>	
+	<h2><?php _e('Poll Templates', 'wp-polls'); ?></h2>
 	<!-- Template Variables -->
 	<h3><?php _e('Template Variables', 'wp-polls'); ?></h3>
 	<table class="widefat">
@@ -293,7 +292,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_voteheader" name="poll_template_voteheader"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_voteheader'))); ?></textarea></td>
 		</tr>
-		<tr> 
+		<tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Voting Form Body:', 'wp-polls'); ?></strong><br /><br /><br />
 				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
@@ -304,9 +303,9 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_CHECKBOX_RADIO%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('votebody');" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_votebody" name="poll_template_votebody"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_votebody'))); ?></textarea></td> 
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_votebody" name="poll_template_votebody"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_votebody'))); ?></textarea></td>
 		</tr>
-		<tr> 
+		<tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Voting Form Footer:', 'wp-polls'); ?></strong><br /><br /><br />
 					<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
@@ -315,13 +314,13 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 					<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('votefooter');" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_votefooter" name="poll_template_votefooter"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_votefooter'))); ?></textarea></td> 
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_votefooter" name="poll_template_votefooter"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_votefooter'))); ?></textarea></td>
 		</tr>
 	</table>
-	
+
 	<!-- Poll Result Templates -->
 	<h3><?php _e('Poll Result Templates', 'wp-polls'); ?></h3>
-	<table class="form-table"> 
+	<table class="form-table">
 		 <tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Result Header:', 'wp-polls'); ?></strong><br /><br /><br />
@@ -337,7 +336,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultheader" name="poll_template_resultheader"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultheader'))); ?></textarea></td>
 		</tr>
-		<tr> 
+		<tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Result Body:', 'wp-polls'); ?></strong><br /><?php _e('Displayed When The User HAS NOT Voted', 'wp-polls'); ?><br /><br />
 				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
@@ -350,9 +349,9 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultbody');" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody" name="poll_template_resultbody"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultbody'))); ?></textarea></td> 
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody" name="poll_template_resultbody"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultbody'))); ?></textarea></td>
 		</tr>
-		<tr> 
+		<tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Result Body:', 'wp-polls'); ?></strong><br /><?php _e('Displayed When The User HAS Voted', 'wp-polls'); ?><br /><br />
 				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
@@ -365,9 +364,9 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultbody2');" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody2" name="poll_template_resultbody2"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultbody2'))); ?></textarea></td> 
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody2" name="poll_template_resultbody2"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultbody2'))); ?></textarea></td>
 		</tr>
-		<tr> 
+		<tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Result Footer:', 'wp-polls'); ?></strong><br /><?php _e('Displayed When The User HAS Voted', 'wp-polls'); ?><br /><br />
 				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
@@ -385,9 +384,9 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultfooter');" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter" name="poll_template_resultfooter"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultfooter'))); ?></textarea></td> 
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter" name="poll_template_resultfooter"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultfooter'))); ?></textarea></td>
 		</tr>
-		<tr> 
+		<tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Result Footer:', 'wp-polls'); ?></strong><br /><?php _e('Displayed When The User HAS NOT Voted', 'wp-polls'); ?><br /><br />
 				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
@@ -405,13 +404,13 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultfooter2');" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter2" name="poll_template_resultfooter2"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultfooter2'))); ?></textarea></td> 
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter2" name="poll_template_resultfooter2"><?php echo htmlspecialchars(stripslashes(get_option('poll_template_resultfooter2'))); ?></textarea></td>
 		</tr>
 	</table>
 
 	<!-- Poll Archive Templates -->
 	<h3><?php _e('Poll Archive Templates', 'wp-polls'); ?></h3>
-	<table class="form-table"> 
+	<table class="form-table">
 		<tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Poll Archive Link', 'wp-polls'); ?></strong><br /><?php _e('Template For Displaying Poll Archive Link', 'wp-polls'); ?><br /><br />
@@ -471,7 +470,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 
 	<!-- Poll Misc Templates -->
 	<h3><?php _e('Poll Misc Templates', 'wp-polls'); ?></h3>
-	<table class="form-table"> 
+	<table class="form-table">
 		 <tr>
 			<td width="30%" valign="top">
 				<strong><?php _e('Poll Disabled', 'wp-polls'); ?></strong><br /><?php _e('Displayed When The Poll Is Disabled', 'wp-polls'); ?><br /><br />
@@ -494,5 +493,5 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	<p class="submit">
 		<input type="submit" name="Submit" class="button-primary" value="<?php _e('Save Changes', 'wp-polls'); ?>" />
 	</p>
-</div> 
-</form> 
+</div>
+</form>

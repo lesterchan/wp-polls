@@ -173,7 +173,6 @@ switch($mode) {
 		<input type="hidden" name="pollq_id" value="<?php echo $poll_id; ?>" />
 		<input type="hidden" name="pollq_active" value="<?php echo $poll_active; ?>" />
 		<div class="wrap">
-			<div id="icon-wp-polls" class="icon32"><br /></div>
 			<h2><?php _e('Edit Poll', 'wp-polls'); ?></h2>
 			<!-- Poll Question -->
 			<h3><?php _e('Poll Question', 'wp-polls'); ?></h3>
@@ -323,7 +322,6 @@ switch($mode) {
 
 		<!-- Manage Polls -->
 		<div class="wrap">
-			<div id="icon-wp-polls" class="icon32"><br /></div>
 			<h2><?php _e('Manage Polls', 'wp-polls'); ?></h2>
 			<h3><?php _e('Polls', 'wp-polls'); ?></h3>
 			<br style="clear" />
