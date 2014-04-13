@@ -33,6 +33,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 * FIXED: Use SITECOOKIEPATH instead of COOKIEPATH.
 * FIXED: Use http://ipinfo.io instead of http://ws.arin.net to get check IP information.
 * FIXED: Wrapped all JS function in jQuery.ready(). It is ugly, but it will do till I have time to rewrite it.
+* FIXED: Add INDEX for wp_pollsip: pollip_ip_qid (pollip_ip, pollip_qid) to prevent full table scan. Thanks archon810 from AndroidPolice.
 
 ### Version 2.64
 * NEW: Add in various filters in the plugin. Props Machiel.

@@ -1652,7 +1652,8 @@ function create_poll_table() {
 									"pollip_userid int(10) NOT NULL default '0',".
 									"PRIMARY KEY (pollip_id),".
 									"KEY pollip_ip (pollip_id),".
-									"KEY pollip_qid (pollip_qid)".
+									"KEY pollip_qid (pollip_qid),".
+									"KEY pollip_ip_qid (pollip_ip, pollip_qid)".
 									") $charset_collate;";
 	maybe_create_table($wpdb->pollsq, $create_table['pollsq']);
 	maybe_create_table($wpdb->pollsa, $create_table['pollsa']);
@@ -1739,6 +1740,9 @@ function create_poll_table() {
 	// Database Upgrade For WP-Polls 2.61
 	$wpdb->query("ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip (pollip_ip);");
 	$wpdb->query("ALTER TABLE $wpdb->pollsip ADD INDEX pollip_qid (pollip_qid);");
+	// Database Upgrade WP-Polls 2.65
+	$wpdb->query("ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid (pollip_ip, pollip_qid);");
+
 	// Set 'manage_polls' Capabilities To Administrator
 	$role = get_role('administrator');
 	if(!$role->has_cap('manage_polls')) {
