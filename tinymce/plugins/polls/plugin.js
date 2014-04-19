@@ -1,9 +1,9 @@
 (function() {
-	tinymce.PluginManager.add('polls', function(editor, url) {
+	tinymce.PluginManager.add('polls', function(editor) {
 		editor.addCommand('WP-Polls-Insert_Poll', function() {
-			var poll_id = jQuery.trim(prompt(pollsEdL10n.enter_poll_id));
+			var poll_id = jQuery.trim(prompt(tinymce.translate('Enter Poll ID')));
 			while(isNaN(poll_id)) {
-				poll_id = jQuery.trim(prompt(pollsEdL10n.error_poll_id_numeric + "\n\n" + pollsEdL10n.enter_poll_id_again));
+				poll_id = jQuery.trim(prompt(tinymce.translate('Error: Poll ID must be numeric') + "\n\n" + tinymce.translate('Please enter Poll ID again')));
 			}
 			if (poll_id >= -1 && poll_id != null && poll_id != "") {
 				editor.insertContent('[poll="' + poll_id + '"]');
@@ -11,10 +11,10 @@
 		});
 		editor.addButton('polls', {
 			text: false,
-			tooltip: pollsEdL10n.insert_poll,
+			tooltip: tinymce.translate('Insert Poll'),
 			icon: 'polls dashicons-before dashicons-chart-bar',
 			onclick: function() {
-				tinyMCE.activeEditor.execCommand( 'WP-Polls-Insert_Poll' )
+				tinyMCE.activeEditor.execCommand('WP-Polls-Insert_Poll')
 			}
 		});
 	});
