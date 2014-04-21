@@ -860,10 +860,10 @@ function polls_archive() {
 	global $wpdb, $in_pollsarchive;
 	// Polls Variables
 	$in_pollsarchive = true;
-	$page = intval($_GET['poll_page']);
+	$page = isset($_GET['poll_page'] ? intval($_GET['poll_page']) : 0;
 	$polls_questions = array();
 	$polls_answers = array();
-	$polls_ip = array();
+	$polls_ips = array();
 	$polls_perpage = intval(get_option('poll_archive_perpage'));
 	$poll_questions_ids = '0';
 	$poll_voted = false;
@@ -1017,7 +1017,7 @@ function polls_archive() {
 				}
 			}
 			// Let User See What Options They Voted
-			if(in_array($polls_answer['aid'], check_voted_multiple($polls_question['id'], $polls_ips[$polls_question['id']]))) {
+			if(isset($polls_ips[$polls_question['id']]) && in_array($polls_answer['aid'], check_voted_multiple($polls_question['id'], $polls_ips[$polls_question['id']]))) {
 				// Results Body Variables
 				$template_answer = stripslashes(get_option('poll_template_resultbody2'));
 				$template_answer = str_replace("%POLL_ID%", $polls_question['id'], $template_answer);
