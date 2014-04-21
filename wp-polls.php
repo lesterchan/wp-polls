@@ -860,7 +860,7 @@ function polls_archive() {
 	global $wpdb, $in_pollsarchive;
 	// Polls Variables
 	$in_pollsarchive = true;
-	$page = isset($_GET['poll_page'] ? intval($_GET['poll_page']) : 0;
+	$page = isset($_GET['poll_page']) ? intval($_GET['poll_page']) : 0;
 	$polls_questions = array();
 	$polls_answers = array();
 	$polls_ips = array();
