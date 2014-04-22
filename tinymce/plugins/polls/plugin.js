@@ -6,7 +6,7 @@
 				poll_id = jQuery.trim(prompt(tinymce.translate('Error: Poll ID must be numeric') + "\n\n" + tinymce.translate('Please enter Poll ID again')));
 			}
 			if (poll_id >= -1 && poll_id != null && poll_id != "") {
-				editor.insertContent('[poll="' + poll_id + '"]');
+				editor.insertContent('[poll id="' + poll_id + '"]');
 			}
 		});
 		editor.addButton('polls', {

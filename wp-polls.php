@@ -261,7 +261,7 @@ function poll_footer_admin() {
 				poll_id = jQuery.trim(prompt("<?php echo esc_js(__('Error: Poll ID must be numeric', 'wp-polls')); ?>\n\n<?php echo esc_js(__('Please enter Poll ID again', 'wp-polls')); ?>"));
 			}
 			if (poll_id >= -1 && poll_id != null && poll_id != "") {
-				QTags.insertContent('[poll="' + poll_id + '"]');
+				QTags.insertContent('[poll id="' + poll_id + '"]');
 			}
 		});
 	</script>

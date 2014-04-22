@@ -27,6 +27,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ## Changelog
 
 ### Version 2.66
+* FIXED: Editor button was outputting the wrong shortcode.
 * FIXED: ReferenceError: pollsEdL10n is not defined if TinyMCE 4.0 is loaded outside the Add/Edit Posts/Pages.
 
 ### Version 2.65
