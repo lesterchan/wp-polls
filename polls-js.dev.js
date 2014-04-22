@@ -57,12 +57,11 @@ function poll_process() {
 	jQuery(document).ready(function($) {
 		poll_nonce = $('#poll_' + poll_id + '_nonce').val();
 		if(pollsL10n.show_fading) {
-			$('#polls-' + poll_id).fadeTo('def', 0, function () {
-				if(pollsL10n.show_loading) {
-					$('#polls-' + poll_id + '-loading').show();
-				}
-				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
-			});
+			$('#polls-' + poll_id).fadeTo('def', 0);
+			if(pollsL10n.show_loading) {
+				$('#polls-' + poll_id + '-loading').show();
+			}
+			$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
 		} else {
 			if(pollsL10n.show_loading) {
 				$('#polls-' + poll_id + '-loading').show();
@@ -80,12 +79,11 @@ function poll_result(current_poll_id) {
 			poll_id = current_poll_id;
 			poll_nonce = $('#poll_' + poll_id + '_nonce').val();
 			if(pollsL10n.show_fading) {
-				$('#polls-' + poll_id).fadeTo('def', 0, function () {
-					if(pollsL10n.show_loading) {
-						$('#polls-' + poll_id + '-loading').show();
-					}
-					$.ajax({type: 'GET', url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
-				});
+				$('#polls-' + poll_id).fadeTo('def', 0);
+				if(pollsL10n.show_loading) {
+					$('#polls-' + poll_id + '-loading').show();
+				}
+				$.ajax({type: 'GET', url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
 			} else {
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
@@ -106,12 +104,11 @@ function poll_booth(current_poll_id) {
 			poll_id = current_poll_id;
 			poll_nonce = $('#poll_' + poll_id + '_nonce').val();
 			if(pollsL10n.show_fading) {
-				$('#polls-' + poll_id).fadeTo('def', 0, function () {
-					if(pollsL10n.show_loading) {
-						$('#polls-' + poll_id + '-loading').show();
-					}
-					$.ajax({type: 'GET', url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
-				});
+				$('#polls-' + poll_id).fadeTo('def', 0);
+				if(pollsL10n.show_loading) {
+					$('#polls-' + poll_id + '-loading').show();
+				}
+				$.ajax({type: 'GET', url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
 			} else {
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
@@ -132,9 +129,8 @@ function poll_process_success(data) {
 			$('#polls-' + poll_id + '-loading').hide();
 		}
 		if(pollsL10n.show_fading) {
-			$('#polls-' + poll_id).fadeTo('def', 1, function () {
-				set_is_being_voted(false);
-			});
+			$('#polls-' + poll_id).fadeTo('def', 1);
+			set_is_being_voted(false);
 		} else {
 			set_is_being_voted(false);
 		}
