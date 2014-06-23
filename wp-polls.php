@@ -1627,7 +1627,7 @@ function create_poll_table() {
 	}
 	// Create Poll Tables (3 Tables)
 	$charset_collate = '';
-	if($wpdb->supports_collation()) {
+	if( $wpdb->has_cap( 'collation' ) ) {
 		if(!empty($wpdb->charset)) {
 			$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
 		}
@@ -1748,11 +1748,24 @@ function create_poll_table() {
 	add_option('poll_template_pollarchivepagingfooter', '');
 	// Database Upgrade For WP-Polls 2.50
 	delete_option('poll_archive_show');
-	// Database Upgrade For WP-Polls 2.61
-	$wpdb->query("ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip (pollip_ip);");
-	$wpdb->query("ALTER TABLE $wpdb->pollsip ADD INDEX pollip_qid (pollip_qid);");
-	// Database Upgrade WP-Polls 2.65
-	$wpdb->query("ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid (pollip_ip, pollip_qid);");
+
+	// Index
+	$index = $wpdb->get_results( "SHOW INDEX FROM $wpdb->pollsip;" );
+	$key_name = array();
+	if( sizeof( $index ) > 0 ) {
+		foreach( $index as $i ) {
+			$key_name[]= $i->Key_name;
+		}
+	}
+	if ( !in_array( 'pollip_ip', $key_name ) ) {
+		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip (pollip_ip);" );
+	}
+	if ( !in_array( 'pollip_qid', $key_name ) ) {
+		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_qid (pollip_qid);" );
+	}
+	if ( !in_array( 'pollip_ip_qid', $key_name ) ) {
+		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid (pollip_ip, pollip_qid);" );
+	}
 
 	// Set 'manage_polls' Capabilities To Administrator
 	$role = get_role('administrator');
