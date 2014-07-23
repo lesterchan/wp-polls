@@ -3,4 +3,8 @@ php:
   - "5.4"
   - "5.3"
 
-script: find . \( -name '*.php' \) -exec php -lf {} \;
+script:
+  - find . \( -name '*.php' \) -exec php -lf {} \;
+
+notifications:
+  email: false
