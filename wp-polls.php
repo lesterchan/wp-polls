@@ -1662,7 +1662,7 @@ function create_poll_table() {
 									"pollip_user tinytext NOT NULL,".
 									"pollip_userid int(10) NOT NULL default '0',".
 									"PRIMARY KEY (pollip_id),".
-									"KEY pollip_ip (pollip_id),".
+									"KEY pollip_ip (pollip_ip),".
 									"KEY pollip_qid (pollip_qid),".
 									"KEY pollip_ip_qid (pollip_ip, pollip_qid)".
 									") $charset_collate;";
