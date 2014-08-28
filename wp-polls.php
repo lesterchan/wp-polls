@@ -80,6 +80,7 @@ function get_poll($temp_poll_id = 0, $display = true) {
 		}
 	// Poll Is Enabled
 	} else {
+		do_action('wp_polls_get_poll');
 		// Hardcoded Poll ID Is Not Specified
 		switch($temp_poll_id) {
 			// Random Poll
@@ -433,6 +434,7 @@ function poll_template_vote_markup($template, $poll_db_object, $variables) {
 
 ### Function: Display Voting Form
 function display_pollvote($poll_id, $display_loading = true) {
+	do_action('wp_polls_display_pollvote');
 	global $wpdb;
 	// Temp Poll Result
 	$temp_pollvote = '';
@@ -538,6 +540,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 
 ### Function: Display Results Form
 function display_pollresult($poll_id, $user_voted = '', $display_loading = true) {
+	do_action('wp_polls_display_pollresult');
 	global $wpdb;
 	$poll_id = intval($poll_id);
 	// User Voted
@@ -867,6 +870,7 @@ function display_polls_archive_link($display = true) {
 
 ### Function: Display Polls Archive
 function polls_archive() {
+	do_action('wp_polls_polls_archive');
 	global $wpdb, $in_pollsarchive;
 	// Polls Variables
 	$in_pollsarchive = true;
@@ -1309,6 +1313,7 @@ function vote_poll() {
 		{
 			// Poll Vote
 			case 'process':
+				do_action('wp_polls_vote_poll');
 				$poll_aid = $_POST["poll_$poll_id"];
 				$poll_aid_array = array_unique(array_map('intval', explode(',', $poll_aid)));
 				if($poll_id > 0 && !empty($poll_aid_array) && check_allowtovote()) {
