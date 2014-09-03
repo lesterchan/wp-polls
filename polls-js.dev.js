@@ -83,12 +83,12 @@ function poll_result(current_poll_id) {
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
 				}
-				$.ajax({type: 'GET', url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
 			} else {
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
 				}
-				$.ajax({type: 'GET', url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
 			}
 		} else {
 			alert(pollsL10n.text_wait);
@@ -108,12 +108,12 @@ function poll_booth(current_poll_id) {
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
 				}
-				$.ajax({type: 'GET', url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
 			} else {
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
 				}
-				$.ajax({type: 'GET', url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
 			}
 		} else {
 			alert(pollsL10n.text_wait);
