@@ -21,8 +21,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 [http://dev.wp-plugins.org/browser/wp-polls/i18n/](http://dev.wp-plugins.org/browser/wp-polls/i18n/ "http://dev.wp-plugins.org/browser/wp-polls/i18n/")
 
 ### Credits
-* __ngetext() by [Anna Ozeritskaya](http://hweia.ru/ "Anna Ozeritskaya")
-* Right To Left Language Support by [Kambiz R. Khojasteh](http://persian-programming.com/ "Kambiz R. Khojasteh")
+* Plugin icon by [Freepik](http://www.freepik.com) from [Flaticon](http://www.flaticon.com)
 
 ### Donations
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appericiate it. If not feel free to use it without any obligations.
