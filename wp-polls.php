@@ -558,6 +558,11 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 	$poll_least_percentage = 0;
 	// Get Poll Question Data
 	$poll_question = $wpdb->get_row("SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_active, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id LIMIT 1");
+	// No poll could be loaded from the database
+    if (!$poll_question) {
+        echo stripslashes(get_option('poll_template_disable'));
+        return;
+    }
 	// Poll Question Variables
 	$poll_question_text = stripslashes($poll_question->pollq_question);
 	$poll_question_id = intval($poll_question->pollq_id);
