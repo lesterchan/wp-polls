@@ -13,19 +13,19 @@ Text Domain: wp-polls
 /*
 	Copyright 2014  Lester Chan  (email : lesterchan@gmail.com)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 
@@ -424,11 +424,11 @@ add_filter('poll_template_votefooter_markup', 'poll_template_vote_markup', 10, 3
 
 function poll_template_vote_markup($template, $poll_db_object, $variables) {
 
-    foreach($variables as $placeholder => $value) {
-        $template = str_replace($placeholder, $value, $template);
-    }
+	foreach($variables as $placeholder => $value) {
+		$template = str_replace($placeholder, $value, $template);
+	}
 
-    return $template;
+	return $template;
 }
 
 
@@ -457,15 +457,15 @@ function display_pollvote($poll_id, $display_loading = true) {
 
 	$template_question = stripslashes(get_option('poll_template_voteheader'));
 
-    $template_question = apply_filters('poll_template_voteheader_markup', $template_question, $poll_question, array(
-        '%POLL_QUESTION%' => $poll_question_text,
-        '%POLL_ID%' => $poll_question_id,
-        '%POLL_TOTALVOTES%' => $poll_question_totalvotes,
-        '%POLL_TOTALVOTERS%' => $poll_question_totalvoters,
-        '%POLL_START_DATE%' => $poll_start_date,
-        '%POLL_END_DATE%' => $poll_end_date,
-        '%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
-    ));
+	$template_question = apply_filters('poll_template_voteheader_markup', $template_question, $poll_question, array(
+		'%POLL_QUESTION%' => $poll_question_text,
+		'%POLL_ID%' => $poll_question_id,
+		'%POLL_TOTALVOTES%' => $poll_question_totalvotes,
+		'%POLL_TOTALVOTERS%' => $poll_question_totalvoters,
+		'%POLL_START_DATE%' => $poll_start_date,
+		'%POLL_END_DATE%' => $poll_end_date,
+		'%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
+	));
 
 	// Get Poll Answers Data
 	$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY ".get_option('poll_ans_sortby').' '.get_option('poll_ans_sortorder'));
@@ -488,13 +488,13 @@ function display_pollvote($poll_id, $display_loading = true) {
 			$poll_answer_votes = intval($poll_answer->polla_votes);
 			$template_answer = stripslashes(get_option('poll_template_votebody'));
 
-            $template_answer = apply_filters('poll_template_votebody_markup', $template_answer, $poll_answer, array(
-                '%POLL_ID%' => $poll_question_id,
-                '%POLL_ANSWER_ID%' => $poll_answer_id,
-                '%POLL_ANSWER%' => $poll_answer_text,
-                '%POLL_ANSWER_VOTES%' => number_format_i18n($poll_answer_votes),
-                "%POLL_CHECKBOX_RADIO%" => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
-            ));
+			$template_answer = apply_filters('poll_template_votebody_markup', $template_answer, $poll_answer, array(
+				'%POLL_ID%' => $poll_question_id,
+				'%POLL_ANSWER_ID%' => $poll_answer_id,
+				'%POLL_ANSWER%' => $poll_answer_text,
+				'%POLL_ANSWER_VOTES%' => number_format_i18n($poll_answer_votes),
+				"%POLL_CHECKBOX_RADIO%" => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
+			));
 
 			// Print Out Voting Form Body Template
 			$temp_pollvote .= "\t\t$template_answer\n";
@@ -512,13 +512,13 @@ function display_pollvote($poll_id, $display_loading = true) {
 		// Voting Form Footer Variables
 		$template_footer = stripslashes(get_option('poll_template_votefooter'));
 
-        $template_footer = apply_filters('poll_template_votefooter_markup', $template_footer, $poll_question, array(
-            '%POLL_ID%' => $poll_question_id,
-            '%POLL_RESULT_URL%' => $poll_result_url,
-            '%POLL_START_DATE%' => $poll_start_date,
-            '%POLL_END_DATE%' => $poll_end_date,
-            '%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
-        ));
+		$template_footer = apply_filters('poll_template_votefooter_markup', $template_footer, $poll_question, array(
+			'%POLL_ID%' => $poll_question_id,
+			'%POLL_RESULT_URL%' => $poll_result_url,
+			'%POLL_START_DATE%' => $poll_start_date,
+			'%POLL_END_DATE%' => $poll_end_date,
+			'%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
+		));
 
 		// Print Out Voting Form Footer Template
 		$temp_pollvote .= "\t\t$template_footer\n";
@@ -558,6 +558,11 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 	$poll_least_percentage = 0;
 	// Get Poll Question Data
 	$poll_question = $wpdb->get_row("SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_active, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id LIMIT 1");
+	// No poll could be loaded from the database
+	if (!$poll_question) {
+		echo stripslashes(get_option('poll_template_disable'));
+		return;
+	}
 	// Poll Question Variables
 	$poll_question_text = stripslashes($poll_question->pollq_question);
 	$poll_question_id = intval($poll_question->pollq_id);
