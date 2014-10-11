@@ -1621,8 +1621,8 @@ function widget_polls_init() {
 
 
 ### Function: Activate Plugin
-register_activation_hook( __FILE__, 'poll_activation' );
-function poll_activation( $network_wide )
+register_activation_hook( __FILE__, 'polls_activation' );
+function polls_activation( $network_wide )
 {
 	if ( is_multisite() && $network_wide )
 	{
