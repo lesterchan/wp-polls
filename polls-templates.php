@@ -81,12 +81,12 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$text = '';
 	foreach($update_poll_queries as $update_poll_query) {
 		if($update_poll_query) {
-			$text .= '<font color="green">'.$update_poll_text[$i].' '.__('Updated', 'wp-polls').'</font><br />';
+			$text .= '<p style="color: green;">'.$update_poll_text[$i].' '.__('Updated', 'wp-polls').'</p>';
 		}
 		$i++;
 	}
 	if(empty($text)) {
-		$text = '<font color="red">'.__('No Poll Option Updated', 'wp-polls').'</font>';
+		$text = '<p style="color: red;">'.__('No Poll Option Updated', 'wp-polls').'</p>';
 	}
 	wp_clear_scheduled_hook('polls_cron');
 	if (!wp_next_scheduled('polls_cron')) {
