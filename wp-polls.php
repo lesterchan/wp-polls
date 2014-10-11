@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: http://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.67
+Version: 2.68
 Author: Lester 'GaMerZ' Chan
 Author URI: http://lesterchan.net
 Text Domain: wp-polls
@@ -30,7 +30,7 @@ Text Domain: wp-polls
 
 
 ### Version
-define( 'WP_POLLS_VERSION', 2.67 );
+define( 'WP_POLLS_VERSION', 2.68 );
 
 
 ### Create Text Domain For Translations
@@ -48,15 +48,14 @@ $wpdb->pollsip  = $wpdb->prefix.'pollsip';
 
 
 ### Function: Poll Administration Menu
-add_action('admin_menu', 'poll_menu');
+add_action( 'admin_menu', 'poll_menu' );
 function poll_menu() {
-	add_menu_page(__('Polls', 'wp-polls'), __('Polls', 'wp-polls'), 'manage_polls', 'wp-polls/polls-manager.php', '', 'dashicons-chart-bar');
+	add_menu_page( __( 'Polls', 'wp-polls' ), __( 'Polls', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-manager.php', '', 'dashicons-chart-bar' );
 
-	add_submenu_page('wp-polls/polls-manager.php', __('Manage Polls', 'wp-polls'), __('Manage Polls', 'wp-polls'), 'manage_polls', 'wp-polls/polls-manager.php');
-	add_submenu_page('wp-polls/polls-manager.php', __('Add Poll', 'wp-polls'), __('Add Poll', 'wp-polls'), 'manage_polls', 'wp-polls/polls-add.php');
-	add_submenu_page('wp-polls/polls-manager.php', __('Poll Options', 'wp-polls'), __('Poll Options', 'wp-polls'), 'manage_polls', 'wp-polls/polls-options.php');
-	add_submenu_page('wp-polls/polls-manager.php', __('Poll Templates', 'wp-polls'), __('Poll Templates', 'wp-polls'), 'manage_polls', 'wp-polls/polls-templates.php');
-	add_submenu_page('wp-polls/polls-manager.php', __('Uninstall WP-Polls', 'wp-polls'), __('Uninstall WP-Polls', 'wp-polls'), 'manage_polls', 'wp-polls/polls-uninstall.php');
+	add_submenu_page( 'wp-polls/polls-manager.php', __( 'Manage Polls', 'wp-polls'), __( 'Manage Polls', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-manager.php' );
+	add_submenu_page( 'wp-polls/polls-manager.php', __( 'Add Poll', 'wp-polls'), __( 'Add Poll', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-add.php' );
+	add_submenu_page( 'wp-polls/polls-manager.php', __( 'Poll Options', 'wp-polls'), __( 'Poll Options', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-options.php' );
+	add_submenu_page( 'wp-polls/polls-manager.php', __( 'Poll Templates', 'wp-polls'), __( 'Poll Templates', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-templates.php' );
 }
 
 
@@ -1621,20 +1620,42 @@ function widget_polls_init() {
 }
 
 
-### Function: Create Poll Tables
-add_action('activate_wp-polls/wp-polls.php', 'create_poll_table');
-function create_poll_table() {
+### Function: Activate Plugin
+register_activation_hook( __FILE__, 'poll_activation' );
+function poll_activation( $network_wide )
+{
+	if ( is_multisite() && $network_wide )
+	{
+		$ms_sites = wp_get_sites();
+
+		if( 0 < sizeof( $ms_sites ) )
+		{
+			foreach ( $ms_sites as $ms_site )
+			{
+				switch_to_blog( $ms_site['blog_id'] );
+				polls_activate();
+			}
+		}
+
+		restore_current_blog();
+	}
+	else
+	{
+		polls_activate();
+	}
+}
+
+function polls_activate() {
 	global $wpdb;
-	polls_textdomain();
-	if(@is_file(ABSPATH.'/wp-admin/includes/upgrade.php')) {
-		include_once(ABSPATH.'/wp-admin/includes/upgrade.php');
-	}elseif(@is_file(ABSPATH.'/wp-admin/upgrade-functions.php')) {
+
+	if(@is_file(ABSPATH.'/wp-admin/upgrade-functions.php')) {
 		include_once(ABSPATH.'/wp-admin/upgrade-functions.php');
 	} elseif(@is_file(ABSPATH.'/wp-admin/includes/upgrade.php')) {
 		include_once(ABSPATH.'/wp-admin/includes/upgrade.php');
 	} else {
 		die('We have problem finding your \'/wp-admin/upgrade-functions.php\' and \'/wp-admin/includes/upgrade.php\'');
 	}
+
 	// Create Poll Tables (3 Tables)
 	$charset_collate = '';
 	if( $wpdb->has_cap( 'collation' ) ) {
