@@ -28,10 +28,12 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ## Changelog
 ### Version 2.68
+* NEW: Poll answer percentage are now not rounded off, previously it was always rounded to add up to 100%
 * NEW: Support WordPress MultiSite Network Activation
 * NEW: Uses native WordPress uninstall.php
 * NEW: Show shortcode in success message after creating a poll
 * NEW: Checks and ensure that Poll Question and Poll Answers are not empty
+
 
 ### Version 2.67
 * NEW: Use POST for View Results and Vote link
@@ -345,6 +347,9 @@ N/A
 6. Click 'Publish'.
 
 * If you ARE NOT using nice permalinks, you need to go to `WP-Admin -> Polls -> Poll Options` and under `Poll Archive -> Polls Archive URL`, you need to fill in the URL to the Polls Archive Page you created above.
+
+### Why doesn't my poll's answers add up to 100%?
+* It is because of rounding issues. To make it always round up to 100%, the last poll's answer will get the remainding percentage added to it. To enable this feature, add this to your theme's functions.php: `add_filter( 'wp_polls_round_percentage', '__return_true' )`
 
 ### How Does WP-Polls Load CSS?
 * WP-Polls will load `polls-css.css` from your theme's directory if it exists.
