@@ -118,28 +118,28 @@ msgstr[1] ""
 
 #: polls-logs.php:130
 msgid ""
-"<strong>&raquo;</strong> <strong>%s</strong> vote is casted by registered "
+"<strong>&raquo;</strong> <strong>%s</strong> vote is cast by registered "
 "users"
 msgid_plural ""
-"<strong>&raquo;</strong> <strong>%s</strong> votes are casted by registered "
+"<strong>&raquo;</strong> <strong>%s</strong> votes are cast by registered "
 "users"
 msgstr[0] ""
 msgstr[1] ""
 
 #: polls-logs.php:131
 msgid ""
-"<strong>&raquo;</strong> <strong>%s</strong> vote is casted by comment "
+"<strong>&raquo;</strong> <strong>%s</strong> vote is cast by comment "
 "authors"
 msgid_plural ""
-"<strong>&raquo;</strong> <strong>%s</strong> votes are casted by comment "
+"<strong>&raquo;</strong> <strong>%s</strong> votes are cast by comment "
 "authors"
 msgstr[0] ""
 msgstr[1] ""
 
 #: polls-logs.php:132
-msgid "<strong>&raquo;</strong> <strong>%s</strong> vote is casted by guests"
+msgid "<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests"
 msgid_plural ""
-"<strong>&raquo;</strong> <strong>%s</strong> votes are casted by guests"
+"<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -452,7 +452,7 @@ msgid "Total Polls' Answers:"
 msgstr ""
 
 #: polls-manager.php:449
-msgid "Total Votes Casted:"
+msgid "Total Votes Cast:"
 msgstr ""
 
 #: polls-manager.php:462
@@ -1337,8 +1337,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: wp-polls.php:1504
-msgid "<strong>%s</strong> vote was casted."
-msgid_plural "<strong>%s</strong> votes were casted."
+msgid "<strong>%s</strong> vote was cast."
+msgid_plural "<strong>%s</strong> votes were cast."
 msgstr[0] ""
 msgstr[1] ""
 

@@ -129,9 +129,9 @@ if(!empty($_POST['do'])) {
 	<h3><?php echo $poll_question; ?></h3>
 	<p>
 		<?php printf(_n('There are a total of <strong>%s</strong> recorded vote for this poll.', 'There are a total of <strong>%s</strong> recorded votes for this poll.', $poll_totalrecorded, 'wp-polls'), number_format_i18n($poll_totalrecorded)); ?><br />
-		<?php printf(_n('<strong>&raquo;</strong> <strong>%s</strong> vote is casted by registered users', '<strong>&raquo;</strong> <strong>%s</strong> votes are casted by registered users', $poll_registered, 'wp-polls'), number_format_i18n($poll_registered)); ?><br />
-		<?php printf(_n('<strong>&raquo;</strong> <strong>%s</strong> vote is casted by comment authors', '<strong>&raquo;</strong> <strong>%s</strong> votes are casted by comment authors', $poll_comments, 'wp-polls'), number_format_i18n($poll_comments)); ?><br />
-		<?php printf(_n('<strong>&raquo;</strong> <strong>%s</strong> vote is casted by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are casted by guests', $poll_guest, 'wp-polls'), number_format_i18n($poll_guest)); ?>
+		<?php printf(_n('<strong>&raquo;</strong> <strong>%s</strong> vote is cast by registered users', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by registered users', $poll_registered, 'wp-polls'), number_format_i18n($poll_registered)); ?><br />
+		<?php printf(_n('<strong>&raquo;</strong> <strong>%s</strong> vote is cast by comment authors', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by comment authors', $poll_comments, 'wp-polls'), number_format_i18n($poll_comments)); ?><br />
+		<?php printf(_n('<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests', $poll_guest, 'wp-polls'), number_format_i18n($poll_guest)); ?>
 	</p>
 </div>
 <?php if($poll_totalrecorded > 0) { ?>

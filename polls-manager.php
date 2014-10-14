@@ -437,7 +437,7 @@ switch($mode) {
 				<td><?php echo number_format_i18n($total_ans); ?></td>
 			</tr>
 			<tr>
-				<th><?php _e('Total Votes Casted:', 'wp-polls'); ?></th>
+				<th><?php _e('Total Votes Cast:', 'wp-polls'); ?></th>
 				<td><?php echo number_format_i18n($total_votes); ?></td>
 			</tr>
 			<tr class="alternate">
