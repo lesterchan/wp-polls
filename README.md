@@ -33,6 +33,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * NEW: Uses native WordPress uninstall.php
 * NEW: Show shortcode in success message after creating a poll
 * NEW: Checks and ensure that Poll Question and Poll Answers are not empty
+* NEW: Checks whether Poll is closed before checking whether user has voted
 
 
 ### Version 2.67
