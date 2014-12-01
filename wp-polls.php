@@ -610,7 +610,7 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 			// Calculate Percentage And Image Bar Width
 			if(!$poll_totalvotes_zero) {
 				if($poll_answer_votes > 0) {
-					$poll_answer_percentage = round((($poll_answer_votes/$poll_question_totalvoters)*100));
+					$poll_answer_percentage = round((($poll_answer_votes/$poll_question_totalvotes)*100));
 					$poll_answer_imagewidth = round($poll_answer_percentage);
 					if($poll_answer_imagewidth == 100) {
 						$poll_answer_imagewidth = 99;
