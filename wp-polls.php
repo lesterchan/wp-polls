@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: http://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.68
+Version: 2.69
 Author: Lester 'GaMerZ' Chan
 Author URI: http://lesterchan.net
 Text Domain: wp-polls
@@ -11,7 +11,7 @@ Text Domain: wp-polls
 
 
 /*
-	Copyright 2014  Lester Chan  (email : lesterchan@gmail.com)
+	Copyright 2015  Lester Chan  (email : lesterchan@gmail.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ Text Domain: wp-polls
 
 
 ### Version
-define( 'WP_POLLS_VERSION', 2.68 );
+define( 'WP_POLLS_VERSION', 2.69 );
 
 
 ### Create Text Domain For Translations
@@ -1495,14 +1495,10 @@ function manage_poll() {
 
 
 ### Function: Plug Into WP-Stats
-add_action('wp','polls_wp_stats');
+add_action( 'plugins_loaded','polls_wp_stats' );
 function polls_wp_stats() {
-	if(function_exists('stats_page')) {
-		if(strpos(get_option('stats_url'), $_SERVER['REQUEST_URI']) || strpos($_SERVER['REQUEST_URI'], 'stats-options.php') || strpos($_SERVER['REQUEST_URI'], 'wp-stats/wp-stats.php')) {
-			add_filter('wp_stats_page_admin_plugins', 'polls_page_admin_general_stats');
-			add_filter('wp_stats_page_plugins', 'polls_page_general_stats');
-		}
-	}
+	add_filter( 'wp_stats_page_admin_plugins', 'polls_page_admin_general_stats' );
+	add_filter( 'wp_stats_page_plugins', 'polls_page_general_stats' );
 }
 
 
