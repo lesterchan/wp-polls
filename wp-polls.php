@@ -1791,20 +1791,24 @@ function polls_activate() {
 			$key_name[]= $i->Key_name;
 		}
 	}
-	if ( !in_array( 'pollip_ip', $key_name ) ) {
+	if ( ! in_array( 'pollip_ip', $key_name ) ) {
 		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip (pollip_ip);" );
 	}
-	if ( !in_array( 'pollip_qid', $key_name ) ) {
+	if ( ! in_array( 'pollip_qid', $key_name ) ) {
 		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_qid (pollip_qid);" );
 	}
-	if ( !in_array( 'pollip_ip_qid', $key_name ) ) {
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid (pollip_ip, pollip_qid);" );
+	if ( ! in_array( 'pollip_ip_qid_aid', $key_name ) ) {
+		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid_aid (pollip_ip, pollip_qid, pollip_aid);" );
+	}
+	// No longer needed index
+	if ( in_array( 'pollip_ip_qid', $key_name ) ) {
+		$wpdb->query( "ALTER TABLE $wpdb->pollsip DROP INDEX pollip_ip_qid;" );
 	}
 
 	// Set 'manage_polls' Capabilities To Administrator
-	$role = get_role('administrator');
-	if(!$role->has_cap('manage_polls')) {
-		$role->add_cap('manage_polls');
+	$role = get_role( 'administrator' );
+	if( ! $role->has_cap( 'manage_polls' ) ) {
+		$role->add_cap( 'manage_polls' );
 	}
 	cron_polls_place();
 }

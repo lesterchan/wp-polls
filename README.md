@@ -28,6 +28,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ## Changelog
 ### Version 2.69
+* FIXED: Added new index to wp_pollsip. Props ArtemR.
 * FIXED: Integration with WP-Stats
 
 ### Version 2.68
