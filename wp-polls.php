@@ -168,28 +168,6 @@ function get_poll($temp_poll_id = 0, $display = true) {
 ### Function: Print Polls Stylesheets That Are Dynamic And jQuery At The Top
 add_action('wp_head', 'poll_head_scripts');
 function poll_head_scripts() {
-	$pollbar = get_option('poll_bar');
-	echo '<style type="text/css">'."\n";
-	if($pollbar['style'] == 'use_css') {
-		echo '.wp-polls .pollbar {'."\n";
-		echo "\t".'margin: 1px;'."\n";
-		echo "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
-		echo "\t".'line-height: '.$pollbar['height'].'px;'."\n";
-		echo "\t".'height: '.$pollbar['height'].'px;'."\n";
-		echo "\t".'background: #'.$pollbar['background'].';'."\n";
-		echo "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
-		echo '}'."\n";
-	} else {
-		echo '.wp-polls .pollbar {'."\n";
-		echo "\t".'margin: 1px;'."\n";
-		echo "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
-		echo "\t".'line-height: '.$pollbar['height'].'px;'."\n";
-		echo "\t".'height: '.$pollbar['height'].'px;'."\n";
-		echo "\t".'background-image: url(\''.plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif').'\');'."\n";
-		echo "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
-		echo '}'."\n";
-	}
-	echo '</style>'."\n";
 	wp_print_scripts('jquery');
 }
 
@@ -209,6 +187,27 @@ function poll_scripts() {
 			wp_enqueue_style('wp-polls-rtl', plugins_url('wp-polls/polls-css-rtl.css'), false, WP_POLLS_VERSION, 'all');
 		}
 	}
+	$pollbar = get_option('poll_bar');
+	if($pollbar['style'] == 'use_css') {
+		$pollbar_css = '.wp-polls .pollbar {'."\n";
+		$pollbar_css .= "\t".'margin: 1px;'."\n";
+		$pollbar_css .= "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
+		$pollbar_css .= "\t".'line-height: '.$pollbar['height'].'px;'."\n";
+		$pollbar_css .= "\t".'height: '.$pollbar['height'].'px;'."\n";
+		$pollbar_css .= "\t".'background: #'.$pollbar['background'].';'."\n";
+		$pollbar_css .= "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
+		$pollbar_css .= '}'."\n";
+	} else {
+		$pollbar_css = '.wp-polls .pollbar {'."\n";
+		$pollbar_css .= "\t".'margin: 1px;'."\n";
+		$pollbar_css .= "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
+		$pollbar_css .= "\t".'line-height: '.$pollbar['height'].'px;'."\n";
+		$pollbar_css .= "\t".'height: '.$pollbar['height'].'px;'."\n";
+		$pollbar_css .= "\t".'background-image: url(\''.plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif').'\');'."\n";
+		$pollbar_css .= "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
+		$pollbar_css .= '}'."\n";
+	}
+	wp_add_inline_style( 'wp-polls', $pollbar_css );
 	$poll_ajax_style = get_option('poll_ajax_style');
 	$pollbar = get_option('poll_bar');
 	wp_enqueue_script('wp-polls', plugins_url('wp-polls/polls-js.js'), array('jquery'), WP_POLLS_VERSION, true);
