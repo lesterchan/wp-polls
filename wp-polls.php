@@ -1306,13 +1306,6 @@ function vote_poll() {
 			exit();
 		}
 
-		// Verify Referer
-		if(!check_ajax_referer('poll_'.$poll_id.'-nonce', 'poll_'.$poll_id.'_nonce', false))
-		{
-			_e('Failed To Verify Referrer', 'wp-polls');
-			exit();
-		}
-
 		// Which View
 		switch($_REQUEST['view'])
 		{
