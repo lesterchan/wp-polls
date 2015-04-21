@@ -28,8 +28,11 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ## Changelog
 ### Version 2.69
+* NEW: Make use of wp_add_inline_style. Props @pathawks.
+* NEW: Create 2 filters for secret ballot. Props @afragen.
 * FIXED: Added new index to wp_pollsip. Props ArtemR.
 * FIXED: Integration with WP-Stats
+* FIXED: Proper IP checking
 
 ### Version 2.68
 * NEW: Poll answer percentage are now not rounded off, previously it was always rounded to add up to 100%
