@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: http://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.69
+Version: 2.70
 Author: Lester 'GaMerZ' Chan
 Author URI: http://lesterchan.net
 Text Domain: wp-polls
@@ -30,7 +30,7 @@ Text Domain: wp-polls
 
 
 ### Version
-define( 'WP_POLLS_VERSION', 2.69 );
+define( 'WP_POLLS_VERSION', 2.70 );
 
 
 ### Create Text Domain For Translations
@@ -187,8 +187,8 @@ function poll_scripts() {
 			wp_enqueue_style('wp-polls-rtl', plugins_url('wp-polls/polls-css-rtl.css'), false, WP_POLLS_VERSION, 'all');
 		}
 	}
-	$pollbar = get_option('poll_bar');
-	if($pollbar['style'] == 'use_css') {
+	$pollbar = get_option( 'poll_bar' );
+	if( $pollbar['style'] === 'use_css' ) {
 		$pollbar_css = '.wp-polls .pollbar {'."\n";
 		$pollbar_css .= "\t".'margin: 1px;'."\n";
 		$pollbar_css .= "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
@@ -209,7 +209,6 @@ function poll_scripts() {
 	}
 	wp_add_inline_style( 'wp-polls', $pollbar_css );
 	$poll_ajax_style = get_option('poll_ajax_style');
-	$pollbar = get_option('poll_bar');
 	wp_enqueue_script('wp-polls', plugins_url('wp-polls/polls-js.js'), array('jquery'), WP_POLLS_VERSION, true);
 	wp_localize_script('wp-polls', 'pollsL10n', array(
 		'ajax_url' => admin_url('admin-ajax.php'),
