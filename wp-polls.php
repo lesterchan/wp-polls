@@ -1359,6 +1359,7 @@ function vote_poll() {
 									$wpdb->query("INSERT INTO $wpdb->pollsip VALUES (0, $poll_id, $polla_aid, '$pollip_ip', '$pollip_host', '$pollip_timestamp', '$pollip_user', $pollip_userid)");
 								}
 								echo display_pollresult($poll_id, $poll_aid_array, false);
+								do_action( 'wp_polls_vote_poll_success' );
 							} else {
 								printf(__('Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls'), $poll_id);
 							} // End if($vote_a)

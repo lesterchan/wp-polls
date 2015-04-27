@@ -4,7 +4,7 @@ Donate link: http://lesterchan.net/site/donation/
 Tags: poll, polls, polling, vote, booth, democracy, ajax, survey, post, widget  
 Requires at least: 3.9  
 Tested up to: 4.2
-Stable tag: 2.69
+Stable tag: 2.70
 
 Adds an AJAX poll system to your WordPress blog. You can also easily add a poll into your WordPress's blog post/page.
 
@@ -28,6 +28,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ## Changelog
 ### Version 2.70
+* NEW: Add wp_polls_vote_poll_success action hook
 
 ### Version 2.69
 * NEW: Make use of wp_add_inline_style. Props @pathawks.
