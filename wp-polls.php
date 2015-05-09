@@ -474,6 +474,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 			$poll_answer_id = intval($poll_answer->polla_aid);
 			$poll_answer_text = stripslashes($poll_answer->polla_answers);
 			$poll_answer_votes = intval($poll_answer->polla_votes);
+			$poll_answer_percentage = round((($poll_answer_votes/$poll_question_totalvoters)*100));
 			$template_answer = stripslashes(get_option('poll_template_votebody'));
 
 			$template_answer = apply_filters('poll_template_votebody_markup', $template_answer, $poll_answer, array(
@@ -481,6 +482,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 				'%POLL_ANSWER_ID%' => $poll_answer_id,
 				'%POLL_ANSWER%' => $poll_answer_text,
 				'%POLL_ANSWER_VOTES%' => number_format_i18n($poll_answer_votes),
+				'%POLL_ANSWER_PERCENTAGE%' => $poll_answer_percentage,
 				"%POLL_CHECKBOX_RADIO%" => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
 			));
 
