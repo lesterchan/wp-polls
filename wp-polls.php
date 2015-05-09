@@ -165,13 +165,6 @@ function get_poll($temp_poll_id = 0, $display = true) {
 }
 
 
-### Function: Print Polls Stylesheets That Are Dynamic And jQuery At The Top
-add_action('wp_head', 'poll_head_scripts');
-function poll_head_scripts() {
-	wp_print_scripts('jquery');
-}
-
-
 ### Function: Enqueue Polls JavaScripts/CSS
 add_action('wp_enqueue_scripts', 'poll_scripts');
 function poll_scripts() {

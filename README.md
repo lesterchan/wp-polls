@@ -28,6 +28,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ## Changelog
 * FIXED: PHP Notices
+* FIXED: Removed not needed wp_print_scripts
 
 ### Version 2.70
 * NEW: Add wp_polls_vote_poll_success action hook
