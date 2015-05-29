@@ -140,6 +140,7 @@ if(!empty($_POST['do'])) {
 			// Update Lastest Poll ID To Poll Options
 			$latest_pollid = polls_latest_id();
 			$update_latestpoll = update_option('poll_latestpoll', $latest_pollid);
+			do_action( 'wp_polls_update_poll', $latest_pollid );
 			cron_polls_place();
 			break;
 	}
