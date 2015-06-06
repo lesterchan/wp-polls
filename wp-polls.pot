@@ -1,106 +1,119 @@
-# Copyright (C) 2014 WP-Polls
+# Copyright (C) 2015 WP-Polls
 # This file is distributed under the same license as the WP-Polls package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP-Polls 2.67\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-polls\n"
-"POT-Creation-Date: 2014-12-03 14:55:28+00:00\n"
+"Project-Id-Version: WP-Polls 2.69\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/wp-polls\n"
+"POT-Creation-Date: 2015-06-06 05:39:11+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: polls-add.php:34 polls-add.php:110 polls-add.php:177 wp-polls.php:56
+#: polls-add.php:16 polls-add.php:104 polls-add.php:171 wp-polls.php:56
 msgid "Add Poll"
 msgstr ""
 
-#: polls-add.php:79
+#: polls-add.php:62
 msgid "Error In Adding Poll '%s'."
 msgstr ""
 
-#: polls-add.php:88 polls-manager.php:129
+#: polls-add.php:72 polls-manager.php:129
 msgid "Error In Adding Poll's Answer '%s'."
 msgstr ""
 
-#: polls-add.php:95
-msgid "Poll '%s' (ID: %s) Added Successfully."
+#: polls-add.php:75
+msgid "Poll's Answer is empty."
 msgstr ""
 
-#: polls-add.php:95 polls-manager.php:325 wp-polls.php:55
-msgid "Manage Polls"
+#: polls-add.php:82
+msgid ""
+"Poll '%s' (ID: %s) added successfully. Embed this poll with the shortcode: "
+"%s or go back to <a href=\"%s\">Manage Polls</a>"
 msgstr ""
 
-#: polls-add.php:112 polls-manager.php:178
+#: polls-add.php:85
+msgid ""
+"Poll '%s' (ID: %s) (Shortcode: %s) added successfully, but there are some "
+"errors with the Poll's Answers. Embed this poll with the shortcode: %s or go "
+"back to <a href=\"%s\">Manage Polls</a>"
+msgstr ""
+
+#: polls-add.php:90
+msgid "Poll Question is empty."
+msgstr ""
+
+#: polls-add.php:106 polls-manager.php:178
 msgid "Poll Question"
 msgstr ""
 
-#: polls-add.php:115 polls-manager.php:181 polls-manager.php:332
+#: polls-add.php:109 polls-manager.php:181 polls-manager.php:332
 msgid "Question"
 msgstr ""
 
-#: polls-add.php:120 polls-manager.php:186
+#: polls-add.php:114 polls-manager.php:186
 msgid "Poll Answers"
 msgstr ""
 
-#: polls-add.php:125 polls-manager.php:221
+#: polls-add.php:119 polls-manager.php:221
 msgid "Add Answer"
 msgstr ""
 
-#: polls-add.php:132 polls-manager.php:208
+#: polls-add.php:126 polls-manager.php:208
 msgid "Answer %s"
 msgstr ""
 
-#: polls-add.php:133 wp-polls.php:249
+#: polls-add.php:127 wp-polls.php:245
 msgid "Remove"
 msgstr ""
 
-#: polls-add.php:141 polls-manager.php:232
+#: polls-add.php:135 polls-manager.php:232
 msgid "Poll Multiple Answers"
 msgstr ""
 
-#: polls-add.php:144 polls-manager.php:235
+#: polls-add.php:138 polls-manager.php:235
 msgid "Allows Users To Select More Than One Answer?"
 msgstr ""
 
-#: polls-add.php:147 polls-manager.php:238 polls-options.php:199
-#: polls-options.php:208 polls-options.php:325 wp-polls.php:1576
+#: polls-add.php:141 polls-manager.php:238 polls-options.php:199
+#: polls-options.php:208 polls-options.php:325 wp-polls.php:1582
 msgid "No"
 msgstr ""
 
-#: polls-add.php:148 polls-logs.php:383 polls-manager.php:239
+#: polls-add.php:142 polls-logs.php:383 polls-manager.php:239
 #: polls-manager.php:461 polls-options.php:200 polls-options.php:209
-#: polls-options.php:326 polls-uninstall.php:127 wp-polls.php:1577
+#: polls-options.php:326 wp-polls.php:1583
 msgid "Yes"
 msgstr ""
 
-#: polls-add.php:153 polls-manager.php:244
+#: polls-add.php:147 polls-manager.php:244
 msgid "Maximum Number Of Selected Answers Allowed?"
 msgstr ""
 
-#: polls-add.php:166 polls-manager.php:261
+#: polls-add.php:160 polls-manager.php:261
 msgid "Poll Start/End Date"
 msgstr ""
 
-#: polls-add.php:169 polls-manager.php:264 polls-manager.php:334
+#: polls-add.php:163 polls-manager.php:264 polls-manager.php:334
 msgid "Start Date/Time"
 msgstr ""
 
-#: polls-add.php:173 polls-manager.php:272 polls-manager.php:335
+#: polls-add.php:167 polls-manager.php:272 polls-manager.php:335
 msgid "End Date/Time"
 msgstr ""
 
-#: polls-add.php:174 polls-manager.php:283
+#: polls-add.php:168 polls-manager.php:283
 msgid "Do NOT Expire This Poll"
 msgstr ""
 
-#: polls-add.php:177 polls-manager.php:307
+#: polls-add.php:171 polls-manager.php:307
 msgid "Cancel"
 msgstr ""
 
 #: polls-logs.php:34 polls-logs.php:35 polls-logs.php:38 polls-logs.php:70
-#: polls-logs.php:74 polls-logs.php:107 polls-logs.php:110 wp-polls.php:1327
+#: polls-logs.php:74 polls-logs.php:107 polls-logs.php:110 wp-polls.php:1334
 msgid "Guest"
 msgstr ""
 
@@ -117,28 +130,26 @@ msgstr[1] ""
 
 #: polls-logs.php:132
 msgid ""
-"<strong>&raquo;</strong> <strong>%s</strong> vote is casted by registered "
-"users"
+"<strong>&raquo;</strong> <strong>%s</strong> vote is cast by registered users"
 msgid_plural ""
-"<strong>&raquo;</strong> <strong>%s</strong> votes are casted by registered "
+"<strong>&raquo;</strong> <strong>%s</strong> votes are cast by registered "
 "users"
 msgstr[0] ""
 msgstr[1] ""
 
 #: polls-logs.php:133
 msgid ""
-"<strong>&raquo;</strong> <strong>%s</strong> vote is casted by comment "
-"authors"
+"<strong>&raquo;</strong> <strong>%s</strong> vote is cast by comment authors"
 msgid_plural ""
-"<strong>&raquo;</strong> <strong>%s</strong> votes are casted by comment "
+"<strong>&raquo;</strong> <strong>%s</strong> votes are cast by comment "
 "authors"
 msgstr[0] ""
 msgstr[1] ""
 
 #: polls-logs.php:134
-msgid "<strong>&raquo;</strong> <strong>%s</strong> vote is casted by guests"
+msgid "<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests"
 msgid_plural ""
-"<strong>&raquo;</strong> <strong>%s</strong> votes are casted by guests"
+"<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -225,7 +236,7 @@ msgid ""
 "This default filter is limited to display only <strong>%s</strong> records."
 msgstr ""
 
-#: polls-logs.php:289 polls-logs.php:334 wp-polls.php:248
+#: polls-logs.php:289 polls-logs.php:334 wp-polls.php:244
 msgid "Answer"
 msgstr ""
 
@@ -243,8 +254,8 @@ msgstr ""
 
 #: polls-logs.php:299 polls-logs.php:329 polls-manager.php:266
 #: polls-manager.php:278 polls-manager.php:355 polls-manager.php:363
-#: wp-polls.php:449 wp-polls.php:454 wp-polls.php:567 wp-polls.php:572
-#: wp-polls.php:982 wp-polls.php:986
+#: wp-polls.php:445 wp-polls.php:450 wp-polls.php:568 wp-polls.php:573
+#: wp-polls.php:987 wp-polls.php:991
 msgid "%s @ %s"
 msgstr ""
 
@@ -280,7 +291,7 @@ msgstr ""
 msgid "Are You Sure You Want To Delete Logs For This Poll Only?"
 msgstr ""
 
-#: polls-logs.php:384 wp-polls.php:243 wp-polls.php:1406
+#: polls-logs.php:384 wp-polls.php:239 wp-polls.php:1416
 msgid "Delete Logs For This Poll Only"
 msgstr ""
 
@@ -365,7 +376,7 @@ msgstr ""
 msgid "This Poll Will Not Expire"
 msgstr ""
 
-#: polls-manager.php:305 wp-polls.php:247 wp-polls.php:1449
+#: polls-manager.php:305 wp-polls.php:243 wp-polls.php:1459
 msgid "Close Poll"
 msgstr ""
 
@@ -373,7 +384,7 @@ msgstr ""
 msgid "You are about to CLOSE this poll '%s'."
 msgstr ""
 
-#: polls-manager.php:306 wp-polls.php:246 wp-polls.php:1437
+#: polls-manager.php:306 wp-polls.php:242 wp-polls.php:1447
 msgid "Open Poll"
 msgstr ""
 
@@ -381,7 +392,11 @@ msgstr ""
 msgid "You are about to OPEN this poll '%s'."
 msgstr ""
 
-#: polls-manager.php:326 wp-polls.php:53 wp-polls.php:1530 wp-polls.php:1565
+#: polls-manager.php:325 wp-polls.php:55
+msgid "Manage Polls"
+msgstr ""
+
+#: polls-manager.php:326 wp-polls.php:53 wp-polls.php:1536 wp-polls.php:1571
 msgid "Polls"
 msgstr ""
 
@@ -390,7 +405,7 @@ msgid "ID"
 msgstr ""
 
 #: polls-manager.php:333 polls-templates.php:121 polls-templates.php:124
-#: wp-polls.php:1707 wp-polls.php:1710
+#: wp-polls.php:1735 wp-polls.php:1738
 msgid "Total Voters"
 msgstr ""
 
@@ -402,7 +417,7 @@ msgstr ""
 msgid "Action"
 msgstr ""
 
-#: polls-manager.php:361 wp-polls.php:452 wp-polls.php:570 wp-polls.php:984
+#: polls-manager.php:361 wp-polls.php:448 wp-polls.php:571 wp-polls.php:989
 msgid "No Expiry"
 msgstr ""
 
@@ -451,7 +466,7 @@ msgid "Total Polls' Answers:"
 msgstr ""
 
 #: polls-manager.php:440
-msgid "Total Votes Casted:"
+msgid "Total Votes Cast:"
 msgstr ""
 
 #: polls-manager.php:453
@@ -462,7 +477,7 @@ msgstr ""
 msgid "Are You Sure You Want To Delete All Polls Logs?"
 msgstr ""
 
-#: polls-manager.php:462 wp-polls.php:241 wp-polls.php:1394
+#: polls-manager.php:462 wp-polls.php:237 wp-polls.php:1404
 msgid "Delete All Logs"
 msgstr ""
 
@@ -470,7 +485,7 @@ msgstr ""
 msgid "You are about to delete all poll logs. This action is not reversible."
 msgstr ""
 
-#: polls-manager.php:465 wp-polls.php:240
+#: polls-manager.php:465 wp-polls.php:236
 msgid "No poll logs available."
 msgstr ""
 
@@ -724,15 +739,15 @@ msgstr ""
 msgid "Current Active Poll"
 msgstr ""
 
-#: polls-options.php:343 wp-polls.php:1584
+#: polls-options.php:343 wp-polls.php:1590
 msgid "Do NOT Display Poll (Disable)"
 msgstr ""
 
-#: polls-options.php:344 wp-polls.php:1585
+#: polls-options.php:344 wp-polls.php:1591
 msgid "Display Random Poll"
 msgstr ""
 
-#: polls-options.php:345 wp-polls.php:1586
+#: polls-options.php:345 wp-polls.php:1592
 msgid "Display Latest Poll"
 msgstr ""
 
@@ -816,54 +831,54 @@ msgstr ""
 msgid "Poll Error Template"
 msgstr ""
 
-#: polls-templates.php:109 polls-templates.php:124 wp-polls.php:1698
-#: wp-polls.php:1711
+#: polls-templates.php:109 polls-templates.php:124 wp-polls.php:1726
+#: wp-polls.php:1739
 msgid "Vote"
 msgstr ""
 
-#: polls-templates.php:109 wp-polls.php:1699
+#: polls-templates.php:109 wp-polls.php:1727
 msgid "View Results Of This Poll"
 msgstr ""
 
-#: polls-templates.php:109 wp-polls.php:1699
+#: polls-templates.php:109 wp-polls.php:1727
 msgid "View Results"
 msgstr ""
 
-#: polls-templates.php:115 polls-templates.php:118 wp-polls.php:1704
-#: wp-polls.php:1705
+#: polls-templates.php:115 polls-templates.php:118 wp-polls.php:1732
+#: wp-polls.php:1733
 msgid ","
 msgstr ""
 
-#: polls-templates.php:115 polls-templates.php:118 wp-polls.php:1704
-#: wp-polls.php:1705
+#: polls-templates.php:115 polls-templates.php:118 wp-polls.php:1732
+#: wp-polls.php:1733
 msgid "Votes"
 msgstr ""
 
-#: polls-templates.php:118 wp-polls.php:1705
+#: polls-templates.php:118 wp-polls.php:1733
 msgid "You Have Voted For This Choice"
 msgstr ""
 
-#: polls-templates.php:124 wp-polls.php:1711
+#: polls-templates.php:124 wp-polls.php:1739
 msgid "Vote For This Poll"
 msgstr ""
 
-#: polls-templates.php:127 wp-polls.php:1737
+#: polls-templates.php:127 wp-polls.php:1765
 msgid "Polls Archive"
 msgstr ""
 
-#: polls-templates.php:133 wp-polls.php:1741
+#: polls-templates.php:133 wp-polls.php:1769
 msgid "Start Date:"
 msgstr ""
 
-#: polls-templates.php:133 wp-polls.php:1741
+#: polls-templates.php:133 wp-polls.php:1769
 msgid "End Date:"
 msgstr ""
 
-#: polls-templates.php:142 wp-polls.php:1713
+#: polls-templates.php:142 wp-polls.php:1741
 msgid "Sorry, there are no polls available at the moment."
 msgstr ""
 
-#: polls-templates.php:145 wp-polls.php:1714
+#: polls-templates.php:145 wp-polls.php:1742
 msgid "An error has occurred when processing your poll."
 msgstr ""
 
@@ -1102,276 +1117,219 @@ msgstr ""
 msgid "Displayed When An Error Has Occured While Processing The Poll"
 msgstr ""
 
-#: polls-uninstall.php:39 polls-uninstall.php:128
-msgid "UNINSTALL WP-Polls"
-msgstr ""
-
-#: polls-uninstall.php:47
-msgid "Table '%s' has been deleted."
-msgstr ""
-
-#: polls-uninstall.php:56
-msgid "Setting Key '%s' has been deleted."
-msgstr ""
-
-#: polls-uninstall.php:75 polls-uninstall.php:86 wp-polls.php:59
-msgid "Uninstall WP-Polls"
-msgstr ""
-
-#: polls-uninstall.php:76
-msgid ""
-"<a href=\"%s\">Click Here</a> To Finish The Uninstallation And WP-Polls Will "
-"Be Deactivated Automatically."
-msgstr ""
-
-#: polls-uninstall.php:88
-msgid ""
-"Deactivating WP-Polls plugin does not remove any data that may have been "
-"created, such as the poll data and the poll's voting logs. To completely "
-"remove this plugin, you can uninstall it here."
-msgstr ""
-
-#: polls-uninstall.php:91
-msgid "WARNING:"
-msgstr ""
-
-#: polls-uninstall.php:92
-msgid ""
-"Once uninstalled, this cannot be undone. You should use a Database Backup "
-"plugin of WordPress to back up all the data first."
-msgstr ""
-
-#: polls-uninstall.php:95
-msgid "The following WordPress Options/Tables will be DELETED:"
-msgstr ""
-
-#: polls-uninstall.php:100
-msgid "WordPress Options"
-msgstr ""
-
-#: polls-uninstall.php:101
-msgid "WordPress Tables"
-msgstr ""
-
-#: polls-uninstall.php:126
-msgid "Do you really want to uninstall WP-Polls?"
-msgstr ""
-
-#: polls-uninstall.php:128
-msgid ""
-"You Are About To Uninstall WP-Polls From WordPress.\\nThis Action Is Not "
-"Reversible.\\n\\n Choose [Cancel] To Stop, [OK] To Uninstall."
-msgstr ""
-
-#: wp-polls.php:219
+#: wp-polls.php:216
 msgid "Your last request is still being processed. Please wait a while ..."
 msgstr ""
 
-#: wp-polls.php:220
+#: wp-polls.php:217
 msgid "Please choose a valid poll answer."
 msgstr ""
 
-#: wp-polls.php:221
+#: wp-polls.php:218
 msgid "Maximum number of choices allowed: "
 msgstr ""
 
-#: wp-polls.php:239 wp-polls.php:1461
+#: wp-polls.php:235 wp-polls.php:1471
 msgid "Delete Poll"
 msgstr ""
 
-#: wp-polls.php:242
+#: wp-polls.php:238
 msgid "Please check the \\'Yes\\' checkbox if you want to delete all logs."
 msgstr ""
 
-#: wp-polls.php:244
+#: wp-polls.php:240
 msgid ""
 "Please check the \\'Yes\\' checkbox if you want to delete all logs for this "
 "poll ONLY."
 msgstr ""
 
-#: wp-polls.php:245 wp-polls.php:1420
+#: wp-polls.php:241 wp-polls.php:1430
 msgid "Delete Poll Answer"
 msgstr ""
 
-#: wp-polls.php:263
+#: wp-polls.php:259
 msgid "Poll"
 msgstr ""
 
-#: wp-polls.php:264 wp-polls.php:301
+#: wp-polls.php:260 wp-polls.php:297
 msgid "Enter Poll ID"
 msgstr ""
 
-#: wp-polls.php:266 wp-polls.php:302
+#: wp-polls.php:262 wp-polls.php:298
 msgid "Error: Poll ID must be numeric"
 msgstr ""
 
-#: wp-polls.php:266 wp-polls.php:303
+#: wp-polls.php:262 wp-polls.php:299
 msgid "Please enter Poll ID again"
 msgstr ""
 
-#: wp-polls.php:304
+#: wp-polls.php:300
 msgid "Insert Poll"
 msgstr ""
 
-#: wp-polls.php:530 wp-polls.php:706
+#: wp-polls.php:526 wp-polls.php:711
 msgid "Loading"
 msgstr ""
 
-#: wp-polls.php:759
+#: wp-polls.php:764
 msgid ""
 "Note: There is a poll embedded within this post, please visit the site to "
 "participate in this post's poll."
 msgstr ""
 
-#: wp-polls.php:1125
+#: wp-polls.php:1130
 msgid "Page %s of %s"
 msgstr ""
 
-#: wp-polls.php:1127
+#: wp-polls.php:1132
 msgid "&laquo; First"
 msgstr ""
 
-#: wp-polls.php:1131
+#: wp-polls.php:1136
 msgid "&laquo;"
 msgstr ""
 
-#: wp-polls.php:1141
+#: wp-polls.php:1146
 msgid "&raquo;"
 msgstr ""
 
-#: wp-polls.php:1145
+#: wp-polls.php:1150
 msgid "Last &raquo;"
 msgstr ""
 
-#: wp-polls.php:1300
+#: wp-polls.php:1305
 msgid "Invalid Poll ID"
 msgstr ""
 
-#: wp-polls.php:1307
+#: wp-polls.php:1312
 msgid "Failed To Verify Referrer"
 msgstr ""
 
-#: wp-polls.php:1357
+#: wp-polls.php:1364
 msgid "Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s"
 msgstr ""
 
-#: wp-polls.php:1360
+#: wp-polls.php:1367
 msgid "You Had Already Voted For This Poll. Poll ID #%s"
 msgstr ""
 
-#: wp-polls.php:1363
+#: wp-polls.php:1370
+msgid "Poll ID #%s is closed"
+msgstr ""
+
+#: wp-polls.php:1373
 msgid "Invalid Poll ID. Poll ID #%s"
 msgstr ""
 
-#: wp-polls.php:1399
+#: wp-polls.php:1409
 msgid "All Polls Logs Have Been Deleted."
 msgstr ""
 
-#: wp-polls.php:1401
+#: wp-polls.php:1411
 msgid "An Error Has Occurred While Deleting All Polls Logs."
 msgstr ""
 
-#: wp-polls.php:1413
+#: wp-polls.php:1423
 msgid "All Logs For '%s' Has Been Deleted."
 msgstr ""
 
-#: wp-polls.php:1415
+#: wp-polls.php:1425
 msgid "An Error Has Occurred While Deleting All Logs For '%s'"
 msgstr ""
 
-#: wp-polls.php:1431
+#: wp-polls.php:1441
 msgid "Poll Answer '%s' Deleted Successfully."
 msgstr ""
 
-#: wp-polls.php:1433
+#: wp-polls.php:1443
 msgid "Error In Deleting Poll Answer '%s'."
 msgstr ""
 
-#: wp-polls.php:1443
+#: wp-polls.php:1453
 msgid "Poll '%s' Is Now Opened"
 msgstr ""
 
-#: wp-polls.php:1445
+#: wp-polls.php:1455
 msgid "Error Opening Poll '%s'"
 msgstr ""
 
-#: wp-polls.php:1455
+#: wp-polls.php:1465
 msgid "Poll '%s' Is Now Closed"
 msgstr ""
 
-#: wp-polls.php:1457
+#: wp-polls.php:1467
 msgid "Error Closing Poll '%s'"
 msgstr ""
 
-#: wp-polls.php:1470
+#: wp-polls.php:1480
 msgid "Error In Deleting Poll '%s' Question"
 msgstr ""
 
-#: wp-polls.php:1473
+#: wp-polls.php:1483
 msgid "Poll '%s' Deleted Successfully"
 msgstr ""
 
-#. #-#-#-#-#  plugin.pot (WP-Polls 2.67)  #-#-#-#-#
+#. #-#-#-#-#  plugin.pot (WP-Polls 2.69)  #-#-#-#-#
 #. Plugin Name of the plugin/theme
-#: wp-polls.php:1502 wp-polls.php:1504 wp-polls.php:1514
+#: wp-polls.php:1508 wp-polls.php:1510 wp-polls.php:1520
 msgid "WP-Polls"
 msgstr ""
 
-#: wp-polls.php:1516
+#: wp-polls.php:1522
 msgid "<strong>%s</strong> poll was created."
 msgid_plural "<strong>%s</strong> polls were created."
 msgstr[0] ""
 msgstr[1] ""
 
-#: wp-polls.php:1517
+#: wp-polls.php:1523
 msgid "<strong>%s</strong> polls' answer was given."
 msgid_plural "<strong>%s</strong> polls' answers were given."
 msgstr[0] ""
 msgstr[1] ""
 
-#: wp-polls.php:1518
-msgid "<strong>%s</strong> vote was casted."
-msgid_plural "<strong>%s</strong> votes were casted."
+#: wp-polls.php:1524
+msgid "<strong>%s</strong> vote was cast."
+msgid_plural "<strong>%s</strong> votes were cast."
 msgstr[0] ""
 msgstr[1] ""
 
-#: wp-polls.php:1529
+#: wp-polls.php:1535
 msgid "WP-Polls polls"
 msgstr ""
 
-#: wp-polls.php:1571
+#: wp-polls.php:1577
 msgid "Title:"
 msgstr ""
 
-#: wp-polls.php:1574
+#: wp-polls.php:1580
 msgid "Display Polls Archive Link Below Poll?"
 msgstr ""
 
-#: wp-polls.php:1582
+#: wp-polls.php:1588
 msgid "Poll To Display:"
 msgstr ""
 
-#: wp-polls.php:1682
+#: wp-polls.php:1710
 msgid "How Is My Site?"
 msgstr ""
 
-#: wp-polls.php:1685
+#: wp-polls.php:1713
 msgid "Good"
 msgstr ""
 
-#: wp-polls.php:1686
+#: wp-polls.php:1714
 msgid "Excellent"
 msgstr ""
 
-#: wp-polls.php:1687
+#: wp-polls.php:1715
 msgid "Bad"
 msgstr ""
 
-#: wp-polls.php:1688
+#: wp-polls.php:1716
 msgid "Can Be Improved"
 msgstr ""
 
-#: wp-polls.php:1689
+#: wp-polls.php:1717
 msgid "No Comments"
 msgstr ""
 
