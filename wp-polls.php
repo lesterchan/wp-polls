@@ -41,10 +41,19 @@ function polls_textdomain() {
 
 
 ### Polls Table Name
-global $wpdb;
-$wpdb->pollsq   = $wpdb->prefix.'pollsq';
-$wpdb->pollsa   = $wpdb->prefix.'pollsa';
-$wpdb->pollsip  = $wpdb->prefix.'pollsip';
+add_action('switch_blog', 'poll_setup_tables_names');
+function poll_setup_tables_names(){
+	global $wpdb;
+	if(defined('POLLS_MOTHER_SITE')){
+		$prefix = $wpdb->get_blog_prefix(POLLS_MOTHER_SITE);
+	}else{
+		$prefix = $wpdb->prefix;
+	}
+	$wpdb->pollsq   = $prefix.'pollsq';
+	$wpdb->pollsa   = $prefix.'pollsa';
+	$wpdb->pollsip  = $prefix.'pollsip';
+}
+poll_setup_tables_names();
 
 
 ### Function: Poll Administration Menu
