@@ -1632,10 +1632,9 @@ function polls_activation( $network_wide )
 			{
 				switch_to_blog( $ms_site['blog_id'] );
 				polls_activate();
+				restore_current_blog();
 			}
 		}
-
-		restore_current_blog();
 	}
 	else
 	{
