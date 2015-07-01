@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: http://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.69
+Version: 2.70
 Author: Lester 'GaMerZ' Chan
 Author URI: http://lesterchan.net
 Text Domain: wp-polls
@@ -30,7 +30,7 @@ Text Domain: wp-polls
 
 
 ### Version
-define( 'WP_POLLS_VERSION', 2.69 );
+define( 'WP_POLLS_VERSION', 2.70 );
 
 
 ### Create Text Domain For Translations
@@ -70,7 +70,6 @@ function get_poll($temp_poll_id = 0, $display = true) {
 	}
 	$temp_poll_id = intval($temp_poll_id);
 	// Check Whether Poll Is Disabled
-	write_log("get_poll");
 	if(intval(get_option('poll_currentpoll')) == -1) {
 		if($display) {
 			echo stripslashes(get_option('poll_template_disable'));
@@ -139,7 +138,6 @@ function get_poll($temp_poll_id = 0, $display = true) {
 		} else {
 			$poll_close = 0;
 		}
-		write_log($poll_close);
 		if(intval($check_voted) > 0 || (is_array($check_voted) && sizeof($check_voted) > 0) || ($poll_active == 0 && $poll_close == 1)) {
 			if($display) {
 				echo display_pollresult($poll_id, $check_voted);
@@ -167,13 +165,6 @@ function get_poll($temp_poll_id = 0, $display = true) {
 }
 
 
-### Function: Print Polls Stylesheets That Are Dynamic And jQuery At The Top
-add_action('wp_head', 'poll_head_scripts');
-function poll_head_scripts() {
-	wp_print_scripts('jquery');
-}
-
-
 ### Function: Enqueue Polls JavaScripts/CSS
 add_action('wp_enqueue_scripts', 'poll_scripts');
 function poll_scripts() {
@@ -189,8 +180,8 @@ function poll_scripts() {
 			wp_enqueue_style('wp-polls-rtl', plugins_url('wp-polls/polls-css-rtl.css'), false, WP_POLLS_VERSION, 'all');
 		}
 	}
-	$pollbar = get_option('poll_bar');
-	if($pollbar['style'] == 'use_css') {
+	$pollbar = get_option( 'poll_bar' );
+	if( $pollbar['style'] === 'use_css' ) {
 		$pollbar_css = '.wp-polls .pollbar {'."\n";
 		$pollbar_css .= "\t".'margin: 1px;'."\n";
 		$pollbar_css .= "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
@@ -211,7 +202,6 @@ function poll_scripts() {
 	}
 	wp_add_inline_style( 'wp-polls', $pollbar_css );
 	$poll_ajax_style = get_option('poll_ajax_style');
-	$pollbar = get_option('poll_bar');
 	wp_enqueue_script('wp-polls', plugins_url('wp-polls/polls-js.js'), array('jquery'), WP_POLLS_VERSION, true);
 	wp_localize_script('wp-polls', 'pollsL10n', array(
 		'ajax_url' => admin_url('admin-ajax.php'),
@@ -484,6 +474,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 			$poll_answer_id = intval($poll_answer->polla_aid);
 			$poll_answer_text = stripslashes($poll_answer->polla_answers);
 			$poll_answer_votes = intval($poll_answer->polla_votes);
+			$poll_answer_percentage = round((($poll_answer_votes/$poll_question_totalvoters)*100));
 			$template_answer = stripslashes(get_option('poll_template_votebody'));
 
 			$template_answer = apply_filters('poll_template_votebody_markup', $template_answer, $poll_answer, array(
@@ -491,6 +482,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 				'%POLL_ANSWER_ID%' => $poll_answer_id,
 				'%POLL_ANSWER%' => $poll_answer_text,
 				'%POLL_ANSWER_VOTES%' => number_format_i18n($poll_answer_votes),
+				'%POLL_ANSWER_PERCENTAGE%' => $poll_answer_percentage,
 				"%POLL_CHECKBOX_RADIO%" => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
 			));
 
@@ -746,13 +738,13 @@ function poll_page_shortcode($atts) {
 
 ### Function: Short Code For Inserting Polls Into Posts
 add_shortcode( 'poll', 'poll_shortcode' );
-function poll_shortcode($atts) {
+function poll_shortcode( $atts ) {
 	$attributes = shortcode_atts( array( 'id' => 0, 'type' => 'vote' ), $atts );
-	if( !is_feed() ) {
+	if( ! is_feed() ) {
 		$id = intval( $attributes['id'] );
 
 		// To maintain backward compatibility with [poll=1]. Props @tz-ua
-		if( !$id ) {
+		if( ! $id && isset( $atts[0] ) ) {
 			$id = intval( trim( $atts[0], '="\'' ) );
 		}
 
@@ -1361,6 +1353,7 @@ function vote_poll() {
 									$wpdb->query("INSERT INTO $wpdb->pollsip VALUES (0, $poll_id, $polla_aid, '$pollip_ip', '$pollip_host', '$pollip_timestamp', '$pollip_user', $pollip_userid)");
 								}
 								echo display_pollresult($poll_id, $poll_aid_array, false);
+								do_action( 'wp_polls_vote_poll_success' );
 							} else {
 								printf(__('Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls'), $poll_id);
 							} // End if($vote_a)
@@ -1486,6 +1479,7 @@ function manage_poll() {
 					// Update Lastest Poll ID To Poll Options
 					$latest_pollid = polls_latest_id();
 					$update_latestpoll = update_option('poll_latestpoll', $latest_pollid);
+					do_action( 'wp_polls_delete_poll', $pollq_id );
 					break;
 			}
 			exit();
@@ -1637,10 +1631,9 @@ function polls_activation( $network_wide )
 			{
 				switch_to_blog( $ms_site['blog_id'] );
 				polls_activate();
+				restore_current_blog();
 			}
 		}
-
-		restore_current_blog();
 	}
 	else
 	{
@@ -1651,10 +1644,10 @@ function polls_activation( $network_wide )
 function polls_activate() {
 	global $wpdb;
 
-	if(@is_file(ABSPATH.'/wp-admin/upgrade-functions.php')) {
-		include_once(ABSPATH.'/wp-admin/upgrade-functions.php');
-	} elseif(@is_file(ABSPATH.'/wp-admin/includes/upgrade.php')) {
+	if(@is_file(ABSPATH.'/wp-admin/includes/upgrade.php')) {
 		include_once(ABSPATH.'/wp-admin/includes/upgrade.php');
+	} elseif(@is_file(ABSPATH.'/wp-admin/upgrade-functions.php')) {
+		include_once(ABSPATH.'/wp-admin/upgrade-functions.php');
 	} else {
 		die('We have problem finding your \'/wp-admin/upgrade-functions.php\' and \'/wp-admin/includes/upgrade.php\'');
 	}
