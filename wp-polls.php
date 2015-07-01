@@ -550,8 +550,7 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 	$poll_question = $wpdb->get_row("SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_active, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id LIMIT 1");
 	// No poll could be loaded from the database
 	if (!$poll_question) {
-		echo stripslashes(get_option('poll_template_disable'));
-		return;
+		return stripslashes(get_option('poll_template_disable'));
 	}
 	// Poll Question Variables
 	$poll_question_text = stripslashes($poll_question->pollq_question);
