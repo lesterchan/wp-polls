@@ -1526,9 +1526,9 @@ function polls_page_general_stats($content) {
 ### Class: WP-Polls Widget
  class WP_Widget_Polls extends WP_Widget {
 	// Constructor
-	function WP_Widget_Polls() {
+	function __construct() {
 		$widget_ops = array('description' => __('WP-Polls polls', 'wp-polls'));
-		$this->WP_Widget('polls-widget', __('Polls', 'wp-polls'), $widget_ops);
+		parent::__construct('polls-widget', __('Polls', 'wp-polls'), $widget_ops);
 	}
 
 	// Display Widget
