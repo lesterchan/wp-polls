@@ -162,12 +162,12 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Poll Bar Background', 'wp-polls'); ?></th>
-			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_bg" name="poll_bar_bg" value="<?php echo $pollbar['background']; ?>" size="6" maxlength="6" onblur="update_pollbar('background');" /></td>
+			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_bg" name="poll_bar_bg" value="<?php echo esc_attr( $pollbar['background'] ); ?>" size="6" maxlength="6" onblur="update_pollbar('background');" /></td>
 			<td><div id="wp-polls-pollbar-bg" style="background-color: #<?php echo $pollbar['background']; ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Poll Bar Border', 'wp-polls'); ?></th>
-			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_border" name="poll_bar_border" value="<?php echo $pollbar['border']; ?>" size="6" maxlength="6" onblur="update_pollbar('border');" /></td>
+			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_border" name="poll_bar_border" value="<?php echo esc_attr( $pollbar['border'] ); ?>" size="6" maxlength="6" onblur="update_pollbar('border');" /></td>
 			<td><div id="wp-polls-pollbar-border" style="background-color: #<?php echo $pollbar['border']; ?>;"></div></td>
 		</tr>
 		<tr>
