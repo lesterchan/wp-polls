@@ -316,7 +316,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Poll Archive URL:', 'wp-polls'); ?></th>
-			<td><input type="text" name="poll_archive_url" value="<?php echo get_option('poll_archive_url'); ?>" size="50" dir="ltr" /></td>
+			<td><input type="text" name="poll_archive_url" value="<?php echo esc_attr( get_option( 'poll_archive_url' ) ); ?>" size="50" dir="ltr" /></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Display Poll Archive Link Below Poll?', 'wp-polls'); ?></th>
