@@ -33,7 +33,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * NEW: Add wp_polls_add_poll, wp_polls_update_poll, wp_polls_delete_poll action hooks
 * FIXED: PHP Notices
 * FIXED: Removed not needed wp_print_scripts
-* FIXED: Use esc_attr() and esc_textarea() instead of htmlspecialchars()
+* FIXED: Use esc_attr() and esc_textarea() instead of htmlspecialchars(). Props [Govind Singh](https://in.linkedin.com/pub/govind-singh/21/1a9/bab)
 
 ### Version 2.69
 * NEW: Make use of wp_add_inline_style. Props @pathawks.
