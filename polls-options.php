@@ -43,7 +43,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$poll_ans_result_sortorder = strip_tags(trim($_POST['poll_ans_result_sortorder']));
 	$poll_archive_perpage = intval($_POST['poll_archive_perpage']);
 	$poll_archive_displaypoll = intval($_POST['poll_archive_displaypoll']);
-	$poll_archive_url = esc_url_raw( strip_tags( trim( $_POST['poll_archive_url'] ) );
+	$poll_archive_url = esc_url_raw( strip_tags( trim( $_POST['poll_archive_url'] ) ) );
 	$poll_archive_show = intval($_POST['poll_archive_show']);
 	$poll_currentpoll = intval($_POST['poll_currentpoll']);
 	$poll_close = intval($_POST['poll_close']);
