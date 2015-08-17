@@ -42,7 +42,7 @@ if(!empty($_POST['do'])) {
 			// Poll Total Voters
 			$pollq_totalvoters = intval($_POST['pollq_totalvoters']);
 			// Poll Question
-			$pollq_question = addslashes(trim($_POST['pollq_question']));
+			$pollq_question = addslashes( wp_kses_post( trim( $_POST['pollq_question'] ) ) );
 			// Poll Active
 			$pollq_active = intval($_POST['pollq_active']);
 			// Poll Start Date
@@ -103,7 +103,7 @@ if(!empty($_POST['do'])) {
 						$polla_aids[] = intval($get_polla_aid->polla_aid);
 				}
 				foreach($polla_aids as $polla_aid) {
-					$polla_answers = addslashes(trim($_POST['polla_aid-'.$polla_aid]));
+					$polla_answers = addslashes( wp_kses_post( trim( $_POST['polla_aid-'.$polla_aid] ) ) );
 					$polla_votes = intval($_POST['polla_votes-'.$polla_aid]);
 					$edit_poll_answer = $wpdb->query("UPDATE $wpdb->pollsa SET polla_answers = '$polla_answers', polla_votes = $polla_votes WHERE polla_qid = $pollq_id AND polla_aid = $polla_aid");
 					if(!$edit_poll_answer) {
@@ -121,7 +121,7 @@ if(!empty($_POST['do'])) {
 				$i = 0;
 				$polla_answers_new_votes = $_POST['polla_answers_new_votes'];
 				foreach($polla_answers_new as $polla_answer_new) {
-					$polla_answer_new = addslashes(trim($polla_answer_new));
+					$polla_answer_new = addslashes( wp_kses_post( trim( $polla_answer_new ) ) );
 					if(!empty($polla_answer_new)) {
 						$polla_answer_new_vote = intval($polla_answers_new_votes[$i]);
 						$add_poll_answers = $wpdb->query("INSERT INTO $wpdb->pollsa VALUES (0, $pollq_id, '$polla_answer_new', $polla_answer_new_vote)");
@@ -393,7 +393,7 @@ switch($mode) {
 								} else if(in_array($poll_id, $multiple_polls)) {
 										echo '<strong>'.__('Displayed:', 'wp-polls').'</strong> ';
 								}
-								echo "$poll_question</td>\n";
+								echo wp_kses_post( $poll_question )."</td>\n";
 								echo '<td>'.number_format_i18n($poll_totalvoters)."</td>\n";
 								echo "<td>$poll_date</td>\n";
 								echo "<td>$poll_expiry_text</td>\n";

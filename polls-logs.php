@@ -27,7 +27,7 @@ if(!current_user_can('manage_polls')) {
 $max_records = 2000;
 $pollip_answers = array();
 $poll_question_data = $wpdb->get_row("SELECT pollq_multiple, pollq_question, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id");
-$poll_question = stripslashes($poll_question_data->pollq_question);
+$poll_question = wp_kses_post( stripslashes( $poll_question_data->pollq_question ) );
 $poll_totalvoters = intval($poll_question_data->pollq_totalvoters);
 $poll_multiple = intval($poll_question_data->pollq_multiple);
 $poll_registered = $wpdb->get_var("SELECT COUNT(pollip_userid) FROM $wpdb->pollsip WHERE pollip_qid = $poll_id AND pollip_userid > 0");

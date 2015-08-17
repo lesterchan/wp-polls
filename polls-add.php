@@ -16,7 +16,7 @@ if(!empty($_POST['do'])) {
 		case __('Add Poll', 'wp-polls'):
 			check_admin_referer('wp-polls_add-poll');
 			// Poll Question
-			$pollq_question = addslashes(trim($_POST['pollq_question']));
+			$pollq_question = addslashes( wp_kses_post( trim( $_POST['pollq_question'] ) ) );
 			if( ! empty( $pollq_question ) ) {
 				// Poll Start Date
 				$timestamp_sql = '';
@@ -65,7 +65,7 @@ if(!empty($_POST['do'])) {
 				$polla_answers = $_POST['polla_answers'];
 				$polla_qid = intval($wpdb->insert_id);
 				foreach ($polla_answers as $polla_answer) {
-					$polla_answer = addslashes(trim($polla_answer));
+					$polla_answer = addslashes( wp_kses_post( trim( $polla_answer ) ) );
 					if( ! empty( $polla_answer ) ) {
 						$add_poll_answers = $wpdb->query("INSERT INTO $wpdb->pollsa VALUES (0, $polla_qid, '$polla_answer', 0)");
 						if (!$add_poll_answers) {

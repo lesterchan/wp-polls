@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: http://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.70
+Version: 2.71
 Author: Lester 'GaMerZ' Chan
 Author URI: http://lesterchan.net
 Text Domain: wp-polls
@@ -430,7 +430,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 	$poll_question = $wpdb->get_row("SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id LIMIT 1");
 
 	// Poll Question Variables
-	$poll_question_text = stripslashes($poll_question->pollq_question);
+	$poll_question_text = wp_kses_post( stripslashes( $poll_question->pollq_question ) );
 	$poll_question_id = intval($poll_question->pollq_id);
 	$poll_question_totalvotes = intval($poll_question->pollq_totalvotes);
 	$poll_question_totalvoters = intval($poll_question->pollq_totalvoters);
@@ -472,7 +472,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 		foreach($poll_answers as $poll_answer) {
 			// Poll Answer Variables
 			$poll_answer_id = intval($poll_answer->polla_aid);
-			$poll_answer_text = stripslashes($poll_answer->polla_answers);
+			$poll_answer_text = wp_kses_post( stripslashes( $poll_answer->polla_answers ) );
 			$poll_answer_votes = intval($poll_answer->polla_votes);
 			$poll_answer_percentage = $poll_question_totalvoters > 0 ? round((($poll_answer_votes/$poll_question_totalvoters)*100)) : 0;
 			$template_answer = stripslashes(get_option('poll_template_votebody'));
@@ -553,7 +553,7 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 		return stripslashes(get_option('poll_template_disable'));
 	}
 	// Poll Question Variables
-	$poll_question_text = stripslashes($poll_question->pollq_question);
+	$poll_question_text = wp_kses_post( stripslashes( $poll_question->pollq_question ) );
 	$poll_question_id = intval($poll_question->pollq_id);
 	$poll_question_totalvotes = intval($poll_question->pollq_totalvotes);
 	$poll_question_totalvoters = intval($poll_question->pollq_totalvoters);
@@ -595,10 +595,8 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 		foreach($poll_answers as $poll_answer) {
 			// Poll Answer Variables
 			$poll_answer_id = intval($poll_answer->polla_aid);
-			$poll_answer_text = stripslashes($poll_answer->polla_answers);
+			$poll_answer_text = wp_kses_post( stripslashes($poll_answer->polla_answers) );
 			$poll_answer_votes = intval($poll_answer->polla_votes);
-			$poll_answer_percentage = 0;
-			$poll_answer_imagewidth = 0;
 			// Calculate Percentage And Image Bar Width
 			if(!$poll_totalvotes_zero) {
 				if($poll_answer_votes > 0) {
@@ -765,7 +763,7 @@ if(!function_exists('get_poll_question')) {
 		global $wpdb;
 		$poll_id = intval($poll_id);
 		$poll_question = $wpdb->get_var("SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = $poll_id LIMIT 1");
-		return stripslashes($poll_question);
+		return wp_kses_post( stripslashes( $poll_question ) );
 	}
 }
 
@@ -941,7 +939,7 @@ function polls_archive() {
 	$questions = $wpdb->get_results("SELECT * FROM $wpdb->pollsq WHERE $polls_type_sql ORDER BY pollq_id DESC LIMIT $offset, $polls_perpage");
 	if($questions) {
 		foreach($questions as $question) {
-			$polls_questions[] = array('id' => intval($question->pollq_id), 'question' => stripslashes($question->pollq_question), 'timestamp' => $question->pollq_timestamp, 'totalvotes' => intval($question->pollq_totalvotes), 'start' => $question->pollq_timestamp, 'end' => trim($question->pollq_expiry), 'multiple' => intval($question->pollq_multiple), 'totalvoters' => intval($question->pollq_totalvoters));
+			$polls_questions[] = array('id' => intval($question->pollq_id), 'question' => wp_kses_post( stripslashes( $question->pollq_question ) ), 'timestamp' => $question->pollq_timestamp, 'totalvotes' => intval($question->pollq_totalvotes), 'start' => $question->pollq_timestamp, 'end' => trim($question->pollq_expiry), 'multiple' => intval($question->pollq_multiple), 'totalvoters' => intval($question->pollq_totalvoters));
 			$poll_questions_ids .= intval($question->pollq_id).', ';
 		}
 		$poll_questions_ids = substr($poll_questions_ids, 0, -2);
@@ -951,7 +949,7 @@ function polls_archive() {
 	$answers = $wpdb->get_results("SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid IN ($poll_questions_ids) ORDER BY ".get_option('poll_ans_result_sortby').' '.get_option('poll_ans_result_sortorder'));
 	if($answers) {
 		foreach($answers as $answer) {
-			$polls_answers[intval($answer->polla_qid)][] = array('aid' => intval($answer->polla_aid), 'qid' => intval($answer->polla_qid), 'answers' => stripslashes($answer->polla_answers), 'votes' => intval($answer->polla_votes));
+			$polls_answers[intval($answer->polla_qid)][] = array('aid' => intval($answer->polla_aid), 'qid' => intval($answer->polla_qid), 'answers' => wp_kses_post( stripslashes( $answer->polla_answers ) ), 'votes' => intval($answer->polla_votes));
 		}
 	}
 
@@ -1028,6 +1026,7 @@ function polls_archive() {
 					}
 				}
 			}
+			$polls_answer['answers'] = wp_kses_post( $polls_answer['answers'] );
 			// Let User See What Options They Voted
 			if(isset($polls_ips[$polls_question['id']]) && in_array($polls_answer['aid'], check_voted_multiple($polls_question['id'], $polls_ips[$polls_question['id']]))) {
 				// Results Body Variables
@@ -1414,9 +1413,9 @@ function manage_poll() {
 					if(trim($_POST['delete_logs_yes']) == 'yes') {
 						$delete_logs = $wpdb->query("DELETE FROM $wpdb->pollsip WHERE pollip_qid = $pollq_id");
 						if($delete_logs) {
-							echo '<p style="color: green;">'.sprintf(__('All Logs For \'%s\' Has Been Deleted.', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+							echo '<p style="color: green;">'.sprintf(__('All Logs For \'%s\' Has Been Deleted.', 'wp-polls'), wp_kses_post( stripslashes( $pollq_question ) ) ).'</p>';
 						} else {
-							echo '<p style="color: red;">'.sprintf(__('An Error Has Occurred While Deleting All Logs For \'%s\'', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+							echo '<p style="color: red;">'.sprintf(__('An Error Has Occurred While Deleting All Logs For \'%s\'', 'wp-polls'), wp_kses_post( stripslashes( $pollq_question ) ) ).'</p>';
 						}
 					}
 					break;
@@ -1427,7 +1426,7 @@ function manage_poll() {
 					$polla_aid = intval($_POST['polla_aid']);
 					$poll_answers = $wpdb->get_row("SELECT polla_votes, polla_answers FROM $wpdb->pollsa WHERE polla_aid = $polla_aid AND polla_qid = $pollq_id");
 					$polla_votes = intval($poll_answers->polla_votes);
-					$polla_answers = stripslashes(trim($poll_answers->polla_answers));
+					$polla_answers = wp_kses_post( stripslashes( trim( $poll_answers->polla_answers ) ) );
 					$delete_polla_answers = $wpdb->query("DELETE FROM $wpdb->pollsa WHERE polla_aid = $polla_aid AND polla_qid = $pollq_id");
 					$delete_pollip = $wpdb->query("DELETE FROM $wpdb->pollsip WHERE pollip_qid = $pollq_id AND pollip_aid = $polla_aid");
 					$update_pollq_totalvotes = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes-$polla_votes) WHERE pollq_id = $pollq_id");
@@ -1444,9 +1443,9 @@ function manage_poll() {
 					$pollq_question = $wpdb->get_var("SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = $pollq_id");
 					$open_poll = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_active = 1 WHERE pollq_id = $pollq_id;");
 					if($open_poll) {
-						echo '<p style="color: green;">'.sprintf(__('Poll \'%s\' Is Now Opened', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+						echo '<p style="color: green;">'.sprintf(__('Poll \'%s\' Is Now Opened', 'wp-polls'), wp_kses_post( stripslashes( $pollq_question ) ) ).'</p>';
 					} else {
-						echo '<p style="color: red;">'.sprintf(__('Error Opening Poll \'%s\'', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+						echo '<p style="color: red;">'.sprintf(__('Error Opening Poll \'%s\'', 'wp-polls'), wp_kses_post( stripslashes( $pollq_question ) ) ).'</p>';
 					}
 					break;
 				// Close Poll
@@ -1456,9 +1455,9 @@ function manage_poll() {
 					$pollq_question = $wpdb->get_var("SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = $pollq_id");
 					$close_poll = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_active = 0 WHERE pollq_id = $pollq_id;");
 					if($close_poll) {
-						echo '<p style="color: green;">'.sprintf(__('Poll \'%s\' Is Now Closed', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+						echo '<p style="color: green;">'.sprintf(__('Poll \'%s\' Is Now Closed', 'wp-polls'), wp_kses_post( stripslashes( $pollq_question ) ) ).'</p>';
 					} else {
-						echo '<p style="color: red;">'.sprintf(__('Error Closing Poll \'%s\'', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+						echo '<p style="color: red;">'.sprintf(__('Error Closing Poll \'%s\'', 'wp-polls'), wp_kses_post( stripslashes( $pollq_question ) ) ).'</p>';
 					}
 					break;
 				// Delete Poll
@@ -1471,10 +1470,10 @@ function manage_poll() {
 					$delete_poll_ip = $wpdb->query("DELETE FROM $wpdb->pollsip WHERE pollip_qid = $pollq_id");
 					$poll_option_lastestpoll = $wpdb->get_var("SELECT option_value FROM $wpdb->options WHERE option_name = 'poll_latestpoll'");
 					if(!$delete_poll_question) {
-						echo '<p style="color: red;">'.sprintf(__('Error In Deleting Poll \'%s\' Question', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+						echo '<p style="color: red;">'.sprintf(__('Error In Deleting Poll \'%s\' Question', 'wp-polls'), wp_kses_post( stripslashes( $pollq_question ) ) ).'</p>';
 					}
 					if(empty($text)) {
-						echo '<p style="color: green;">'.sprintf(__('Poll \'%s\' Deleted Successfully', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+						echo '<p style="color: green;">'.sprintf(__('Poll \'%s\' Deleted Successfully', 'wp-polls'), wp_kses_post( stripslashes( $pollq_question ) ) ).'</p>';
 					}
 					// Update Lastest Poll ID To Poll Options
 					$latest_pollid = polls_latest_id();
@@ -1590,7 +1589,7 @@ function polls_page_general_stats($content) {
 					$polls = $wpdb->get_results("SELECT pollq_id, pollq_question FROM $wpdb->pollsq ORDER BY pollq_id DESC");
 					if($polls) {
 						foreach($polls as $poll) {
-							$pollq_question = stripslashes($poll->pollq_question);
+							$pollq_question = wp_kses_post( stripslashes( $poll->pollq_question ) );
 							$pollq_id = intval($poll->pollq_id);
 							if($pollq_id == $poll_id) {
 								echo "<option value=\"$pollq_id\" selected=\"selected\">$pollq_question</option>\n";
