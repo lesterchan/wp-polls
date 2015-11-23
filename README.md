@@ -28,7 +28,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ## Changelog
 ### Version 2.71
-* FIXED: Use wp_kses_post() to get filter alway bad tags
+* FIXED: Use wp_kses_post() to get filter always bad tags
 
 ### Version 2.70
 * NEW: Add wp_polls_vote_poll_success action hook
