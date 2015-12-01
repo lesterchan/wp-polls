@@ -33,7 +33,7 @@ if(!empty($_POST['do'])) {
 					$pollq_active = 1;
 				}
 				// Poll End Date
-				$pollq_expiry_no = intval($_POST['pollq_expiry_no']);
+				$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? intval($_POST['pollq_expiry_no']) : 0;
 				if ($pollq_expiry_no == 1) {
 					$pollq_expiry = '';
 				} else {
