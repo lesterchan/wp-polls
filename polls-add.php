@@ -78,6 +78,8 @@ if(!empty($_POST['do'])) {
 				// Update Lastest Poll ID To Poll Options
 				$latest_pollid = polls_latest_id();
 				$update_latestpoll = update_option('poll_latestpoll', $latest_pollid);
+				// If poll starts in the future use the correct poll ID
+				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 				if ( empty( $text ) ) {
 					$text = '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' (ID: %s) added successfully. Embed this poll with the shortcode: %s or go back to <a href="%s">Manage Polls</a>', 'wp-polls' ), stripslashes( $pollq_question ), $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
 				} else {
