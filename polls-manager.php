@@ -62,7 +62,8 @@ if(!empty($_POST['do'])) {
 				}
 			}
 			// Poll End Date
-			$pollq_expiry_no = intval($_POST['pollq_expiry_no']);
+
+			$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? intval($_POST['pollq_expiry_no']) : 0;
 			if($pollq_expiry_no == 1) {
 				$pollq_expiry = '';
 			} else {
@@ -91,6 +92,7 @@ if(!empty($_POST['do'])) {
 				$pollq_multiple = 0;
 			}
 			// Update Poll's Question
+			$text = '';
 			$edit_poll_question = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_question = '$pollq_question', pollq_totalvotes = $pollq_totalvotes, pollq_expiry = '$pollq_expiry', pollq_active = $pollq_active, pollq_multiple = $pollq_multiple, pollq_totalvoters = $pollq_totalvoters $timestamp_sql WHERE pollq_id = $pollq_id");
 			if(!$edit_poll_question) {
 				$text = '<p style="color: blue">'.sprintf(__('No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls'), stripslashes($pollq_question)).'</p>';
