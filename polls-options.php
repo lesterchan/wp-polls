@@ -44,7 +44,6 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$poll_archive_perpage = intval($_POST['poll_archive_perpage']);
 	$poll_archive_displaypoll = intval($_POST['poll_archive_displaypoll']);
 	$poll_archive_url = esc_url_raw( strip_tags( trim( $_POST['poll_archive_url'] ) ) );
-	$poll_archive_show = intval($_POST['poll_archive_show']);
 	$poll_currentpoll = intval($_POST['poll_currentpoll']);
 	$poll_close = intval($_POST['poll_close']);
 	$poll_logging_method = intval($_POST['poll_logging_method']);
@@ -61,7 +60,6 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$update_poll_queries[] = update_option('poll_archive_perpage', $poll_archive_perpage);
 	$update_poll_queries[] = update_option('poll_archive_displaypoll', $poll_archive_displaypoll);
 	$update_poll_queries[] = update_option('poll_archive_url', $poll_archive_url);
-	$update_poll_queries[] = update_option('poll_archive_show', $poll_archive_show);
 	$update_poll_queries[] = update_option('poll_currentpoll', $poll_currentpoll);
 	$update_poll_queries[] = update_option('poll_close', $poll_close);
 	$update_poll_queries[] = update_option('poll_logging_method', $poll_logging_method);
@@ -317,15 +315,6 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e('Poll Archive URL:', 'wp-polls'); ?></th>
 			<td><input type="text" name="poll_archive_url" value="<?php echo esc_url( get_option( 'poll_archive_url' ) ); ?>" size="50" dir="ltr" /></td>
-		</tr>
-		<tr>
-			<th scope="row" valign="top"><?php _e('Display Poll Archive Link Below Poll?', 'wp-polls'); ?></th>
-			<td>
-				<select name="poll_archive_show" size="1">
-					<option value="0"<?php selected('0', get_option('poll_archive_show')); ?>><?php _e('No', 'wp-polls'); ?></option>
-					<option value="1"<?php selected('1', get_option('poll_archive_show')); ?>><?php _e('Yes', 'wp-polls'); ?></option>
-				</select>
-			</td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Note', 'wp-polls'); ?></th>
