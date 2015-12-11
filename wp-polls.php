@@ -457,7 +457,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 
     // Get Poll Answers Data
     list($order_by, $sort_order) = _polls_get_ans_sort();
-    $poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY %s %s", $poll_question_id, $order_by, $sort_order ) );
+    $poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
     // If There Is Poll Question With Answers
     if($poll_question && $poll_answers) {
         // Display Poll Voting Form
@@ -581,7 +581,7 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
     }
     // Get Poll Answers Data
     list($order_by, $sort_order) = _polls_get_ans_result_sort();
-    $poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY %s %s", $poll_question_id, $order_by, $sort_order ) );
+    $poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
     // If There Is Poll Question With Answers
     if($poll_question && $poll_answers) {
         // Store The Percentage Of The Poll
