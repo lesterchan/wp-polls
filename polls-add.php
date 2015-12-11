@@ -83,7 +83,7 @@ if(!empty($_POST['do'])) {
                 }
                 // Add Poll Answers
                 $polla_answers = $_POST['polla_answers'];
-                $polla_qid = intval($wpdb->insert_id);
+                $polla_qid = intval( $wpdb->insert_id );
                 foreach ($polla_answers as $polla_answer) {
                     $polla_answer = wp_kses_post( trim( $polla_answer ) );
                     if( ! empty( $polla_answer ) ) {
