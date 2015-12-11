@@ -34,7 +34,8 @@ $poll_registered = $wpdb->get_var("SELECT COUNT(pollip_userid) FROM $wpdb->polls
 $poll_comments = $wpdb->get_var("SELECT COUNT(pollip_user) FROM $wpdb->pollsip WHERE pollip_qid = $poll_id AND pollip_user != '".__('Guest', 'wp-polls')."' AND pollip_userid = 0");
 $poll_guest = $wpdb->get_var("SELECT COUNT(pollip_user) FROM $wpdb->pollsip WHERE pollip_qid = $poll_id AND pollip_user = '".__('Guest', 'wp-polls')."'");
 $poll_totalrecorded = ($poll_registered+$poll_comments+$poll_guest);
-$poll_answers_data = $wpdb->get_results("SELECT polla_aid, polla_answers FROM $wpdb->pollsa WHERE polla_qid = $poll_id ORDER BY ".get_option('poll_ans_sortby').' '.get_option('poll_ans_sortorder'));
+list($order_by, $sort_order) = _polls_get_ans_sort();
+$poll_answers_data = $wpdb->get_results("SELECT polla_aid, polla_answers FROM $wpdb->pollsa WHERE polla_qid = $poll_id ORDER BY ".$order_by.' '.$sort_order);
 $poll_voters = $wpdb->get_col("SELECT DISTINCT pollip_user FROM $wpdb->pollsip WHERE pollip_qid = $poll_id AND pollip_user != '".__('Guest', 'wp-polls')."' ORDER BY pollip_user ASC");
 $poll_logs_count = $wpdb->get_var("SELECT COUNT(pollip_id) FROM $wpdb->pollsip WHERE pollip_qid = $poll_id");
 
@@ -79,7 +80,7 @@ if(!empty($_POST['do'])) {
 			$exclude_registered_2 = intval($_POST['exclude_registered_2']);
 			$exclude_comment_2 = intval($_POST['exclude_comment_2']);
 			$num_choices = intval($_POST['num_choices']);
-			$num_choices_sign = addslashes($_POST['num_choices_sign']);
+			$num_choices_sign = esc_sql($_POST['num_choices_sign']);
 			switch($num_choices_sign) {
 				case 'more':
 					$num_choices_sign_sql = '>';
@@ -113,7 +114,7 @@ if(!empty($_POST['do'])) {
 			$order_by = 'pollip_user, pollip_ip';
 			break;
 		case 3;
-			$what_user_voted = addslashes($_POST['what_user_voted']);
+			$what_user_voted = esc_sql($_POST['what_user_voted']);
 			$what_user_voted_sql = "AND pollip_user = '$what_user_voted'";
 			$order_by = 'pollip_user, pollip_ip';
 			break;

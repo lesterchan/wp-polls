@@ -16,7 +16,7 @@ if(!empty($_POST['do'])) {
 		case __('Add Poll', 'wp-polls'):
 			check_admin_referer('wp-polls_add-poll');
 			// Poll Question
-			$pollq_question = addslashes( wp_kses_post( trim( $_POST['pollq_question'] ) ) );
+			$pollq_question = wp_kses_post( trim( $_POST['pollq_question'] ) );
 			if( ! empty( $pollq_question ) ) {
 				// Poll Start Date
 				$timestamp_sql = '';
@@ -57,19 +57,19 @@ if(!empty($_POST['do'])) {
 					$pollq_multiple = 0;
 				}
 				// Insert Poll
-				$add_poll_question = $wpdb->query("INSERT INTO $wpdb->pollsq VALUES (0, '$pollq_question', '$pollq_timestamp', 0, $pollq_active, '$pollq_expiry', $pollq_multiple, 0)");
+				$add_poll_question = $wpdb->query($wpdb->prepare("INSERT INTO $wpdb->pollsq VALUES (0, %s, %s, 0, %d, %s, %d, 0)", $pollq_question, $pollq_timestamp, $pollq_active, $pollq_expiry, $pollq_multiple));
 				if (!$add_poll_question) {
-					$text .= '<p style="color: red;">' . sprintf(__('Error In Adding Poll \'%s\'.', 'wp-polls'), stripslashes($pollq_question)) . '</p>';
+					$text .= '<p style="color: red;">' . sprintf(__('Error In Adding Poll \'%s\'.', 'wp-polls'), $pollq_question) . '</p>';
 				}
 				// Add Poll Answers
 				$polla_answers = $_POST['polla_answers'];
 				$polla_qid = intval($wpdb->insert_id);
 				foreach ($polla_answers as $polla_answer) {
-					$polla_answer = addslashes( wp_kses_post( trim( $polla_answer ) ) );
+					$polla_answer = wp_kses_post( trim( $polla_answer ) );
 					if( ! empty( $polla_answer ) ) {
-						$add_poll_answers = $wpdb->query("INSERT INTO $wpdb->pollsa VALUES (0, $polla_qid, '$polla_answer', 0)");
+						$add_poll_answers = $wpdb->query($wpdb->prepare("INSERT INTO $wpdb->pollsa VALUES (0, %d, %s, 0)", $polla_qid, $polla_answer));
 						if (!$add_poll_answers) {
-							$text .= '<p style="color: red;">' . sprintf(__('Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls'), stripslashes($polla_answer)) . '</p>';
+							$text .= '<p style="color: red;">' . sprintf(__('Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls'), $polla_answer) . '</p>';
 						}
 					} else {
 						$text .= '<p style="color: red;">' . __( 'Poll\'s Answer is empty.', 'wp-polls' ) . '</p>';
@@ -81,10 +81,10 @@ if(!empty($_POST['do'])) {
 				// If poll starts in the future use the correct poll ID
 				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 				if ( empty( $text ) ) {
-					$text = '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' (ID: %s) added successfully. Embed this poll with the shortcode: %s or go back to <a href="%s">Manage Polls</a>', 'wp-polls' ), stripslashes( $pollq_question ), $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
+					$text = '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' (ID: %s) added successfully. Embed this poll with the shortcode: %s or go back to <a href="%s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
 				} else {
 					if( $add_poll_question ) {
-						$text .= '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' (ID: %s) (Shortcode: %s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %s or go back to <a href="%s">Manage Polls</a>', 'wp-polls' ), stripslashes( $pollq_question ), $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />' ) .'</p>';
+						$text .= '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' (ID: %s) (Shortcode: %s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %s or go back to <a href="%s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />' ) .'</p>';
 					}
 				}
 				do_action( 'wp_polls_add_poll', $latest_pollid );

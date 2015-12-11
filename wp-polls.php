@@ -456,7 +456,8 @@ function display_pollvote($poll_id, $display_loading = true) {
 	));
 
 	// Get Poll Answers Data
-	$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY ".get_option('poll_ans_sortby').' '.get_option('poll_ans_sortorder'));
+	list($order_by, $sort_order) = _polls_get_ans_sort();
+	$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY $order_by $sort_order");
 	// If There Is Poll Question With Answers
 	if($poll_question && $poll_answers) {
 		// Display Poll Voting Form
@@ -579,7 +580,8 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 		$template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", '1', $template_question);
 	}
 	// Get Poll Answers Data
-	$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY ".get_option('poll_ans_result_sortby').' '.get_option('poll_ans_result_sortorder'));
+	list($order_by, $sort_order) = _polls_get_ans_result_sort();
+	$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY $order_by $sort_order");
 	// If There Is Poll Question With Answers
 	if($poll_question && $poll_answers) {
 		// Store The Percentage Of The Poll
@@ -946,7 +948,8 @@ function polls_archive() {
 	}
 
 	// Get Poll Answers
-	$answers = $wpdb->get_results("SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid IN ($poll_questions_ids) ORDER BY ".get_option('poll_ans_result_sortby').' '.get_option('poll_ans_result_sortorder'));
+	list($order_by, $sort_order) = _polls_get_ans_result_sort();
+	$answers = $wpdb->get_results("SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid IN ($poll_questions_ids) ORDER BY $order_by $sort_order");
 	if($answers) {
 		foreach($answers as $answer) {
 			$polls_answers[intval($answer->polla_qid)][] = array('aid' => intval($answer->polla_aid), 'qid' => intval($answer->polla_qid), 'answers' => wp_kses_post( stripslashes( $answer->polla_answers ) ), 'votes' => intval($answer->polla_votes));
@@ -1327,7 +1330,7 @@ function vote_poll() {
 							}
 							$pollip_userid = intval($user_ID);
 							$pollip_ip = get_ipaddress();
-							$pollip_host = esc_attr(@gethostbyaddr($pollip_ip));
+							$pollip_host = @gethostbyaddr($pollip_ip);
 							$pollip_timestamp = current_time('timestamp');
 							// Only Create Cookie If User Choose Logging Method 1 Or 2
 							$poll_logging_method = intval(get_option('poll_logging_method'));
@@ -1349,7 +1352,7 @@ function vote_poll() {
 							$vote_q = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . sizeof($poll_aid_array) . "), pollq_totalvoters = (pollq_totalvoters+1) WHERE pollq_id = $poll_id AND pollq_active = 1");
 							if ($vote_q) {
 								foreach ($poll_aid_array as $polla_aid) {
-									$wpdb->query("INSERT INTO $wpdb->pollsip VALUES (0, $poll_id, $polla_aid, '$pollip_ip', '$pollip_host', '$pollip_timestamp', '$pollip_user', $pollip_userid)");
+									$wpdb->query($wpdb->prepare("INSERT INTO $wpdb->pollsip VALUES (0, %s, %s, %s, %s, %s, %s, %d)", $poll_id, $polla_aid, $pollip_ip, $pollip_host, $pollip_timestamp, $pollip_user, $pollip_userid));
 								}
 								echo display_pollresult($poll_id, $poll_aid_array, false);
 								do_action( 'wp_polls_vote_poll_success' );
@@ -1803,4 +1806,35 @@ function polls_activate() {
 		$role->add_cap( 'manage_polls' );
 	}
 	cron_polls_place();
+}
+
+function _polls_get_ans_sort() {
+	$order_by = get_option('poll_ans_sortby');
+	switch($order_by) {
+		case 'polla_aid':
+		case 'polla_answers':
+		case 'RAND()':
+			break;
+		default:
+			$order_by = 'polla_aid';
+			break;
+	}
+	$sort_order = get_option('poll_ans_sortorder') === 'desc' ? 'desc' : 'asc';
+	return array($order_by, $sort_order);
+}
+
+function _polls_get_ans_result_sort() {
+	$order_by = get_option('poll_ans_result_sortby');
+	switch($order_by) {
+		case 'polla_votes':
+		case 'polla_aid':
+		case 'polla_answers':
+		case 'RAND()':
+			break;
+		default:
+			$order_by = 'polla_aid';
+			break;
+	}
+	$sort_order = get_option('poll_ans_result_sortorder') === 'desc' ? 'desc' : 'asc';
+	return array($order_by, $sort_order);
 }
