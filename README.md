@@ -31,6 +31,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * NEW: Use translate.wordpress.org to translate the plugin
 * FIXED: SQL Injection fixes. Props [Jay Dansand](https://github.com/jaydansand)
 * FIXED: Use $wpdb->insert(), $wpdb->update() and $wpdb->delete() as much as possible
+* FIXED Remove poll_archive_show option from UI
 
 ### Version 2.71
 * FIXED: Use wp_kses_post() to get filter always bad tags
