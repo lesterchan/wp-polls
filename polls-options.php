@@ -337,7 +337,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 						$polls = $wpdb->get_results("SELECT pollq_id, pollq_question FROM $wpdb->pollsq ORDER BY pollq_id DESC");
 						if($polls) {
 							foreach($polls as $poll) {
-								$poll_question = stripslashes($poll->pollq_question);
+								$poll_question = removeslashes($poll->pollq_question);
 								$poll_id = intval($poll->pollq_id);
 								if($poll_id == intval(get_option('poll_currentpoll'))) {
 									echo '<option value="' . $poll_id . '" selected="selected">' . esc_attr( $poll_question ) . '</option>';

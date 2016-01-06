@@ -9,7 +9,7 @@ if( ! current_user_can( 'manage_polls' ) ) {
 $max_records = 2000;
 $pollip_answers = array();
 $poll_question_data = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_multiple, pollq_question, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
-$poll_question = wp_kses_post( stripslashes( $poll_question_data->pollq_question ) );
+$poll_question = wp_kses_post( removeslashes( $poll_question_data->pollq_question ) );
 $poll_totalvoters = intval( $poll_question_data->pollq_totalvoters );
 $poll_multiple = intval( $poll_question_data->pollq_multiple );
 $poll_registered = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(pollip_userid) FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_userid > 0", $poll_id ) );
@@ -106,7 +106,7 @@ if(!empty($_POST['do'])) {
     $poll_ips = $wpdb->get_results( $wpdb->prepare( "SELECT pollip_aid, pollip_ip, pollip_host, pollip_timestamp, pollip_user FROM $wpdb->pollsip WHERE pollip_qid = %d ORDER BY pollip_aid ASC, pollip_user ASC LIMIT %d", $poll_id, $max_records ) );
 }
 ?>
-<?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.stripslashes($text).'</div>'; } else { echo '<div id="message" class="updated" style="display: none;"></div>'; } ?>
+<?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.removeslashes($text).'</div>'; } else { echo '<div id="message" class="updated" style="display: none;"></div>'; } ?>
 <div class="wrap">
     <h2><?php _e('Poll\'s Logs', 'wp-polls'); ?></h2>
     <h3><?php echo $poll_question; ?></h3>
@@ -135,7 +135,7 @@ if(!empty($_POST['do'])) {
                                     if($poll_answers_data) {
                                         foreach($poll_answers_data as $data) {
                                             $polla_id = intval($data->polla_aid);
-                                            $polla_answers = stripslashes( strip_tags( esc_attr( $data->polla_answers ) ) );
+                                            $polla_answers = removeslashes( strip_tags( esc_attr( $data->polla_answers ) ) );
                                             if($polla_id  == $users_voted_for) {
                                                 echo '<option value="'.$polla_id .'" selected="selected">'.$polla_answers.'</option>';
                                             } else {
@@ -229,9 +229,9 @@ if(!empty($_POST['do'])) {
                                     if($poll_voters) {
                                         foreach($poll_voters as $pollip_user) {
                                             if($pollip_user == $what_user_voted) {
-                                                echo '<option value="' . stripslashes( esc_attr( $pollip_user ) ) . '" selected="selected">' . stripslashes( esc_attr( $pollip_user ) ) . '</option>';
+                                                echo '<option value="' . removeslashes( esc_attr( $pollip_user ) ) . '" selected="selected">' . removeslashes( esc_attr( $pollip_user ) ) . '</option>';
                                             } else {
-                                                echo '<option value="' . stripslashes( esc_attr( $pollip_user ) ) . '">' . stripslashes( esc_attr( $pollip_user ) ) . '</option>';
+                                                echo '<option value="' . removeslashes( esc_attr( $pollip_user ) ) . '">' . removeslashes( esc_attr( $pollip_user ) ) . '</option>';
                                             }
                                         }
                                     }
@@ -276,7 +276,7 @@ if(!empty($_POST['do'])) {
                     echo "</tr>\n";
                     foreach($poll_ips as $poll_ip) {
                         $pollip_aid = intval($poll_ip->pollip_aid);
-                        $pollip_user = stripslashes($poll_ip->pollip_user);
+                        $pollip_user = removeslashes($poll_ip->pollip_user);
                         $pollip_ip = $poll_ip->pollip_ip;
                         $pollip_host = $poll_ip->pollip_host;
                         $pollip_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_ip->pollip_timestamp));
@@ -306,7 +306,7 @@ if(!empty($_POST['do'])) {
                 } else {
                     foreach($poll_ips as $poll_ip) {
                         $pollip_aid = intval($poll_ip->pollip_aid);
-                        $pollip_user = apply_filters( 'poll_log_secret_ballot', stripslashes($poll_ip->pollip_user) );
+                        $pollip_user = apply_filters( 'poll_log_secret_ballot', removeslashes($poll_ip->pollip_user) );
                         $pollip_ip = $poll_ip->pollip_ip;
                         $pollip_host = $poll_ip->pollip_host;
                         $pollip_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_ip->pollip_timestamp));

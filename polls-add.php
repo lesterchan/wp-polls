@@ -132,7 +132,7 @@ if(!empty($_POST['do'])) {
 $poll_noquestion = 2;
 $count = 0;
 ?>
-<?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.stripslashes($text).'</div>'; } ?>
+<?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.removeslashes($text).'</div>'; } ?>
 <form method="post" action="<?php echo admin_url('admin.php?page='.plugin_basename(__FILE__)); ?>">
 <?php wp_nonce_field('wp-polls_add-poll'); ?>
 <div class="wrap">

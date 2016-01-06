@@ -102,7 +102,7 @@ if(!empty($_POST['do'])) {
                 )
             );
             if( ! $edit_poll_question ) {
-                $text = '<p style="color: blue">'.sprintf(__('No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+                $text = '<p style="color: blue">'.sprintf(__('No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls'), removeslashes($pollq_question)).'</p>';
             }
             // Update Polls' Answers
             $polla_aids = array();
@@ -140,7 +140,7 @@ if(!empty($_POST['do'])) {
                     }
                 }
             } else {
-                $text .= '<p style="color: red">'.sprintf(__('Invalid Poll \'%s\'.', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+                $text .= '<p style="color: red">'.sprintf(__('Invalid Poll \'%s\'.', 'wp-polls'), removeslashes($pollq_question)).'</p>';
             }
             // Add Poll Answers (If Needed)
             $polla_answers_new = isset($_POST['polla_answers_new']) ? $_POST['polla_answers_new'] : null;
@@ -174,7 +174,7 @@ if(!empty($_POST['do'])) {
                 }
             }
             if(empty($text)) {
-                $text = '<p style="color: green">'.sprintf(__('Poll \'%s\' Edited Successfully.', 'wp-polls'), stripslashes($pollq_question)).'</p>';
+                $text = '<p style="color: green">'.sprintf(__('Poll \'%s\' Edited Successfully.', 'wp-polls'), removeslashes($pollq_question)).'</p>';
             }
             // Update Lastest Poll ID To Poll Options
             $latest_pollid = polls_latest_id();
@@ -197,7 +197,7 @@ switch($mode) {
         $poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_question, pollq_timestamp, pollq_totalvotes, pollq_active, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
         $poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY polla_aid ASC", $poll_id ) );
         $poll_noquestion = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(polla_aid) FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
-        $poll_question_text = stripslashes($poll_question->pollq_question);
+        $poll_question_text = removeslashes($poll_question->pollq_question);
         $poll_totalvotes = intval($poll_question->pollq_totalvotes);
         $poll_timestamp = $poll_question->pollq_timestamp;
         $poll_active = intval($poll_question->pollq_active);
@@ -205,7 +205,7 @@ switch($mode) {
         $poll_multiple = intval($poll_question->pollq_multiple);
         $poll_totalvoters = intval($poll_question->pollq_totalvoters);
 ?>
-        <?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.stripslashes($text).'</div>'; } else { echo '<div id="message" class="updated" style="display: none;"></div>'; } ?>
+        <?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.removeslashes($text).'</div>'; } else { echo '<div id="message" class="updated" style="display: none;"></div>'; } ?>
 
         <!-- Edit Poll -->
         <form method="post" action="<?php echo admin_url('admin.php?page='.plugin_basename(__FILE__).'&amp;mode=edit&amp;id='.$poll_id); ?>">
@@ -242,7 +242,7 @@ switch($mode) {
                             $pollip_answers[0] = __('Null Votes', 'wp-polls');
                             foreach($poll_answers as $poll_answer) {
                                 $polla_aid = intval($poll_answer->polla_aid);
-                                $polla_answers = stripslashes($poll_answer->polla_answers);
+                                $polla_answers = removeslashes($poll_answer->polla_answers);
                                 $polla_votes = intval($poll_answer->polla_votes);
                                 $pollip_answers[$polla_aid] = $polla_answers;
                                 echo "<tr id=\"poll-answer-$polla_aid\">\n";
@@ -392,7 +392,7 @@ switch($mode) {
                             $latest_poll = intval(get_option('poll_latestpoll'));
                             foreach($polls as $poll) {
                                 $poll_id = intval($poll->pollq_id);
-                                $poll_question = stripslashes($poll->pollq_question);
+                                $poll_question = removeslashes($poll->pollq_question);
                                 $poll_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll->pollq_timestamp));
                                 $poll_totalvotes = intval($poll->pollq_totalvotes);
                                 $poll_totalvoters = intval($poll->pollq_totalvoters);
