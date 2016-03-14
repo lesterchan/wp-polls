@@ -1379,8 +1379,16 @@ function vote_poll() {
                             } else {
                                 printf(__('Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls'), $poll_id);
                             } // End if($vote_a)
-                        } else {
+                        } else {                            
+                            //when displaying result, we keep widget original height
+                            echo display_pollresult($poll_id);  
+
+                            //Wrapper to help adding style 
+                            echo '<div class="wp-polls-message">';
                             printf(__('You Had Already Voted For This Poll. Poll ID #%s', 'wp-polls'), $poll_id);
+                            echo '</div>';
+
+
                         } // End if($check_voted)
                     } else {
                         printf( __( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id );
