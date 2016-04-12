@@ -318,7 +318,8 @@ if(!empty($_POST['do'])) {
                             if($pollip_aid == 0) {
                                 echo "<tr class=\"highlight\">\n<td colspan=\"4\"><strong>$pollip_answers[$pollip_aid]</strong></td>\n</tr>\n";
                             } else {
-                                echo "<tr class=\"highlight\">\n<td colspan=\"4\"><strong>".__('Answer', 'wp-polls')." ".number_format_i18n($k).": $pollip_answers[$pollip_aid]</strong></td>\n</tr>\n";
+                                $polla_answer = ! empty( $pollip_answers[$pollip_aid] ) ? $pollip_answers[ $pollip_aid ] : $poll_answers_data[ $k-1 ]->polla_answers;
+                                echo "<tr class=\"highlight\">\n<td colspan=\"4\"><strong>".__('Answer', 'wp-polls')." ".number_format_i18n($k).": " . $polla_answer . "</strong></td>\n</tr>\n";
                                 $k++;
                             }
                             echo "<tr class=\"thead\">\n";
