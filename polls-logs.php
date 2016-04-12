@@ -266,6 +266,7 @@ if(!empty($_POST['do'])) {
                     echo '<p>'.sprintf(__('This default filter is limited to display only <strong>%s</strong> records.', 'wp-polls'), number_format_i18n($max_records)).'</p>';
                 }
                 echo '<table class="widefat">'."\n";
+                echo "<tr class=\"highlight\"><td colspan=\"4\">". $poll_question . "</td></tr>";
                 $k = 1;
                 $j = 0;
                 $poll_last_aid = -1;
