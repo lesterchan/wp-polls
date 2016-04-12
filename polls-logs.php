@@ -25,6 +25,9 @@ $exclude_registered = 0;
 $exclude_comment = 0;
 $exclude_guest = 0;
 
+$users_voted_for = null;
+$what_user_voted = null;
+
 ### Process Filters
 if(!empty($_POST['do'])) {
     check_admin_referer('wp-polls_logs');
