@@ -25,6 +25,9 @@ $exclude_registered = 0;
 $exclude_comment = 0;
 $exclude_guest = 0;
 
+$users_voted_for = null;
+$what_user_voted = null;
+
 ### Process Filters
 if(!empty($_POST['do'])) {
     check_admin_referer('wp-polls_logs');
@@ -263,6 +266,7 @@ if(!empty($_POST['do'])) {
                     echo '<p>'.sprintf(__('This default filter is limited to display only <strong>%s</strong> records.', 'wp-polls'), number_format_i18n($max_records)).'</p>';
                 }
                 echo '<table class="widefat">'."\n";
+                echo "<tr class=\"highlight\"><td colspan=\"4\">". $poll_question . "</td></tr>";
                 $k = 1;
                 $j = 0;
                 $poll_last_aid = -1;
@@ -314,7 +318,8 @@ if(!empty($_POST['do'])) {
                             if($pollip_aid == 0) {
                                 echo "<tr class=\"highlight\">\n<td colspan=\"4\"><strong>$pollip_answers[$pollip_aid]</strong></td>\n</tr>\n";
                             } else {
-                                echo "<tr class=\"highlight\">\n<td colspan=\"4\"><strong>".__('Answer', 'wp-polls')." ".number_format_i18n($k).": $pollip_answers[$pollip_aid]</strong></td>\n</tr>\n";
+                                $polla_answer = ! empty( $pollip_answers[$pollip_aid] ) ? $pollip_answers[ $pollip_aid ] : $poll_answers_data[ $k-1 ]->polla_answers;
+                                echo "<tr class=\"highlight\">\n<td colspan=\"4\"><strong>".__('Answer', 'wp-polls')." ".number_format_i18n($k).": " . $polla_answer . "</strong></td>\n</tr>\n";
                                 $k++;
                             }
                             echo "<tr class=\"thead\">\n";
