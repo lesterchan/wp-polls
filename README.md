@@ -29,7 +29,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ## Changelog
 ### Version 2.73.1
 * FIXED: Allow local IP
-* 
+ 
 ### Version 2.73
 * NEW: Display Poll Questions at the top of the Poll Logs table
 * FIXED: Remove slashes
