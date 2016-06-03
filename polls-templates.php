@@ -36,8 +36,10 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$poll_template_resultheader = trim($_POST['poll_template_resultheader']);
 	$poll_template_resultbody = trim($_POST['poll_template_resultbody']);
 	$poll_template_resultbody2 = trim($_POST['poll_template_resultbody2']);
+	$poll_template_resultbody3 = trim($_POST['poll_template_resultbody3']);
 	$poll_template_resultfooter = trim($_POST['poll_template_resultfooter']);
 	$poll_template_resultfooter2 = trim($_POST['poll_template_resultfooter2']);
+	$poll_template_resultfooter3 = trim($_POST['poll_template_resultfooter3']);
 	$poll_template_pollarchivelink = trim($_POST['poll_template_pollarchivelink']);
 	$poll_template_pollarchiveheader = trim($_POST['poll_template_pollarchiveheader']);
 	$poll_template_pollarchivefooter = trim($_POST['poll_template_pollarchivefooter']);
@@ -53,8 +55,10 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$update_poll_queries[] = update_option('poll_template_resultheader', $poll_template_resultheader);
 	$update_poll_queries[] = update_option('poll_template_resultbody', $poll_template_resultbody);
 	$update_poll_queries[] = update_option('poll_template_resultbody2', $poll_template_resultbody2);
+	$update_poll_queries[] = update_option('poll_template_resultbody3', $poll_template_resultbody3);
 	$update_poll_queries[] = update_option('poll_template_resultfooter', $poll_template_resultfooter);
 	$update_poll_queries[] = update_option('poll_template_resultfooter2', $poll_template_resultfooter2);
+	$update_poll_queries[] = update_option('poll_template_resultfooter3', $poll_template_resultfooter3);
 	$update_poll_queries[] = update_option('poll_template_pollarchivelink', $poll_template_pollarchivelink);
 	$update_poll_queries[] = update_option('poll_template_pollarchiveheader', $poll_template_pollarchiveheader);
 	$update_poll_queries[] = update_option('poll_template_pollarchivefooter', $poll_template_pollarchivefooter);
@@ -68,6 +72,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$update_poll_text[] = __('Result Header Template', 'wp-polls');
 	$update_poll_text[] = __('Result Body Template', 'wp-polls');
 	$update_poll_text[] = __('Result Body2 Template', 'wp-polls');
+	$update_poll_text[] = __('Result Body3 Template', 'wp-polls');
 	$update_poll_text[] = __('Result Footer Template', 'wp-polls');
 	$update_poll_text[] = __('Result Footer2 Template', 'wp-polls');
 	$update_poll_text[] = __('Poll Archive Link Template', 'wp-polls');
@@ -117,10 +122,16 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 			case "resultbody2":
 				default_template = "<li><strong><i>%POLL_ANSWER% <small>(%POLL_ANSWER_PERCENTAGE%%<?php _e(',', 'wp-polls'); ?> %POLL_ANSWER_VOTES% <?php _e('Votes', 'wp-polls'); ?>)</small></i></strong><div class=\"pollbar\" style=\"width: %POLL_ANSWER_IMAGEWIDTH%%;\" title=\"<?php _e('You Have Voted For This Choice', 'wp-polls'); ?> - %POLL_ANSWER_TEXT% (%POLL_ANSWER_PERCENTAGE%% | %POLL_ANSWER_VOTES% <?php _e('Votes', 'wp-polls'); ?>)\"></div></li>";
 				break;
+			case "resultbody3":
+				default_template = "<li><strong><i>%POLL_ANSWER% <small>(%POLL_ANSWER_PERCENTAGE%%<?php _e(',', 'wp-polls'); ?> %POLL_ANSWER_VOTES% <?php _e('Votes', 'wp-polls'); ?>)</small></i></strong><div class=\"pollbar\" style=\"width: %POLL_ANSWER_IMAGEWIDTH%%;\" title=\"<?php _e('You Have Voted For This Choice', 'wp-polls'); ?> - %POLL_ANSWER_TEXT% (%POLL_ANSWER_PERCENTAGE%% | %POLL_ANSWER_VOTES% <?php _e('Votes', 'wp-polls'); ?>)\"></div></li>";
+				break;
 			case "resultfooter":
 				default_template = "</ul>\n<p style=\"text-align: center;\"><?php _e('Total Voters', 'wp-polls'); ?>: <strong>%POLL_TOTALVOTERS%</strong></p>\n</div>";
 				break;
 			case "resultfooter2":
+				default_template = "</ul>\n<p style=\"text-align: center;\"><?php _e('Total Voters', 'wp-polls'); ?>: <strong>%POLL_TOTALVOTERS%</strong></p>\n<p style=\"text-align: center;\"><a href=\"#VotePoll\" onclick=\"poll_booth(%POLL_ID%); return false;\" title=\"<?php _e('Vote For This Poll', 'wp-polls'); ?>\"><?php _e('Vote', 'wp-polls'); ?></a></p>\n</div>";
+				break;
+			case "resultfooter3":
 				default_template = "</ul>\n<p style=\"text-align: center;\"><?php _e('Total Voters', 'wp-polls'); ?>: <strong>%POLL_TOTALVOTERS%</strong></p>\n<p style=\"text-align: center;\"><a href=\"#VotePoll\" onclick=\"poll_booth(%POLL_ID%); return false;\" title=\"<?php _e('Vote For This Poll', 'wp-polls'); ?>\"><?php _e('Vote', 'wp-polls'); ?></a></p>\n</div>";
 				break;
 			case "pollarchivelink":
@@ -247,6 +258,14 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<?php _e('Display the poll\'s answer percentage for the least voted answer', 'wp-polls'); ?>
 			</td>
 		</tr>
+		<tr>
+			<td>
+				<strong>%POLL_EXPIRY_DAYS%</strong><br />
+				<?php _e('Display the number of days before the poll expires', 'wp-polls'); ?>
+			</td>
+			<td>
+			</td>
+		</tr>
 		<tr class="alternate">
 			<td>
 				<strong>%POLL_MULTIPLE_ANS_MAX%</strong><br />
@@ -285,6 +304,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_QUESTION%</p>
 				<p style="margin: 2px 0">- %POLL_START_DATE%</p>
 				<p style="margin: 2px 0">- %POLL_END_DATE%</p>
+				<p style="margin: 2px 0">- %POLL_EXPIRY_DAYS%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTES%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTERS%</p>
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
@@ -329,6 +349,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_QUESTION%</p>
 				<p style="margin: 2px 0">- %POLL_START_DATE%</p>
 				<p style="margin: 2px 0">- %POLL_END_DATE%</p>
+				<p style="margin: 2px 0">- %POLL_EXPIRY_DAYS%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTES%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTERS%</p>
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
@@ -368,11 +389,27 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
+				<strong><?php _e('Result Body:', 'wp-polls'); ?></strong><br /><?php _e('Displayed When The User HAS no authorization to vote', 'wp-polls'); ?><br /><br />
+				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
+				<p style="margin: 2px 0">- %POLL_ID%</p>
+				<p style="margin: 2px 0">- %POLL_ANSWER_ID%</p>
+				<p style="margin: 2px 0">- %POLL_ANSWER%</p>
+				<p style="margin: 2px 0">- %POLL_ANSWER_TEXT%</p>
+				<p style="margin: 2px 0">- %POLL_ANSWER_VOTES%</p>
+				-  %POLL_ANSWER_PERCENTAGE%</p>
+				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
+				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultbody3');" class="button" />
+			</td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody3" name="poll_template_resultbody3"><?php echo esc_textarea( removeslashes( get_option( 'poll_template_resultbody3' ) ) ); ?></textarea></td>
+		</tr>
+		<tr>
+			<td width="30%" valign="top">
 				<strong><?php _e('Result Footer:', 'wp-polls'); ?></strong><br /><?php _e('Displayed When The User HAS Voted', 'wp-polls'); ?><br /><br />
 				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
 				<p style="margin: 2px 0">- %POLL_ID%</p>
 				<p style="margin: 2px 0">- %POLL_START_DATE%</p>
 				<p style="margin: 2px 0">- %POLL_END_DATE%</p>
+				<p style="margin: 2px 0">- %POLL_EXPIRY_DAYS%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTES%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTERS%</p>
 				<p style="margin: 2px 0">- %POLL_MOST_ANSWER%</p>
@@ -393,6 +430,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_ID%</p>
 				<p style="margin: 2px 0">- %POLL_START_DATE%</p>
 				<p style="margin: 2px 0">- %POLL_END_DATE%</p>
+				<p style="margin: 2px 0">- %POLL_EXPIRY_DAYS%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTES%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTERS%</p>
 				<p style="margin: 2px 0">- %POLL_MOST_ANSWER%</p>
@@ -405,6 +443,27 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultfooter2');" class="button" />
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter2" name="poll_template_resultfooter2"><?php echo esc_textarea( removeslashes( get_option( 'poll_template_resultfooter2' ) ) ); ?></textarea></td>
+		</tr>
+		<tr>
+			<td width="30%" valign="top">
+				<strong><?php _e('Result Footer:', 'wp-polls'); ?></strong><br /><?php _e('Displayed When The User HAS no authorization to vote', 'wp-polls'); ?><br /><br />
+				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
+				<p style="margin: 2px 0">- %POLL_ID%</p>
+				<p style="margin: 2px 0">- %POLL_START_DATE%</p>
+				<p style="margin: 2px 0">- %POLL_END_DATE%</p>
+				<p style="margin: 2px 0">- %POLL_EXPIRY_DAYS%</p>
+				<p style="margin: 2px 0">- %POLL_TOTALVOTES%</p>
+				<p style="margin: 2px 0">- %POLL_TOTALVOTERS%</p>
+				<p style="margin: 2px 0">- %POLL_MOST_ANSWER%</p>
+				<p style="margin: 2px 0">- %POLL_MOST_VOTES%</p>
+				<p style="margin: 2px 0">- %POLL_MOST_PERCENTAGE%</p>
+				<p style="margin: 2px 0">- %POLL_LEAST_ANSWER%</p>
+				<p style="margin: 2px 0">- %POLL_LEAST_VOTES%</p>
+				<p style="margin: 2px 0">- %POLL_LEAST_PERCENTAGE%</p>
+				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
+				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultfooter3');" class="button" />
+			</td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter3" name="poll_template_resultfooter3"><?php echo esc_textarea( removeslashes( get_option( 'poll_template_resultfooter3' ) ) ); ?></textarea></td>
 		</tr>
 	</table>
 
@@ -435,6 +494,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<?php _e('Allowed Variables:', 'wp-polls'); ?><br />
 				<p style="margin: 2px 0">- %POLL_START_DATE%</p>
 				<p style="margin: 2px 0">- %POLL_END_DATE%</p>
+				<p style="margin: 2px 0">- %POLL_EXPIRY_DAYS%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTES%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTERS%</p>
 				<p style="margin: 2px 0">- %POLL_MOST_ANSWER%</p>
