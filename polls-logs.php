@@ -369,7 +369,7 @@ if(!empty($_POST['do'])) {
         <?php if($poll_logs_count) { ?>
             <strong><?php _e('Are You Sure You Want To Delete Logs For This Poll Only?', 'wp-polls'); ?></strong><br /><br />
             <input type="checkbox" id="delete_logs_yes" name="delete_logs_yes" value="yes" />&nbsp;<label for="delete_logs_yes"><?php _e('Yes', 'wp-polls'); ?></label><br /><br />
-            <input type="button" name="do" value="<?php _e('Delete Logs For This Poll Only', 'wp-polls'); ?>" class="button" onclick="delete_this_poll_logs(<?php echo $poll_id; ?>, '<?php printf(esc_js(__('You are about to delete poll logs for this poll \'%s\' ONLY. This action is not reversible.', 'wp-polls')), htmlspecialchars( $poll_question ) ); ?>', '<?php echo wp_create_nonce('wp-polls_delete-poll-logs'); ?>');" />
+            <input type="button" name="do" value="<?php _e('Delete Logs For This Poll Only', 'wp-polls'); ?>" class="button" onclick="delete_this_poll_logs(<?php echo $poll_id; ?>, '<?php printf( esc_js( __( 'You are about to delete poll logs for this poll \'%s\' ONLY. This action is not reversible.', 'wp-polls' ) ), esc_js( esc_attr( $poll_question ) ) ); ?>', '<?php echo wp_create_nonce('wp-polls_delete-poll-logs'); ?>');" />
         <?php
             } else {
                 _e('No poll logs available for this poll.', 'wp-polls');
