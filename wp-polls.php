@@ -166,19 +166,11 @@ function get_poll($temp_poll_id = 0, $display = true) {
 
 
 ### Function: Enqueue Polls CSS, only if a [poll] shortcode is in one of the queued posts
-add_action('wp_enqueue_scripts', 'poll_styles');
+add_action('wp_footer', 'poll_styles');
 function poll_styles() {
-    global $posts;
-    $bFound = false;
-    if( $posts && is_array($posts) > 0 ) {
-      foreach( $posts AS $objPost ) {
-        if( stripos($objPost->post_content,'[poll ') !== false ) {
-          $bFound = true;
-        }
-      }
-    }
+    global $polls_loaded;
     
-    if( !$bFound ) return;
+    if( !$polls_loaded ) return;
   
     if(@file_exists(get_stylesheet_directory().'/polls-css.css')) {
         wp_enqueue_style('wp-polls', get_stylesheet_directory_uri().'/polls-css.css', false, WP_POLLS_VERSION, 'all');
@@ -213,15 +205,17 @@ function poll_styles() {
         $pollbar_css .= '}'."\n";
     }
     wp_add_inline_style( 'wp-polls', $pollbar_css );
+    
+    wp_print_styles( 'wp-polls' );
 }
 
 
 ### Function: Enqueue Polls JavaScript, only if a [poll] shortcode has been called
 add_action('wp_footer', 'poll_scripts', 0);
 function poll_scripts() {
-    global $poll_shortcode_used;
+    global $polls_loaded;
     
-    if( !$poll_shortcode_used ) return;
+    if( !$polls_loaded ) return;
     
     $poll_ajax_style = get_option('poll_ajax_style');
     wp_enqueue_script('wp-polls', plugins_url('wp-polls/polls-js.js'), array('jquery'), WP_POLLS_VERSION, true);
@@ -764,9 +758,6 @@ function poll_shortcode( $atts ) {
     $attributes = shortcode_atts( array( 'id' => 0, 'type' => 'vote' ), $atts );
     if( ! is_feed() ) {
         
-        global $poll_shortcode_used;
-        $poll_shortcode_used = true;
-      
         $id = intval( $attributes['id'] );
 
         // To maintain backward compatibility with [poll=1]. Props @tz-ua
