@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.73.1
+Version: 2.73.2
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -30,7 +30,7 @@ Text Domain: wp-polls
 
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.73.1' );
+define( 'WP_POLLS_VERSION', '2.73.2' );
 
 
 ### Create Text Domain For Translations
@@ -165,9 +165,13 @@ function get_poll($temp_poll_id = 0, $display = true) {
 }
 
 
-### Function: Enqueue Polls JavaScripts/CSS
-add_action('wp_enqueue_scripts', 'poll_scripts');
-function poll_scripts() {
+### Function: Enqueue Polls CSS, only if a [poll] shortcode is in one of the queued posts
+add_action('wp_footer', 'poll_styles');
+function poll_styles() {
+    global $polls_loaded;
+    
+    if( !$polls_loaded ) return;
+  
     if(@file_exists(get_stylesheet_directory().'/polls-css.css')) {
         wp_enqueue_style('wp-polls', get_stylesheet_directory_uri().'/polls-css.css', false, WP_POLLS_VERSION, 'all');
     } else {
@@ -201,6 +205,18 @@ function poll_scripts() {
         $pollbar_css .= '}'."\n";
     }
     wp_add_inline_style( 'wp-polls', $pollbar_css );
+    
+    wp_print_styles( 'wp-polls' );
+}
+
+
+### Function: Enqueue Polls JavaScript, only if a [poll] shortcode has been called
+add_action('wp_footer', 'poll_scripts', 0);
+function poll_scripts() {
+    global $polls_loaded;
+    
+    if( !$polls_loaded ) return;
+    
     $poll_ajax_style = get_option('poll_ajax_style');
     wp_enqueue_script('wp-polls', plugins_url('wp-polls/polls-js.js'), array('jquery'), WP_POLLS_VERSION, true);
     wp_localize_script('wp-polls', 'pollsL10n', array(
@@ -210,7 +226,7 @@ function poll_scripts() {
         'text_multiple' => __('Maximum number of choices allowed: ', 'wp-polls'),
         'show_loading' => intval($poll_ajax_style['loading']),
         'show_fading' => intval($poll_ajax_style['fading'])
-    ));
+    ));  
 }
 
 
@@ -741,6 +757,7 @@ add_shortcode( 'poll', 'poll_shortcode' );
 function poll_shortcode( $atts ) {
     $attributes = shortcode_atts( array( 'id' => 0, 'type' => 'vote' ), $atts );
     if( ! is_feed() ) {
+        
         $id = intval( $attributes['id'] );
 
         // To maintain backward compatibility with [poll=1]. Props @tz-ua
