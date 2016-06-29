@@ -18,20 +18,20 @@
 
 
 ### Check Whether User Can Manage Polls
-if(!current_user_can('manage_polls')) {
-	die('Access Denied');
+if( ! current_user_can( 'manage_polls' ) ) {
+	die( 'Access Denied' );
 }
 
 
 ### Variables Variables Variables
-$base_name = plugin_basename('wp-polls/polls-options.php');
-$base_page = 'admin.php?page='.$base_name;
-$id = (isset($_GET['id']) ? intval($_GET['id']) : 0);
+$base_name = plugin_basename( 'wp-polls/polls-options.php' );
+$base_page = 'admin.php?page=' . $base_name;
+$id = isset( $_GET['id'] ) ? intval( $_GET['id'] ) : 0;
 
 
 ### Get Poll Bar Images
 $pollbar_path = WP_PLUGIN_DIR . '/wp-polls/images';
-$poll_bars = [];
+$poll_bars = array();
 if( $handle = @opendir( $pollbar_path ) ) {
 	while( false !== ( $filename = readdir( $handle ) ) ) {
 		if( substr( $filename, 0, 1 ) !== '.' && substr( $filename, 0, 2 ) !== '..' ) {
@@ -46,7 +46,7 @@ if( $handle = @opendir( $pollbar_path ) ) {
 ### If Form Is Submitted
 if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	check_admin_referer('wp-polls_options');
-	$poll_bar_style             = isset( $_POST['poll_bar_style'] ) && in_array( $_POST['poll_bar_style'], array_merge( array_keys( $poll_bars ), [ 'use_css' ] ) ) ? $_POST['poll_bar_style'] : 'default';
+	$poll_bar_style             = isset( $_POST['poll_bar_style'] ) && in_array( $_POST['poll_bar_style'], array_merge( array_keys( $poll_bars ), array( 'use_css' ) ) ) ? $_POST['poll_bar_style'] : 'default';
 	$poll_bar_background        = isset( $_POST['poll_bar_bg'] ) ? substr( strip_tags( trim( $_POST['poll_bar_bg'] ) ), 0, 6 ) : '000000';
 	$poll_bar_border            = isset( $_POST['poll_bar_border'] ) ? substr( strip_tags( trim( $_POST['poll_bar_border'] ) ), 0, 6 ) : '000000';
 	$poll_bar_height            = isset( $_POST['poll_bar_height'] ) ? intval( $_POST['poll_bar_height'] ) : 10;
@@ -60,10 +60,10 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		'loading'   => isset( $_POST['poll_ajax_style_loading'] ) ? intval( $_POST['poll_ajax_style_loading'] ) : 1,
 		'fading'    => isset( $_POST['poll_ajax_style_fading'] ) ? intval( $_POST['poll_ajax_style_fading'] ) : 1
 	);
-	$poll_ans_sortby            = isset( $_POST['poll_ans_sortby'] ) ? strip_tags( trim( $_POST['poll_ans_sortby'] ) ) : 'polla_aid';
-	$poll_ans_sortorder         = isset( $_POST['poll_ans_sortorder'] ) ? strip_tags( trim( $_POST['poll_ans_sortorder'] ) ) : 'asc';
-	$poll_ans_result_sortby     = isset( $_POST['poll_ans_result_sortby'] ) ? strip_tags( trim( $_POST['poll_ans_result_sortby'] ) ) : 'polla_votes';
-	$poll_ans_result_sortorder  = isset( $_POST['poll_ans_result_sortorder'] ) ? strip_tags( trim( $_POST['poll_ans_result_sortorder'] ) ) : 'desc';
+	$poll_ans_sortby            = isset( $_POST['poll_ans_sortby'] ) && in_array( $_POST['poll_ans_sortby'], array( 'polla_aid', 'polla_answers', 'RAND()' ) ) ? $_POST['poll_ans_sortby'] : 'polla_aid';
+	$poll_ans_sortorder         = isset( $_POST['poll_ans_sortorder'] ) && in_array( $_POST['poll_ans_sortorder'], array( 'asc', 'desc' ) ) ? $_POST['poll_ans_sortorder'] : 'asc';
+	$poll_ans_result_sortby     = isset( $_POST['poll_ans_result_sortby'] ) && in_array( $_POST['poll_ans_result_sortby'], array( 'polla_votes', 'polla_aid', 'polla_answers', 'RAND()' ) ) ? $_POST['poll_ans_result_sortby'] : 'polla_votes';
+	$poll_ans_result_sortorder  = isset( $_POST['poll_ans_result_sortorder'] ) && in_array( $_POST['poll_ans_result_sortorder'], array( 'asc', 'desc' ) ) ? $_POST['poll_ans_result_sortorder'] : 'desc';
 	$poll_archive_perpage       = isset( $_POST['poll_archive_perpage'] ) ? intval( $_POST['poll_archive_perpage'] ) : 0;
 	$poll_archive_displaypoll   = isset( $_POST['poll_archive_displaypoll'] ) ? intval( $_POST['poll_archive_displaypoll'] ) : 0;
 	$poll_archive_url           = isset( $_POST['poll_archive_url'] ) ? esc_url_raw( strip_tags( trim( $_POST['poll_archive_url'] ) ) ) : '';
