@@ -29,6 +29,8 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ## Changelog
 ### Version 2.73.1
 * FIXED: Allow local IP
+* FIXED: XSS on Poll bar option. Props [Netsparker Web Application Security Scanner](https://www.netsparker.com/)
+* FIXED: Stricter Poll pptions check
  
 ### Version 2.73
 * NEW: Display Poll Questions at the top of the Poll Logs table
