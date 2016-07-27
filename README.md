@@ -18,7 +18,16 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 [https://github.com/lesterchan/wp-polls](https://github.com/lesterchan/wp-polls "https://github.com/lesterchan/wp-polls")
 
 ### Translations
+To translate, download your language and put both .mo and .po in the root of plugins directory.
+
+Example: 
+
+- /wp-content/plugins/wp-polls-es_ES.po
+- /wp-content/plugins/wp-polls-es_ES.mo
+
+
 [http://dev.wp-plugins.org/browser/wp-polls/i18n/](http://dev.wp-plugins.org/browser/wp-polls/i18n/ "http://dev.wp-plugins.org/browser/wp-polls/i18n/")
+
 
 ### Credits
 * Plugin icon by [Freepik](http://www.freepik.com) from [Flaticon](http://www.flaticon.com)
