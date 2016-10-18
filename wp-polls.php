@@ -1315,7 +1315,7 @@ function vote_poll() {
                 do_action('wp_polls_vote_poll');
                 $poll_aid = $_POST["poll_$poll_id"];
                 $poll_aid_array = array_unique(array_map('intval', explode(',', $poll_aid)));
-                $isReal = intval( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsa WHERE polla_aid = %d AND polla_qid", array($poll_aid,$poll_id) ) ) );
+                $isReal = intval( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsa WHERE polla_aid = %d AND polla_qid = %d", array($poll_aid,$poll_id) ) ) );
 		//checks if answer is acceptable.
 		if($isReal > 0){
                 if($poll_id > 0 && !empty($poll_aid_array) && check_allowtovote()) {
