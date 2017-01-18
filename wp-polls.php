@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.73.2
+Version: 2.73.3
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -11,7 +11,7 @@ Text Domain: wp-polls
 
 
 /*
-    Copyright 2016  Lester Chan  (email : lesterchan@gmail.com)
+    Copyright 2017  Lester Chan  (email : lesterchan@gmail.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ Text Domain: wp-polls
 
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.73.2' );
+define( 'WP_POLLS_VERSION', '2.73.3' );
 
 
 ### Create Text Domain For Translations
@@ -124,7 +124,6 @@ function get_poll($temp_poll_id = 0, $display = true) {
     if($pollresult_id == $poll_id) {
         if($display) {
             echo display_pollresult($poll_id);
-            return;
         } else {
             return display_pollresult($poll_id);
         }
@@ -133,30 +132,34 @@ function get_poll($temp_poll_id = 0, $display = true) {
         $poll_active = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
         $poll_active = intval($poll_active);
         $check_voted = check_voted($poll_id);
-        if($poll_active == 0) {
-            $poll_close = intval(get_option('poll_close'));
+        if( $poll_active === 0 ) {
+            $poll_close = intval( get_option( 'poll_close' ) );
         } else {
             $poll_close = 0;
         }
-        if(intval($check_voted) > 0 || (is_array($check_voted) && sizeof($check_voted) > 0) || ($poll_active == 0 && $poll_close == 1)) {
+        if( $poll_close === 2 ) {
+            if( $display ) {
+                echo '';
+            } else {
+                return '';
+            }
+        }
+        if( intval( $check_voted ) > 0 || ( is_array( $check_voted ) && count( $check_voted ) > 0 ) || $poll_close === 1 ) {
             if($display) {
                 echo display_pollresult($poll_id, $check_voted);
-                return;
             } else {
                 return display_pollresult($poll_id, $check_voted);
             }
-        } elseif(!check_allowtovote() || ($poll_active == 0 && $poll_close == 3)) {
+        } elseif( ! check_allowtovote() || $poll_close === 3 ) {
             $disable_poll_js = '<script type="text/javascript">jQuery("#polls_form_'.$poll_id.' :input").each(function (i){jQuery(this).attr("disabled","disabled")});</script>';
             if($display) {
                 echo display_pollvote($poll_id).$disable_poll_js;
-                return;
             } else {
                 return display_pollvote($poll_id).$disable_poll_js;
             }
-        } elseif($poll_active == 1) {
+        } elseif( $poll_active === 1 ) {
             if($display) {
                 echo display_pollvote($poll_id);
-                return;
             } else {
                 return display_pollvote($poll_id);
             }
