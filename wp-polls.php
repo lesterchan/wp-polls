@@ -1535,9 +1535,9 @@ function manage_poll() {
                     if(empty($text)) {
                         echo '<p style="color: green;">'.sprintf(__('Poll \'%s\' Deleted Successfully', 'wp-polls'), wp_kses_post( removeslashes( $pollq_question ) ) ).'</p>';
                     }
+
                     // Update Lastest Poll ID To Poll Options
-                    $latest_pollid = polls_latest_id();
-                    $update_latestpoll = update_option('poll_latestpoll', $latest_pollid);
+                    update_option( 'poll_latestpoll', polls_latest_id() );
                     do_action( 'wp_polls_delete_poll', $pollq_id );
                     break;
             }
@@ -1550,6 +1550,7 @@ function manage_poll() {
 function _polls_get_ans_sort() {
     $order_by = get_option( 'poll_ans_sortby' );
     switch( $order_by ) {
+        case 'polla_votes':
         case 'polla_aid':
         case 'polla_answers':
         case 'RAND()':

@@ -233,6 +233,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 			<th scope="row" valign="top"><?php _e('Sort Poll Answers By:', 'wp-polls'); ?></th>
 			<td>
 				<select name="poll_ans_sortby" size="1">
+					<option value="polla_votes"<?php selected('polla_votes', get_option('poll_ans_sortby')); ?>><?php _e('Votes Cast', 'wp-polls'); ?></option>
 					<option value="polla_aid"<?php selected('polla_aid', get_option('poll_ans_sortby')); ?>><?php _e('Exact Order', 'wp-polls'); ?></option>
 					<option value="polla_answers"<?php selected('polla_answers', get_option('poll_ans_sortby')); ?>><?php _e('Alphabetical Order', 'wp-polls'); ?></option>
 					<option value="RAND()"<?php selected('RAND()', get_option('poll_ans_sortby')); ?>><?php _e('Random Order', 'wp-polls'); ?></option>

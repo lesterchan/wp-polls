@@ -28,6 +28,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ## Changelog
 ### Version 2.73.3
+* NEW: Added sort by votes casted to poll answers.
 * FIXED: Do not display poll option is not respected when poll is closed.
 
 ### Version 2.73.2
