@@ -478,7 +478,7 @@ function display_pollvote($poll_id, $display_loading = true) {
             $poll_answer_id = intval($poll_answer->polla_aid);
             $poll_answer_text = wp_kses_post( removeslashes( $poll_answer->polla_answers ) );
             $poll_answer_votes = intval($poll_answer->polla_votes);
-            $poll_answer_percentage = $poll_question_totalvoters > 0 ? round((($poll_answer_votes/$poll_question_totalvoters)*100)) : 0;
+            $poll_answer_percentage = $poll_question_totalvotes > 0 ? round((($poll_answer_votes/$poll_question_totalvotes)*100)) : 0;
             $template_answer = removeslashes(get_option('poll_template_votebody'));
 
             $template_answer = apply_filters('poll_template_votebody_markup', $template_answer, $poll_answer, array(
@@ -605,7 +605,7 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
             // Calculate Percentage And Image Bar Width
             if(!$poll_totalvotes_zero) {
                 if($poll_answer_votes > 0) {
-                    $poll_answer_percentage = round((($poll_answer_votes/$poll_question_totalvoters)*100));
+                    $poll_answer_percentage = round((($poll_answer_votes/$poll_question_totalvotes)*100));
                     $poll_answer_imagewidth = round($poll_answer_percentage);
                     if($poll_answer_imagewidth == 100) {
                         $poll_answer_imagewidth = 99;
@@ -1011,7 +1011,7 @@ function polls_archive() {
             // Calculate Percentage And Image Bar Width
             if(!$poll_totalvotes_zero) {
                 if($polls_answer['votes'] > 0) {
-                    $poll_answer_percentage = round((($polls_answer['votes']/$polls_question['totalvoters'])*100));
+                    $poll_answer_percentage = round((($polls_answer['votes']/$polls_question['totalvotes'])*100));
                     $poll_answer_imagewidth = round($poll_answer_percentage*0.9);
                 } else {
                     $poll_answer_percentage = 0;
