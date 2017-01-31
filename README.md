@@ -29,7 +29,9 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ## Changelog
 ### Version 2.73.3
 * NEW: Added sort by votes casted to poll answers.
+* NEW: For polls with mutiple answers, we divided by total votes instead of total voters. Props @ljxprime.
 * FIXED: Do not display poll option is not respected when poll is closed.
+
 
 ### Version 2.73.2
 * NEW: Bump WordPress 4.7
