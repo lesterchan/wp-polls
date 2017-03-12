@@ -1753,7 +1753,7 @@ function polls_activate() {
 	                          "pollq_timestamp varchar(20) NOT NULL default ''," .
 	                          "pollq_totalvotes int(10) NOT NULL default '0'," .
 	                          "pollq_active tinyint(1) NOT NULL default '1'," .
-	                          "pollq_expiry varchar(20) NOT NULL default ''," .
+	                          "pollq_expiry int(10) NOT NULL default '0'," .
 	                          "pollq_multiple tinyint(3) NOT NULL default '0'," .
 	                          "pollq_totalvoters int(10) NOT NULL default '0'," .
 	                          "PRIMARY KEY  (pollq_id)" .
@@ -1771,7 +1771,7 @@ function polls_activate() {
 	                           "pollip_aid int(10) NOT NULL default '0'," .
 	                           "pollip_ip varchar(100) NOT NULL default ''," .
 	                           "pollip_host VARCHAR(200) NOT NULL default ''," .
-	                           "pollip_timestamp varchar(20) NOT NULL default '0'," .
+	                           "pollip_timestamp int(10) NOT NULL default '0'," .
 	                           "pollip_user tinytext NOT NULL," .
 	                           "pollip_userid int(10) NOT NULL default '0'," .
 	                           "PRIMARY KEY  (pollip_id)," .
@@ -1884,6 +1884,8 @@ function polls_activate() {
 	if( 'varchar(10)' === $col_pollip_qid->Type ) {
 		$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_qid int(10) NOT NULL default '0';" );
 		$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_aid int(10) NOT NULL default '0';" );
+		$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_timestamp int(10) NOT NULL default '0';" );
+		$wpdb->query( "ALTER TABLE $wpdb->pollsq MODIFY COLUMN pollq_expiry int(10) NOT NULL default '0';" );
 	}
 
 	// Set 'manage_polls' Capabilities To Administrator
