@@ -711,7 +711,7 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
         $temp_pollresult .= removeslashes(get_option('poll_template_disable'));
     }
     // Return Poll Result
-    return $temp_pollresult;
+    return apply_filters('poll_result_markup', $temp_pollresult);
 }
 
 
