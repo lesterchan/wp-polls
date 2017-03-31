@@ -14,17 +14,17 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ### General Usage (Without Widget)
 1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
 2. Add:
-<code>
-&lt;?php if (function_exists('vote_poll') && !in_pollarchive()): ?&gt;
-&nbsp;&nbsp;&lt;li&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;h2&gt;Polls&lt;/h2&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;ul&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;?php get_poll();?&gt;&lt;/li&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ul&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;?php display_polls_archive_link(); ?&gt;
-&nbsp;&nbsp;&lt;/li&gt;
-&lt;?php endif; ?&gt;
-</code>
+```
+<?php if ( function_exists( 'vote_poll' ) && ! in_pollarchive() ): ?>
+	<li>
+		<h2>Polls</h2>
+		<ul>
+			<li><?php get_poll();?></li>
+		</ul>
+		<?php display_polls_archive_link(); ?>
+	</li>
+<?php endif; ?>
+```
 
 * To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
 * To show random poll, use `<?php get_poll(-2); ?>`
@@ -152,32 +152,32 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ### To Display Total Polls
 * Use:
-<code>
-&lt;?php if (function_exists('get_pollquestions')): ?&gt;
-&nbsp;&nbsp;&lt;?php get_pollquestions(); ?&gt;
-&lt;?php endif; ?&gt;
-</code>
+```
+<?php if ( function_exists( 'get_pollquestions' ) ): ?>
+	<?php get_pollquestions(); ?>
+<?php endif; ?> 
+```
 
 ### To Display Total Poll Answers
 * Use:
-<code>
-&lt;?php if (function_exists('get_pollanswers')): ?&gt;
-&nbsp;&nbsp;&lt;?php get_pollanswers(); ?&gt;
-&lt;?php endif; ?&gt;
-</code>
+```
+<?php if ( function_exists( 'get_pollanswers' ) ): ?>
+	<?php get_pollanswers(); ?>
+<?php endif; ?> 
+```
 
 ### To Display Total Poll Votes
 * Use:
-<code>
-&lt;?php if (function_exists('get_pollvotes')): ?&gt;
-&nbsp;&nbsp;&lt;?php get_pollvotes(); ?&gt;
-&lt;?php endif; ?&gt;
-</code>
+```
+<?php if ( function_exists( 'get_pollvotes' ) ): ?>
+	<?php get_pollvotes(); ?>
+<?php endif; ?> 
+```
 
 ### To Display Total Poll Voters
 * Use:
-<code>
-&lt;?php if (function_exists('get_pollvoters')): ?&gt;
-&nbsp;&nbsp;&lt;?php get_pollvoters(); ?&gt;
-&lt;?php endif; ?&gt;
-</code>
+```
+<?php if ( function_exists( 'get_pollvoters' ) ): ?>
+	<?php get_pollvoters(); ?>
+<?php endif; ?> 
+```
