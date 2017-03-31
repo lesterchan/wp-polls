@@ -12,8 +12,6 @@ Adds an AJAX poll system to your WordPress blog. You can also easily add a poll 
 WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
 
 ### General Usage (Without Widget)
-1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
-2. Add:
 ```php
 <?php if ( function_exists( 'vote_poll' ) && ! in_pollarchive() ): ?>
 	<li>
@@ -133,7 +131,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * Open poll-css.css
 * Add to the end of the file:
 
-<code>
+```
 .wp-polls-ul li:nth-child(01) .pollbar{ background:#8FA0C5}
 .wp-polls-ul li:nth-child(02) .pollbar{ background:#FF8}
 .wp-polls-ul li:nth-child(03) .pollbar{ background:#ff8a3b}
@@ -146,18 +144,18 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 .wp-polls-ul li:nth-child(10) .pollbar{ background:#a67c52}
 .wp-polls-ul li .pollbar{ transition: background 0.7s ease-in-out }
 .wp-polls-ul li .pollbar:hover{ background:#F00 }
-</code>
+```
 
 ### Polls Stats (Outside WP Loop)
 
 ### To Display Total Polls
-* Use:
 ```php
-<?php if ( function_exists( 'get_pollquestions' ) ): ?><?php get_pollquestions(); ?><?php endif; ?> 
+<?php if ( function_exists( 'get_pollquestions' ) ): ?>
+	<?php get_pollquestions(); ?>
+<?php endif; ?> 
 ```
 
 ### To Display Total Poll Answers
-* Use:
 ```php
 <?php if ( function_exists( 'get_pollanswers' ) ): ?>
 	<?php get_pollanswers(); ?>
@@ -165,7 +163,6 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Poll Votes
-* Use:
 ```php
 <?php if ( function_exists( 'get_pollvotes' ) ): ?>
 	<?php get_pollvotes(); ?>
@@ -173,7 +170,6 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Poll Voters
-* Use:
 ```php
 <?php if ( function_exists( 'get_pollvoters' ) ): ?>
 	<?php get_pollvoters(); ?>
