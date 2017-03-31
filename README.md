@@ -11,6 +11,34 @@ Adds an AJAX poll system to your WordPress blog. You can also easily add a poll 
 ## Description
 WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
 
+### General Usage (Without Widget)
+1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
+2. Add:
+<code>
+&lt;?php if (function_exists('vote_poll') && !in_pollarchive()): ?&gt;
+&nbsp;&nbsp;&lt;li&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;h2&gt;Polls&lt;/h2&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ul&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;?php get_poll();?&gt;&lt;/li&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ul&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;?php display_polls_archive_link(); ?&gt;
+&nbsp;&nbsp;&lt;/li&gt;
+&lt;?php endif; ?&gt;
+</code>
+
+* To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
+* To show random poll, use `<?php get_poll(-2); ?>`
+* To embed a specific poll in your post, use `[poll id="2"]` where 2 is your poll id.
+* To embed a random poll in your post, use `[poll id="-2"]`
+* To embed a specific poll's result in your post, use `[poll id="2" type="result"]` where 2 is your poll id.
+
+### General Usage (With Widget)
+1. Go to `WP-Admin -> Appearance -> Widgets`.
+2. You can add the Polls Widget by clicking on the 'Add' link besides it.
+3. After adding, you can configure the Polls Widget by clicking on the 'Edit' link besides it.
+4. Click 'Save Changes'.
+5. Scroll down for instructions on how to create a Polls Archive.
+
 ### Build Status
 [![Build Status](https://travis-ci.org/lesterchan/wp-polls.svg?branch=master)](https://travis-ci.org/lesterchan/wp-polls)
 
@@ -63,54 +91,6 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * FIXED: Removed not needed wp_print_scripts
 * FIXED: Use esc_attr() and esc_textarea() instead of htmlspecialchars(). Props [Govind Singh](https://in.linkedin.com/pub/govind-singh/21/1a9/bab)
 
-## Installation
-
-1. Open `wp-content/plugins` Folder
-2. Put: `Folder: wp-polls`
-3. Activate `WP-Polls` Plugin
-4. Go to `WP-Admin -> WP-Polls`
-
-### General Usage (Without Widget)
-1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
-2. Add:
-<code>
-&lt;?php if (function_exists('vote_poll') && !in_pollarchive()): ?&gt;
-&nbsp;&nbsp;&lt;li&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;h2&gt;Polls&lt;/h2&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;ul&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;?php get_poll();?&gt;&lt;/li&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ul&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;?php display_polls_archive_link(); ?&gt;
-&nbsp;&nbsp;&lt;/li&gt;
-&lt;?php endif; ?&gt;
-</code>
-
-* To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
-* To show random poll, use `<?php get_poll(-2); ?>`
-* To embed a specific poll in your post, use `[poll id="2"]` where 2 is your poll id.
-* To embed a random poll in your post, use `[poll id="-2"]`
-* To embed a specific poll's result in your post, use `[poll id="2" type="result"]` where 2 is your poll id.
-
-### General Usage (With Widget)
-1. Go to `WP-Admin -> Appearance -> Widgets`.
-2. You can add the Polls Widget by clicking on the 'Add' link besides it.
-3. After adding, you can configure the Polls Widget by clicking on the 'Edit' link besides it.
-4. Click 'Save Changes'.
-5. Scroll down for instructions on how to create a Polls Archive.
-
-## Upgrading
-
-1. Deactivate `WP-Polls` Plugin
-2. Open `wp-content/plugins` Folder
-3. Put/Overwrite: `Folder: wp-polls`
-4. Activate `WP-Polls` Plugin
-5. Go to `WP-Admin -> Polls -> Polls Templates` and restore all the template variables to `Default`
-6. Go to `WP-Admin -> Appearance -> Widgets` and re-add the Poll Widget
-
-## Upgrade Notice
-
-N/A
-
 ## Screenshots
 
 1. Admin - All Poll
@@ -125,8 +105,6 @@ N/A
 10. Poll - Archive
 
 ## Frequently Asked Questions
-
-
 ### How To Add A Polls Archive?
 1. Go to `WP-Admin -> Pages -> Add New`.
 2. Type any title you like in the post's title area.
