@@ -147,6 +147,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Polls
+* Use:
 
 ```php
 <?php if ( function_exists( 'get_pollquestions' ) ): ?>
@@ -155,6 +156,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Poll Answers
+* Use:
 
 ```php
 <?php if ( function_exists( 'get_pollanswers' ) ): ?>
@@ -163,6 +165,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Poll Votes
+* Use:
 
 ```php
 <?php if ( function_exists( 'get_pollvotes' ) ): ?>
@@ -171,6 +174,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Poll Voters
+* Use:
 
 ```php
 <?php if ( function_exists( 'get_pollvoters' ) ): ?>
