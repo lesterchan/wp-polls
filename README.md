@@ -146,9 +146,8 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 .wp-polls-ul li .pollbar:hover{ background:#F00 }
 ```
 
-### Polls Stats (Outside WP Loop)
-
 ### To Display Total Polls
+
 ```php
 <?php if ( function_exists( 'get_pollquestions' ) ): ?>
 	<?php get_pollquestions(); ?>
@@ -156,6 +155,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Poll Answers
+
 ```php
 <?php if ( function_exists( 'get_pollanswers' ) ): ?>
 	<?php get_pollanswers(); ?>
@@ -163,6 +163,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Poll Votes
+
 ```php
 <?php if ( function_exists( 'get_pollvotes' ) ): ?>
 	<?php get_pollvotes(); ?>
@@ -170,6 +171,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Poll Voters
+
 ```php
 <?php if ( function_exists( 'get_pollvoters' ) ): ?>
 	<?php get_pollvoters(); ?>
