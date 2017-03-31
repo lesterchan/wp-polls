@@ -14,7 +14,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ### General Usage (Without Widget)
 1. Open `wp-content/themes/<YOUR THEME NAME>/sidebar.php`
 2. Add:
-```
+```php
 <?php if ( function_exists( 'vote_poll' ) && ! in_pollarchive() ): ?>
 	<li>
 		<h2>Polls</h2>
@@ -152,15 +152,13 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ### To Display Total Polls
 * Use:
-```
-<?php if ( function_exists( 'get_pollquestions' ) ): ?>
-	<?php get_pollquestions(); ?>
-<?php endif; ?> 
+```php
+<?php if ( function_exists( 'get_pollquestions' ) ): ?><?php get_pollquestions(); ?><?php endif; ?> 
 ```
 
 ### To Display Total Poll Answers
 * Use:
-```
+```php
 <?php if ( function_exists( 'get_pollanswers' ) ): ?>
 	<?php get_pollanswers(); ?>
 <?php endif; ?> 
@@ -168,7 +166,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ### To Display Total Poll Votes
 * Use:
-```
+```php
 <?php if ( function_exists( 'get_pollvotes' ) ): ?>
 	<?php get_pollvotes(); ?>
 <?php endif; ?> 
@@ -176,7 +174,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ### To Display Total Poll Voters
 * Use:
-```
+```php
 <?php if ( function_exists( 'get_pollvoters' ) ): ?>
 	<?php get_pollvoters(); ?>
 <?php endif; ?> 
