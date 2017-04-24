@@ -147,37 +147,34 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ```
 
 ### To Display Total Polls
-* Use:
 
 ```php
 <?php if ( function_exists( 'get_pollquestions' ) ): ?>
 	<?php get_pollquestions(); ?>
 <?php endif; ?> 
 ```
-
+ 
 ### To Display Total Poll Answers
-* Use:
 
 ```php
 <?php if ( function_exists( 'get_pollanswers' ) ): ?>
 	<?php get_pollanswers(); ?>
 <?php endif; ?> 
 ```
-
+ 
 ### To Display Total Poll Votes
-* Use:
 
 ```php
 <?php if ( function_exists( 'get_pollvotes' ) ): ?>
 	<?php get_pollvotes(); ?>
 <?php endif; ?> 
 ```
-
+ 
 ### To Display Total Poll Voters
-* Use:
 
 ```php
 <?php if ( function_exists( 'get_pollvoters' ) ): ?>
 	<?php get_pollvoters(); ?>
 <?php endif; ?> 
 ```
+ 
