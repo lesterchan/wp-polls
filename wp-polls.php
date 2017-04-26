@@ -441,9 +441,12 @@ function display_pollvote($poll_id, $display_loading = true) {
     $poll_expiry = trim($poll_question->pollq_expiry);
     if(empty($poll_expiry)) {
         $poll_end_date  = __('No Expiry', 'wp-polls');
+        $poll_expiry_days = -1;
     } else {
         $poll_end_date  = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_expiry));
+	    $poll_expiry_days = floor(($poll_end_date - time())/(60*60*24));
     }
+    
     $poll_multiple_ans = intval($poll_question->pollq_multiple);
 
     $template_question = removeslashes(get_option('poll_template_voteheader'));
@@ -455,6 +458,7 @@ function display_pollvote($poll_id, $display_loading = true) {
         '%POLL_TOTALVOTERS%' => $poll_question_totalvoters,
         '%POLL_START_DATE%' => $poll_start_date,
         '%POLL_END_DATE%' => $poll_end_date,
+    	'%POLL_EXPIRY_DAYS%' => $poll_expiry_days,
         '%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
     ));
 
@@ -464,7 +468,7 @@ function display_pollvote($poll_id, $display_loading = true) {
     // If There Is Poll Question With Answers
     if($poll_question && $poll_answers) {
         // Display Poll Voting Form
-        $temp_pollvote .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
+        $temp_pollvote .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls l-contentConstrained l-vote l-vote--result\">\n";
         $temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"".esc_attr($_SERVER['SCRIPT_NAME'])."\" method=\"post\">\n";
         $temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" id=\"poll_{$poll_question_id}_nonce\" name=\"wp-polls-nonce\" value=\"".wp_create_nonce('poll_'.$poll_question_id.'-nonce')."\" /></p>\n";
         $temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" name=\"poll_id\" value=\"$poll_question_id\" /></p>\n";
@@ -511,6 +515,7 @@ function display_pollvote($poll_id, $display_loading = true) {
             '%POLL_RESULT_URL%' => $poll_result_url,
             '%POLL_START_DATE%' => $poll_start_date,
             '%POLL_END_DATE%' => $poll_end_date,
+        	'%POLL_EXPIRY_DAYS%' => $poll_expiry_days,
             '%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
         ));
 
@@ -566,8 +571,10 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
     $poll_expiry = trim($poll_question->pollq_expiry);
     if(empty($poll_expiry)) {
         $poll_end_date  = __('No Expiry', 'wp-polls');
+        $poll_expiry_days = -1;
     } else {
         $poll_end_date  = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_expiry));
+        $poll_expiry_days = floor(($poll_expiry - time())/(60*60*24));
     }
     $poll_multiple_ans = intval($poll_question->pollq_multiple);
     $template_question = removeslashes(get_option('poll_template_resultheader'));
@@ -577,6 +584,8 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
     $template_question = str_replace("%POLL_TOTALVOTERS%", $poll_question_totalvoters, $template_question);
     $template_question = str_replace("%POLL_START_DATE%", $poll_start_date, $template_question);
     $template_question = str_replace("%POLL_END_DATE%", $poll_end_date, $template_question);
+    $template_question = str_replace("%POLL_EXPIRY_DAYS%", $poll_expiry_days, $template_question);
+
     if($poll_multiple_ans > 0) {
         $template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", $poll_multiple_ans, $template_question);
     } else {
@@ -595,7 +604,7 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
             $poll_totalvotes_zero = false;
         }
         // Print Out Result Header Template
-        $temp_pollresult .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
+        $temp_pollresult .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls l-contentConstrained l-vote l-vote--result\">\n";
         $temp_pollresult .= "\t\t$template_question\n";
         foreach($poll_answers as $poll_answer) {
             // Poll Answer Variables
@@ -634,7 +643,20 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
             }
 
             // Let User See What Options They Voted
-            if(in_array($poll_answer_id, $user_voted)) {
+            if(!check_allowtovote()){
+             	// Results Body Variables
+             	$template_answer = removeslashes(get_option('poll_template_resultbody3'));
+             	$template_answer = str_replace("%POLL_ID%", $poll_question_id, $template_answer);
+             	$template_answer = str_replace("%POLL_ANSWER_ID%", $poll_answer_id, $template_answer);
+             	$template_answer = str_replace("%POLL_ANSWER%", $poll_answer_text, $template_answer);
+             	$template_answer = str_replace("%POLL_ANSWER_TEXT%", htmlspecialchars(strip_tags($poll_answer_text)), $template_answer);
+             	$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($poll_answer_votes), $template_answer);
+             	$template_answer = str_replace("%POLL_ANSWER_PERCENTAGE%", $poll_answer_percentage, $template_answer);
+             	$template_answer = str_replace("%POLL_ANSWER_IMAGEWIDTH%", $poll_answer_imagewidth, $template_answer);
+             	// Print Out Results Body Template
+             	$temp_pollresult .= "\t\t$template_answer\n";
+             	
+             } else if (in_array($poll_answer_id, $user_voted)) {
                 // Results Body Variables
                 $template_answer = removeslashes(get_option('poll_template_resultbody2'));
                 $template_answer = str_replace("%POLL_ID%", $poll_question_id, $template_answer);
@@ -676,13 +698,16 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
             }
         }
         // Results Footer Variables
-        if(!empty($user_voted) || $poll_question_active == 0 || !check_allowtovote()) {
+        if(!check_allowtovote()){
+        	$template_footer = removeslashes(get_option('poll_template_resultfooter3'));
+        } else if (!empty($user_voted) || $poll_question_active == 0 || !check_allowtovote()) {
             $template_footer = removeslashes(get_option('poll_template_resultfooter'));
         } else {
             $template_footer = removeslashes(get_option('poll_template_resultfooter2'));
         }
         $template_footer = str_replace("%POLL_START_DATE%", $poll_start_date, $template_footer);
         $template_footer = str_replace("%POLL_END_DATE%", $poll_end_date, $template_footer);
+        $template_footer = str_replace("%POLL_EXPIRY_DAYS%", $poll_expiry_days, $template_footer);
         $template_footer = str_replace("%POLL_ID%", $poll_question_id, $template_footer);
         $template_footer = str_replace("%POLL_TOTALVOTES%", number_format_i18n($poll_question_totalvotes), $template_footer);
         $template_footer = str_replace("%POLL_TOTALVOTERS%", number_format_i18n($poll_question_totalvoters), $template_footer);
@@ -984,8 +1009,10 @@ function polls_archive() {
             $poll_start_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $polls_question['start']));
             if(empty($polls_question['end'])) {
                 $poll_end_date  = __('No Expiry', 'wp-polls');
+                $poll_expiry_days = -1;
             } else {
                 $poll_end_date  = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $polls_question['end']));
+                $poll_expiry_days = floor(($polls_question['end'] - time())/(60*60*24));
             }
         // Archive Poll Header
         $template_archive_header = removeslashes(get_option('poll_template_pollarchiveheader'));
@@ -997,6 +1024,8 @@ function polls_archive() {
         $template_question = str_replace("%POLL_TOTALVOTERS%", number_format_i18n($polls_question['totalvoters']), $template_question);
         $template_question = str_replace("%POLL_START_DATE%", $poll_start_date, $template_question);
         $template_question = str_replace("%POLL_END_DATE%", $poll_end_date, $template_question);
+        $template_question = str_replace("%POLL_EXPIRY_DAYS%", $poll_expiry_days, $template_question);
+        
         if($polls_question['multiple'] > 0) {
             $template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", $polls_question['multiple'], $template_question);
         } else {
@@ -1034,7 +1063,20 @@ function polls_archive() {
             }
             $polls_answer['answers'] = wp_kses_post( $polls_answer['answers'] );
             // Let User See What Options They Voted
-            if(isset($polls_ips[$polls_question['id']]) && in_array($polls_answer['aid'], check_voted_multiple($polls_question['id'], $polls_ips[$polls_question['id']]))) {
+            if(!check_allowtovote()){
+            	// Results Body Variables
+            	$template_answer = removeslashes(get_option('poll_template_resultbody3'));
+            	$template_answer = str_replace("%POLL_ID%", $polls_question['id'], $template_answer);
+            	$template_answer = str_replace("%POLL_ANSWER_ID%", $polls_answer['aid'], $template_answer);
+            	$template_answer = str_replace("%POLL_ANSWER%", $polls_answer['answers'], $template_answer);
+            	$template_answer = str_replace("%POLL_ANSWER_TEXT%", htmlspecialchars(strip_tags($polls_answer['answers'])), $template_answer);
+            	$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($polls_answer['votes']), $template_answer);
+            	$template_answer = str_replace("%POLL_ANSWER_PERCENTAGE%", $poll_answer_percentage, $template_answer);
+            	$template_answer = str_replace("%POLL_ANSWER_IMAGEWIDTH%", $poll_answer_imagewidth, $template_answer);
+            	// Print Out Results Body Template
+            	$pollsarchive_output_archive .= $template_answer;
+            	
+            } else if (isset($polls_ips[$polls_question['id']]) && in_array($polls_answer['aid'], check_voted_multiple($polls_question['id'], $polls_ips[$polls_question['id']]))) {
                 // Results Body Variables
                 $template_answer = removeslashes(get_option('poll_template_resultbody2'));
                 $template_answer = str_replace("%POLL_ID%", $polls_question['id'], $template_answer);
@@ -1080,6 +1122,7 @@ function polls_archive() {
         $template_footer = str_replace("%POLL_ID%", $polls_question['id'], $template_footer);
         $template_footer = str_replace("%POLL_START_DATE%", $poll_start_date, $template_footer);
         $template_footer = str_replace("%POLL_END_DATE%", $poll_end_date, $template_footer);
+        $template_footer = str_replace("%POLL_EXPIRY_DAYS%", $poll_expiry_days, $template_footer);
         $template_footer = str_replace("%POLL_TOTALVOTES%", number_format_i18n($polls_question['totalvotes']), $template_footer);
         $template_footer = str_replace("%POLL_TOTALVOTERS%", number_format_i18n($polls_question['totalvoters']), $template_footer);
         $template_footer = str_replace("%POLL_MOST_ANSWER%", $poll_most_answer, $template_footer);
@@ -1097,6 +1140,7 @@ function polls_archive() {
         $template_archive_footer = removeslashes(get_option('poll_template_pollarchivefooter'));
         $template_archive_footer = str_replace("%POLL_START_DATE%", $poll_start_date, $template_archive_footer);
         $template_archive_footer = str_replace("%POLL_END_DATE%", $poll_end_date, $template_archive_footer);
+        $template_archive_footer = str_replace("%POLL_EXPIRY_DAYS%", $poll_expiry_days, $template_archive_footer);
         $template_archive_footer = str_replace("%POLL_TOTALVOTES%", number_format_i18n($polls_question['totalvotes']), $template_archive_footer);
         $template_archive_footer = str_replace("%POLL_TOTALVOTERS%", number_format_i18n($polls_question['totalvoters']), $template_archive_footer);
         $template_archive_footer = str_replace("%POLL_MOST_ANSWER%", $poll_most_answer, $template_archive_footer);
