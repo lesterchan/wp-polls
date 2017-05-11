@@ -20,12 +20,12 @@ if(!empty($_POST['do'])) {
             if( ! empty( $pollq_question ) ) {
                 // Poll Start Date
                 $timestamp_sql = '';
-                $pollq_timestamp_day = intval($_POST['pollq_timestamp_day']);
-                $pollq_timestamp_month = intval($_POST['pollq_timestamp_month']);
-                $pollq_timestamp_year = intval($_POST['pollq_timestamp_year']);
-                $pollq_timestamp_hour = intval($_POST['pollq_timestamp_hour']);
-                $pollq_timestamp_minute = intval($_POST['pollq_timestamp_minute']);
-                $pollq_timestamp_second = intval($_POST['pollq_timestamp_second']);
+                $pollq_timestamp_day = (int) sanitize_key($_POST['pollq_timestamp_day']);
+                $pollq_timestamp_month = (int) sanitize_key($_POST['pollq_timestamp_month']);
+                $pollq_timestamp_year = (int) sanitize_key($_POST['pollq_timestamp_year']);
+                $pollq_timestamp_hour = (int) sanitize_key($_POST['pollq_timestamp_hour']);
+                $pollq_timestamp_minute = (int) sanitize_key($_POST['pollq_timestamp_minute']);
+                $pollq_timestamp_second = (int) sanitize_key($_POST['pollq_timestamp_second']);
                 $pollq_timestamp = gmmktime($pollq_timestamp_hour, $pollq_timestamp_minute, $pollq_timestamp_second, $pollq_timestamp_month, $pollq_timestamp_day, $pollq_timestamp_year);
                 if ($pollq_timestamp > current_time('timestamp')) {
                     $pollq_active = -1;
@@ -33,26 +33,26 @@ if(!empty($_POST['do'])) {
                     $pollq_active = 1;
                 }
                 // Poll End Date
-                $pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? intval($_POST['pollq_expiry_no']) : 0;
-                if ($pollq_expiry_no == 1) {
+                $pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key($_POST['pollq_expiry_no']) : 0;
+                if ($pollq_expiry_no === 1) {
                     $pollq_expiry = '';
                 } else {
-                    $pollq_expiry_day = intval($_POST['pollq_expiry_day']);
-                    $pollq_expiry_month = intval($_POST['pollq_expiry_month']);
-                    $pollq_expiry_year = intval($_POST['pollq_expiry_year']);
-                    $pollq_expiry_hour = intval($_POST['pollq_expiry_hour']);
-                    $pollq_expiry_minute = intval($_POST['pollq_expiry_minute']);
-                    $pollq_expiry_second = intval($_POST['pollq_expiry_second']);
+                    $pollq_expiry_day = (int) sanitize_key($_POST['pollq_expiry_day']);
+                    $pollq_expiry_month = (int) sanitize_key($_POST['pollq_expiry_month']);
+                    $pollq_expiry_year = (int) sanitize_key($_POST['pollq_expiry_year']);
+                    $pollq_expiry_hour = (int) sanitize_key($_POST['pollq_expiry_hour']);
+                    $pollq_expiry_minute = (int) sanitize_key($_POST['pollq_expiry_minute']);
+                    $pollq_expiry_second = (int) sanitize_key($_POST['pollq_expiry_second']);
                     $pollq_expiry = gmmktime($pollq_expiry_hour, $pollq_expiry_minute, $pollq_expiry_second, $pollq_expiry_month, $pollq_expiry_day, $pollq_expiry_year);
                     if ($pollq_expiry <= current_time('timestamp')) {
                         $pollq_active = 0;
                     }
                 }
                 // Mutilple Poll
-                $pollq_multiple_yes = intval($_POST['pollq_multiple_yes']);
+                $pollq_multiple_yes = (int) sanitize_key($_POST['pollq_multiple_yes']);
                 $pollq_multiple = 0;
-                if ($pollq_multiple_yes == 1) {
-                    $pollq_multiple = intval($_POST['pollq_multiple']);
+                if ($pollq_multiple_yes === 1) {
+                    $pollq_multiple = (int) sanitize_key($_POST['pollq_multiple']);
                 } else {
                     $pollq_multiple = 0;
                 }
@@ -83,7 +83,7 @@ if(!empty($_POST['do'])) {
                 }
                 // Add Poll Answers
                 $polla_answers = $_POST['polla_answers'];
-                $polla_qid = intval( $wpdb->insert_id );
+                $polla_qid = (int) $wpdb->insert_id;
                 foreach ($polla_answers as $polla_answer) {
                     $polla_answer = wp_kses_post( trim( $polla_answer ) );
                     if( ! empty( $polla_answer ) ) {

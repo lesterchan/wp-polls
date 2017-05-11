@@ -7,9 +7,9 @@ if(!current_user_can('manage_polls')) {
 ### Variables Variables Variables
 $base_name = plugin_basename('wp-polls/polls-manager.php');
 $base_page = 'admin.php?page='.$base_name;
-$mode       = ( isset( $_GET['mode'] ) ? trim( $_GET['mode'] ) : '' );
-$poll_id    = ( isset( $_GET['id'] ) ? intval( $_GET['id'] ) : 0 );
-$poll_aid   = ( isset( $_GET['aid'] ) ? intval( $_GET['aid'] ) : 0 );
+$mode       = ( isset( $_GET['mode'] ) ? sanitize_key( trim( $_GET['mode'] ) ) : '' );
+$poll_id    = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
+$poll_aid   = ( isset( $_GET['aid'] ) ? (int) sanitize_key( $_GET['aid'] ) : 0 );
 
 ### Form Processing
 if(!empty($_POST['do'])) {
@@ -19,56 +19,56 @@ if(!empty($_POST['do'])) {
         case __('Edit Poll', 'wp-polls'):
             check_admin_referer( 'wp-polls_edit-poll' );
             // Poll ID
-            $pollq_id  = intval( $_POST['pollq_id'] );
+            $pollq_id  = (int) sanitize_key( $_POST['pollq_id'] );
             // Poll Total Votes
-            $pollq_totalvotes = intval($_POST['pollq_totalvotes']);
+            $pollq_totalvotes = (int) sanitize_key($_POST['pollq_totalvotes']);
             // Poll Total Voters
-            $pollq_totalvoters = intval($_POST['pollq_totalvoters']);
+            $pollq_totalvoters = (int) sanitize_key($_POST['pollq_totalvoters']);
             // Poll Question
             $pollq_question = esc_sql( wp_kses_post( trim( $_POST['pollq_question'] ) ) );
             // Poll Active
-            $pollq_active = intval($_POST['pollq_active']);
+            $pollq_active = (int) sanitize_key($_POST['pollq_active']);
             // Poll Start Date
             $pollq_timestamp = isset( $_POST['poll_timestamp_old'] ) ? $_POST['poll_timestamp_old'] : current_time( 'timestamp' );
-            $edit_polltimestamp = isset( $_POST['edit_polltimestamp'] ) && intval( $_POST['edit_polltimestamp'] ) === 1;
-            if($edit_polltimestamp == 1) {
-                $pollq_timestamp_day = intval($_POST['pollq_timestamp_day']);
-                $pollq_timestamp_month = intval($_POST['pollq_timestamp_month']);
-                $pollq_timestamp_year = intval($_POST['pollq_timestamp_year']);
-                $pollq_timestamp_hour = intval($_POST['pollq_timestamp_hour']);
-                $pollq_timestamp_minute = intval($_POST['pollq_timestamp_minute']);
-                $pollq_timestamp_second = intval($_POST['pollq_timestamp_second']);
+            $edit_polltimestamp = isset( $_POST['edit_polltimestamp'] ) && (int) sanitize_key( $_POST['edit_polltimestamp'] ) === 1;
+            if($edit_polltimestamp === 1) {
+                $pollq_timestamp_day = (int) sanitize_key($_POST['pollq_timestamp_day']);
+                $pollq_timestamp_month = (int) sanitize_key($_POST['pollq_timestamp_month']);
+                $pollq_timestamp_year = (int) sanitize_key($_POST['pollq_timestamp_year']);
+                $pollq_timestamp_hour = (int) sanitize_key($_POST['pollq_timestamp_hour']);
+                $pollq_timestamp_minute = (int) sanitize_key($_POST['pollq_timestamp_minute']);
+                $pollq_timestamp_second = (int) sanitize_key($_POST['pollq_timestamp_second']);
                 $pollq_timestamp = gmmktime($pollq_timestamp_hour, $pollq_timestamp_minute, $pollq_timestamp_second, $pollq_timestamp_month, $pollq_timestamp_day, $pollq_timestamp_year);
                 if($pollq_timestamp > current_time('timestamp')) {
                     $pollq_active = -1;
                 }
             }
             // Poll End Date
-            $pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? intval( $_POST['pollq_expiry_no'] ) : 0;
+            $pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
             if($pollq_expiry_no == 1) {
                 $pollq_expiry = '';
             } else {
-                $pollq_expiry_day = intval($_POST['pollq_expiry_day']);
-                $pollq_expiry_month = intval($_POST['pollq_expiry_month']);
-                $pollq_expiry_year = intval($_POST['pollq_expiry_year']);
-                $pollq_expiry_hour = intval($_POST['pollq_expiry_hour']);
-                $pollq_expiry_minute = intval($_POST['pollq_expiry_minute']);
-                $pollq_expiry_second = intval($_POST['pollq_expiry_second']);
+                $pollq_expiry_day = (int) sanitize_key($_POST['pollq_expiry_day']);
+                $pollq_expiry_month = (int) sanitize_key($_POST['pollq_expiry_month']);
+                $pollq_expiry_year = (int) sanitize_key($_POST['pollq_expiry_year']);
+                $pollq_expiry_hour = (int) sanitize_key($_POST['pollq_expiry_hour']);
+                $pollq_expiry_minute = (int) sanitize_key($_POST['pollq_expiry_minute']);
+                $pollq_expiry_second = (int) sanitize_key($_POST['pollq_expiry_second']);
                 $pollq_expiry = gmmktime($pollq_expiry_hour, $pollq_expiry_minute, $pollq_expiry_second, $pollq_expiry_month, $pollq_expiry_day, $pollq_expiry_year);
                 if($pollq_expiry <= current_time('timestamp')) {
                     $pollq_active = 0;
                 }
-                if($edit_polltimestamp == 1) {
+                if($edit_polltimestamp === 1) {
                     if($pollq_expiry < $pollq_timestamp) {
                         $pollq_active = 0;
                     }
                 }
             }
             // Mutilple Poll
-            $pollq_multiple_yes = intval($_POST['pollq_multiple_yes']);
+            $pollq_multiple_yes = (int) sanitize_key($_POST['pollq_multiple_yes']);
             $pollq_multiple = 0;
             if($pollq_multiple_yes == 1) {
-                $pollq_multiple = intval($_POST['pollq_multiple']);
+                $pollq_multiple = (int) sanitize_key($_POST['pollq_multiple']);
             } else {
                 $pollq_multiple = 0;
             }
@@ -109,11 +109,11 @@ if(!empty($_POST['do'])) {
             $get_polla_aids = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY polla_aid ASC", $pollq_id ) );
             if($get_polla_aids) {
                 foreach($get_polla_aids as $get_polla_aid) {
-                        $polla_aids[] = intval($get_polla_aid->polla_aid);
+                        $polla_aids[] = (int) $get_polla_aid->polla_aid;
                 }
                 foreach($polla_aids as $polla_aid) {
                     $polla_answers = wp_kses_post( trim( $_POST['polla_aid-'.$polla_aid] ) );
-                    $polla_votes = intval($_POST['polla_votes-'.$polla_aid]);
+                    $polla_votes = (int) sanitize_key($_POST['polla_votes-'.$polla_aid]);
                     $edit_poll_answer = $wpdb->update(
                         $wpdb->pollsa,
                         array(
@@ -143,14 +143,14 @@ if(!empty($_POST['do'])) {
                 $text .= '<p style="color: red">'.sprintf(__('Invalid Poll \'%s\'.', 'wp-polls'), removeslashes($pollq_question)).'</p>';
             }
             // Add Poll Answers (If Needed)
-            $polla_answers_new = isset($_POST['polla_answers_new']) ? $_POST['polla_answers_new'] : null;
+            $polla_answers_new = isset($_POST['polla_answers_new']) ? wp_kses_post( $_POST['polla_answers_new'] ) : null;
             if(!empty($polla_answers_new)) {
                 $i = 0;
                 $polla_answers_new_votes = $_POST['polla_answers_new_votes'];
                 foreach($polla_answers_new as $polla_answer_new) {
                     $polla_answer_new = wp_kses_post( trim( $polla_answer_new ) );
                     if(!empty($polla_answer_new)) {
-                        $polla_answer_new_vote = intval( $polla_answers_new_votes[$i] );
+                        $polla_answer_new_vote = (int) sanitize_key( $polla_answers_new_votes[$i] );
                         $add_poll_answers = $wpdb->insert(
                             $wpdb->pollsa,
                             array(
@@ -198,12 +198,12 @@ switch($mode) {
         $poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY polla_aid ASC", $poll_id ) );
         $poll_noquestion = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(polla_aid) FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
         $poll_question_text = removeslashes($poll_question->pollq_question);
-        $poll_totalvotes = intval($poll_question->pollq_totalvotes);
+        $poll_totalvotes = (int) $poll_question->pollq_totalvotes;
         $poll_timestamp = $poll_question->pollq_timestamp;
-        $poll_active = intval($poll_question->pollq_active);
+        $poll_active = (int) $poll_question->pollq_active;
         $poll_expiry = trim($poll_question->pollq_expiry);
-        $poll_multiple = intval($poll_question->pollq_multiple);
-        $poll_totalvoters = intval($poll_question->pollq_totalvoters);
+        $poll_multiple = (int) $poll_question->pollq_multiple;
+        $poll_totalvoters = (int) $poll_question->pollq_totalvoters;
 ?>
         <?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.removeslashes($text).'</div>'; } else { echo '<div id="message" class="updated" style="display: none;"></div>'; } ?>
 
@@ -241,9 +241,9 @@ switch($mode) {
                             $pollip_answers = array();
                             $pollip_answers[0] = __('Null Votes', 'wp-polls');
                             foreach($poll_answers as $poll_answer) {
-                                $polla_aid = intval($poll_answer->polla_aid);
+                                $polla_aid = (int) $poll_answer->polla_aid;
                                 $polla_answers = removeslashes($poll_answer->polla_answers);
-                                $polla_votes = intval($poll_answer->polla_votes);
+                                $polla_votes = (int) $poll_answer->polla_votes;
                                 $pollip_answers[$polla_aid] = $polla_answers;
                                 echo "<tr id=\"poll-answer-$polla_aid\">\n";
                                 echo '<th width="20%" scope="row" valign="top">'.sprintf(__('Answer %s', 'wp-polls'), number_format_i18n($i)).'</th>'."\n";
@@ -388,15 +388,15 @@ switch($mode) {
                                 $multiple_polls = array();
                             }
                             $i = 0;
-                            $current_poll = intval(get_option('poll_currentpoll'));
-                            $latest_poll = intval(get_option('poll_latestpoll'));
+                            $current_poll = (int) get_option('poll_currentpoll');
+                            $latest_poll = (int) get_option('poll_latestpoll');
                             foreach($polls as $poll) {
-                                $poll_id = intval($poll->pollq_id);
+                                $poll_id = (int) $poll->pollq_id;
                                 $poll_question = removeslashes($poll->pollq_question);
                                 $poll_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll->pollq_timestamp));
-                                $poll_totalvotes = intval($poll->pollq_totalvotes);
-                                $poll_totalvoters = intval($poll->pollq_totalvoters);
-                                $poll_active = intval($poll->pollq_active);
+                                $poll_totalvotes = (int) $poll->pollq_totalvotes;
+                                $poll_totalvoters = (int) $poll->pollq_totalvoters;
+                                $poll_active = (int) $poll->pollq_active;
                                 $poll_expiry = trim($poll->pollq_expiry);
                                 if(empty($poll_expiry)) {
                                     $poll_expiry_text  = __('No Expiry', 'wp-polls');
@@ -409,28 +409,28 @@ switch($mode) {
                                     $style = '';
                                 }
                                 if($current_poll > 0) {
-                                    if($current_poll == $poll_id) {
+                                    if($current_poll === $poll_id) {
                                         $style = 'class="highlight"';
                                     }
-                                } elseif($current_poll == 0) {
-                                    if($poll_id == $latest_poll) {
+                                } elseif($current_poll === 0) {
+                                    if($poll_id === $latest_poll) {
                                         $style = 'class="highlight"';
                                     }
-                                } else if(in_array($poll_id, $multiple_polls)) {
+                                } else if(in_array($poll_id, $multiple_polls, true)) {
                                     $style = 'class="highlight"';
                                 }
                                 echo "<tr id=\"poll-$poll_id\" $style>\n";
                                 echo '<td><strong>'.number_format_i18n($poll_id).'</strong></td>'."\n";
                                 echo '<td>';
                                 if($current_poll > 0) {
-                                    if($current_poll == $poll_id) {
+                                    if($current_poll === $poll_id) {
                                         echo '<strong>'.__('Displayed:', 'wp-polls').'</strong> ';
                                     }
-                                } elseif($current_poll == 0) {
-                                    if($poll_id == $latest_poll) {
+                                } elseif($current_poll === 0) {
+                                    if($poll_id === $latest_poll) {
                                         echo '<strong>'.__('Displayed:', 'wp-polls').'</strong> ';
                                     }
-                                } else if(in_array($poll_id, $multiple_polls)) {
+                                } else if(in_array($poll_id, $multiple_polls, true)) {
                                         echo '<strong>'.__('Displayed:', 'wp-polls').'</strong> ';
                                 }
                                 echo wp_kses_post( $poll_question )."</td>\n";
@@ -438,9 +438,9 @@ switch($mode) {
                                 echo "<td>$poll_date</td>\n";
                                 echo "<td>$poll_expiry_text</td>\n";
                                 echo '<td>';
-                                if($poll_active == 1) {
+                                if($poll_active === 1) {
                                     _e('Open', 'wp-polls');
-                                } elseif($poll_active == -1) {
+                                } elseif($poll_active === -1) {
                                     _e('Future', 'wp-polls');
                                 } else {
                                     _e('Closed', 'wp-polls');
@@ -495,7 +495,7 @@ switch($mode) {
             <br style="clear" />
             <div align="center" id="poll_logs">
             <?php
-                $poll_ips = intval( $wpdb->get_var( "SELECT COUNT(pollip_id) FROM $wpdb->pollsip" ) );
+                $poll_ips = (int) $wpdb->get_var( "SELECT COUNT(pollip_id) FROM $wpdb->pollsip" );
                 if($poll_ips > 0) {
             ?>
                 <strong><?php _e('Are You Sure You Want To Delete All Polls Logs?', 'wp-polls'); ?></strong><br /><br />

@@ -26,7 +26,7 @@ if( ! current_user_can( 'manage_polls' ) ) {
 ### Variables Variables Variables
 $base_name = plugin_basename( 'wp-polls/polls-options.php' );
 $base_page = 'admin.php?page=' . $base_name;
-$id = isset( $_GET['id'] ) ? intval( $_GET['id'] ) : 0;
+$id = isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0;
 
 
 ### Get Poll Bar Images
@@ -46,10 +46,10 @@ if( $handle = @opendir( $pollbar_path ) ) {
 ### If Form Is Submitted
 if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	check_admin_referer('wp-polls_options');
-	$poll_bar_style             = isset( $_POST['poll_bar_style'] ) && in_array( $_POST['poll_bar_style'], array_merge( array_keys( $poll_bars ), array( 'use_css' ) ) ) ? $_POST['poll_bar_style'] : 'default';
+	$poll_bar_style             = isset( $_POST['poll_bar_style'] ) && in_array( $_POST['poll_bar_style'], array_merge( array_keys( $poll_bars ), array( 'use_css' ) ), true ) ? $_POST['poll_bar_style'] : 'default';
 	$poll_bar_background        = isset( $_POST['poll_bar_bg'] ) ? substr( strip_tags( trim( $_POST['poll_bar_bg'] ) ), 0, 6 ) : '000000';
 	$poll_bar_border            = isset( $_POST['poll_bar_border'] ) ? substr( strip_tags( trim( $_POST['poll_bar_border'] ) ), 0, 6 ) : '000000';
-	$poll_bar_height            = isset( $_POST['poll_bar_height'] ) ? intval( $_POST['poll_bar_height'] ) : 10;
+	$poll_bar_height            = isset( $_POST['poll_bar_height'] ) ? (int) sanitize_key( $_POST['poll_bar_height'] ) : 10;
 	$poll_bar                   = array(
 		'style'         => $poll_bar_style,
 		'background'    => $poll_bar_background,
@@ -57,21 +57,21 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		'height'        => $poll_bar_height
 	);
 	$poll_ajax_style            = array(
-		'loading'   => isset( $_POST['poll_ajax_style_loading'] ) ? intval( $_POST['poll_ajax_style_loading'] ) : 1,
-		'fading'    => isset( $_POST['poll_ajax_style_fading'] ) ? intval( $_POST['poll_ajax_style_fading'] ) : 1
+		'loading'   => isset( $_POST['poll_ajax_style_loading'] ) ? (int) sanitize_key( $_POST['poll_ajax_style_loading'] ) : 1,
+		'fading'    => isset( $_POST['poll_ajax_style_fading'] ) ? (int) sanitize_key( $_POST['poll_ajax_style_fading'] ) : 1
 	);
-	$poll_ans_sortby            = isset( $_POST['poll_ans_sortby'] ) && in_array( $_POST['poll_ans_sortby'], array( 'polla_aid', 'polla_answers', 'RAND()' ) ) ? $_POST['poll_ans_sortby'] : 'polla_aid';
-	$poll_ans_sortorder         = isset( $_POST['poll_ans_sortorder'] ) && in_array( $_POST['poll_ans_sortorder'], array( 'asc', 'desc' ) ) ? $_POST['poll_ans_sortorder'] : 'asc';
-	$poll_ans_result_sortby     = isset( $_POST['poll_ans_result_sortby'] ) && in_array( $_POST['poll_ans_result_sortby'], array( 'polla_votes', 'polla_aid', 'polla_answers', 'RAND()' ) ) ? $_POST['poll_ans_result_sortby'] : 'polla_votes';
-	$poll_ans_result_sortorder  = isset( $_POST['poll_ans_result_sortorder'] ) && in_array( $_POST['poll_ans_result_sortorder'], array( 'asc', 'desc' ) ) ? $_POST['poll_ans_result_sortorder'] : 'desc';
-	$poll_archive_perpage       = isset( $_POST['poll_archive_perpage'] ) ? intval( $_POST['poll_archive_perpage'] ) : 0;
-	$poll_archive_displaypoll   = isset( $_POST['poll_archive_displaypoll'] ) ? intval( $_POST['poll_archive_displaypoll'] ) : 0;
+	$poll_ans_sortby            = isset( $_POST['poll_ans_sortby'] ) && in_array( $_POST['poll_ans_sortby'], array( 'polla_aid', 'polla_answers', 'RAND()' ), true ) ? $_POST['poll_ans_sortby'] : 'polla_aid';
+	$poll_ans_sortorder         = isset( $_POST['poll_ans_sortorder'] ) && in_array( $_POST['poll_ans_sortorder'], array( 'asc', 'desc' ), true ) ? $_POST['poll_ans_sortorder'] : 'asc';
+	$poll_ans_result_sortby     = isset( $_POST['poll_ans_result_sortby'] ) && in_array( $_POST['poll_ans_result_sortby'], array( 'polla_votes', 'polla_aid', 'polla_answers', 'RAND()' ), true ) ? $_POST['poll_ans_result_sortby'] : 'polla_votes';
+	$poll_ans_result_sortorder  = isset( $_POST['poll_ans_result_sortorder'] ) && in_array( $_POST['poll_ans_result_sortorder'], array( 'asc', 'desc' ), true ) ? $_POST['poll_ans_result_sortorder'] : 'desc';
+	$poll_archive_perpage       = isset( $_POST['poll_archive_perpage'] ) ? (int) sanitize_key( $_POST['poll_archive_perpage'] ) : 0;
+	$poll_archive_displaypoll   = isset( $_POST['poll_archive_displaypoll'] ) ? (int) sanitize_key( $_POST['poll_archive_displaypoll'] ) : 0;
 	$poll_archive_url           = isset( $_POST['poll_archive_url'] ) ? esc_url_raw( strip_tags( trim( $_POST['poll_archive_url'] ) ) ) : '';
-	$poll_currentpoll           = isset( $_POST['poll_currentpoll'] ) ? intval( $_POST['poll_currentpoll'] ) : 0;
-	$poll_close                 = isset( $_POST['poll_close'] ) ? intval( $_POST['poll_close'] ) : 0;
-	$poll_logging_method        = isset( $_POST['poll_logging_method'] ) ? intval( $_POST['poll_logging_method'] ) : 0;
-	$poll_cookielog_expiry      = isset( $_POST['poll_cookielog_expiry'] ) ? intval ($_POST['poll_cookielog_expiry'] ) : 0;
-	$poll_allowtovote           = isset( $_POST['poll_allowtovote'] ) ? intval( $_POST['poll_allowtovote'] ) : 0;
+	$poll_currentpoll           = isset( $_POST['poll_currentpoll'] ) ? (int) sanitize_key( $_POST['poll_currentpoll'] ) : 0;
+	$poll_close                 = isset( $_POST['poll_close'] ) ? (int) sanitize_key( $_POST['poll_close'] ) : 0;
+	$poll_logging_method        = isset( $_POST['poll_logging_method'] ) ? (int) sanitize_key( $_POST['poll_logging_method'] ) : 0;
+	$poll_cookielog_expiry      = isset( $_POST['poll_cookielog_expiry'] ) ? (int) sanitize_key ($_POST['poll_cookielog_expiry'] ) : 0;
+	$poll_allowtovote           = isset( $_POST['poll_allowtovote'] ) ? (int) sanitize_key( $_POST['poll_allowtovote'] ) : 0;
 	$update_poll_queries        = array();
 	$update_poll_text = array();
 	$update_poll_queries[] = update_option('poll_bar', $poll_bar);
@@ -308,7 +308,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Expiry Time For Cookie And Log:', 'wp-polls'); ?></th>
-			<td><input type="text" name="poll_cookielog_expiry" value="<?php echo intval(get_option('poll_cookielog_expiry')); ?>" size="10" /> <?php _e('seconds (0 to disable)', 'wp-polls'); ?></td>
+			<td><input type="text" name="poll_cookielog_expiry" value="<?php echo (int) esc_attr( get_option( 'poll_cookielog_expiry' ) ); ?>" size="10" /> <?php _e('seconds (0 to disable)', 'wp-polls'); ?></td>
 		</tr>
 	</table>
 
@@ -317,7 +317,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	<table class="form-table">
 		 <tr>
 			<th scope="row" valign="top"><?php _e('Number Of Polls Per Page:', 'wp-polls'); ?></th>
-			<td><input type="text" name="poll_archive_perpage" value="<?php echo intval(get_option('poll_archive_perpage')); ?>" size="2" /></td>
+			<td><input type="text" name="poll_archive_perpage" value="<?php echo (int) esc_attr( get_option( 'poll_archive_perpage' ) ); ?>" size="2" /></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Type Of Polls To Display In Poll Archive:', 'wp-polls'); ?></th>
@@ -355,8 +355,8 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 						if($polls) {
 							foreach($polls as $poll) {
 								$poll_question = removeslashes($poll->pollq_question);
-								$poll_id = intval($poll->pollq_id);
-								if($poll_id == intval(get_option('poll_currentpoll'))) {
+								$poll_id = (int) $poll->pollq_id;
+								if($poll_id === (int) get_option( 'poll_currentpoll' ) ) {
 									echo '<option value="' . $poll_id . '" selected="selected">' . esc_attr( $poll_question ) . '</option>';
 								} else {
 									echo '<option value="' . $poll_id . '">' . esc_attr( $poll_question ) . '</option>';
