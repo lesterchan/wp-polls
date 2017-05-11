@@ -130,12 +130,11 @@ function get_poll($temp_poll_id = 0, $display = true) {
 	// Check Whether User Has Voted
 	} else {
 		$poll_active = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
-		$poll_active = (int) ($poll_active);
-		$check_voted = check_voted($poll_id);
+		$poll_active = (int) $poll_active;
+		$check_voted = check_voted( $poll_id );
+		$poll_close = 0;
 		if( $poll_active === 0 ) {
 			$poll_close = (int) get_option( 'poll_close' );
-		} else {
-			$poll_close = 0;
 		}
 		if( $poll_close === 2 ) {
 			if( $display ) {
@@ -1161,7 +1160,7 @@ function polls_archive() {
 function poll_timestamp($poll_timestamp, $fieldname = 'pollq_timestamp', $display = 'block') {
 	global $month;
 	echo '<div id="'.$fieldname.'" style="display: '.$display.'">'."\n";
-	$day = gmdate('j', $poll_timestamp);
+	$day = (int) gmdate('j', $poll_timestamp);
 	echo '<select name="'.$fieldname.'_day" size="1">'."\n";
 	for($i = 1; $i <=31; $i++) {
 		if($day === $i) {
@@ -1171,7 +1170,7 @@ function poll_timestamp($poll_timestamp, $fieldname = 'pollq_timestamp', $displa
 		}
 	}
 	echo '</select>&nbsp;&nbsp;'."\n";
-	$month2 = gmdate('n', $poll_timestamp);
+	$month2 = (int) gmdate('n', $poll_timestamp);
 	echo '<select name="'.$fieldname.'_month" size="1">'."\n";
 	for($i = 1; $i <= 12; $i++) {
 		if ($i < 10) {
@@ -1186,7 +1185,7 @@ function poll_timestamp($poll_timestamp, $fieldname = 'pollq_timestamp', $displa
 		}
 	}
 	echo '</select>&nbsp;&nbsp;'."\n";
-	$year = gmdate('Y', $poll_timestamp);
+	$year = (int) gmdate('Y', $poll_timestamp);
 	echo '<select name="'.$fieldname.'_year" size="1">'."\n";
 	for($i = 2000; $i <= ($year+10); $i++) {
 		if($year === $i) {
@@ -1197,7 +1196,7 @@ function poll_timestamp($poll_timestamp, $fieldname = 'pollq_timestamp', $displa
 	}
 	echo '</select>&nbsp;@'."\n";
 	echo '<span dir="ltr">'."\n";
-	$hour = gmdate('H', $poll_timestamp);
+	$hour = (int) gmdate('H', $poll_timestamp);
 	echo '<select name="'.$fieldname.'_hour" size="1">'."\n";
 	for($i = 0; $i < 24; $i++) {
 		if($hour === $i) {
@@ -1207,7 +1206,7 @@ function poll_timestamp($poll_timestamp, $fieldname = 'pollq_timestamp', $displa
 		}
 	}
 	echo '</select>&nbsp;:'."\n";
-	$minute = gmdate('i', $poll_timestamp);
+	$minute = (int) gmdate('i', $poll_timestamp);
 	echo '<select name="'.$fieldname.'_minute" size="1">'."\n";
 	for($i = 0; $i < 60; $i++) {
 		if($minute === $i) {
@@ -1218,7 +1217,7 @@ function poll_timestamp($poll_timestamp, $fieldname = 'pollq_timestamp', $displa
 	}
 
 	echo '</select>&nbsp;:'."\n";
-	$second = gmdate('s', $poll_timestamp);
+	$second = (int) gmdate('s', $poll_timestamp);
 	echo '<select name="'.$fieldname.'_second" size="1">'."\n";
 	for($i = 0; $i <= 60; $i++) {
 		if($second === $i) {
