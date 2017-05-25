@@ -11,32 +11,6 @@ Adds an AJAX poll system to your WordPress blog. You can also easily add a poll 
 ## Description
 WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
 
-### General Usage (Without Widget)
-```php
-<?php if ( function_exists( 'vote_poll' ) && ! in_pollarchive() ): ?>
-	<li>
-		<h2>Polls</h2>
-		<ul>
-			<li><?php get_poll();?></li>
-		</ul>
-		<?php display_polls_archive_link(); ?>
-	</li>
-<?php endif; ?>
-```
-
-* To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
-* To show random poll, use `<?php get_poll(-2); ?>`
-* To embed a specific poll in your post, use `[poll id="2"]` where 2 is your poll id.
-* To embed a random poll in your post, use `[poll id="-2"]`
-* To embed a specific poll's result in your post, use `[poll id="2" type="result"]` where 2 is your poll id.
-
-### General Usage (With Widget)
-1. Go to `WP-Admin -> Appearance -> Widgets`.
-2. You can add the Polls Widget by clicking on the 'Add' link besides it.
-3. After adding, you can configure the Polls Widget by clicking on the 'Edit' link besides it.
-4. Click 'Save Changes'.
-5. Scroll down for instructions on how to create a Polls Archive.
-
 ### Build Status
 [![Build Status](https://travis-ci.org/lesterchan/wp-polls.svg?branch=master)](https://travis-ci.org/lesterchan/wp-polls)
 
@@ -106,6 +80,34 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 10. Poll - Archive
 
 ## Frequently Asked Questions
+
+### General Usage (Without Widget)
+
+```php
+<?php if ( function_exists( 'vote_poll' ) && ! in_pollarchive() ): ?>
+	<li>
+		<h2>Polls</h2>
+		<ul>
+			<li><?php get_poll();?></li>
+		</ul>
+		<?php display_polls_archive_link(); ?>
+	</li>
+<?php endif; ?>
+```
+
+* To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
+* To show random poll, use `<?php get_poll(-2); ?>`
+* To embed a specific poll in your post, use `[poll id="2"]` where 2 is your poll id.
+* To embed a random poll in your post, use `[poll id="-2"]`
+* To embed a specific poll's result in your post, use `[poll id="2" type="result"]` where 2 is your poll id.
+
+### General Usage (With Widget)
+1. Go to `WP-Admin -> Appearance -> Widgets`.
+2. You can add the Polls Widget by clicking on the 'Add' link besides it.
+3. After adding, you can configure the Polls Widget by clicking on the 'Edit' link besides it.
+4. Click 'Save Changes'.
+5. Scroll down for instructions on how to create a Polls Archive.
+
 ### How To Add A Polls Archive?
 1. Go to `WP-Admin -> Pages -> Add New`.
 2. Type any title you like in the post's title area.
