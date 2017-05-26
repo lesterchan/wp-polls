@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.73.5
+Version: 2.73.6
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -28,9 +28,8 @@ Text Domain: wp-polls
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-
 ### Version
-define( 'WP_POLLS_VERSION', '2.73.5' );
+define( 'WP_POLLS_VERSION', '2.73.6' );
 
 
 ### Create Text Domain For Translations
@@ -346,7 +345,6 @@ function check_voted($poll_id) {
 			if(!empty($check_voted_cookie)) {
 				return $check_voted_cookie;
 			}
-
 			return check_voted_ip($poll_id);
 			break;
 		// Logged By Username
@@ -704,7 +702,7 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 		$temp_pollresult .= "</div>\n";
 		if($display_loading) {
 			$poll_ajax_style = get_option('poll_ajax_style');
-			if((int) $poll_ajax_style['loading'] == 1) {
+			if((int) $poll_ajax_style['loading'] === 1) {
 				$temp_pollresult .= "<div id=\"polls-$poll_question_id-loading\" class=\"wp-polls-loading\"><img src=\"".plugins_url('wp-polls/images/loading.gif')."\" width=\"16\" height=\"16\" alt=\"".__('Loading', 'wp-polls')." ...\" title=\"".__('Loading', 'wp-polls')." ...\" class=\"wp-polls-image\" />&nbsp;".__('Loading', 'wp-polls')." ...</div>\n";
 			}
 		}
