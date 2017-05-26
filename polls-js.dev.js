@@ -55,18 +55,17 @@ function poll_vote(current_poll_id) {
 // Process Poll (User Click "Vote" Button)
 function poll_process() {
 	jQuery(document).ready(function($) {
-		poll_nonce = $('#poll_' + poll_id + '_nonce').val();
 		if(pollsL10n.show_fading) {
 			$('#polls-' + poll_id).fadeTo('def', 0);
 			if(pollsL10n.show_loading) {
 				$('#polls-' + poll_id + '-loading').show();
 			}
-			$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+			$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id, cache: false, success: poll_process_success});
 		} else {
 			if(pollsL10n.show_loading) {
 				$('#polls-' + poll_id + '-loading').show();
 			}
-			$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+			$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id, cache: false, success: poll_process_success});
 		}
 	});
 }
@@ -77,18 +76,17 @@ function poll_result(current_poll_id) {
 		if(!is_being_voted) {
 			set_is_being_voted(true);
 			poll_id = current_poll_id;
-			poll_nonce = $('#poll_' + poll_id + '_nonce').val();
 			if(pollsL10n.show_fading) {
 				$('#polls-' + poll_id).fadeTo('def', 0);
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
 				}
-				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id, cache: false, success: poll_process_success});
 			} else {
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
 				}
-				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=result&poll_id=' + poll_id, cache: false, success: poll_process_success});
 			}
 		} else {
 			alert(pollsL10n.text_wait);
@@ -102,18 +100,17 @@ function poll_booth(current_poll_id) {
 		if(!is_being_voted) {
 			set_is_being_voted(true);
 			poll_id = current_poll_id;
-			poll_nonce = $('#poll_' + poll_id + '_nonce').val();
 			if(pollsL10n.show_fading) {
 				$('#polls-' + poll_id).fadeTo('def', 0);
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
 				}
-				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id, cache: false, success: poll_process_success});
 			} else {
 				if(pollsL10n.show_loading) {
 					$('#polls-' + poll_id + '-loading').show();
 				}
-				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+				$.ajax({type: 'POST', xhrFields: {withCredentials: true}, url: pollsL10n.ajax_url, data: 'action=polls&view=booth&poll_id=' + poll_id, cache: false, success: poll_process_success});
 			}
 		} else {
 			alert(pollsL10n.text_wait);
