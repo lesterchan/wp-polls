@@ -1,26 +1,20 @@
 <?php
-/*
-+----------------------------------------------------------------+
-|																							|
-|	WordPress Plugin: WP-Polls										|
-|	Copyright (c) 2012 Lester "GaMerZ" Chan									|
-|																							|
-|	File Written By:																	|
-|	- Lester "GaMerZ" Chan															|
-|	- http://lesterchan.net															|
-|																							|
-|	File Information:																	|
-|	- Configure Poll Templates														|
-|	- wp-content/plugins/wp-polls/polls-templates.php						|
-|																							|
-+----------------------------------------------------------------+
-*/
-
-
 ### Check Whether User Can Manage Polls
 if(!current_user_can('manage_polls')) {
 	die('Access Denied');
 }
+
+# Allow HTML
+$allowed_tags = wp_kses_allowed_html( 'post' );
+$allowed_tags['input'] = array(
+	'type'      => true,
+	'id'        => true,
+	'name'      => true,
+	'value'     => true,
+	'class'     => true,
+	'onclick'   => true,
+);
+$allowed_tags['a']['onclick'] = true;
 
 ### Variables Variables Variables
 $base_name = plugin_basename('wp-polls/polls-templates.php');
@@ -31,8 +25,8 @@ $id = ( isset($_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	check_admin_referer('wp-polls_templates');
 	$poll_template_voteheader = wp_kses_post( trim( $_POST['poll_template_voteheader'] ) );
-	$poll_template_votebody = wp_kses_post( trim($_POST['poll_template_votebody'] ) );
-	$poll_template_votefooter = wp_kses_post( trim($_POST['poll_template_votefooter'] ) );
+	$poll_template_votebody = wp_kses( $_POST['poll_template_votebody'], $allowed_tags );
+	$poll_template_votefooter = wp_kses( $_POST['poll_template_votefooter'], $allowed_tags );
 	$poll_template_resultheader = wp_kses_post( trim($_POST['poll_template_resultheader'] ) );
 	$poll_template_resultbody = wp_kses_post( trim($_POST['poll_template_resultbody'] ) );
 	$poll_template_resultbody2 = wp_kses_post( trim($_POST['poll_template_resultbody2'] ) );

@@ -29,6 +29,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ## Changelog
 ### Version 2.73.6
 * FIXED: Unable to vote for multiple answers
+* FIXED: input HTML tags being removed when saving templates
 
 ### Version 2.73.5
 * FIXED: Parsed error in SERVER variable.
