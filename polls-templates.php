@@ -30,8 +30,8 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$poll_template_resultheader = wp_kses_post( trim($_POST['poll_template_resultheader'] ) );
 	$poll_template_resultbody = wp_kses_post( trim($_POST['poll_template_resultbody'] ) );
 	$poll_template_resultbody2 = wp_kses_post( trim($_POST['poll_template_resultbody2'] ) );
-	$poll_template_resultfooter = wp_kses_post( trim($_POST['poll_template_resultfooter'] ) );
-	$poll_template_resultfooter2 = wp_kses_post( trim($_POST['poll_template_resultfooter2'] ) );
+	$poll_template_resultfooter = wp_kses( trim($_POST['poll_template_resultfooter'] ), $allowed_tags );
+	$poll_template_resultfooter2 = wp_kses( trim($_POST['poll_template_resultfooter2'] ), $allowed_tags );
 	$poll_template_pollarchivelink = wp_kses_post( trim($_POST['poll_template_pollarchivelink'] ) );
 	$poll_template_pollarchiveheader = wp_kses_post( trim($_POST['poll_template_pollarchiveheader'] ) );
 	$poll_template_pollarchivefooter = wp_kses_post( trim($_POST['poll_template_pollarchivefooter'] ) );
