@@ -538,7 +538,11 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 	if( empty( $user_voted ) ) {
 		$user_voted = array();
 	}
-	$user_voted = array_map( 'intval', $user_voted );
+	if ( is_array( $user_voted ) ) {
+		$user_voted = array_map( 'intval', $user_voted );
+	} else {
+		$user_voted = (int) $user_voted;
+	}
 
 	// Temp Poll Result
 	$temp_pollresult = '';
