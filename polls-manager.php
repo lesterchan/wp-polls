@@ -30,7 +30,7 @@ if(!empty($_POST['do'])) {
             $pollq_active = (int) sanitize_key($_POST['pollq_active']);
             // Poll Start Date
             $pollq_timestamp = isset( $_POST['poll_timestamp_old'] ) ? $_POST['poll_timestamp_old'] : current_time( 'timestamp' );
-            $edit_polltimestamp = isset( $_POST['edit_polltimestamp'] ) && (int) sanitize_key( $_POST['edit_polltimestamp'] ) === 1;
+            $edit_polltimestamp = isset( $_POST['edit_polltimestamp'] ) && (int) sanitize_key( $_POST['edit_polltimestamp'] ) === 1 ? 1 : false;
             if($edit_polltimestamp === 1) {
                 $pollq_timestamp_day = (int) sanitize_key($_POST['pollq_timestamp_day']);
                 $pollq_timestamp_month = (int) sanitize_key($_POST['pollq_timestamp_month']);
