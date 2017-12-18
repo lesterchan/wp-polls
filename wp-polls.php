@@ -721,7 +721,7 @@ function display_pollresult($poll_id, $user_voted = array(), $display_loading = 
 ### Function: Get IP Address
 if(!function_exists('get_ipaddress')) {
 	function get_ipaddress() {
-		foreach ( array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR' ) as $key ) {
+		foreach ( array( 'HTTP_CF_CONNECTING_IP', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR' ) as $key ) {
 			if ( array_key_exists( $key, $_SERVER ) === true ) {
 				foreach ( explode( ',', $_SERVER[$key] ) as $ip ) {
 					$ip = trim( $ip );
