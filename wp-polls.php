@@ -372,7 +372,7 @@ function check_voted_ip( $poll_id ) {
 	$log_expiry = (int) get_option( 'poll_cookielog_expiry' );
 	$log_expiry_sql = '';
 	if( $log_expiry > 0 ) {
-		$log_expiry_sql = 'AND (' . current_time('timestamp') . '-(pollip_timestamp+0)) < ' . $log_expiry;
+		$log_expiry_sql = ' AND (' . current_time('timestamp') . '-(pollip_timestamp+0)) < ' . $log_expiry;
 	}
 	// Check IP From IP Logging Database
 	$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s", $poll_id, get_ipaddress() ) . $log_expiry_sql );
