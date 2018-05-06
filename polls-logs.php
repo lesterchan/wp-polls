@@ -299,7 +299,7 @@ if( ! empty( $_POST['do'] ) ) {
                         }
                         echo "<tr $style>\n";
                         echo "<td>{$pollip_answers[$pollip_aid]}</td>\n";
-                        echo "<td><a href=\"http://ipinfo.io/$pollip_ip\" title=\"$pollip_ip\">$pollip_ip</a></td>\n";
+                        echo "<td>$pollip_ip</td>\n";
                         echo "<td>$pollip_host</td>\n";
                         echo "<td>$pollip_date</td>\n";
                         echo "</tr>\n";
@@ -338,7 +338,7 @@ if( ! empty( $_POST['do'] ) ) {
                         echo "<tr $style>\n";
                         echo "<td>".number_format_i18n($i)."</td>\n";
                         echo "<td>$pollip_user</td>\n";
-                        echo "<td><a href=\"http://ipinfo.io/$pollip_ip\" title=\"$pollip_ip\">$pollip_ip</a> / $pollip_host</td>\n";
+                        echo "<td>$pollip_ip / $pollip_host</td>\n";
                         echo "<td>$pollip_date</td>\n";
                         echo "</tr>\n";
                         $poll_last_aid = $pollip_aid;

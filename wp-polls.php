@@ -375,7 +375,7 @@ function check_voted_ip( $poll_id ) {
 		$log_expiry_sql = ' AND (' . current_time('timestamp') . '-(pollip_timestamp+0)) < ' . $log_expiry;
 	}
 	// Check IP From IP Logging Database
-	$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s", $poll_id, get_ipaddress() ) . $log_expiry_sql );
+	$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s", $poll_id, poll_get_ipaddress() ) . $log_expiry_sql );
 	if( $get_voted_aids ) {
 		return $get_voted_aids;
 	}
@@ -733,7 +733,26 @@ if(!function_exists('get_ipaddress')) {
 		}
 	}
 }
+function poll_get_ipaddress() {
+	$ip = get_ipaddress();
+	if ( ! empty( $ip ) ) {
+		return substr( $ip, 0, strrpos( $ip, '.' ) ) . '.xxx';
+	}
 
+	return $ip;
+}
+function poll_get_hostname() {
+	$hostname = gethostbyaddr( get_ipaddress() );
+	if ( $hostname === get_ipaddress() ) {
+		return poll_get_ipaddress();
+	}
+
+	if ( false !== $hostname ) {
+		return substr( $hostname, strpos( $hostname, '.' ) + 1 );
+	}
+
+	return false;
+}
 
 ### Function: Short Code For Inserting Polls Archive Into Page
 add_shortcode('page_polls', 'poll_page_shortcode');
@@ -963,7 +982,7 @@ function polls_archive() {
 	}
 
 	// Get Poll IPs
-	$ips = $wpdb->get_results("SELECT pollip_qid, pollip_aid FROM $wpdb->pollsip WHERE pollip_qid IN ($poll_questions_ids) AND pollip_ip = '".get_ipaddress()."' ORDER BY pollip_qid ASC");
+	$ips = $wpdb->get_results( "SELECT pollip_qid, pollip_aid FROM $wpdb->pollsip WHERE pollip_qid IN ($poll_questions_ids) AND pollip_ip = '" . poll_get_ipaddress() . "' ORDER BY pollip_qid ASC" );
 	if($ips) {
 		foreach($ips as $ip) {
 			$polls_ips[(int) $ip->pollip_qid][] = (int) $ip->pollip_aid;
@@ -1334,9 +1353,9 @@ function vote_poll() {
 									$pollip_user = __('Guest', 'wp-polls');
 								}
 								$pollip_user = sanitize_text_field( $pollip_user );
-								$pollip_userid = (int) $user_ID;
-								$pollip_ip = get_ipaddress();
-								$pollip_host = @gethostbyaddr($pollip_ip);
+								$pollip_userid = $user_ID;
+								$pollip_ip = poll_get_ipaddress();
+								$pollip_host = poll_get_hostname();
 								$pollip_timestamp = current_time('timestamp');
 								// Only Create Cookie If User Choose Logging Method 1 Or 2
 								$poll_logging_method = (int) get_option('poll_logging_method');
