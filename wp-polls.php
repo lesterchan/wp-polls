@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.73.8
+Version: 2.74
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -11,7 +11,7 @@ Text Domain: wp-polls
 
 
 /*
-	Copyright 2017  Lester Chan  (email : lesterchan@gmail.com)
+	Copyright 2018  Lester Chan  (email : lesterchan@gmail.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ Text Domain: wp-polls
 */
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.73.8' );
+define( 'WP_POLLS_VERSION', '2.74' );
 
 
 ### Create Text Domain For Translations
@@ -734,12 +734,7 @@ if(!function_exists('get_ipaddress')) {
 	}
 }
 function poll_get_ipaddress() {
-	$ip = get_ipaddress();
-	if ( ! empty( $ip ) ) {
-		return substr( $ip, 0, strrpos( $ip, '.' ) ) . '.xxx';
-	}
-
-	return $ip;
+    return wp_privacy_anonymize_ip( get_ipaddress() );
 }
 function poll_get_hostname() {
 	$hostname = gethostbyaddr( get_ipaddress() );
