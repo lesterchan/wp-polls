@@ -734,12 +734,12 @@ if(!function_exists('get_ipaddress')) {
 	}
 }
 function poll_get_ipaddress() {
-    return wp_privacy_anonymize_ip( get_ipaddress() );
+    return wp_hash( get_ipaddress() );
 }
 function poll_get_hostname() {
 	$hostname = gethostbyaddr( get_ipaddress() );
 	if ( $hostname === get_ipaddress() ) {
-		return poll_get_ipaddress();
+		return wp_privacy_anonymize_ip( get_ipaddress() );
 	}
 
 	if ( false !== $hostname ) {

@@ -28,7 +28,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 ## Changelog
 ### Version 2.74
-* NEW: Anonymize IP and Hostname to make it GDPR compliance
+* NEW: Hashed IP and anonymize Hostname to make it GDPR compliance
 
 ### Version 2.73.8
 * FIXED: Bug fixes and stricter type checking

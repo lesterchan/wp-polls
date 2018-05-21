@@ -325,7 +325,7 @@ if( ! empty( $_POST['do'] ) ) {
                             echo "<tr class=\"thead\">\n";
                             echo "<th>".__('No.', 'wp-polls')."</th>\n";
                             echo "<th>".__('User', 'wp-polls')."</th>\n";
-                            echo "<th>".__('IP/Host', 'wp-polls')."</th>\n";
+                            echo "<th>".__('Hashed IP / Host', 'wp-polls')."</th>\n";
                             echo "<th>".__('Date', 'wp-polls')."</th>\n";
                             echo "</tr>\n";
                             $i = 1;
