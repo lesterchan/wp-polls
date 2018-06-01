@@ -1352,9 +1352,9 @@ function vote_poll() {
 								$pollip_ip = poll_get_ipaddress();
 								$pollip_host = poll_get_hostname();
 								$pollip_timestamp = current_time('timestamp');
-								// Only Create Cookie If User Choose Logging Method 1 Or 2
 								$poll_logging_method = (int) get_option('poll_logging_method');
-								if ($poll_logging_method === 1 || $poll_logging_method === 3) {
+								// Only Create Cookie If User Choose Logging Method 1 Or 3
+								if ( $poll_logging_method === 1 || $poll_logging_method === 3 ) {
 									$cookie_expiry = (int) get_option('poll_cookielog_expiry');
 									if ($cookie_expiry === 0) {
 										$cookie_expiry = YEAR_IN_SECONDS;
@@ -1372,27 +1372,30 @@ function vote_poll() {
 								$vote_q = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . count( $poll_aid_array ) . "), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = $poll_id AND pollq_active = 1");
 								if ($vote_q) {
 									foreach ($poll_aid_array as $polla_aid) {
-										$wpdb->insert(
-											$wpdb->pollsip,
-											array(
-												'pollip_qid'		=> $poll_id,
-												'pollip_aid'		=> $polla_aid,
-												'pollip_ip'		 => $pollip_ip,
-												'pollip_host'	   => $pollip_host,
-												'pollip_timestamp'  => $pollip_timestamp,
-												'pollip_user'	   => $pollip_user,
-												'pollip_userid'	 => $pollip_userid
-											),
-											array(
-												'%s',
-												'%s',
-												'%s',
-												'%s',
-												'%s',
-												'%s',
-												'%d'
-											)
-										);
+										// Log Ratings In DB If User Choose Logging Method 2, 3 or 4
+										if ( $poll_logging_method > 1 ){
+											$wpdb->insert(
+												$wpdb->pollsip,
+												array(
+													'pollip_qid'       => $poll_id,
+													'pollip_aid'       => $polla_aid,
+													'pollip_ip'        => $pollip_ip,
+													'pollip_host'      => $pollip_host,
+													'pollip_timestamp' => $pollip_timestamp,
+													'pollip_user'      => $pollip_user,
+													'pollip_userid'    => $pollip_userid
+												),
+												array(
+													'%s',
+													'%s',
+													'%s',
+													'%s',
+													'%s',
+													'%s',
+													'%d'
+												)
+											);
+										}
 									}
 									echo display_pollresult($poll_id, $poll_aid_array, false);
 									do_action( 'wp_polls_vote_poll_success' );
