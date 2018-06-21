@@ -349,6 +349,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_ANSWER_TEXT%</p>
 				<p style="margin: 2px 0">- %POLL_ANSWER_VOTES%</p>
 				<p style="margin: 2px 0">- %POLL_ANSWER_PERCENTAGE%</p>
+				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANSWER_PERCENTAGE%</p>
 				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultbody');" class="button" />
 			</td>
@@ -363,7 +364,8 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_ANSWER%</p>
 				<p style="margin: 2px 0">- %POLL_ANSWER_TEXT%</p>
 				<p style="margin: 2px 0">- %POLL_ANSWER_VOTES%</p>
-				-  %POLL_ANSWER_PERCENTAGE%</p>
+				<p style="margin: 2px 0">- %POLL_ANSWER_PERCENTAGE%</p>
+				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANSWER_PERCENTAGE%</p>
 				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultbody2');" class="button" />
 			</td>
