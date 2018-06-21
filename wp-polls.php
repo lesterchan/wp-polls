@@ -1026,24 +1026,20 @@ function polls_archive() {
 		$poll_answer_percentage_array = array();
 		foreach($polls_answers[$polls_question['id']] as $polls_answer) {
 			// Calculate Percentage And Image Bar Width
-			if(!$poll_totalvotes_zero) {
-				if($polls_answer['votes'] > 0) {
-					$poll_answer_percentage = round((($polls_answer['votes']/$polls_question['totalvotes'])*100));
-					$poll_answer_imagewidth = round($poll_answer_percentage*0.9);
-				} else {
-					$poll_answer_percentage = 0;
-					$poll_answer_imagewidth = 1;
-				}
-			} else {
-				$poll_answer_percentage = 0;
-				$poll_answer_imagewidth = 1;
+			$poll_answer_percentage = 0;
+			$poll_multiple_answer_percentage = 0;
+			$poll_answer_imagewidth = 1;
+			if ( ! $poll_totalvotes_zero && $polls_answer['votes'] > 0 ) {
+				$poll_answer_percentage = round( ( $polls_answer['votes'] / $polls_question['totalvotes'] ) * 100 );
+				$poll_multiple_answer_percentage = round( ( $polls_answer['votes'] / $polls_question['totalvoters'] ) * 100 );
+				$poll_answer_imagewidth = round( $poll_answer_percentage * 0.9 );
 			}
 			// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer
 			if($polls_question['multiple'] === 0) {
 				$poll_answer_percentage_array[] = $poll_answer_percentage;
 				if(count($poll_answer_percentage_array) === count($polls_answers[$polls_question['id']])) {
 					$percentage_error_buffer = 100 - array_sum($poll_answer_percentage_array);
-					$poll_answer_percentage = $poll_answer_percentage + $percentage_error_buffer;
+					$poll_answer_percentage += $percentage_error_buffer;
 					if($poll_answer_percentage < 0) {
 						$poll_answer_percentage = 0;
 					}
@@ -1060,6 +1056,7 @@ function polls_archive() {
 				$template_answer = str_replace("%POLL_ANSWER_TEXT%", htmlspecialchars(strip_tags($polls_answer['answers'])), $template_answer);
 				$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($polls_answer['votes']), $template_answer);
 				$template_answer = str_replace("%POLL_ANSWER_PERCENTAGE%", $poll_answer_percentage, $template_answer);
+				$template_answer = str_replace("%POLL_MULTIPLE_ANSWER_PERCENTAGE%", $poll_multiple_answer_percentage, $template_answer);
 				$template_answer = str_replace("%POLL_ANSWER_IMAGEWIDTH%", $poll_answer_imagewidth, $template_answer);
 				// Print Out Results Body Template
 				$pollsarchive_output_archive .= $template_answer;
@@ -1072,6 +1069,7 @@ function polls_archive() {
 				$template_answer = str_replace("%POLL_ANSWER_TEXT%", htmlspecialchars(strip_tags($polls_answer['answers'])), $template_answer);
 				$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($polls_answer['votes']), $template_answer);
 				$template_answer = str_replace("%POLL_ANSWER_PERCENTAGE%", $poll_answer_percentage, $template_answer);
+				$template_answer = str_replace("%POLL_MULTIPLE_ANSWER_PERCENTAGE%", $poll_multiple_answer_percentage, $template_answer);
 				$template_answer = str_replace("%POLL_ANSWER_IMAGEWIDTH%", $poll_answer_imagewidth, $template_answer);
 				// Print Out Results Body Template
 				$pollsarchive_output_archive .= $template_answer;

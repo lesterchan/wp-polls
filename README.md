@@ -27,6 +27,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ### Version 2.74
 * NEW: Hashed IP and anonymize Hostname to make it GDPR compliance
 * NEW: If Do Not Log is set in Poll Options, do not log to DB
+* NEW: Support %POLL_MULTIPLE_ANSWER_PERCENTAGE%. This is total votes divided by total voters.
 
 ### Version 2.73.8
 * FIXED: Bug fixes and stricter type checking

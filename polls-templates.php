@@ -261,6 +261,15 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<?php _e('Display the poll archive URL', 'wp-polls'); ?>
 			</td>
 		</tr>
+		<tr>
+			<td>
+				<strong>%POLL_MULTIPLE_ANSWER_PERCENTAGE%</strong><br />
+				<?php _e('Display the poll\'s mutiple answer percentage. This is total votes divided by total voters.', 'wp-polls'); ?>
+			</td>
+			<td>
+				&nbsp;
+			</td>
+		</tr>
 		<tr class="alternate">
 			<td colspan="2">
 				<?php _e('Note: <strong>%POLL_TOTALVOTES%</strong> and <strong>%POLL_TOTALVOTERS%</strong> will be different if your poll supports multiple answers. If your poll allows only single answer, both value will be the same.', 'wp-polls'); ?>
