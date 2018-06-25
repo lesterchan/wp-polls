@@ -475,7 +475,8 @@ function display_pollvote($poll_id, $display_loading = true) {
 			$poll_answer_id = (int) $poll_answer->polla_aid;
 			$poll_answer_text = wp_kses_post( removeslashes( $poll_answer->polla_answers ) );
 			$poll_answer_votes = (int) $poll_answer->polla_votes;
-			$poll_answer_percentage = $poll_question_totalvotes > 0 ? round((($poll_answer_votes/$poll_question_totalvotes)*100)) : 0;
+			$poll_answer_percentage = $poll_question_totalvotes > 0 ? round( ( $poll_answer_votes / $poll_question_totalvotes ) * 100 ) : 0;
+			$poll_multiple_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 );
 			$template_answer = removeslashes(get_option('poll_template_votebody'));
 
 			$template_answer = apply_filters('poll_template_votebody_markup', $template_answer, $poll_answer, array(
@@ -484,6 +485,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 				'%POLL_ANSWER%' => $poll_answer_text,
 				'%POLL_ANSWER_VOTES%' => number_format_i18n($poll_answer_votes),
 				'%POLL_ANSWER_PERCENTAGE%' => $poll_answer_percentage,
+				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%' => $poll_multiple_answer_percentage,
 				"%POLL_CHECKBOX_RADIO%" => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
 			));
 
@@ -606,20 +608,16 @@ function display_pollresult($poll_id, $user_voted = array(), $display_loading = 
 			$poll_answer_text = wp_kses_post( removeslashes($poll_answer->polla_answers) );
 			$poll_answer_votes = (int) $poll_answer->polla_votes;
 			// Calculate Percentage And Image Bar Width
-			if(!$poll_totalvotes_zero) {
-				if($poll_answer_votes > 0) {
-					$poll_answer_percentage = round((($poll_answer_votes/$poll_question_totalvotes)*100));
-					$poll_answer_imagewidth = round($poll_answer_percentage);
-					if($poll_answer_imagewidth === 100) {
-						$poll_answer_imagewidth = 99;
-					}
-				} else {
-					$poll_answer_percentage = 0;
-					$poll_answer_imagewidth = 1;
+			$poll_answer_percentage = 0;
+			$poll_multiple_answer_percentage = 0;
+			$poll_answer_imagewidth = 1;
+			if ( ! $poll_totalvotes_zero && $poll_answer_votes > 0 ) {
+				$poll_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvotes ) * 100 );
+				$poll_multiple_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 );
+				$poll_answer_imagewidth = round($poll_answer_percentage);
+				if($poll_answer_imagewidth === 100) {
+					$poll_answer_imagewidth = 99;
 				}
-			} else {
-				$poll_answer_percentage = 0;
-				$poll_answer_imagewidth = 1;
 			}
 			// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer
 			$round_percentage = apply_filters( 'wp_polls_round_percentage', false );
@@ -637,31 +635,38 @@ function display_pollresult($poll_id, $user_voted = array(), $display_loading = 
 			}
 
 			// Let User See What Options They Voted
-			if(in_array($poll_answer_id, $user_voted, true)) {
+			if ( in_array( $poll_answer_id, $user_voted, true ) ) {
 				// Results Body Variables
 				$template_answer = removeslashes(get_option('poll_template_resultbody2'));
-				$template_answer = str_replace("%POLL_ID%", $poll_question_id, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_ID%", $poll_answer_id, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER%", $poll_answer_text, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_TEXT%", htmlspecialchars(strip_tags($poll_answer_text)), $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($poll_answer_votes), $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_PERCENTAGE%", $poll_answer_percentage, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_IMAGEWIDTH%", $poll_answer_imagewidth, $template_answer);
-				// Print Out Results Body Template
-				$temp_pollresult .= "\t\t$template_answer\n";
 			} else {
 				// Results Body Variables
 				$template_answer = removeslashes(get_option('poll_template_resultbody'));
-				$template_answer = str_replace("%POLL_ID%", $poll_question_id, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_ID%", $poll_answer_id, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER%", $poll_answer_text, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_TEXT%", htmlspecialchars(strip_tags($poll_answer_text)), $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($poll_answer_votes), $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_PERCENTAGE%", $poll_answer_percentage, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_IMAGEWIDTH%", $poll_answer_imagewidth, $template_answer);
-				// Print Out Results Body Template
-				$temp_pollresult .= "\t\t$template_answer\n";
 			}
+
+			$template_answer = str_replace( [
+				'%POLL_ID%',
+				'%POLL_ANSWER_ID%',
+				'%POLL_ANSWER%',
+				'%POLL_ANSWER_TEXT%',
+				'%POLL_ANSWER_VOTES%',
+				'%POLL_ANSWER_PERCENTAGE%',
+				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%',
+				'%POLL_ANSWER_IMAGEWIDTH%',
+				'',
+			], [
+				$poll_question_id,
+				$poll_answer_id,
+				$poll_answer_text,
+				htmlspecialchars( wp_strip_all_tags( $poll_answer_text ) ),
+				number_format_i18n( $poll_answer_votes ),
+				$poll_answer_percentage,
+				$poll_multiple_answer_percentage,
+				$poll_answer_imagewidth,
+			], $template_answer );
+
+			// Print Out Results Body Template
+			$temp_pollresult .= "\t\t$template_answer\n";
+
 			// Get Most Voted Data
 			if($poll_answer_votes > $poll_most_votes) {
 				$poll_most_answer = $poll_answer_text;
@@ -1047,33 +1052,36 @@ function polls_archive() {
 			}
 			$polls_answer['answers'] = wp_kses_post( $polls_answer['answers'] );
 			// Let User See What Options They Voted
-			if(isset( $polls_ips[$polls_question['id']] ) && in_array( $polls_answer['aid'], check_voted_multiple( $polls_question['id'], $polls_ips[$polls_question['id']] ), true ) ) {
-				// Results Body Variables
+			if (isset( $polls_ips[$polls_question['id']] ) && in_array( $polls_answer['aid'], check_voted_multiple( $polls_question['id'], $polls_ips[$polls_question['id']] ), true ) ) {
 				$template_answer = removeslashes(get_option('poll_template_resultbody2'));
-				$template_answer = str_replace("%POLL_ID%", $polls_question['id'], $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_ID%", $polls_answer['aid'], $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER%", $polls_answer['answers'], $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_TEXT%", htmlspecialchars(strip_tags($polls_answer['answers'])), $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($polls_answer['votes']), $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_PERCENTAGE%", $poll_answer_percentage, $template_answer);
-				$template_answer = str_replace("%POLL_MULTIPLE_ANSWER_PERCENTAGE%", $poll_multiple_answer_percentage, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_IMAGEWIDTH%", $poll_answer_imagewidth, $template_answer);
-				// Print Out Results Body Template
-				$pollsarchive_output_archive .= $template_answer;
 			} else {
-				// Results Body Variables
 				$template_answer = removeslashes(get_option('poll_template_resultbody'));
-				$template_answer = str_replace("%POLL_ID%", $polls_question['id'], $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_ID%", $polls_answer['aid'], $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER%", $polls_answer['answers'], $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_TEXT%", htmlspecialchars(strip_tags($polls_answer['answers'])), $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_VOTES%", number_format_i18n($polls_answer['votes']), $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_PERCENTAGE%", $poll_answer_percentage, $template_answer);
-				$template_answer = str_replace("%POLL_MULTIPLE_ANSWER_PERCENTAGE%", $poll_multiple_answer_percentage, $template_answer);
-				$template_answer = str_replace("%POLL_ANSWER_IMAGEWIDTH%", $poll_answer_imagewidth, $template_answer);
-				// Print Out Results Body Template
-				$pollsarchive_output_archive .= $template_answer;
 			}
+
+			$template_answer = str_replace( [
+				'%POLL_ID%',
+				'%POLL_ANSWER_ID%',
+				'%POLL_ANSWER%',
+				'%POLL_ANSWER_TEXT%"',
+				'%POLL_ANSWER_VOTES%',
+				'%POLL_ANSWER_PERCENTAGE%"',
+				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%',
+				'%POLL_ANSWER_IMAGEWIDTH%',
+			], [
+				$polls_question['id'],
+				$polls_answer['aid'],
+				$polls_answer['answers'],
+				htmlspecialchars( wp_strip_all_tags( $polls_answer['answers'] ) ),
+				number_format_i18n( $polls_answer['votes'] ),
+				$poll_answer_percentage,
+				$poll_multiple_answer_percentage,
+				$poll_answer_imagewidth,
+			],
+				$template_answer );
+
+			// Print Out Results Body Template
+			$pollsarchive_output_archive .= $template_answer;
+
 			// Get Most Voted Data
 			if($polls_answer['votes'] > $poll_most_votes) {
 				$poll_most_answer = $polls_answer['answers'];
