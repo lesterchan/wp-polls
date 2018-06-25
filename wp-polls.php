@@ -652,7 +652,6 @@ function display_pollresult($poll_id, $user_voted = array(), $display_loading = 
 				'%POLL_ANSWER_PERCENTAGE%',
 				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%',
 				'%POLL_ANSWER_IMAGEWIDTH%',
-				'',
 			], [
 				$poll_question_id,
 				$poll_answer_id,
@@ -668,16 +667,16 @@ function display_pollresult($poll_id, $user_voted = array(), $display_loading = 
 			$temp_pollresult .= "\t\t$template_answer\n";
 
 			// Get Most Voted Data
-			if($poll_answer_votes > $poll_most_votes) {
+			if ( $poll_answer_votes > $poll_most_votes ) {
 				$poll_most_answer = $poll_answer_text;
 				$poll_most_votes = $poll_answer_votes;
 				$poll_most_percentage = $poll_answer_percentage;
 			}
 			// Get Least Voted Data
-			if($poll_least_votes === 0) {
+			if ( $poll_least_votes === 0 ) {
 				$poll_least_votes = $poll_answer_votes;
 			}
-			if($poll_answer_votes <= $poll_least_votes) {
+			if ( $poll_answer_votes <= $poll_least_votes ) {
 				$poll_least_answer = $poll_answer_text;
 				$poll_least_votes = $poll_answer_votes;
 				$poll_least_percentage = $poll_answer_percentage;
