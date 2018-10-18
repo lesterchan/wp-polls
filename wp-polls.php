@@ -1061,9 +1061,9 @@ function polls_archive() {
 				'%POLL_ID%',
 				'%POLL_ANSWER_ID%',
 				'%POLL_ANSWER%',
-				'%POLL_ANSWER_TEXT%"',
+				'%POLL_ANSWER_TEXT%',
 				'%POLL_ANSWER_VOTES%',
-				'%POLL_ANSWER_PERCENTAGE%"',
+				'%POLL_ANSWER_PERCENTAGE%',
 				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%',
 				'%POLL_ANSWER_IMAGEWIDTH%',
 			], [
