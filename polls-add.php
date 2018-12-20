@@ -34,9 +34,9 @@ if ( ! empty($_POST['do'] ) ) {
 					$pollq_active = 1;
 				}
 				// Poll End Date
-				$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key($_POST['pollq_expiry_no']) : 0;
+				$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
 				if ( $pollq_expiry_no === 1 ) {
-					$pollq_expiry = '';
+					$pollq_expiry = 0;
 				} else {
 					$pollq_expiry_day = isset( $_POST['pollq_expiry_day'] ) ? (int) sanitize_key( $_POST['pollq_expiry_day'] ) : 0;
 					$pollq_expiry_month = isset( $_POST['pollq_expiry_month'] ) ? (int) sanitize_key( $_POST['pollq_expiry_month'] ) : 0;
@@ -61,12 +61,12 @@ if ( ! empty($_POST['do'] ) ) {
 				$add_poll_question = $wpdb->insert(
 					$wpdb->pollsq,
 					array(
-						'pollq_question'	=> $pollq_question,
+						'pollq_question'    => $pollq_question,
 						'pollq_timestamp'   => $pollq_timestamp,
 						'pollq_totalvotes'  => 0,
-						'pollq_active'	  => $pollq_active,
-						'pollq_expiry'	  => $pollq_expiry,
-						'pollq_multiple'	=> $pollq_multiple,
+						'pollq_active'      => $pollq_active,
+						'pollq_expiry'      => $pollq_expiry,
+						'pollq_multiple'    => $pollq_multiple,
 						'pollq_totalvoters' => 0
 					),
 					array(
@@ -74,7 +74,7 @@ if ( ! empty($_POST['do'] ) ) {
 						'%s',
 						'%d',
 						'%d',
-						'%s',
+						'%d',
 						'%d',
 						'%d'
 					)
