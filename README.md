@@ -27,6 +27,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ### Version 2.74.1
 * FIXED: Don't use PHP 5.4 Short array syntax.
 * FIXED: Division by zero 
+* FIXED: Wrong database column type for pollq_expiry
 
 ### Version 2.74
 * NEW: Hashed IP and anonymize Hostname to make it GDPR compliance
