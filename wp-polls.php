@@ -470,23 +470,23 @@ function display_pollvote($poll_id, $display_loading = true) {
 		}
 		// Print Out Voting Form Header Template
 		$temp_pollvote .= "\t\t$template_question\n";
-		foreach($poll_answers as $poll_answer) {
+		foreach ( $poll_answers as $poll_answer ) {
 			// Poll Answer Variables
 			$poll_answer_id = (int) $poll_answer->polla_aid;
 			$poll_answer_text = wp_kses_post( removeslashes( $poll_answer->polla_answers ) );
 			$poll_answer_votes = (int) $poll_answer->polla_votes;
 			$poll_answer_percentage = $poll_question_totalvotes > 0 ? round( ( $poll_answer_votes / $poll_question_totalvotes ) * 100 ) : 0;
-			$poll_multiple_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 );
-			$template_answer = removeslashes(get_option('poll_template_votebody'));
+			$poll_multiple_answer_percentage = $poll_question_totalvoters > 0 ? round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 ) : 0;
+			$template_answer = removeslashes( get_option( 'poll_template_votebody' ) );
 
-			$template_answer = apply_filters('poll_template_votebody_markup', $template_answer, $poll_answer, array(
+			$template_answer = apply_filters( 'poll_template_votebody_markup', $template_answer, $poll_answer, array(
 				'%POLL_ID%' => $poll_question_id,
 				'%POLL_ANSWER_ID%' => $poll_answer_id,
 				'%POLL_ANSWER%' => $poll_answer_text,
-				'%POLL_ANSWER_VOTES%' => number_format_i18n($poll_answer_votes),
+				'%POLL_ANSWER_VOTES%' => number_format_i18n( $poll_answer_votes ),
 				'%POLL_ANSWER_PERCENTAGE%' => $poll_answer_percentage,
 				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%' => $poll_multiple_answer_percentage,
-				"%POLL_CHECKBOX_RADIO%" => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
+				'%POLL_CHECKBOX_RADIO%' => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
 			));
 
 			// Print Out Voting Form Body Template
