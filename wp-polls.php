@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.74.1
+Version: 2.75
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -11,7 +11,7 @@ Text Domain: wp-polls
 
 
 /*
-	Copyright 2018  Lester Chan  (email : lesterchan@gmail.com)
+	Copyright 2019  Lester Chan  (email : lesterchan@gmail.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ Text Domain: wp-polls
 */
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.74.1' );
+define( 'WP_POLLS_VERSION', '2.75' );
 
 
 ### Create Text Domain For Translations
@@ -445,7 +445,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 
 	$template_question = removeslashes(get_option('poll_template_voteheader'));
 
-	$template_question = apply_filters('poll_template_voteheader_markup', $template_question, $poll_question, array(
+	$template_question = apply_filters( 'wp_polls_template_voteheader_markup', $template_question, $poll_question, array(
 		'%POLL_QUESTION%' => $poll_question_text,
 		'%POLL_ID%' => $poll_question_id,
 		'%POLL_TOTALVOTES%' => $poll_question_totalvotes,
@@ -479,7 +479,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 			$poll_multiple_answer_percentage = $poll_question_totalvoters > 0 ? round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 ) : 0;
 			$template_answer = removeslashes( get_option( 'poll_template_votebody' ) );
 
-			$template_answer = apply_filters( 'poll_template_votebody_markup', $template_answer, $poll_answer, array(
+			$template_answer = apply_filters( 'wp_polls_template_votebody_markup', $template_answer, $poll_answer, array(
 				'%POLL_ID%' => $poll_question_id,
 				'%POLL_ANSWER_ID%' => $poll_answer_id,
 				'%POLL_ANSWER%' => $poll_answer_text,
@@ -505,7 +505,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 		// Voting Form Footer Variables
 		$template_footer = removeslashes(get_option('poll_template_votefooter'));
 
-		$template_footer = apply_filters('poll_template_votefooter_markup', $template_footer, $poll_question, array(
+		$template_footer = apply_filters( 'wp_polls_template_votefooter_markup', $template_footer, $poll_question, array(
 			'%POLL_ID%' => $poll_question_id,
 			'%POLL_RESULT_URL%' => $poll_result_url,
 			'%POLL_START_DATE%' => $poll_start_date,
@@ -739,7 +739,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		$temp_pollresult .= removeslashes( get_option ('poll_template_disable' ) );
 	}
 	// Return Poll Result
-	return apply_filters( 'poll_result_markup', $temp_pollresult );
+	return apply_filters( 'wp_polls_result_markup', $temp_pollresult );
 }
 
 
@@ -759,19 +759,19 @@ if ( ! function_exists( 'get_ipaddress' ) ) {
 	}
 }
 function poll_get_ipaddress() {
-    return wp_hash( get_ipaddress() );
+	return apply_filters( 'wp_polls_ipaddress', wp_hash( get_ipaddress() ) );
 }
 function poll_get_hostname() {
 	$hostname = gethostbyaddr( get_ipaddress() );
 	if ( $hostname === get_ipaddress() ) {
-		return wp_privacy_anonymize_ip( get_ipaddress() );
+		$hostname = wp_privacy_anonymize_ip( get_ipaddress() );
 	}
 
 	if ( false !== $hostname ) {
-		return substr( $hostname, strpos( $hostname, '.' ) + 1 );
+		$hostname = substr( $hostname, strpos( $hostname, '.' ) + 1 );
 	}
 
-	return false;
+	return apply_filters( 'wp_polls_hostname', $hostname );
 }
 
 ### Function: Short Code For Inserting Polls Archive Into Page
@@ -1195,7 +1195,7 @@ function polls_archive() {
 	}
 
 	// Output Polls Archive Page
-	return apply_filters('polls_archive', $pollsarchive_output_archive);
+	return apply_filters( 'wp_polls_archive', $pollsarchive_output_archive );
 }
 
 

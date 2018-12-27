@@ -120,7 +120,7 @@ if( ! empty( $_POST['do'] ) ) {
         <?php printf(_n('<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests', $poll_guest, 'wp-polls'), number_format_i18n($poll_guest)); ?>
     </p>
 </div>
-<?php if($poll_totalrecorded > 0 && apply_filters( 'poll_log_show_log_filter', true )) { ?>
+<?php if($poll_totalrecorded > 0 && apply_filters( 'wp_polls_log_show_log_filter', true )) { ?>
 <div class="wrap">
     <h3><?php _e('Filter Poll\'s Logs', 'wp-polls') ?></h3>
     <table width="100%"  border="0" cellspacing="0" cellpadding="0">
@@ -310,7 +310,7 @@ if( ! empty( $_POST['do'] ) ) {
                 } else {
                     foreach($poll_ips as $poll_ip) {
                         $pollip_aid = (int) $poll_ip->pollip_aid;
-                        $pollip_user = apply_filters( 'poll_log_secret_ballot', removeslashes($poll_ip->pollip_user) );
+                        $pollip_user = apply_filters( 'wp_polls_log_secret_ballot', removeslashes( $poll_ip->pollip_user ) );
                         $pollip_ip = $poll_ip->pollip_ip;
                         $pollip_host = $poll_ip->pollip_host;
                         $pollip_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_ip->pollip_timestamp));
