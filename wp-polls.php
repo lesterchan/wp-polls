@@ -1078,7 +1078,7 @@ function polls_archive() {
 				$template_answer = removeslashes(get_option('poll_template_resultbody'));
 			}
 
-			$template_answer = str_replace( [
+			$template_answer = str_replace( array(
 				'%POLL_ID%',
 				'%POLL_ANSWER_ID%',
 				'%POLL_ANSWER%',
@@ -1087,7 +1087,7 @@ function polls_archive() {
 				'%POLL_ANSWER_PERCENTAGE%',
 				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%',
 				'%POLL_ANSWER_IMAGEWIDTH%',
-			], [
+			), array(
 				$polls_question['id'],
 				$polls_answer['aid'],
 				$polls_answer['answers'],
@@ -1096,7 +1096,7 @@ function polls_archive() {
 				$poll_answer_percentage,
 				$poll_multiple_answer_percentage,
 				$poll_answer_imagewidth,
-			],
+			),
 				$template_answer );
 
 			// Print Out Results Body Template
