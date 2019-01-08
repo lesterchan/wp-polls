@@ -39,14 +39,14 @@ if(!empty($_POST['do'])) {
                 $pollq_timestamp_minute = (int) sanitize_key($_POST['pollq_timestamp_minute']);
                 $pollq_timestamp_second = (int) sanitize_key($_POST['pollq_timestamp_second']);
                 $pollq_timestamp = gmmktime($pollq_timestamp_hour, $pollq_timestamp_minute, $pollq_timestamp_second, $pollq_timestamp_month, $pollq_timestamp_day, $pollq_timestamp_year);
-                if($pollq_timestamp > current_time('timestamp')) {
+                if ( $pollq_timestamp > current_time( 'timestamp' ) ) {
                     $pollq_active = -1;
                 }
             }
             // Poll End Date
             $pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
-            if($pollq_expiry_no == 1) {
-                $pollq_expiry = '';
+            if ( $pollq_expiry_no === 1 ) {
+                $pollq_expiry = 0;
             } else {
                 $pollq_expiry_day = (int) sanitize_key($_POST['pollq_expiry_day']);
                 $pollq_expiry_month = (int) sanitize_key($_POST['pollq_expiry_month']);
