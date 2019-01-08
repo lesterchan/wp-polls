@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.75.1
+Version: 2.75.2
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -29,7 +29,7 @@ Text Domain: wp-polls
 */
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.75.1' );
+define( 'WP_POLLS_VERSION', '2.75.2' );
 
 
 ### Create Text Domain For Translations
@@ -445,15 +445,23 @@ function display_pollvote($poll_id, $display_loading = true) {
 
 	$template_question = removeslashes(get_option('poll_template_voteheader'));
 
-	$template_question = apply_filters( 'wp_polls_template_voteheader_markup', $template_question, $poll_question, array(
-		'%POLL_QUESTION%' => $poll_question_text,
-		'%POLL_ID%' => $poll_question_id,
-		'%POLL_TOTALVOTES%' => $poll_question_totalvotes,
-		'%POLL_TOTALVOTERS%' => $poll_question_totalvoters,
-		'%POLL_START_DATE%' => $poll_start_date,
-		'%POLL_END_DATE%' => $poll_end_date,
-		'%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
-	));
+	$template_question = apply_filters( 'wp_polls_template_voteheader_markup', str_replace( array(
+		'%POLL_QUESTION%',
+		'%POLL_ID%',
+		'%POLL_TOTALVOTES%',
+		'%POLL_TOTALVOTERS%',
+		'%POLL_START_DATE%',
+		'%POLL_END_DATE%',
+		'%POLL_MULTIPLE_ANS_MAX%'
+	),  array(
+		$poll_question_text,
+		$poll_question_id,
+		$poll_question_totalvotes,
+		$poll_question_totalvoters,
+		$poll_start_date,
+		$poll_end_date,
+		$poll_multiple_ans > 0 ? $poll_multiple_ans : 1
+	), $template_question ) );
 
 	// Get Poll Answers Data
 	list($order_by, $sort_order) = _polls_get_ans_sort();
@@ -479,15 +487,23 @@ function display_pollvote($poll_id, $display_loading = true) {
 			$poll_multiple_answer_percentage = $poll_question_totalvoters > 0 ? round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 ) : 0;
 			$template_answer = removeslashes( get_option( 'poll_template_votebody' ) );
 
-			$template_answer = apply_filters( 'wp_polls_template_votebody_markup', $template_answer, $poll_answer, array(
-				'%POLL_ID%' => $poll_question_id,
-				'%POLL_ANSWER_ID%' => $poll_answer_id,
-				'%POLL_ANSWER%' => $poll_answer_text,
-				'%POLL_ANSWER_VOTES%' => number_format_i18n( $poll_answer_votes ),
-				'%POLL_ANSWER_PERCENTAGE%' => $poll_answer_percentage,
-				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%' => $poll_multiple_answer_percentage,
-				'%POLL_CHECKBOX_RADIO%' => $poll_multiple_ans > 0 ? 'checkbox' : 'radio'
-			));
+			$template_answer = apply_filters( 'wp_polls_template_votebody_markup', str_replace( array(
+				'%POLL_ID%',
+				'%POLL_ANSWER_ID%',
+				'%POLL_ANSWER%',
+				'%POLL_ANSWER_VOTES%',
+				'%POLL_ANSWER_PERCENTAGE%',
+				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%' ,
+				'%POLL_CHECKBOX_RADIO%'
+			), array(
+				$poll_question_id,
+				$poll_answer_id,
+				$poll_answer_text,
+				number_format_i18n( $poll_answer_votes ),
+				$poll_answer_percentage,
+				$poll_multiple_answer_percentage,
+				$poll_multiple_ans > 0 ? 'checkbox' : 'radio'
+			), $template_answer ) );
 
 			// Print Out Voting Form Body Template
 			$temp_pollvote .= "\t\t$template_answer\n";
@@ -505,13 +521,19 @@ function display_pollvote($poll_id, $display_loading = true) {
 		// Voting Form Footer Variables
 		$template_footer = removeslashes(get_option('poll_template_votefooter'));
 
-		$template_footer = apply_filters( 'wp_polls_template_votefooter_markup', $template_footer, $poll_question, array(
-			'%POLL_ID%' => $poll_question_id,
-			'%POLL_RESULT_URL%' => $poll_result_url,
-			'%POLL_START_DATE%' => $poll_start_date,
-			'%POLL_END_DATE%' => $poll_end_date,
-			'%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
-		));
+		$template_footer = apply_filters( 'wp_polls_template_votefooter_markup', str_replace( array(
+			'%POLL_ID%',
+			'%POLL_RESULT_URL%',
+			'%POLL_START_DATE%',
+			'%POLL_END_DATE%',
+			'%POLL_MULTIPLE_ANS_MAX%'
+		), array(
+			$poll_question_id,
+			$poll_result_url,
+			$poll_start_date,
+			$poll_end_date,
+			$poll_multiple_ans > 0 ? $poll_multiple_ans : 1
+		), $template_footer ) );
 
 		// Print Out Voting Form Footer Template
 		$temp_pollvote .= "\t\t$template_footer\n";
