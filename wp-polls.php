@@ -1318,6 +1318,112 @@ function in_pollarchive() {
 	return true;
 }
 
+function vote_poll_process($poll_id, $poll_aid_array = [])
+{
+	global $wpdb, $user_identity, $user_ID;
+
+	do_action('wp_polls_vote_poll');
+
+	$polla_aids = $wpdb->get_col( $wpdb->prepare( "SELECT polla_aid FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
+	$is_real = count( array_intersect( $poll_aid_array, $polla_aids ) ) === count( $poll_aid_array );
+	
+	if( !$is_real ) {
+		throw new InvalidArgumentException(sprintf(__('Invalid Answer to Poll ID #%s', 'wp-polls'), $poll_id));
+	}
+
+	if (!check_allowtovote()) {
+		throw new InvalidArgumentException(sprintf(__('User is not allowed to vote for Poll ID #%s', 'wp-polls'), $poll_id));
+	}
+
+	if (empty($poll_aid_array)) {
+		throw new InvalidArgumentException(sprintf(__('No anwsers given for Poll ID #%s', 'wp-polls'), $poll_id));
+	}
+
+	if($poll_id === 0) {
+		throw new InvalidArgumentException(sprintf(__('Invalid Poll ID. Poll ID #%s', 'wp-polls'), $poll_id));
+	}
+
+	$is_poll_open = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsq WHERE pollq_id = %d AND pollq_active = 1", $poll_id ) );
+	
+	if ($is_poll_open === 0) {
+		throw new InvalidArgumentException(sprintf(__( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id ));
+	}
+
+	$check_voted = check_voted($poll_id);
+	if ( !empty( $check_voted ) ) {
+		throw new InvalidArgumentException(sprintf(__('You Had Already Voted For This Poll. Poll ID #%s', 'wp-polls'), $poll_id));
+	}
+
+	if (!empty($user_identity)) {
+		$pollip_user = $user_identity;
+	} elseif ( ! empty( $_COOKIE['comment_author_' . COOKIEHASH] ) ) {
+		$pollip_user = $_COOKIE['comment_author_' . COOKIEHASH];
+	} else {
+		$pollip_user = __('Guest', 'wp-polls');
+	}
+
+	$pollip_user = sanitize_text_field( $pollip_user );
+	$pollip_userid = $user_ID;
+	$pollip_ip = poll_get_ipaddress();
+	$pollip_host = poll_get_hostname();
+	$pollip_timestamp = current_time('timestamp');
+	$poll_logging_method = (int) get_option('poll_logging_method');
+
+	// Only Create Cookie If User Choose Logging Method 1 Or 3
+	if ( $poll_logging_method === 1 || $poll_logging_method === 3 ) {
+		$cookie_expiry = (int) get_option('poll_cookielog_expiry');
+		if ($cookie_expiry === 0) {
+			$cookie_expiry = YEAR_IN_SECONDS;
+		}
+		setcookie( 'voted_' . $poll_id, implode(',', $poll_aid_array ), $pollip_timestamp + $cookie_expiry, apply_filters( 'wp_polls_cookiepath', SITECOOKIEPATH ) );
+	}
+
+	$i = 0;
+	foreach ($poll_aid_array as $polla_aid) {
+		error_log(__LINE__);
+		$update_polla_votes = $wpdb->query( "UPDATE $wpdb->pollsa SET polla_votes = (polla_votes + 1) WHERE polla_qid = $poll_id AND polla_aid = $polla_aid" );
+		if (!$update_polla_votes) {
+			unset($poll_aid_array[$i]);
+		}
+		$i++;
+	}
+
+	$vote_q = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . count( $poll_aid_array ) . "), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = $poll_id AND pollq_active = 1");
+	if (!$vote_q) {
+		throw new InvalidArgumentException(sprintf(__('Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls'), $poll_id));
+	}
+
+	foreach ($poll_aid_array as $polla_aid) {
+		// Log Ratings In DB If User Choose Logging Method 2, 3 or 4
+		if ( $poll_logging_method > 1 ){
+			$wpdb->insert(
+				$wpdb->pollsip,
+				array(
+					'pollip_qid'       => $poll_id,
+					'pollip_aid'       => $polla_aid,
+					'pollip_ip'        => $pollip_ip,
+					'pollip_host'      => $pollip_host,
+					'pollip_timestamp' => $pollip_timestamp,
+					'pollip_user'      => $pollip_user,
+					'pollip_userid'    => $pollip_userid
+				),
+				array(
+					'%s',
+					'%s',
+					'%s',
+					'%s',
+					'%s',
+					'%s',
+					'%d'
+				)
+			);
+		}
+	}
+	do_action( 'wp_polls_vote_poll_success' );
+
+	return display_pollresult($poll_id, $poll_aid_array, false);
+}
+
 
 ### Function: Vote Poll
 add_action('wp_ajax_polls', 'vote_poll');
@@ -1349,92 +1455,12 @@ function vote_poll() {
 		switch( sanitize_key( $_REQUEST['view'] ) ) {
 			// Poll Vote
 			case 'process':
-				do_action('wp_polls_vote_poll');
-				$poll_aid_array = array_unique( array_map('intval', array_map('sanitize_key', explode( ',', $_POST["poll_$poll_id"] ) ) ) );
-				$polla_aids = $wpdb->get_col( $wpdb->prepare( "SELECT polla_aid FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
-
-				$is_real = count( array_intersect( $poll_aid_array, $polla_aids ) ) === count( $poll_aid_array );
-				// The multiple ifs is ugly, I know it.  Feel free to send a PR to fix it
-				if( $is_real ) {
-					if($poll_id > 0 && !empty($poll_aid_array) && check_allowtovote()) {
-						$is_poll_open = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsq WHERE pollq_id = %d AND pollq_active = 1", $poll_id ) );
-						if ( $is_poll_open > 0 ) {
-							$check_voted = check_voted($poll_id);
-							if ( empty( $check_voted ) ) {
-								if (!empty($user_identity)) {
-									$pollip_user = $user_identity;
-								} elseif ( ! empty( $_COOKIE['comment_author_' . COOKIEHASH] ) ) {
-									$pollip_user = $_COOKIE['comment_author_' . COOKIEHASH];
-								} else {
-									$pollip_user = __('Guest', 'wp-polls');
-								}
-								$pollip_user = sanitize_text_field( $pollip_user );
-								$pollip_userid = $user_ID;
-								$pollip_ip = poll_get_ipaddress();
-								$pollip_host = poll_get_hostname();
-								$pollip_timestamp = current_time('timestamp');
-								$poll_logging_method = (int) get_option('poll_logging_method');
-								// Only Create Cookie If User Choose Logging Method 1 Or 3
-								if ( $poll_logging_method === 1 || $poll_logging_method === 3 ) {
-									$cookie_expiry = (int) get_option('poll_cookielog_expiry');
-									if ($cookie_expiry === 0) {
-										$cookie_expiry = YEAR_IN_SECONDS;
-									}
-									setcookie( 'voted_' . $poll_id, implode(',', $poll_aid_array ), $pollip_timestamp + $cookie_expiry, apply_filters( 'wp_polls_cookiepath', SITECOOKIEPATH ) );
-								}
-								$i = 0;
-								foreach ($poll_aid_array as $polla_aid) {
-									$update_polla_votes = $wpdb->query( "UPDATE $wpdb->pollsa SET polla_votes = (polla_votes + 1) WHERE polla_qid = $poll_id AND polla_aid = $polla_aid" );
-									if (!$update_polla_votes) {
-										unset($poll_aid_array[$i]);
-									}
-									$i++;
-								}
-								$vote_q = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . count( $poll_aid_array ) . "), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = $poll_id AND pollq_active = 1");
-								if ($vote_q) {
-									foreach ($poll_aid_array as $polla_aid) {
-										// Log Ratings In DB If User Choose Logging Method 2, 3 or 4
-										if ( $poll_logging_method > 1 ){
-											$wpdb->insert(
-												$wpdb->pollsip,
-												array(
-													'pollip_qid'       => $poll_id,
-													'pollip_aid'       => $polla_aid,
-													'pollip_ip'        => $pollip_ip,
-													'pollip_host'      => $pollip_host,
-													'pollip_timestamp' => $pollip_timestamp,
-													'pollip_user'      => $pollip_user,
-													'pollip_userid'    => $pollip_userid
-												),
-												array(
-													'%s',
-													'%s',
-													'%s',
-													'%s',
-													'%s',
-													'%s',
-													'%d'
-												)
-											);
-										}
-									}
-									echo display_pollresult($poll_id, $poll_aid_array, false);
-									do_action( 'wp_polls_vote_poll_success' );
-								} else {
-									printf(__('Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls'), $poll_id);
-								} // End if($vote_a)
-							} else {
-								printf(__('You Had Already Voted For This Poll. Poll ID #%s', 'wp-polls'), $poll_id);
-							} // End if($check_voted)
-						} else {
-							printf( __( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id );
-						}  // End if($is_poll_open > 0)
-					} else {
-						printf(__('Invalid Poll ID. Poll ID #%s', 'wp-polls'), $poll_id);
-					} // End if($poll_id > 0 && !empty($poll_aid_array) && check_allowtovote())
-				} else {
-					 printf(__('Invalid Answer to Poll ID #%s', 'wp-polls'), $poll_id);
-				} //End if(!isRealAnswer($poll_id,$poll_aid))
+				try {
+					$poll_aid_array = array_unique( array_map('intval', array_map('sanitize_key', explode( ',', $_POST["poll_$poll_id"] ) ) ) );
+					echo vote_poll_process($poll_id, $poll_aid_array);				
+				} catch (Exception $e) {
+					echo $e->getMessage();
+				}
 				break;
 			// Poll Result
 			case 'result':
