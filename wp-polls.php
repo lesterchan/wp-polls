@@ -1380,7 +1380,6 @@ function vote_poll_process($poll_id, $poll_aid_array = [])
 
 	$i = 0;
 	foreach ($poll_aid_array as $polla_aid) {
-		error_log(__LINE__);
 		$update_polla_votes = $wpdb->query( "UPDATE $wpdb->pollsa SET polla_votes = (polla_votes + 1) WHERE polla_qid = $poll_id AND polla_aid = $polla_aid" );
 		if (!$update_polla_votes) {
 			unset($poll_aid_array[$i]);
