@@ -225,10 +225,10 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 <?php endif; ?> 
 ```
 
-### To Display Poll Timestamp by ID
+### To Display Poll Time by ID and date format
 
 ```php
-<?php if ( function_exists( 'get_polltimestamp' ) ): ?>
-	<?php get_polltimestamp($poll_id); ?>
+<?php if ( function_exists( 'get_polltime' ) ): ?>
+	<?php get_polltime($poll_id, $date_format); ?>
 <?php endif; ?>
 ```

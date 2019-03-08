@@ -856,7 +856,7 @@ if(!function_exists('get_pollvotes_by_id')) {
 	function get_pollvotes_by_id($poll_id, $display = true) {
 		global $wpdb;
 		$poll_id = (int) $poll_id;
-		$totalvotes = (int) $wpdb->get_var("SELECT pollq_totalvotes FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id);
+		$totalvotes = (int) $wpdb->get_var( $wpdb->prepare("SELECT pollq_totalvotes FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id));
 		if($display) {
 			echo $totalvotes;
 		} else {
@@ -879,16 +879,17 @@ if(!function_exists('get_pollvoters')) {
 	}
 }
 
-### Function: Get Poll Timestamp Based on Poll ID
-if(!function_exists('get_polltimestamp')) {
-	function get_polltimestamp($poll_id, $display = true) {
+### Function: Get Poll Time Based on Poll ID and Date Format
+if(!function_exists('get_polltime')) {
+	function get_polltime($poll_id, $date_format = "d/m/Y", $display = true) {
 		global $wpdb;
 		$poll_id = (int) $poll_id;
-		$timestamp = (int) $wpdb->get_var("SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id);
+		$timestamp = (int) $wpdb->get_var( $wpdb->prepare("SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id));
+		$formatted_date = date($date_format,$timestamp);
 		if($display) {
-			echo $timestamp;
+			echo $formatted_date;
 		} else {
-			return $timestamp;
+			return $formatted_date;
 		}
 	}
 }
