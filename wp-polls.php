@@ -881,7 +881,7 @@ if(!function_exists('get_pollvoters')) {
 
 ### Function: Get Poll Timestamp Based on Poll ID
 if(!function_exists('get_polltimestamp')) {
-	function get_pollvotes_by_id($poll_id, $display = true) {
+	function get_polltimestamp($poll_id, $display = true) {
 		global $wpdb;
 		$poll_id = (int) $poll_id;
 		$timestamp = (int) $wpdb->get_var("SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id);
