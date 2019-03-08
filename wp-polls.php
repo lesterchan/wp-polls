@@ -851,6 +851,20 @@ if(!function_exists('get_pollvotes')) {
 	}
 }
 
+### Function: Get Poll Votes Based on Poll ID
+if(!function_exists('get_pollvotes_by_id')) {
+	function get_pollvotes_by_id($poll_id, $display = true) {
+		global $wpdb;
+		$poll_id = (int) $poll_id;
+		$totalvotes = (int) $wpdb->get_var("SELECT pollq_totalvotes FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id);
+		if($display) {
+			echo $totalvotes;
+		} else {
+			return $totalvotes;
+		}
+	}
+}
+
 
 ### Function: Get Poll Total Voters
 if(!function_exists('get_pollvoters')) {
@@ -861,6 +875,20 @@ if(!function_exists('get_pollvoters')) {
 			echo $totalvoters;
 		} else {
 			return $totalvoters;
+		}
+	}
+}
+
+### Function: Get Poll Timestamp Based on Poll ID
+if(!function_exists('get_polltimestamp')) {
+	function get_pollvotes_by_id($poll_id, $display = true) {
+		global $wpdb;
+		$poll_id = (int) $poll_id;
+		$timestamp = (int) $wpdb->get_var("SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id);
+		if($display) {
+			echo $timestamp;
+		} else {
+			return $timestamp;
 		}
 	}
 }

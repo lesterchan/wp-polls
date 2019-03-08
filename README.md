@@ -209,10 +209,26 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 <?php endif; ?> 
 ```
  
+### To Display Poll Votes by ID
+
+```php
+<?php if ( function_exists( 'get_pollvotes_by_id' ) ): ?>
+	<?php get_pollvotes_by_id($poll_id); ?>
+<?php endif; ?>
+```
+
 ### To Display Total Poll Voters
 
 ```php
 <?php if ( function_exists( 'get_pollvoters' ) ): ?>
 	<?php get_pollvoters(); ?>
 <?php endif; ?> 
+```
+
+### To Display Poll Timestamp by ID
+
+```php
+<?php if ( function_exists( 'get_polltimestamp' ) ): ?>
+	<?php get_polltimestamp($poll_id); ?>
+<?php endif; ?>
 ```
