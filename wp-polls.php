@@ -598,16 +598,9 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 	if ( $poll_question && $poll_answers ) {
 		// Store The Percentage Of The Poll
 		$poll_answer_percentage_array = array();
-		// Is The Poll Total Votes 0?
-		$poll_totalvotes_zero = true;
-		if ( $poll_question_totalvotes > 0 ) {
-			$poll_totalvotes_zero = false;
-		}
-		// Is The Poll Total Voters 0?
-		$poll_totalvoters_zero = true;
-		if ( $poll_question_totalvoters > 0 ) {
-			$poll_totalvoters_zero = false;
-		}
+		// Is The Poll Total Votes or Voters 0?
+		$poll_totalvotes_zero = $poll_question_totalvotes <= 0;
+		$poll_totalvoters_zero = $poll_question_totalvoters <= 0;
 		// Print Out Result Header Template
 		$temp_pollresult .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
 		$temp_pollresult .= "\t\t$template_question\n";
@@ -1048,15 +1041,8 @@ function polls_archive() {
 		$poll_least_votes = 0;
 		$poll_least_percentage = 0;
 		// Is The Poll Total Votes 0?
-		$poll_totalvotes_zero = true;
-		if($polls_question['totalvotes'] > 0) {
-			$poll_totalvotes_zero = false;
-		}
-		// Is The Poll Total Voters 0?
-		$poll_totalvoters_zero = true;
-		if($polls_question['totalvotesr'] > 0) {
-			$poll_totalvoters_zero = false;
-		}
+		$poll_totalvotes_zero = $polls_question['totalvotes'] <= 0;
+		$poll_totalvoters_zero = $polls_question['totalvoters'] <= 0;
 		$poll_start_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $polls_question['start']));
 		if(empty($polls_question['end'])) {
 			$poll_end_date  = __('No Expiry', 'wp-polls');
