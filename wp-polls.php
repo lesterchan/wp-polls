@@ -603,6 +603,11 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		if ( $poll_question_totalvotes > 0 ) {
 			$poll_totalvotes_zero = false;
 		}
+		// Is The Poll Total Voters 0?
+		$poll_totalvoters_zero = true;
+		if ( $poll_question_totalvoters > 0 ) {
+			$poll_totalvoters_zero = false;
+		}
 		// Print Out Result Header Template
 		$temp_pollresult .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
 		$temp_pollresult .= "\t\t$template_question\n";
@@ -615,7 +620,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 			$poll_answer_percentage = 0;
 			$poll_multiple_answer_percentage = 0;
 			$poll_answer_imagewidth = 1;
-			if ( ! $poll_totalvotes_zero && $poll_answer_votes > 0 ) {
+			if ( ! $poll_totalvotes_zero && ! $poll_totalvoters_zero && $poll_answer_votes > 0 ) {
 				$poll_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvotes ) * 100 );
 				$poll_multiple_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 );
 				$poll_answer_imagewidth = round( $poll_answer_percentage );
@@ -880,13 +885,13 @@ if(!function_exists('get_pollvoters')) {
 }
 
 ### Function: Get Poll Time Based on Poll ID and Date Format
-if(!function_exists('get_polltime')) {
-	function get_polltime($poll_id, $date_format = 'd/m/Y', $display = true) {
+if ( ! function_exists( 'get_polltime' ) ) {
+	function get_polltime( $poll_id, $date_format = 'd/m/Y', $display = true ) {
 		global $wpdb;
 		$poll_id = (int) $poll_id;
-		$timestamp = (int) $wpdb->get_var( $wpdb->prepare("SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id));
+		$timestamp = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 		$formatted_date = date( $date_format, $timestamp );
-		if($display) {
+		if ( $display ) {
 			echo $formatted_date;
 		} else {
 			return $formatted_date;
@@ -1047,12 +1052,17 @@ function polls_archive() {
 		if($polls_question['totalvotes'] > 0) {
 			$poll_totalvotes_zero = false;
 		}
-			$poll_start_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $polls_question['start']));
-			if(empty($polls_question['end'])) {
-				$poll_end_date  = __('No Expiry', 'wp-polls');
-			} else {
-				$poll_end_date  = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $polls_question['end']));
-			}
+		// Is The Poll Total Voters 0?
+		$poll_totalvoters_zero = true;
+		if($polls_question['totalvotesr'] > 0) {
+			$poll_totalvoters_zero = false;
+		}
+		$poll_start_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $polls_question['start']));
+		if(empty($polls_question['end'])) {
+			$poll_end_date  = __('No Expiry', 'wp-polls');
+		} else {
+			$poll_end_date  = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $polls_question['end']));
+		}
 		// Archive Poll Header
 		$template_archive_header = removeslashes(get_option('poll_template_pollarchiveheader'));
 		// Poll Question Variables
@@ -1078,7 +1088,7 @@ function polls_archive() {
 			$poll_answer_percentage = 0;
 			$poll_multiple_answer_percentage = 0;
 			$poll_answer_imagewidth = 1;
-			if ( ! $poll_totalvotes_zero && $polls_answer['votes'] > 0 ) {
+			if ( ! $poll_totalvotes_zero && ! $poll_totalvoters_zero && $polls_answer['votes'] > 0 ) {
 				$poll_answer_percentage = round( ( $polls_answer['votes'] / $polls_question['totalvotes'] ) * 100 );
 				$poll_multiple_answer_percentage = round( ( $polls_answer['votes'] / $polls_question['totalvoters'] ) * 100 );
 				$poll_answer_imagewidth = round( $poll_answer_percentage * 0.9 );
