@@ -60,7 +60,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		'loading'   => isset( $_POST['poll_ajax_style_loading'] ) ? (int) sanitize_key( $_POST['poll_ajax_style_loading'] ) : 1,
 		'fading'    => isset( $_POST['poll_ajax_style_fading'] ) ? (int) sanitize_key( $_POST['poll_ajax_style_fading'] ) : 1
 	);
-	$poll_ans_sortby            = isset( $_POST['poll_ans_sortby'] ) && in_array( $_POST['poll_ans_sortby'], array( 'polla_aid', 'polla_answers', 'RAND()' ), true ) ? $_POST['poll_ans_sortby'] : 'polla_aid';
+	$poll_ans_sortby            = isset( $_POST['poll_ans_sortby'] ) && in_array( $_POST['poll_ans_sortby'], array( 'polla_votes', 'polla_aid', 'polla_answers', 'RAND()' ), true ) ? $_POST['poll_ans_sortby'] : 'polla_aid';
 	$poll_ans_sortorder         = isset( $_POST['poll_ans_sortorder'] ) && in_array( $_POST['poll_ans_sortorder'], array( 'asc', 'desc' ), true ) ? $_POST['poll_ans_sortorder'] : 'asc';
 	$poll_ans_result_sortby     = isset( $_POST['poll_ans_result_sortby'] ) && in_array( $_POST['poll_ans_result_sortby'], array( 'polla_votes', 'polla_aid', 'polla_answers', 'RAND()' ), true ) ? $_POST['poll_ans_result_sortby'] : 'polla_votes';
 	$poll_ans_result_sortorder  = isset( $_POST['poll_ans_result_sortorder'] ) && in_array( $_POST['poll_ans_result_sortorder'], array( 'asc', 'desc' ), true ) ? $_POST['poll_ans_result_sortorder'] : 'desc';
