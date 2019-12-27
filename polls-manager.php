@@ -143,7 +143,7 @@ if(!empty($_POST['do'])) {
                 $text .= '<p style="color: red">'.sprintf(__('Invalid Poll \'%s\'.', 'wp-polls'), removeslashes($pollq_question)).'</p>';
             }
             // Add Poll Answers (If Needed)
-            $polla_answers_new = isset($_POST['polla_answers_new']) ? wp_kses_post( $_POST['polla_answers_new'] ) : null;
+            $polla_answers_new = isset($_POST['polla_answers_new']) ? $_POST['polla_answers_new'] : array();
             if(!empty($polla_answers_new)) {
                 $i = 0;
                 $polla_answers_new_votes = $_POST['polla_answers_new_votes'];
