@@ -4,7 +4,7 @@ Donate link: https://lesterchan.net/site/donation/
 Tags: poll, polls, polling, vote, booth, democracy, ajax, survey, post, widget  
 Requires at least: 4.9.6  
 Tested up to: 5.3  
-Stable tag: 2.75.3  
+Stable tag: 2.75.4  
 
 Adds an AJAX poll system to your WordPress blog. You can also easily add a poll into your WordPress's blog post/page.
 
@@ -24,7 +24,10 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
 
 ## Changelog
-### VErsion 2.75.3
+### Version 2.75.4
+* FIXED: Unable to edit poll because of class-wp-block-parser.php.
+
+### Version 2.75.3
 * FIXED: Broken filter for templates
 * FIXED: Divison by 0 by totalvoters
 * FIXED: Add whitelist to sortby poll answers

@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.75.3
+Version: 2.75.4
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -11,7 +11,7 @@ Text Domain: wp-polls
 
 
 /*
-	Copyright 2019  Lester Chan  (email : lesterchan@gmail.com)
+	Copyright 2020  Lester Chan  (email : lesterchan@gmail.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ Text Domain: wp-polls
 */
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.75.3' );
+define( 'WP_POLLS_VERSION', '2.75.4' );
 
 
 ### Create Text Domain For Translations
@@ -1351,7 +1351,7 @@ function vote_poll_process($poll_id, $poll_aid_array = [])
 
 	$polla_aids = $wpdb->get_col( $wpdb->prepare( "SELECT polla_aid FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
 	$is_real = count( array_intersect( $poll_aid_array, $polla_aids ) ) === count( $poll_aid_array );
-	
+
 	if( !$is_real ) {
 		throw new InvalidArgumentException(sprintf(__('Invalid Answer to Poll ID #%s', 'wp-polls'), $poll_id));
 	}
@@ -1369,7 +1369,7 @@ function vote_poll_process($poll_id, $poll_aid_array = [])
 	}
 
 	$is_poll_open = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsq WHERE pollq_id = %d AND pollq_active = 1", $poll_id ) );
-	
+
 	if ($is_poll_open === 0) {
 		throw new InvalidArgumentException(sprintf(__( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id ));
 	}
@@ -1481,7 +1481,7 @@ function vote_poll() {
 			case 'process':
 				try {
 					$poll_aid_array = array_unique( array_map('intval', array_map('sanitize_key', explode( ',', $_POST["poll_$poll_id"] ) ) ) );
-					echo vote_poll_process($poll_id, $poll_aid_array);				
+					echo vote_poll_process($poll_id, $poll_aid_array);
 				} catch (Exception $e) {
 					echo $e->getMessage();
 				}
