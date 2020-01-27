@@ -381,12 +381,6 @@ switch($mode) {
                 <tbody id="manage_polls">
                     <?php
                         if($polls) {
-                            if(function_exists('dynamic_sidebar')) {
-                                $options = get_option('widget_polls');
-                                $multiple_polls = explode(',', $options['multiple_polls']);
-                            } else {
-                                $multiple_polls = array();
-                            }
                             $i = 0;
                             $current_poll = (int) get_option('poll_currentpoll');
                             $latest_poll = (int) get_option('poll_latestpoll');
@@ -416,8 +410,6 @@ switch($mode) {
                                     if($poll_id === $latest_poll) {
                                         $style = 'class="highlight"';
                                     }
-                                } else if(in_array($poll_id, $multiple_polls, true)) {
-                                    $style = 'class="highlight"';
                                 }
                                 echo "<tr id=\"poll-$poll_id\" $style>\n";
                                 echo '<td><strong>'.number_format_i18n($poll_id).'</strong></td>'."\n";
@@ -430,8 +422,6 @@ switch($mode) {
                                     if($poll_id === $latest_poll) {
                                         echo '<strong>'.__('Displayed:', 'wp-polls').'</strong> ';
                                     }
-                                } else if(in_array($poll_id, $multiple_polls, true)) {
-                                        echo '<strong>'.__('Displayed:', 'wp-polls').'</strong> ';
                                 }
                                 echo wp_kses_post( $poll_question )."</td>\n";
                                 echo '<td>'.number_format_i18n($poll_totalvoters)."</td>\n";
