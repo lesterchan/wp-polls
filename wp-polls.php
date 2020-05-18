@@ -409,6 +409,11 @@ function check_voted_username($poll_id) {
 add_filter( 'wp_polls_template_voteheader_markup', 'poll_template_vote_markup', 10, 3 );
 add_filter( 'wp_polls_template_votebody_markup', 'poll_template_vote_markup', 10, 3 );
 add_filter( 'wp_polls_template_votefooter_markup', 'poll_template_vote_markup', 10, 3) ;
+add_filter( 'wp_polls_template_resultheader_markup', 'poll_template_vote_markup', 10, 3) ;
+add_filter( 'wp_polls_template_resultbody_markup', 'poll_template_vote_markup', 10, 3) ;
+add_filter( 'wp_polls_template_resultbody2_markup', 'poll_template_vote_markup', 10, 3) ;
+add_filter( 'wp_polls_template_resultfooter_markup', 'poll_template_vote_markup', 10, 3) ;
+add_filter( 'wp_polls_template_resultfooter2_markup', 'poll_template_vote_markup', 10, 3) ;
 
 function poll_template_vote_markup( $template, $object, $variables ) {
 	return str_replace( array_keys( $variables ), array_values( $variables ), $template ) ;
@@ -571,21 +576,17 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 	}
 	$poll_multiple_ans = (int) $poll_question->pollq_multiple;
 	$template_question = removeslashes( get_option( 'poll_template_resultheader' ) );
-	$template_question = str_replace( array(
-		'%POLL_QUESTION%',
-		'%POLL_ID%',
-		'%POLL_TOTALVOTES%',
-		'%POLL_TOTALVOTERS%',
-		'%POLL_START_DATE%',
-		'%POLL_END_DATE%'
-	), array(
-		$poll_question_text,
-		$poll_question_id,
-		$poll_question_totalvotes,
-		$poll_question_totalvoters,
-		$poll_start_date,
-		$poll_end_date
-	), $template_question );
+	$template_variables = array(
+		'%POLL_QUESTION%' => $poll_question_text,
+		'%POLL_ID%' => $poll_question_id,
+		'%POLL_TOTALVOTES%' => $poll_question_totalvotes,
+		'%POLL_TOTALVOTERS%' => $poll_question_totalvoters,
+		'%POLL_START_DATE%' => $poll_start_date,
+		'%POLL_END_DATE%' => $poll_end_date
+	);
+
+	$template_question = apply_filters('wp_polls_template_resultheader_markup', $template_question, $poll_question, $template_variables);
+
 	if($poll_multiple_ans > 0) {
 		$template_question = str_replace( '%POLL_MULTIPLE_ANS_MAX%', $poll_multiple_ans, $template_question );
 	} else {
@@ -634,34 +635,26 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 				}
 			}
 
+			$template_variables = array(
+				'%POLL_ID%' => $poll_question_id,
+				'%POLL_ANSWER_ID%' => $poll_answer_id,
+				'%POLL_ANSWER%' => $poll_answer_text,
+				'%POLL_ANSWER_TEXT%' => htmlspecialchars( wp_strip_all_tags( $poll_answer_text ) ),
+				'%POLL_ANSWER_VOTES%' => number_format_i18n( $poll_answer_votes ),
+				'%POLL_ANSWER_PERCENTAGE%' => $poll_answer_percentage,
+				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%' => $poll_multiple_answer_percentage,
+				'%POLL_ANSWER_IMAGEWIDTH%' => $poll_answer_imagewidth
+			);
 			// Let User See What Options They Voted
 			if ( in_array( $poll_answer_id, $user_voted, true ) ) {
 				// Results Body Variables
 				$template_answer = removeslashes( get_option( 'poll_template_resultbody2' ) );
+				$template_answer = apply_filters('wp_polls_template_resultbody2_markup', $template_answer, $poll_answer, $template_variables);
 			} else {
 				// Results Body Variables
 				$template_answer = removeslashes (get_option( 'poll_template_resultbody' ) );
+				$template_answer = apply_filters('wp_polls_template_resultbody_markup', $template_answer, $poll_answer, $template_variables);
 			}
-
-			$template_answer = str_replace( array(
-				'%POLL_ID%',
-				'%POLL_ANSWER_ID%',
-				'%POLL_ANSWER%',
-				'%POLL_ANSWER_TEXT%',
-				'%POLL_ANSWER_VOTES%',
-				'%POLL_ANSWER_PERCENTAGE%',
-				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%',
-				'%POLL_ANSWER_IMAGEWIDTH%'
-			), array(
-				$poll_question_id,
-				$poll_answer_id,
-				$poll_answer_text,
-				htmlspecialchars( wp_strip_all_tags( $poll_answer_text ) ),
-				number_format_i18n( $poll_answer_votes ),
-				$poll_answer_percentage,
-				$poll_multiple_answer_percentage,
-				$poll_answer_imagewidth
-			), $template_answer );
 
 			// Print Out Results Body Template
 			$temp_pollresult .= "\t\t$template_answer\n";
@@ -683,36 +676,26 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 			}
 		}
 		// Results Footer Variables
+		$template_variables = array(
+			'%POLL_START_DATE%' => $poll_start_date,
+			'%POLL_END_DATE%' => $poll_end_date,
+			'%POLL_ID%' => $poll_question_id,
+			'%POLL_TOTALVOTES%' => number_format_i18n( $poll_question_totalvotes ),
+			'%POLL_TOTALVOTERS%' => number_format_i18n( $poll_question_totalvoters ),
+			'%POLL_MOST_ANSWER%' => $poll_most_answer,
+			'%POLL_MOST_VOTES%' => number_format_i18n( $poll_most_votes ),
+			'%POLL_MOST_PERCENTAGE%' => $poll_most_percentage,
+			'%POLL_LEAST_ANSWER%' => $poll_least_answer,
+			'%POLL_LEAST_VOTES%' => number_format_i18n( $poll_least_votes ),
+			'%POLL_LEAST_PERCENTAGE%' => $poll_least_percentage
+		);
 		if ( ! empty( $user_voted ) || $poll_question_active === 0 || ! check_allowtovote() ) {
 			$template_footer = removeslashes( get_option( 'poll_template_resultfooter' ) );
+			$template_footer = apply_filters('wp_polls_template_resultfooter_markup', $template_footer, $poll_answer, $template_variables);
 		} else {
 			$template_footer = removeslashes( get_option( 'poll_template_resultfooter2' ) );
+			$template_footer = apply_filters('wp_polls_template_resultfooter2_markup', $template_footer, $poll_answer, $template_variables);
 		}
-		$template_footer = str_replace( array(
-			'%POLL_START_DATE%',
-			'%POLL_END_DATE%',
-			'%POLL_ID%',
-			'%POLL_TOTALVOTES%',
-			'%POLL_TOTALVOTERS%',
-			'%POLL_MOST_ANSWER%',
-			'%POLL_MOST_VOTES%',
-			'%POLL_MOST_PERCENTAGE%',
-			'%POLL_LEAST_ANSWER%',
-			'%POLL_LEAST_VOTES%',
-			'%POLL_LEAST_PERCENTAGE%'
-		), array(
-			$poll_start_date,
-			$poll_end_date,
-			$poll_question_id,
-			number_format_i18n( $poll_question_totalvotes ),
-			number_format_i18n( $poll_question_totalvoters ),
-			$poll_most_answer,
-			number_format_i18n( $poll_most_votes ),
-			$poll_most_percentage,
-			$poll_least_answer,
-			number_format_i18n( $poll_least_votes ),
-			$poll_least_percentage
-		), $template_footer );
 		if ( $poll_multiple_ans > 0 ) {
 			$template_footer = str_replace( '%POLL_MULTIPLE_ANS_MAX%', $poll_multiple_ans, $template_footer );
 		} else {
