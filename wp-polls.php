@@ -691,10 +691,10 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		);
 		if ( ! empty( $user_voted ) || $poll_question_active === 0 || ! check_allowtovote() ) {
 			$template_footer = removeslashes( get_option( 'poll_template_resultfooter' ) );
-			$template_footer = apply_filters('wp_polls_template_resultfooter_markup', $template_footer, $poll_answer, $template_variables);
+			$template_footer = apply_filters('wp_polls_template_resultfooter_markup', $template_footer, $poll_question, $template_variables);
 		} else {
 			$template_footer = removeslashes( get_option( 'poll_template_resultfooter2' ) );
-			$template_footer = apply_filters('wp_polls_template_resultfooter2_markup', $template_footer, $poll_answer, $template_variables);
+			$template_footer = apply_filters('wp_polls_template_resultfooter2_markup', $template_footer, $poll_question, $template_variables);
 		}
 		if ( $poll_multiple_ans > 0 ) {
 			$template_footer = str_replace( '%POLL_MULTIPLE_ANS_MAX%', $poll_multiple_ans, $template_footer );
