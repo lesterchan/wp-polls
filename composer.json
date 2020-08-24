@@ -10,11 +10,5 @@
             "name": "Lester Chan",
             "email": "lesterchan@gmail.com"
         }
-    ],
-    "repositories": [
-        {
-            "type":"composer",
-            "url":"https://wpackagist.org"
-        }
     ]
 }
