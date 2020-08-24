@@ -34,6 +34,7 @@ wp_polls_template_resultbody_variables
 wp_polls_template_resultfooter_variables
 These can be used to register new variables on the admin side.
 Added readme documentation for the usage.
+* NEW: composer.json
 
 ### Version 2.75.5
  * NEW: New filter for templates: wp_polls_template_resultheader_markup, wp_polls_template_resultbody_markup, wp_polls_template_resultbody2_markup, wp_polls_template_resultfooter_markup, wp_polls_template_resultfooter2_markup. Props @Jaska.
