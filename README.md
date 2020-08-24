@@ -284,5 +284,5 @@ Good practice is to name them for example with prefix `STR_` here `STR_TOTAL_VOT
 // Trigger the filter
 \add_filter( 'wp_polls_template_resultfooter_variables', 'wp_polls_template_resultfooter_variables' , 10, 1 );
 ```
-In the admin side just call the custom variable like so and it works and the variable has been translated.
+In the admin side just call the custom variable like so and the variable has been translated in the front-end.
 `%STR_TOTAL_VOTERS%'`
