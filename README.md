@@ -265,7 +265,7 @@ wp_polls_template_resultfooter_variables
 ```
 
 Add filter to your theme and register custom variable where you will add your translation.
-Good practice is to name them for example with prefix `STR_` here `STR_TOTAL_VOTERS`.
+Good practice is to name them for example with prefix `STR_` in the example `STR_TOTAL_VOTERS`.
 ```php
     /**
      * Localize wp_polls_template_resultfooter_variables.
