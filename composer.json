@@ -6,15 +6,15 @@
     "license": ["GPL-2.0-only"],
     "minimum-stability": "dev",
     "authors": [
-      {
-        "name": "Lester Chan",
-        "email": "lesterchan@gmail.com"
-      }
+        {
+            "name": "Lester Chan",
+            "email": "lesterchan@gmail.com"
+        }
     ],
     "repositories": [
-      {
-        "type":"composer",
-        "url":"https://wpackagist.org"
-      }
+        {
+            "type":"composer",
+            "url":"https://wpackagist.org"
+        }
     ]
 }
