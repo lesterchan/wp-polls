@@ -26,18 +26,11 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ## Changelog
 
 ### Version 2.75.6
- * NEW: New filter for template variables (Props @Liblastic):
-wp_polls_template_votebody_variables
-wp_polls_template_votefooter
-wp_polls_template_resultheader_variables
-wp_polls_template_resultbody_variables
-wp_polls_template_resultfooter_variables
-These can be used to register new variables on the admin side.
-Added readme documentation for the usage.
+* NEW: New filter for template variables: wp_polls_template_votebody_variables, wp_polls_template_votefooter, wp_polls_template_resultheader_variables, wp_polls_template_resultbody_variables, wp_polls_template_resultfooter_variables. Props @Liblastic.
 * NEW: composer.json
 
 ### Version 2.75.5
- * NEW: New filter for templates: wp_polls_template_resultheader_markup, wp_polls_template_resultbody_markup, wp_polls_template_resultbody2_markup, wp_polls_template_resultfooter_markup, wp_polls_template_resultfooter2_markup. Props @Jaska.
+* NEW: New filter for templates: wp_polls_template_resultheader_markup, wp_polls_template_resultbody_markup, wp_polls_template_resultbody2_markup, wp_polls_template_resultfooter_markup, wp_polls_template_resultfooter2_markup. Props @Jaska.
 
 ### Version 2.75.4
 * FIXED: Unable to edit poll because of class-wp-block-parser.php.
