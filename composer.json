@@ -1,0 +1,14 @@
+{
+    "name": "lesterchan/wp-polls",
+    "description": "Adds an AJAX poll system to your WordPress blog.",
+    "type": "wordpress-plugin",
+    "keywords": ["wordpress", "plugin", "poll"],
+    "license": ["GPL-2.0-only"],
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Lester Chan",
+            "email": "lesterchan@gmail.com"
+        }
+    ]
+}

@@ -24,6 +24,18 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
 
 ## Changelog
+
+### Version 2.75.6
+ * NEW: New filter for template variables:
+wp_polls_template_votebody_variables
+wp_polls_template_votefooter
+wp_polls_template_resultheader_variables
+wp_polls_template_resultbody_variables
+wp_polls_template_resultfooter_variables
+These can be used to register new variables on the admin side.
+Added readme documentation for the usage.
+* NEW: composer.json
+
 ### Version 2.75.5
  * NEW: New filter for templates: wp_polls_template_resultheader_markup, wp_polls_template_resultbody_markup, wp_polls_template_resultbody2_markup, wp_polls_template_resultfooter_markup, wp_polls_template_resultfooter2_markup. Props @Jaska.
 
@@ -240,3 +252,38 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 	<?php get_polltime( $poll_id, $date_format ); ?>
 <?php endif; ?>
 ```
+
+### Translating the template
+
+The plugin templates can be translated via template variables.
+There are these filters for the custom template variables
+```
+wp_polls_template_votebody_variables
+wp_polls_template_votefooter
+wp_polls_template_resultheader_variables
+wp_polls_template_resultbody_variables
+wp_polls_template_resultfooter_variables
+```
+
+Add filter to your theme and register custom variable where you will add your translation.
+Good practice is to name them for example with prefix `STR_` in the example `STR_TOTAL_VOTERS`.
+```php
+    /**
+     * Localize wp_polls_template_resultfooter_variables.
+     *
+     * @param array $variables An array of template variables.
+     * @return array $variables Modified template variables.
+     */
+    function wp_polls_template_resultfooter_variables( $variables ) {
+
+        // Add strings.
+        $variables['%STR_TOTAL_VOTERS%'] = __( 'Total voters', 'theme-textdomain' );
+
+        return $variables;
+    }
+
+// Trigger the filter
+\add_filter( 'wp_polls_template_resultfooter_variables', 'wp_polls_template_resultfooter_variables' , 10, 1 );
+```
+In the admin side just call the custom variable like so and the variable has been translated in the front-end.
+`%STR_TOTAL_VOTERS%'`
