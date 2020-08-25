@@ -3,8 +3,8 @@ Contributors: GamerZ
 Donate link: https://lesterchan.net/site/donation/  
 Tags: poll, polls, polling, vote, booth, democracy, ajax, survey, post, widget  
 Requires at least: 4.9.6  
-Tested up to: 5.4  
-Stable tag: 2.75.5  
+Tested up to: 5.5  
+Stable tag: 2.75.6  
 
 Adds an AJAX poll system to your WordPress blog. You can also easily add a poll into your WordPress's blog post/page.
 
@@ -26,7 +26,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 ## Changelog
 
 ### Version 2.75.6
- * NEW: New filter for template variables:
+ * NEW: New filter for template variables (Props @Liblastic):
 wp_polls_template_votebody_variables
 wp_polls_template_votefooter
 wp_polls_template_resultheader_variables
@@ -283,7 +283,7 @@ Good practice is to name them for example with prefix `STR_` in the example `STR
     }
 
 // Trigger the filter
-\add_filter( 'wp_polls_template_resultfooter_variables', 'wp_polls_template_resultfooter_variables' , 10, 1 );
+add_filter( 'wp_polls_template_resultfooter_variables', 'wp_polls_template_resultfooter_variables' , 10, 1 );
 ```
 In the admin side just call the custom variable like so and the variable has been translated in the front-end.
 `%STR_TOTAL_VOTERS%'`
