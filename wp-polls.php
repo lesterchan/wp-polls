@@ -593,15 +593,15 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		'%POLL_START_DATE%' => $poll_start_date,
 		'%POLL_END_DATE%' => $poll_end_date
 	);
-
+	if ( $poll_multiple_ans > 0 ) {
+		$template_variables['%POLL_MULTIPLE_ANS_MAX%'] = $poll_multiple_ans;
+	} else {
+		$template_variables['%POLL_MULTIPLE_ANS_MAX%'] = '1';
+	}
+	
 	$template_variables = apply_filters('wp_polls_template_resultheader_variables', $template_variables );
 	$template_question  = apply_filters('wp_polls_template_resultheader_markup', $template_question, $poll_question, $template_variables );
 
-	if($poll_multiple_ans > 0) {
-		$template_question = str_replace( '%POLL_MULTIPLE_ANS_MAX%', $poll_multiple_ans, $template_question );
-	} else {
-		$template_question = str_replace( '%POLL_MULTIPLE_ANS_MAX%', '1', $template_question );
-	}
 	// Get Poll Answers Data
 	list( $order_by, $sort_order ) = _polls_get_ans_result_sort();
 	$poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
@@ -701,6 +701,11 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 			'%POLL_LEAST_VOTES%' => number_format_i18n( $poll_least_votes ),
 			'%POLL_LEAST_PERCENTAGE%' => $poll_least_percentage
 		);
+		if ( $poll_multiple_ans > 0 ) {
+			$template_variables['%POLL_MULTIPLE_ANS_MAX%'] = $poll_multiple_ans;
+		} else {
+			$template_variables['%POLL_MULTIPLE_ANS_MAX%'] = '1';
+		}
 		$template_variables = apply_filters('wp_polls_template_resultfooter_variables', $template_variables );
 
 		if ( ! empty( $user_voted ) || $poll_question_active === 0 || ! check_allowtovote() ) {
@@ -710,11 +715,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 			$template_footer = removeslashes( get_option( 'poll_template_resultfooter2' ) );
 			$template_footer = apply_filters('wp_polls_template_resultfooter2_markup', $template_footer, $poll_question, $template_variables);
 		}
-		if ( $poll_multiple_ans > 0 ) {
-			$template_footer = str_replace( '%POLL_MULTIPLE_ANS_MAX%', $poll_multiple_ans, $template_footer );
-		} else {
-			$template_footer = str_replace( '%POLL_MULTIPLE_ANS_MAX%', '1', $template_footer );
-		}
+
 		// Print Out Results Footer Template
 		$temp_pollresult .= "\t\t$template_footer\n";
 		$temp_pollresult .= "\t\t<input type=\"hidden\" id=\"poll_{$poll_question_id}_nonce\" name=\"wp-polls-nonce\" value=\"".wp_create_nonce('poll_'.$poll_question_id.'-nonce')."\" />\n";
