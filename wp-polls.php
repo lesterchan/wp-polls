@@ -1359,7 +1359,7 @@ function vote_poll_process($poll_id, $poll_aid_array = [])
 	}
 
 	if (empty($poll_aid_array)) {
-		throw new InvalidArgumentException(sprintf(__('No anwsers given for Poll ID #%s', 'wp-polls'), $poll_id));
+		throw new InvalidArgumentException(sprintf(__('No answers given for Poll ID #%s', 'wp-polls'), $poll_id));
 	}
 
 	if($poll_id === 0) {
