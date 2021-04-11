@@ -72,6 +72,13 @@ if(!empty($_POST['do'])) {
             } else {
                 $pollq_multiple = 0;
             }
+			// Allowed Roles
+			$pollq_allowedroles_yes = isset( $_POST['pollq_allowedroles_yes'] ) ? (int) sanitize_key( $_POST['pollq_allowedroles_yes'] ) : 0;
+			if ( $pollq_allowedroles_yes === 1 ) {
+				$pollq_allowedroles = serialize($_POST['pollq_allowedroles']);
+			} else {
+				$pollq_allowedroles = null;
+			}
             // Update Poll's Question
             $text = '';
             $edit_poll_question = $wpdb->update(
@@ -83,7 +90,8 @@ if(!empty($_POST['do'])) {
                     'pollq_active'          => $pollq_active,
                     'pollq_expiry'          => $pollq_expiry,
                     'pollq_multiple'        => $pollq_multiple,
-                    'pollq_totalvoters'     => $pollq_totalvoters
+                    'pollq_totalvoters'     => $pollq_totalvoters,
+					'pollq_allowedroles'    => $pollq_allowedroles,
                 ),
                 array(
                     'pollq_id' => $pollq_id
@@ -95,7 +103,8 @@ if(!empty($_POST['do'])) {
                     '%d',
                     '%s',
                     '%d',
-                    '%d'
+                    '%d',
+					'%s',
                 ),
                 array(
                     '%d'
@@ -187,14 +196,18 @@ if(!empty($_POST['do'])) {
 
 ### Determines Which Mode It Is
 switch($mode) {
-    // Poll Logging
-    case 'logs':
-        require('polls-logs.php');
-        break;
+	// Poll Logging
+	case 'logs':
+		require('polls-logs.php');
+		break;
+	// Poll Statistics
+	case 'stats':
+		do_action( 'wp_polls_manager_stats_file');
+		break;
     // Edit A Poll
     case 'edit':
         $last_col_align = is_rtl() ? 'right' : 'left';
-        $poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_question, pollq_timestamp, pollq_totalvotes, pollq_active, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
+        $poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_question, pollq_timestamp, pollq_totalvotes, pollq_active, pollq_expiry, pollq_multiple, pollq_totalvoters, pollq_allowedroles FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
         $poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY polla_aid ASC", $poll_id ) );
         $poll_noquestion = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(polla_aid) FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
         $poll_question_text = removeslashes($poll_question->pollq_question);
@@ -204,6 +217,7 @@ switch($mode) {
         $poll_expiry = trim($poll_question->pollq_expiry);
         $poll_multiple = (int) $poll_question->pollq_multiple;
         $poll_totalvoters = (int) $poll_question->pollq_totalvoters;
+		$pollq_allowedroles= unserialize($poll_question->pollq_allowedroles);
 ?>
         <?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade">'.removeslashes($text).'</div>'; } else { echo '<div id="message" class="updated" style="display: none;"></div>'; } ?>
 
@@ -332,6 +346,40 @@ switch($mode) {
                     </td>
                 </tr>
             </table>
+			<!-- Poll Allowed Roles -->
+			<h3><?php _e('Poll Allowed Roles', 'wp-polls'); ?></h3>
+			<table class="form-table">
+				<tr>
+					<th width="40%" scope="row" valign="top"><?php _e('Restrict Voting Permission by Role?', 'wp-polls') ?></th>
+					<td width="60%">
+						<select name="pollq_allowedroles_yes" id="pollq_allowedroles_yes" size="1" onchange="check_pollq_allowedroles();">
+							<option value="0"<?php if(empty($pollq_allowedroles)) { echo ' selected="selected"'; } ?>><?php _e('No', 'wp-polls'); ?></option>
+							<option value="1"<?php if(!empty($pollq_allowedroles)) { echo ' selected="selected"'; } ?>><?php _e('Yes', 'wp-polls'); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th width="40%" scope="row" valign="top"><?php _e('Who Is Allowed To Vote?', 'wp-polls') ?></th>
+					<td width="60%">
+						<fieldset id="pollq_allowedroles" <?php if(empty($pollq_allowedroles)) { echo 'disabled="disabled"'; } ?>>
+							<?php
+							foreach( wp_roles()->role_names as $name => $label ) : ?>
+								<label for="pollq_allowedroles-<?php echo esc_attr( $name ); ?>">
+									<input
+											id="pollq_allowedroles-<?php echo esc_attr( $name ); ?>"
+											type="checkbox"
+											name="pollq_allowedroles[]"
+											value="<?php echo esc_attr( $name ); ?>"
+											<?php checked( in_array( $name, $pollq_allowedroles ) ); ?>
+									/>
+									<?php echo esc_html( translate_user_role( $label ) ); ?>
+								</label>
+								<br />
+							<?php endforeach; ?>
+						</fieldset>
+					</td>
+				</tr>
+			</table>
             <p style="text-align: center;">
                 <input type="submit" name="do" value="<?php _e('Edit Poll', 'wp-polls'); ?>" class="button-primary" />&nbsp;&nbsp;
             <?php
@@ -371,11 +419,12 @@ switch($mode) {
                     <tr>
                         <th><?php _e('ID', 'wp-polls'); ?></th>
                         <th><?php _e('Question', 'wp-polls'); ?></th>
-                        <th><?php _e('Total Voters', 'wp-polls'); ?></th>
+						<th><?php _e('Total Voters', 'wp-polls'); ?></th>
+						<th><?php _e('Allowed Voters', 'wp-polls'); ?></th>
                         <th><?php _e('Start Date/Time', 'wp-polls'); ?></th>
                         <th><?php _e('End Date/Time', 'wp-polls'); ?></th>
                         <th><?php _e('Status', 'wp-polls'); ?></th>
-                        <th colspan="3"><?php _e('Action', 'wp-polls'); ?></th>
+                        <th colspan="4"><?php _e('Action', 'wp-polls'); ?></th>
                     </tr>
                 </thead>
                 <tbody id="manage_polls">
@@ -390,6 +439,8 @@ switch($mode) {
                                 $poll_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll->pollq_timestamp));
                                 $poll_totalvotes = (int) $poll->pollq_totalvotes;
                                 $poll_totalvoters = (int) $poll->pollq_totalvoters;
+								$poll_question_allowedroles = unserialize($poll->pollq_allowedroles);
+								$poll_allowedvoters = poll_get_allowedvoters($poll_question_allowedroles);
                                 $poll_active = (int) $poll->pollq_active;
                                 $poll_expiry = trim($poll->pollq_expiry);
                                 if(empty($poll_expiry)) {
@@ -424,7 +475,8 @@ switch($mode) {
                                     }
                                 }
                                 echo wp_kses_post( $poll_question )."</td>\n";
-                                echo '<td>'.number_format_i18n($poll_totalvoters)."</td>\n";
+								echo '<td>'.number_format_i18n($poll_totalvoters)."</td>\n";
+								echo '<td>'.number_format_i18n($poll_allowedvoters)."</td>\n";
                                 echo "<td>$poll_date</td>\n";
                                 echo "<td>$poll_expiry_text</td>\n";
                                 echo '<td>';
@@ -436,7 +488,13 @@ switch($mode) {
                                     _e('Closed', 'wp-polls');
                                 }
                                 echo "</td>\n";
-                                echo "<td><a href=\"$base_page&amp;mode=logs&amp;id=$poll_id\" class=\"edit\">".__('Logs', 'wp-polls')."</a></td>\n";
+								echo "<td><a href=\"$base_page&amp;mode=logs&amp;id=$poll_id\" class=\"edit\">".__('Logs', 'wp-polls')."</a></td>\n";
+								if (apply_filters( 'wp_polls_manager_enable_stats' , false)){
+									echo "<td><a href=\"$base_page&amp;mode=stats&amp;id=$poll_id\" class=\"edit\">" . __('Stats', 'wp-polls') . "</a></td>\n";
+								}
+								else {
+									echo "<td style=\"display:none;\"></td>\n";
+								}
                                 echo "<td><a href=\"$base_page&amp;mode=edit&amp;id=$poll_id\" class=\"edit\">".__('Edit', 'wp-polls')."</a></td>\n";
                                 echo "<td><a href=\"#DeletePoll\" onclick=\"delete_poll($poll_id, '".sprintf(esc_js(__('You are about to delete this poll, \'%s\'.', 'wp-polls')), esc_js($poll_question))."', '".wp_create_nonce('wp-polls_delete-poll')."');\" class=\"delete\">".__('Delete', 'wp-polls')."</a></td>\n";
                                 echo '</tr>';

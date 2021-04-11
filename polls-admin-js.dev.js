@@ -112,7 +112,7 @@ function closing_poll(poll_id, poll_confirm, nonce) {
 	}
 }
 
-// Reoder Answer Answer
+// Reorder Answer
 function reorder_answer_num() {
 	jQuery(document).ready(function($) {
 		var pollq_multiple = $('#pollq_multiple');
@@ -192,6 +192,18 @@ function check_pollq_multiple() {
 		} else {
 			$('#pollq_multiple').val(1);
 			$('#pollq_multiple').attr('disabled', true);
+		}
+	});
+}
+
+// Check Poll Whether It is Restricted by Role
+function check_pollq_allowedroles() {
+	jQuery(document).ready(function($) {
+		if(parseInt($('#pollq_allowedroles_yes').val()) == 1) {
+			$('#pollq_allowedroles').attr('disabled', false);
+		} else {
+			$('#pollq_allowedroles').val(1);
+			$('#pollq_allowedroles').attr('disabled', true);
 		}
 	});
 }

@@ -148,7 +148,7 @@ function get_poll($temp_poll_id = 0, $display = true) {
 			} else {
 				return display_pollresult($poll_id, $check_voted);
 			}
-		} elseif( $poll_close === 3 || ! check_allowtovote() ) {
+		} elseif( $poll_close === 3 || ! check_allowtovote($poll_id) ) {
 			$disable_poll_js = '<script type="text/javascript">jQuery("#polls_form_'.$poll_id.' :input").each(function (i){jQuery(this).attr("disabled","disabled")});</script>';
 			if($display) {
 				echo display_pollvote($poll_id).$disable_poll_js;
@@ -296,10 +296,17 @@ function poll_tinymce_translation($mce_translation) {
 
 
 ### Function: Check Who Is Allow To Vote
-function check_allowtovote() {
+function check_allowtovote($poll_id) {
 	global $user_ID;
 	$user_ID = (int) $user_ID;
+	$user_data = get_userdata( $user_ID );
+    $user_roles = (array) $user_data->roles;
 	$allow_to_vote = (int) get_option( 'poll_allowtovote' );
+
+	global $wpdb;
+	$poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_allowedroles FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
+	$poll_allowedroles = unserialize($poll_question->pollq_allowedroles);
+
 	switch($allow_to_vote) {
 		// Guests Only
 		case 0:
@@ -311,6 +318,14 @@ function check_allowtovote() {
 		// Registered Users Only
 		case 1:
 			if($user_ID === 0) {
+				return false;
+			}
+			if (!empty($poll_allowedroles)) {
+				foreach($poll_allowedroles as $poll_allowedrole ) {
+					if(in_array( $poll_allowedrole, array_map('esc_attr', $user_roles ))) {
+						return true;
+					}
+				}
 				return false;
 			}
 			return true;
@@ -427,13 +442,15 @@ function display_pollvote($poll_id, $display_loading = true) {
 	// Temp Poll Result
 	$temp_pollvote = '';
 	// Get Poll Question Data
-	$poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
+	$poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters, pollq_allowedroles FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 
 	// Poll Question Variables
 	$poll_question_text = wp_kses_post( removeslashes( $poll_question->pollq_question ) );
 	$poll_question_id = (int) $poll_question->pollq_id;
 	$poll_question_totalvotes = (int) $poll_question->pollq_totalvotes;
 	$poll_question_totalvoters = (int) $poll_question->pollq_totalvoters;
+	$poll_question_allowedroles = unserialize($poll_question->pollq_allowedroles);
+	$poll_question_allowedvoters = poll_get_allowedvoters($poll_question_allowedroles);
 	$poll_start_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_question->pollq_timestamp));
 	$poll_expiry = trim($poll_question->pollq_expiry);
 	if(empty($poll_expiry)) {
@@ -450,9 +467,10 @@ function display_pollvote($poll_id, $display_loading = true) {
 		'%POLL_ID%'                 => $poll_question_id,
 		'%POLL_TOTALVOTES%'         => $poll_question_totalvotes,
 		'%POLL_TOTALVOTERS%'        => $poll_question_totalvoters,
+		'%POLL_ALLOWEDVOTERS%'      => $poll_question_allowedvoters,
 		'%POLL_START_DATE%'         => $poll_start_date,
 		'%POLL_END_DATE%'           => $poll_end_date,
-		'%POLL_MULTIPLE_ANS_MAX%'   => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
+		'%POLL_MULTIPLE_ANS_MAX%'   => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1,
 	);
 	$template_question_variables = apply_filters( 'wp_polls_template_voteheader_variables', $template_question_variables );
 	$template_question  		 = apply_filters( 'wp_polls_template_voteheader_markup', $template_question, $poll_question, $template_question_variables );
@@ -513,6 +531,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 
 		$template_footer_variables = array(
 			'%POLL_ID%'               => $poll_question_id,
+			'%POLL_ALLOWEDVOTERS%'    => $poll_question_allowedvoters,
 			'%POLL_RESULT_URL%'       => $poll_result_url,
 			'%POLL_START_DATE%'       => $poll_start_date,
 			'%POLL_END_DATE%'         => $poll_end_date,
@@ -565,7 +584,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 	$poll_least_votes = 0;
 	$poll_least_percentage = 0;
 	// Get Poll Question Data
-	$poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_active, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
+	$poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_active, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters, pollq_allowedroles FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 	// No poll could be loaded from the database
 	if ( ! $poll_question ) {
 		return removeslashes( get_option( 'poll_template_disable' ) );
@@ -575,6 +594,8 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 	$poll_question_id = (int) $poll_question->pollq_id;
 	$poll_question_totalvotes = (int) $poll_question->pollq_totalvotes;
 	$poll_question_totalvoters = (int) $poll_question->pollq_totalvoters;
+	$poll_question_allowedroles = unserialize($poll_question->pollq_allowedroles);
+	$poll_question_allowedvoters = poll_get_allowedvoters($poll_question_allowedroles);
 	$poll_question_active = (int) $poll_question->pollq_active;
 	$poll_start_date = mysql2date( sprintf( __( '%s @ %s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_question->pollq_timestamp ) );
 	$poll_expiry = trim( $poll_question->pollq_expiry );
@@ -590,6 +611,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		'%POLL_ID%' => $poll_question_id,
 		'%POLL_TOTALVOTES%' => $poll_question_totalvotes,
 		'%POLL_TOTALVOTERS%' => $poll_question_totalvoters,
+		'%POLL_ALLOWEDVOTERS%' => $poll_question_allowedvoters,
 		'%POLL_START_DATE%' => $poll_start_date,
 		'%POLL_END_DATE%' => $poll_end_date
 	);
@@ -598,7 +620,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 	} else {
 		$template_variables['%POLL_MULTIPLE_ANS_MAX%'] = '1';
 	}
-	
+
 	$template_variables = apply_filters('wp_polls_template_resultheader_variables', $template_variables );
 	$template_question  = apply_filters('wp_polls_template_resultheader_markup', $template_question, $poll_question, $template_variables );
 
@@ -699,7 +721,8 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 			'%POLL_MOST_PERCENTAGE%' => $poll_most_percentage,
 			'%POLL_LEAST_ANSWER%' => $poll_least_answer,
 			'%POLL_LEAST_VOTES%' => number_format_i18n( $poll_least_votes ),
-			'%POLL_LEAST_PERCENTAGE%' => $poll_least_percentage
+			'%POLL_LEAST_PERCENTAGE%' => $poll_least_percentage,
+			'%POLL_ALLOWEDVOTERS%' => $poll_question_allowedvoters,
 		);
 		if ( $poll_multiple_ans > 0 ) {
 			$template_variables['%POLL_MULTIPLE_ANS_MAX%'] = $poll_multiple_ans;
@@ -708,7 +731,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		}
 		$template_variables = apply_filters('wp_polls_template_resultfooter_variables', $template_variables );
 
-		if ( ! empty( $user_voted ) || $poll_question_active === 0 || ! check_allowtovote() ) {
+		if ( ! empty( $user_voted ) || $poll_question_active === 0 || ! check_allowtovote($poll_id) ) {
 			$template_footer = removeslashes( get_option( 'poll_template_resultfooter' ) );
 			$template_footer = apply_filters('wp_polls_template_resultfooter_markup', $template_footer, $poll_question, $template_variables);
 		} else {
@@ -805,6 +828,20 @@ if(!function_exists('get_poll_question')) {
 	}
 }
 
+### Function: Get Number of Allowed Voters Based on Poll ID
+if(!function_exists('poll_get_allowedvoters')) {
+	function poll_get_allowedvoters($allowedroles) {
+		$avail_roles = count_users()['avail_roles'];
+		$poll_question_allowedvoters = (int) 0;
+		if(!empty($allowedroles)) {
+			foreach ($allowedroles as $allowedrole) {
+				if (array_key_exists($allowedrole, $avail_roles))
+					$poll_question_allowedvoters += $avail_roles[$allowedrole];
+			}
+		}
+		return $poll_question_allowedvoters;
+	}
+}
 
 ### Function: Get Poll Total Questions
 if(!function_exists('get_pollquestions')) {
@@ -1354,7 +1391,7 @@ function vote_poll_process($poll_id, $poll_aid_array = [])
 		throw new InvalidArgumentException(sprintf(__('Invalid Answer to Poll ID #%s', 'wp-polls'), $poll_id));
 	}
 
-	if (!check_allowtovote()) {
+	if (!check_allowtovote($poll_id)) {
 		throw new InvalidArgumentException(sprintf(__('User is not allowed to vote for Poll ID #%s', 'wp-polls'), $poll_id));
 	}
 
@@ -1841,6 +1878,7 @@ function polls_activate() {
 							  "pollq_expiry int(10) NOT NULL default '0'," .
 							  "pollq_multiple tinyint(3) NOT NULL default '0'," .
 							  "pollq_totalvoters int(10) NOT NULL default '0'," .
+							  "pollq_allowedroles longtext NULL default NULL," .
 							  "PRIMARY KEY  (pollq_id)" .
 							  ") $charset_collate;";
 	$create_table['pollsa'] = "CREATE TABLE $wpdb->pollsa (" .

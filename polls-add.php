@@ -57,17 +57,26 @@ if ( ! empty($_POST['do'] ) ) {
 				} else {
 					$pollq_multiple = 0;
 				}
+				// Allowed Roles
+				$pollq_allowedroles_yes = isset( $_POST['pollq_allowedroles_yes'] ) ? (int) sanitize_key( $_POST['pollq_allowedroles_yes'] ) : 0;
+				if ( $pollq_allowedroles_yes === 1 ) {
+					$pollq_allowedroles = serialize($_POST['pollq_allowedroles']);
+				} else {
+					$pollq_allowedroles = null;
+				}
+
 				// Insert Poll
 				$add_poll_question = $wpdb->insert(
 					$wpdb->pollsq,
 					array(
-						'pollq_question'    => $pollq_question,
-						'pollq_timestamp'   => $pollq_timestamp,
-						'pollq_totalvotes'  => 0,
-						'pollq_active'      => $pollq_active,
-						'pollq_expiry'      => $pollq_expiry,
-						'pollq_multiple'    => $pollq_multiple,
-						'pollq_totalvoters' => 0
+						'pollq_question'     => $pollq_question,
+						'pollq_timestamp'    => $pollq_timestamp,
+						'pollq_totalvotes'   => 0,
+						'pollq_active'       => $pollq_active,
+						'pollq_expiry'       => $pollq_expiry,
+						'pollq_multiple'     => $pollq_multiple,
+						'pollq_totalvoters'  => 0,
+						'pollq_allowedroles' => $pollq_allowedroles,
 					),
 					array(
 						'%s',
@@ -76,7 +85,8 @@ if ( ! empty($_POST['do'] ) ) {
 						'%d',
 						'%d',
 						'%d',
-						'%d'
+						'%d',
+						'%s',
 					)
 				);
 				if ( ! $add_poll_question ) {
@@ -202,6 +212,40 @@ $count = 0;
 		<tr>
 			<th width="20%" scope="row" valign="top"><?php _e('End Date/Time', 'wp-polls') ?></th>
 			<td width="80%"><input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" onclick="check_pollexpiry();" />&nbsp;&nbsp;<label for="pollq_expiry_no"><?php _e('Do NOT Expire This Poll', 'wp-polls'); ?></label><?php poll_timestamp(current_time('timestamp'), 'pollq_expiry', 'none'); ?></td>
+		</tr>
+	</table>
+	<!-- Poll Allowed Roles -->
+	<h3><?php _e('Poll Allowed Roles', 'wp-polls'); ?></h3>
+	<table class="form-table">
+		<tr>
+			<th width="40%" scope="row" valign="top"><?php _e('Restrict Voting Permission by Role?', 'wp-polls') ?></th>
+			<td width="60%">
+				<select name="pollq_allowedroles_yes" id="pollq_allowedroles_yes" size="1" onchange="check_pollq_allowedroles();">
+					<option value="0"><?php _e('No', 'wp-polls'); ?></option>
+					<option value="1"><?php _e('Yes', 'wp-polls'); ?></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th width="40%" scope="row" valign="top"><?php _e('Who Is Allowed To Vote?', 'wp-polls') ?></th>
+			<td width="60%">
+				<fieldset id="pollq_allowedroles" disabled="disabled">
+					<?php
+					foreach( wp_roles()->role_names as $name => $label ) : ?>
+						<label for="pollq_allowedroles-<?php echo esc_attr( $name ); ?>">
+							<input
+									id="pollq_allowedroles-<?php echo esc_attr( $name ); ?>"
+									type="checkbox"
+									name="pollq_allowedroles[]"
+									value="<?php echo esc_attr( $name ); ?>"
+									<?php checked( in_array( $name, $pollq_allowedroles ) ); ?>
+							/>
+							<?php echo esc_html( translate_user_role( $label ) ); ?>
+						</label>
+						<br />
+					<?php endforeach; ?>
+				</fieldset>
+			</td>
 		</tr>
 	</table>
 	<p style="text-align: center;"><input type="submit" name="do" value="<?php _e('Add Poll', 'wp-polls'); ?>"  class="button-primary" />&nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e('Cancel', 'wp-polls'); ?>" class="button" onclick="javascript:history.go(-1)" /></p>

@@ -261,16 +261,17 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<?php _e('Display the poll archive URL', 'wp-polls'); ?>
 			</td>
 		</tr>
-		<tr>
+		<tr class="alternate">
 			<td>
 				<strong>%POLL_MULTIPLE_ANSWER_PERCENTAGE%</strong><br />
-				<?php _e('Display the poll\'s mutiple answer percentage. This is total votes divided by total voters.', 'wp-polls'); ?>
+				<?php _e('Display the poll\'s multiple answer percentage. This is total votes divided by total voters.', 'wp-polls'); ?>
 			</td>
 			<td>
-				&nbsp;
+				<strong>%POLL_ALLOWEDVOTERS%</strong><br />
+				<?php _e('Display number of allowed voters for poll.', 'wp-polls'); ?>
 			</td>
 		</tr>
-		<tr class="alternate">
+		<tr>
 			<td colspan="2">
 				<?php _e('Note: <strong>%POLL_TOTALVOTES%</strong> and <strong>%POLL_TOTALVOTERS%</strong> will be different if your poll supports multiple answers. If your poll allows only single answer, both value will be the same.', 'wp-polls'); ?>
 			</td>
@@ -290,7 +291,8 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_END_DATE%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTES%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTERS%</p>
-				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
+				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p>
+				<p style="margin: 2px 0">- %POLL_ALLOWEDVOTERS%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('voteheader');" class="button" />
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_voteheader" name="poll_template_voteheader"><?php echo esc_textarea( removeslashes( get_option( 'poll_template_voteheader' ) ) ); ?></textarea></td>
@@ -334,7 +336,8 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_END_DATE%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTES%</p>
 				<p style="margin: 2px 0">- %POLL_TOTALVOTERS%</p>
-				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
+				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p>
+				<p style="margin: 2px 0">- %POLL_ALLOWEDVOTERS%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultheader');" class="button" />
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultheader" name="poll_template_resultheader"><?php echo esc_textarea( removeslashes( get_option( 'poll_template_resultheader' ) ) ); ?></textarea></td>
@@ -386,7 +389,8 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_LEAST_ANSWER%</p>
 				<p style="margin: 2px 0">- %POLL_LEAST_VOTES%</p>
 				<p style="margin: 2px 0">- %POLL_LEAST_PERCENTAGE%</p>
-				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
+				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p>
+				<p style="margin: 2px 0">- %POLL_ALLOWEDVOTERS%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultfooter');" class="button" />
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter" name="poll_template_resultfooter"><?php echo esc_textarea( removeslashes( get_option( 'poll_template_resultfooter' ) ) ); ?></textarea></td>
@@ -406,7 +410,8 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				<p style="margin: 2px 0">- %POLL_LEAST_ANSWER%</p>
 				<p style="margin: 2px 0">- %POLL_LEAST_VOTES%</p>
 				<p style="margin: 2px 0">- %POLL_LEAST_PERCENTAGE%</p>
-				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
+				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p>
+				<p style="margin: 2px 0">- %POLL_ALLOWEDVOTERS%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e('Restore Default Template', 'wp-polls'); ?>" onclick="poll_default_templates('resultfooter2');" class="button" />
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter2" name="poll_template_resultfooter2"><?php echo esc_textarea( removeslashes( get_option( 'poll_template_resultfooter2' ) ) ); ?></textarea></td>
