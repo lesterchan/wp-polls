@@ -1,22 +1,4 @@
 <?php
-/*
-+----------------------------------------------------------------+
-|																							|
-|	WordPress Plugin: WP-Polls										|
-|	Copyright (c) 2012 Lester "GaMerZ" Chan									|
-|																							|
-|	File Written By:																	|
-|	- Lester "GaMerZ" Chan															|
-|	- http://lesterchan.net															|
-|																							|
-|	File Information:																	|
-|	- Configure Poll Options															|
-|	- wp-content/plugins/wp-polls/polls-options.php						|
-|																							|
-+----------------------------------------------------------------+
-*/
-
-
 ### Check Whether User Can Manage Polls
 if( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
@@ -72,7 +54,12 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$poll_logging_method        = isset( $_POST['poll_logging_method'] ) ? (int) sanitize_key( $_POST['poll_logging_method'] ) : 0;
 	$poll_cookielog_expiry      = isset( $_POST['poll_cookielog_expiry'] ) ? (int) sanitize_key ($_POST['poll_cookielog_expiry'] ) : 0;
 	$poll_allowtovote           = isset( $_POST['poll_allowtovote'] ) ? (int) sanitize_key( $_POST['poll_allowtovote'] ) : 0;
-	$update_poll_queries        = array();
+	
+	// New options we just need a single poll_options
+	$poll_options = array();
+	$poll_options['ip_header'] = ! empty( $_POST['poll_ip_header'] )  ? sanitize_text_field( $_POST['poll_ip_header'] ) : '';
+
+	$update_poll_queries = array();
 	$update_poll_text = array();
 	$update_poll_queries[] = update_option('poll_bar', $poll_bar);
 	$update_poll_queries[] = update_option('poll_ajax_style', $poll_ajax_style);
@@ -88,6 +75,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$update_poll_queries[] = update_option('poll_logging_method', $poll_logging_method);
 	$update_poll_queries[] = update_option('poll_cookielog_expiry', $poll_cookielog_expiry);
 	$update_poll_queries[] = update_option('poll_allowtovote', $poll_allowtovote);
+	$update_poll_queries[] = update_option( 'poll_options', $poll_options );
 	$update_poll_text[] = __('Poll Bar Style', 'wp-polls');
 	$update_poll_text[] = __('Poll AJAX Style', 'wp-polls');
 	$update_poll_text[] = __('Sort Poll Answers By Option', 'wp-polls');
@@ -103,6 +91,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	$update_poll_text[] = __('Logging Method', 'wp-polls');
 	$update_poll_text[] = __('Cookie And Log Expiry Option', 'wp-polls');
 	$update_poll_text[] = __('Allow To Vote Option', 'wp-polls');
+	$update_poll_text[] = __( 'Poll Options', 'wp-polls' );
 	$i=0;
 	$text = '';
 	foreach($update_poll_queries as $update_poll_query) {
@@ -115,6 +104,11 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		$text = '<p style="color: red;">'.__('No Poll Option Updated', 'wp-polls').'</p>';
 	}
 	cron_polls_place();
+}
+
+$poll_options = get_option( 'poll_options' );
+if ( empty( $poll_options ) ) {
+	$poll_options['ip_header'] = '';
 }
 ?>
 <script type="text/javascript">
@@ -309,6 +303,10 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e('Expiry Time For Cookie And Log:', 'wp-polls'); ?></th>
 			<td><input type="text" name="poll_cookielog_expiry" value="<?php echo (int) esc_attr( get_option( 'poll_cookielog_expiry' ) ); ?>" size="10" /> <?php _e('seconds (0 to disable)', 'wp-polls'); ?></td>
+		</tr>
+		<tr>
+			<th scope="row" valign="top"><?php _e( 'Header That Contains The IP:', 'wp-polls' ); ?></th>
+			<td><input type="text" name="poll_ip_header" value="<?php echo esc_attr( $poll_options['ip_header'] ); ?>" size="30" /> <?php _e( 'You can leave it blank to use the default', 'wp-polls' ); ?><br /><?php _e( 'Example: REMOTE_ADDR', 'wp-polls' ); ?></td>
 		</tr>
 	</table>
 

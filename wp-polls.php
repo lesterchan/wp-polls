@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.75.6
+Version: 2.76.0
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -11,7 +11,7 @@ Text Domain: wp-polls
 
 
 /*
-	Copyright 2021  Lester Chan  (email : lesterchan@gmail.com)
+	Copyright 2022  Lester Chan  (email : lesterchan@gmail.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ Text Domain: wp-polls
 */
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.75.6' );
+define( 'WP_POLLS_VERSION', '2.76.0' );
 
 
 ### Create Text Domain For Translations
@@ -750,7 +750,13 @@ if ( ! function_exists( 'get_ipaddress' ) ) {
 	}
 }
 function poll_get_ipaddress() {
-	return apply_filters( 'wp_polls_ipaddress', wp_hash( get_ipaddress() ) );
+	$ip = get_ipaddress();
+	$poll_options = get_option( 'poll_options' );
+	if ( ! empty( $poll_options ) && ! empty( $poll_options['ip_header'] ) && ! empty( $_SERVER[ $poll_options['ip_header'] ] ) ) {
+		$ip = esc_attr( $_SERVER[ $poll_options['ip_header'] ] );
+	}
+	
+	return apply_filters( 'wp_polls_ipaddress', wp_hash( $ip ) );
 }
 function poll_get_hostname() {
 	$hostname = gethostbyaddr( get_ipaddress() );
@@ -1929,6 +1935,7 @@ function polls_activate() {
 	add_option('poll_archive_displaypoll', 2);
 	add_option('poll_template_pollarchiveheader', '');
 	add_option('poll_template_pollarchivefooter', '<p>'.__('Start Date:', 'wp-polls').' %POLL_START_DATE%<br />'.__('End Date:', 'wp-polls').' %POLL_END_DATE%</p>');
+	add_option( 'poll_options', array( 'ip_header' => '' ) );
 
 	$pollq_totalvoters = (int) $wpdb->get_var( "SELECT SUM(pollq_totalvoters) FROM $wpdb->pollsq" );
 	if ( 0 === $pollq_totalvoters ) {

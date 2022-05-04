@@ -36,6 +36,7 @@ $option_names = array(
 	, 'poll_template_pollarchiveheader'
 	, 'poll_template_pollarchivefooter'
 	, 'poll_cookielog_expiry'
+	, 'poll_options'
 	, 'widget_polls-widget'
 );
 
