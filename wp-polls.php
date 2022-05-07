@@ -755,7 +755,7 @@ function poll_get_ipaddress() {
 	if ( ! empty( $poll_options ) && ! empty( $poll_options['ip_header'] ) && ! empty( $_SERVER[ $poll_options['ip_header'] ] ) ) {
 		$ip = esc_attr( $_SERVER[ $poll_options['ip_header'] ] );
 	}
-	
+
 	return apply_filters( 'wp_polls_ipaddress', wp_hash( $ip ) );
 }
 function poll_get_hostname() {
@@ -1935,7 +1935,6 @@ function polls_activate() {
 	add_option('poll_archive_displaypoll', 2);
 	add_option('poll_template_pollarchiveheader', '');
 	add_option('poll_template_pollarchivefooter', '<p>'.__('Start Date:', 'wp-polls').' %POLL_START_DATE%<br />'.__('End Date:', 'wp-polls').' %POLL_END_DATE%</p>');
-	add_option( 'poll_options', array( 'ip_header' => '' ) );
 
 	$pollq_totalvoters = (int) $wpdb->get_var( "SELECT SUM(pollq_totalvoters) FROM $wpdb->pollsq" );
 	if ( 0 === $pollq_totalvoters ) {
@@ -1946,8 +1945,12 @@ function polls_activate() {
 	add_option('poll_cookielog_expiry', 0);
 	add_option('poll_template_pollarchivepagingheader', '');
 	add_option('poll_template_pollarchivepagingfooter', '');
+
 	// Database Upgrade For WP-Polls 2.50
 	delete_option('poll_archive_show');
+
+	// Database Upgrade for WP-Polls 2.76
+	add_option( 'poll_options', array( 'ip_header' => '' ) );
 
 	// Index
 	$index = $wpdb->get_results( "SHOW INDEX FROM $wpdb->pollsip;" );
