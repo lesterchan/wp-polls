@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.76.0
+Version: 2.77.0
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -29,7 +29,7 @@ Text Domain: wp-polls
 */
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.76.0' );
+define( 'WP_POLLS_VERSION', '2.77.0' );
 
 
 ### Create Text Domain For Translations
@@ -1347,11 +1347,16 @@ function in_pollarchive() {
 	return true;
 }
 
-function vote_poll_process($poll_id, $poll_aid_array = [])
-{
+function vote_poll_process( $poll_id, $poll_aid_array = [] ) {
 	global $wpdb, $user_identity, $user_ID;
 
-	do_action('wp_polls_vote_poll');
+	do_action( 'wp_polls_vote_poll' );
+
+	// Acquire lock
+	$fp_lock = polls_acquire_lock( $poll_id );
+	if ( $fp_lock === false ) {
+		throw new InvalidArgumentException( sprintf( __( 'Unable to obtain lock for Poll ID #%s', 'wp-polls'), $poll_id ) );
+	}
 
 	$polla_aids = $wpdb->get_col( $wpdb->prepare( "SELECT polla_aid FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
 	$is_real = count( array_intersect( $poll_aid_array, $polla_aids ) ) === count( $poll_aid_array );
@@ -1447,6 +1452,10 @@ function vote_poll_process($poll_id, $poll_aid_array = [])
 			);
 		}
 	}
+
+	// Release lock
+	polls_release_lock( $fp_lock, $poll_id );
+
 	do_action( 'wp_polls_vote_poll_success' );
 
 	return display_pollresult($poll_id, $poll_aid_array, false);
@@ -1637,6 +1646,35 @@ function manage_poll() {
 	}
 }
 
+function polls_acquire_lock( $poll_id ) {
+	$fp = fopen( polls_lock_file( $poll_id ), 'w+' );
+
+	if ( ! flock( $fp, LOCK_EX | LOCK_NB ) ) {
+		return false;
+	}
+
+	ftruncate( $fp, 0 );
+	fwrite( $fp, microtime( true ) );
+
+	return $fp;
+}
+
+function polls_release_lock( $fp, $poll_id ) {
+	if ( is_resource( $fp ) ) {
+		fflush( $fp );
+		flock( $fp, LOCK_UN );
+		fclose( $fp );
+		unlink( polls_lock_file( $poll_id ) );
+
+		return true;
+	}
+
+	return false;
+}
+
+function polls_lock_file( $poll_id ) {
+	return apply_filters( 'wp_polls_lock_file', get_temp_dir() . '/wp-polls-' . $poll_id . '.lock', $poll_id );
+}
 
 function _polls_get_ans_sort() {
 	$order_by = get_option( 'poll_ans_sortby' );
