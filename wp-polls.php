@@ -1340,7 +1340,7 @@ function in_pollarchive() {
 		$poll_archive_url = $poll_archive_url_array[count($poll_archive_url_array)-2];
 	}
 	$current_url = esc_url_raw( $_SERVER['REQUEST_URI'] );
-	if(strpos($current_url, $poll_archive_url) === false) {
+	if ( strpos( $current_url, strval( $poll_archive_url ) ) === false ) {
 		return false;
 	}
 
