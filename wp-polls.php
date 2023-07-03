@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.77.1
+Version: 2.77.2
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -29,7 +29,7 @@ Text Domain: wp-polls
 */
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.77.1' );
+define( 'WP_POLLS_VERSION', '2.77.2' );
 
 
 ### Create Text Domain For Translations
@@ -375,7 +375,7 @@ function check_voted_ip( $poll_id ) {
 		$log_expiry_sql = ' AND (' . current_time('timestamp') . '-(pollip_timestamp+0)) < ' . $log_expiry;
 	}
 	// Check IP From IP Logging Database
-	$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND (pollip_ip = %s OR pollip_ip = %s)", $poll_id, poll_get_ipaddress(), get_ipaddress() ) . $log_expiry_sql );
+	$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s", $poll_id, poll_get_ipaddress() ) . $log_expiry_sql );
 	if( $get_voted_aids ) {
 		return $get_voted_aids;
 	}
@@ -735,22 +735,8 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 
 
 ### Function: Get IP Address
-if ( ! function_exists( 'get_ipaddress' ) ) {
-	function get_ipaddress() {
-		foreach ( array( 'HTTP_CF_CONNECTING_IP', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR' ) as $key ) {
-			if ( array_key_exists( $key, $_SERVER ) === true ) {
-				foreach ( explode( ',', $_SERVER[$key] ) as $ip ) {
-					$ip = trim( $ip );
-					if ( filter_var( $ip, FILTER_VALIDATE_IP ) !== false ) {
-						return esc_attr( $ip );
-					}
-				}
-			}
-		}
-	}
-}
 function poll_get_ipaddress() {
-	$ip = get_ipaddress();
+	$ip = esc_attr( $_SERVER['REMOTE_ADDR'] );
 	$poll_options = get_option( 'poll_options' );
 	if ( ! empty( $poll_options ) && ! empty( $poll_options['ip_header'] ) && ! empty( $_SERVER[ $poll_options['ip_header'] ] ) ) {
 		$ip = esc_attr( $_SERVER[ $poll_options['ip_header'] ] );
@@ -759,9 +745,10 @@ function poll_get_ipaddress() {
 	return apply_filters( 'wp_polls_ipaddress', wp_hash( $ip ) );
 }
 function poll_get_hostname() {
-	$hostname = gethostbyaddr( get_ipaddress() );
-	if ( $hostname === get_ipaddress() ) {
-		$hostname = wp_privacy_anonymize_ip( get_ipaddress() );
+	$ip_address = poll_get_ipaddress();
+	$hostname = gethostbyaddr( $ip_address );
+	if ( $hostname === $ip_address ) {
+		$hostname = wp_privacy_anonymize_ip( $ip_address );
 	}
 
 	if ( false !== $hostname ) {
