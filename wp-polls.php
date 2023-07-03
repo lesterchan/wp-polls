@@ -735,17 +735,22 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 
 
 ### Function: Get IP Address
-function poll_get_ipaddress() {
+function poll_get_raw_ipaddress() {
 	$ip = esc_attr( $_SERVER['REMOTE_ADDR'] );
 	$poll_options = get_option( 'poll_options' );
 	if ( ! empty( $poll_options ) && ! empty( $poll_options['ip_header'] ) && ! empty( $_SERVER[ $poll_options['ip_header'] ] ) ) {
 		$ip = esc_attr( $_SERVER[ $poll_options['ip_header'] ] );
 	}
 
-	return apply_filters( 'wp_polls_ipaddress', wp_hash( $ip ) );
+	return $ip;
 }
+
+function poll_get_ipaddress() {
+	return apply_filters( 'wp_polls_ipaddress', wp_hash( poll_get_raw_ipaddress() ) );
+}
+
 function poll_get_hostname() {
-	$ip = esc_attr( $_SERVER['REMOTE_ADDR'] );
+	$ip = poll_get_raw_ipaddress();
 	$hostname = gethostbyaddr( $ip );
 	if ( $hostname === $ip ) {
 		$hostname = wp_privacy_anonymize_ip( $ip );
