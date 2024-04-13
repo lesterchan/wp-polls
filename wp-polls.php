@@ -599,7 +599,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 	// Sort again if object answers with alphabetical order to make the sorting reference the answer text instead of the answer ID. 
 	if ($poll_type == 'object' && $order_by == 'polla_answers'){ 
 		$sort_factor = ($sort_order == 'asc') ? 1 : -1;
-		usort($poll_answers, fn($a, $b) => $sort_factor * strnatcasecmp(get_the_title($a->polla_answers), get_the_title($b->polla_answers) )); //cf. https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-one-property
+		usort($poll_answers, fn($a, $b) => $sort_factor * strnatcasecmp(wp_polls_sortify(get_the_title($a->polla_answers)), wp_polls_sortify(get_the_title($b->polla_answers)) )); //cf. https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-one-property
 	}
 	// If There Is Poll Question With Answers
 	if($poll_question && $poll_answers) {
@@ -776,7 +776,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 	// Sort again if object answers with alphabetical order to make the sorting reference the answer text instead of the answer ID. 
 	if ($poll_type == 'object' && $order_by == 'polla_answers'){ 
 		$sort_factor = ($sort_order == 'asc') ? 1 : -1;
-		usort($poll_answers, fn($a, $b) => $sort_factor * strnatcasecmp(get_the_title($a->polla_answers), get_the_title($b->polla_answers) )); //cf. https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-one-property
+		usort($poll_answers, fn($a, $b) => $sort_factor * strnatcasecmp(wp_polls_sortify(get_the_title($a->polla_answers)), wp_polls_sortify(get_the_title($b->polla_answers)) )); //cf. https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-one-property
 	}
 	// If There Is Poll Question With Answers
 	if ( $poll_question && $poll_answers ) {
@@ -1225,7 +1225,7 @@ function polls_archive($templates_set_id = -1) {
 		foreach($polls_answers as $polls_answer){
 			if ($polls_answer[array_key_first($polls_answer)]['type'] == 'object' && $order_by == 'polla_answers'){ 
 				$sort_factor = ($sort_order == 'asc') ? 1 : -1;
-				usort($polls_answer, fn($a, $b) => $sort_factor * strnatcasecmp(get_the_title($a['answers']), get_the_title($b['answers']) )); //cf. https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-one-property
+				usort($polls_answer, fn($a, $b) => $sort_factor * strnatcasecmp(wp_polls_sortify(get_the_title($a['answers'])), wp_polls_sortify(get_the_title($b['answers'])) )); //cf. https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-one-property
 			}
 		}
 	}
@@ -2324,17 +2324,17 @@ function polls_page_general_stats($content) {
 
 ### Function: Helper to sort terms - source: https://wordpress.stackexchange.com/questions/37285/custom-taxonomy-get-the-terms-listing-in-order-of-parent-child#answer-239935
 function sort_terms_hierarchically( array &$terms, array &$into, $parent_id = 0 ) { 
-	foreach ( $terms as $i => $term ) {
-		if ( $term->parent == $parent_id ) {
-			$into[$term->term_id] = $term;
-			unset( $terms[ $i ] );
-		}
-	}
+    foreach ( $terms as $i => $term ) {
+        if ( $term->parent == $parent_id ) {
+            $into[$term->term_id] = $term;
+            unset( $terms[ $i ] );
+        }
+    }
 
-	foreach ( $into as $top_term ) {
-		$top_term->children = array();
-		sort_terms_hierarchically( $terms, $top_term->children, $top_term->term_id );
-	}
+    foreach ( $into as $top_term ) {
+        $top_term->children = array();
+        sort_terms_hierarchically( $terms, $top_term->children, $top_term->term_id );
+    }
 
 }
 
@@ -2439,8 +2439,8 @@ function wp_polls_list_available_templates_sets($context = 'select_list_options'
 							<td>'.$text_type_default.$tpl_name.'</td>
 							<td>'.$total_associated_polls_count.$total_associated_polls_list_tooltip.'</td>
 							<td><a href="#DuplicateTemplate" onclick="duplicate_templates_set(\''.$tpl_id.'\',\''.wp_create_nonce('wp-polls_duplicate-template').'\');" class="duplicate">'.__('Duplicate', 'wp-polls').'</a></td>
-							<td><a href="'.$base_page.'&amp;mode=edit&amp;tpl_id='.$tpl_id.'" class="edit">'.__('Edit', 'wp-polls').'</a></td>
-							<td><a href="#DeleteTemplate" onclick="delete_templates_set(\''.$tpl_id.'\', \''.sprintf(esc_js(__('You are about to delete this template: \"%s\".', 'wp-polls')), esc_js($tpl_name)).'\', \''.wp_create_nonce('wp-polls_delete-template').'\');" class="delete">'.__('Delete', 'wp-polls').'</a></td>
+                            <td><a href="'.$base_page.'&amp;mode=edit&amp;tpl_id='.$tpl_id.'" class="edit">'.__('Edit', 'wp-polls').'</a></td>
+                            <td><a href="#DeleteTemplate" onclick="delete_templates_set(\''.$tpl_id.'\', \''.sprintf(esc_js(__('You are about to delete this template: \"%s\".', 'wp-polls')), esc_js($tpl_name)).'\', \''.wp_create_nonce('wp-polls_delete-template').'\');" class="delete">'.__('Delete', 'wp-polls').'</a></td>
 						  </tr>';
 				break;
 		}
@@ -2455,22 +2455,22 @@ function wp_polls_list_available_templates_sets($context = 'select_list_options'
 
 ### Function: Get all post type fields saved as post metadata (where ACF store its fields names for instance) - taken from https://wordpress.stackexchange.com/questions/249505/get-all-meta-keys-assigned-to-a-post-type
 function wp_polls_get_all_meta_keys($post_type = 'post', $exclude_empty = false, $exclude_hidden = false) {
-	global $wpdb;
-	$query = "
-		SELECT DISTINCT($wpdb->postmeta.meta_key) 
-		FROM $wpdb->posts 
-		LEFT JOIN $wpdb->postmeta 
-		ON $wpdb->posts.ID = $wpdb->postmeta.post_id 
-		WHERE $wpdb->posts.post_type = '%s'
-	";
-	if($exclude_empty) 
-		$query .= " AND $wpdb->postmeta.meta_key != ''";
-	if($exclude_hidden) 
-		$query .= " AND $wpdb->postmeta.meta_key NOT RegExp '(^[_0-9].+$)' ";
+    global $wpdb;
+    $query = "
+        SELECT DISTINCT($wpdb->postmeta.meta_key) 
+        FROM $wpdb->posts 
+        LEFT JOIN $wpdb->postmeta 
+        ON $wpdb->posts.ID = $wpdb->postmeta.post_id 
+        WHERE $wpdb->posts.post_type = '%s'
+    ";
+    if($exclude_empty) 
+        $query .= " AND $wpdb->postmeta.meta_key != ''";
+    if($exclude_hidden) 
+        $query .= " AND $wpdb->postmeta.meta_key NOT RegExp '(^[_0-9].+$)' ";
 
-	$meta_keys = $wpdb->get_col($wpdb->prepare($query, $post_type));
+    $meta_keys = $wpdb->get_col($wpdb->prepare($query, $post_type));
 
-	return $meta_keys;
+    return $meta_keys;
 }
 
 ### Function: Helper to get a child option's value from 'poll_options' array.
@@ -2969,7 +2969,7 @@ function wp_polls_apply_variables_to_after_vote_message_template($poll_question_
 		$poll_answer->polla_answers = ($poll_type == 'object') ? get_the_title($poll_answer->polla_answers) : $poll_answer->polla_answers;
 	}
 	//for object answers it must be sorted again per answers' text instead of per answer's ID
-	if ($poll_type == 'object') usort( $poll_answers, function($a, $b) {return strnatcasecmp($a->polla_answers, $b->polla_answers);} ); //cf. https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-one-property
+	if ($poll_type == 'object') usort( $poll_answers, function($a, $b) {return strnatcasecmp(wp_polls_sortify($a->polla_answers), wp_polls_sortify($b->polla_answers));} ); //cf. https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-one-property
 	//generate lists markup
 	$poll_answers_ids_list_ordered = "<ul>";
 	$poll_answers_content_list_ordered = "<ul>";
@@ -2991,6 +2991,11 @@ function wp_polls_apply_variables_to_after_vote_message_template($poll_question_
 	$poll_aftervote_template  = apply_filters( 'wp_polls_template_aftervote_markup', $poll_aftervote_template, '', $poll_aftervote_template_variables );
 	
 	return $poll_aftervote_template;
+}
+
+### Helper function to replace unicode characters by their equivalent (useful for alphabetical sorting). Taken from https://stackoverflow.com/questions/832709/natural-sorting-algorithm-in-php-with-support-for-unicode/3650743#3650743
+function wp_polls_sortify($string) {
+    return preg_replace('~&([a-z]{1,2})(acute|cedil|circ|grave|lig|orn|ring|slash|tilde|uml);~i', '$1' . chr(255) . '$2', htmlentities($string, ENT_QUOTES, 'UTF-8'));
 }
 
 ### Class: WP-Polls Widget
