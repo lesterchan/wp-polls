@@ -67,9 +67,6 @@ if( ! empty( $_POST['do'] ) ) {
 			$order_by = 'pollip_timestamp DESC';
 			break;
 		case 2:
-			echo '<pre>';
-			var_dump($_POST);
-			echo '</pre>';
 			$exclude_registered_2 = (array_key_exists('exclude_registered_2', $_POST)) ? (int) sanitize_key( $_POST['exclude_registered_2'] ) : 0;
 			$exclude_comment_2 = (array_key_exists('exclude_comment_2', $_POST)) ? (int) sanitize_key( $_POST['exclude_comment_2'] )  : 0;
 			$num_choices = (array_key_exists('num_choices', $_POST)) ? (int) sanitize_key( $_POST['num_choices']) : 0;
