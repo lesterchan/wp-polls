@@ -28,6 +28,13 @@ Text Domain: wp-polls
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+
+### Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 ### Version
 define( 'WP_POLLS_VERSION', '2.77.3' );
 
