@@ -18,6 +18,9 @@ if ( ! empty($_POST['do'] ) ) {
 			$text = '';
 			// Poll Question
 			$pollq_question = isset( $_POST['pollq_question'] ) ? wp_kses_post( trim( $_POST['pollq_question'] ) ) : '';
+			// Poll Type
+			$pollq_type = isset( $_POST['pollq_type'] ) ? sanitize_text_field( $_POST['pollq_type'] ) : 'classic';
+
 			if ( ! empty( $pollq_question ) ) {
 				// Poll Start Date
 				$timestamp_sql = '';
@@ -49,7 +52,7 @@ if ( ! empty($_POST['do'] ) ) {
 						$pollq_active = 0;
 					}
 				}
-				// Mutilple Poll
+				// Multiple Poll
 				$pollq_multiple_yes = isset( $_POST['pollq_multiple_yes'] ) ? (int) sanitize_key( $_POST['pollq_multiple_yes'] ) : 0;
 				$pollq_multiple = 0;
 				if ( $pollq_multiple_yes === 1 ) {
@@ -57,7 +60,7 @@ if ( ! empty($_POST['do'] ) ) {
 				} else {
 					$pollq_multiple = 0;
 				}
-				// Insert Poll
+				// Insert Poll Question (with pollq_type added)
 				$add_poll_question = $wpdb->insert(
 					$wpdb->pollsq,
 					array(
@@ -67,7 +70,8 @@ if ( ! empty($_POST['do'] ) ) {
 						'pollq_active'      => $pollq_active,
 						'pollq_expiry'      => $pollq_expiry,
 						'pollq_multiple'    => $pollq_multiple,
-						'pollq_totalvoters' => 0
+						'pollq_totalvoters' => 0,
+						'pollq_type'        => $pollq_type
 					),
 					array(
 						'%s',
@@ -76,7 +80,8 @@ if ( ! empty($_POST['do'] ) ) {
 						'%d',
 						'%d',
 						'%d',
-						'%d'
+						'%d',
+						'%s'
 					)
 				);
 				if ( ! $add_poll_question ) {
@@ -145,6 +150,17 @@ $count = 0;
 			<th width="20%" scope="row" valign="top"><?php _e('Question', 'wp-polls') ?></th>
 			<td width="80%"><input type="text" size="70" name="pollq_question" value="" /></td>
 		</tr>
+		<!-- Poll Type -->
+		<tr>
+			<th width="20%" scope="row" valign="top"><?php _e('Poll Type', 'wp-polls') ?></th>
+			<td width="80%">
+				<select name="pollq_type">
+					<option value="classic"><?php _e('Classic (Single Choice)', 'wp-polls'); ?></option>
+					<option value="ranked"><?php _e('Ranked Choice', 'wp-polls'); ?></option>
+				</select>
+				<p class="description"><?php _e('Select the type of poll.', 'wp-polls'); ?></p>
+			</td>
+		</tr>
 	</table>
 	<!-- Poll Answers -->
 	<h3><?php _e('Poll Answers', 'wp-polls'); ?></h3>
@@ -207,3 +223,4 @@ $count = 0;
 	<p style="text-align: center;"><input type="submit" name="do" value="<?php _e('Add Poll', 'wp-polls'); ?>"  class="button-primary" />&nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e('Cancel', 'wp-polls'); ?>" class="button" onclick="javascript:history.go(-1)" /></p>
 </div>
 </form>
+
