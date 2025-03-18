@@ -17,13 +17,13 @@
 
 
 .wp-polls ul li, .wp-polls-ul li, .wp-polls-ans ul li {
-	text-align: right;
+    text-align: right;
 }
 
 .wp-polls ul, .wp-polls-ul, .wp-polls-ans ul  {
-	text-align: right;
+    text-align: right;
 }
 
 .wp-polls-ul {
-	margin: 0px 10px 10px 0px;
+    margin: 0px 10px 10px 0px;
 }
