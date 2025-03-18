@@ -100,7 +100,7 @@ if( ! empty( $_POST['do'] ) ) {
 			}
 			$guest_sql  = 'AND pollip_user != \''.__('Guest', 'wp-polls').'\'';
 			$num_choices_query = $wpdb->get_col("SELECT pollip_user, COUNT(pollip_ip) AS num_choices FROM $wpdb->pollsip WHERE pollip_qid = $poll_id GROUP BY pollip_ip, pollip_user HAVING num_choices $num_choices_sign_sql $num_choices");
-			$num_choices_sql = 'AND pollip_user IN (\''.implode('\',\'',$num_choices_query).'\')';
+			$num_choices_sql = 'AND pollip_user IN (\'' . implode( '\',\'', array_map( 'esc_sql', $num_choices_query ) ) . '\')';
 			$order_by = 'pollip_user, pollip_ip';
 			break;
 		case 3;
@@ -128,7 +128,7 @@ if( ! empty( $_POST['do'] ) ) {
 <?php if($poll_totalrecorded > 0 && apply_filters( 'wp_polls_log_show_log_filter', true )) { ?>
 <div class="wrap">
 	<h3><?php _e('Filter Poll\'s Logs', 'wp-polls') ?></h3>
-	<table width="100%"  border="0" cellspacing="0" cellpadding="0">
+	<table width="100%" cellspacing="0" cellpadding="0">
 		<tr>
 			<td width="50%">
 				<form method="post" action="<?php echo admin_url('admin.php?page='.$base_name.'&amp;mode=logs&amp;id='.$poll_id); ?>">
@@ -167,7 +167,7 @@ if( ! empty( $_POST['do'] ) ) {
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2" align="center"><input type="submit" name="do" value="<?php _e('Filter', 'wp-polls'); ?>" class="button" /></td>
+						<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php _e('Filter', 'wp-polls'); ?>" class="button" /></td>
 					</tr>
 				</table>
 				</form>
@@ -215,7 +215,7 @@ if( ! empty( $_POST['do'] ) ) {
 							</td>
 						</tr>
 						<tr>
-							<td colspan="2" align="center"><input type="submit" name="do" value="<?php _e('Filter', 'wp-polls'); ?>" class="button" /></td>
+							<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php _e('Filter', 'wp-polls'); ?>" class="button" /></td>
 						</tr>
 					</table>
 					</form>
@@ -250,7 +250,7 @@ if( ! empty( $_POST['do'] ) ) {
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2" align="center"><input type="submit" name="do" value="<?php _e('Filter', 'wp-polls'); ?>" class="button" /></td>
+						<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php _e('Filter', 'wp-polls'); ?>" class="button" /></td>
 					</tr>
 				</table>
 				</form>
@@ -258,7 +258,7 @@ if( ! empty( $_POST['do'] ) ) {
 					&nbsp;
 				<?php } // End if($poll_multiple > -1) ?>
 			</td>
-			<td align="center"><input type="button" value="<?php _e('Clear Filter', 'wp-polls'); ?>" onclick="self.location.href = '<?php echo esc_attr( $base_page ); ?>&amp;mode=logs&amp;id=<?php echo $poll_id; ?>';" class="button" /></td>
+			<td style="text-align: center;"><input type="button" value="<?php _e('Clear Filter', 'wp-polls'); ?>" onclick="self.location.href = '<?php echo esc_attr( $base_page ); ?>&amp;mode=logs&amp;id=<?php echo $poll_id; ?>';" class="button" /></td>
 		</tr>
 	</table>
 </div>
@@ -281,8 +281,7 @@ if( ! empty( $_POST['do'] ) ) {
 				if(isset($_POST['filter']) && (int) sanitize_key( $_POST['filter'] ) > 1) {
 					echo "<tr class=\"thead\">\n";
 					echo "<th>".__('Answer', 'wp-polls')."</th>\n";
-					echo "<th>".__('IP', 'wp-polls')."</th>\n";
-					echo "<th>".__('Host', 'wp-polls')."</th>\n";
+					echo "<th>".__('Hashed IP / Host', 'wp-polls')."</th>\n";
 					echo "<th>".__('Date', 'wp-polls')."</th>\n";
 					echo "</tr>\n";
 					foreach($poll_ips as $poll_ip) {
@@ -298,17 +297,16 @@ if( ! empty( $_POST['do'] ) ) {
 						}  else {
 							$style = 'class="alternate"';
 						}
-						if($pollip_user != $temp_pollip_user) {
-							echo '<tr class="highlight">'."\n";
-							echo "<td colspan=\"4\"><strong>".__('User', 'wp-polls')." ".number_format_i18n($k).": $pollip_user</strong></td>\n";
+						if ( $pollip_user !== $temp_pollip_user ) {
+							echo '<tr class="highlight">';
+							echo '<td colspan="3"><strong>' . __( 'User', 'wp-polls') . ' ' . esc_html( number_format_i18n( $k ) ) . ': ' . esc_html( $pollip_user ) . '</strong></td>';
 							echo '</tr>';
 							$k++;
 						}
 						echo "<tr $style>\n";
-						echo "<td>{$pollip_answers[$pollip_aid]}</td>\n";
-						echo "<td>$pollip_ip</td>\n";
-						echo "<td>$pollip_host</td>\n";
-						echo "<td>$pollip_date</td>\n";
+						echo '<td>' . esc_html( $pollip_answers[$pollip_aid] ) . '</td>';
+						echo '<td>' . esc_html( $pollip_ip ) . ' / ' . esc_html( $pollip_host ) . '</td>';
+						echo '<td>' . esc_html( $pollip_date ) . '</td>';
 						echo "</tr>\n";
 						$temp_pollip_user = $pollip_user;
 						$i++;
@@ -322,11 +320,11 @@ if( ! empty( $_POST['do'] ) ) {
 						$pollip_host = $poll_ip->pollip_host;
 						$pollip_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_ip->pollip_timestamp));
 						if($pollip_aid != $poll_last_aid) {
-							if($pollip_aid == 0) {
-								echo "<tr class=\"highlight\">\n<td colspan=\"4\"><strong>$pollip_answers[$pollip_aid]</strong></td>\n</tr>\n";
+							if ( $pollip_aid ===  0 ) {
+								echo '<tr class="highlight"><td colspan="4"><strong>' . esc_html( $pollip_answers[$pollip_aid] ) . '</strong></td></tr>';
 							} else {
 								$polla_answer = ! empty( $pollip_answers[$pollip_aid] ) ? $pollip_answers[ $pollip_aid ] : $poll_answers_data[ $k-1 ]->polla_answers;
-								echo "<tr class=\"highlight\">\n<td colspan=\"4\"><strong>".__('Answer', 'wp-polls')." ".number_format_i18n($k).": " . $polla_answer . "</strong></td>\n</tr>\n";
+								echo '<tr class="highlight"><td colspan="4"><strong>' . __('Answer', 'wp-polls') . ' ' . esc_html( number_format_i18n( $k ) ) . ': ' . esc_html( $polla_answer ) . '</strong></td></tr>';
 								$k++;
 							}
 							echo "<tr class=\"thead\">\n";
@@ -343,10 +341,10 @@ if( ! empty( $_POST['do'] ) ) {
 							$style = 'class="alternate"';
 						}
 						echo "<tr $style>\n";
-						echo "<td>".number_format_i18n($i)."</td>\n";
-						echo "<td>$pollip_user</td>\n";
-						echo "<td>$pollip_ip / $pollip_host</td>\n";
-						echo "<td>$pollip_date</td>\n";
+						echo '<td>' . esc_html( number_format_i18n( $i ) ) . '</td>';
+						echo '<td>' . esc_html( $pollip_user ) . '</td>';
+						echo '<td>' . esc_html( $pollip_ip ) . ' / ' . esc_html( $pollip_host ) . '</td>';
+						echo '<td>' . esc_html( $pollip_date ) . '</td>';
 						echo "</tr>\n";
 						$poll_last_aid = $pollip_aid;
 						$i++;
@@ -372,7 +370,7 @@ if( ! empty( $_POST['do'] ) ) {
 <div class="wrap">
 	<h3><?php _e('Delete Poll Logs', 'wp-polls'); ?></h3>
 	<br class="clear" />
-	<div align="center" id="poll_logs">
+	<div style="text-align: center;" id="poll_logs">
 		<?php if($poll_logs_count) { ?>
 			<strong><?php _e('Are You Sure You Want To Delete Logs For This Poll Only?', 'wp-polls'); ?></strong><br /><br />
 			<input type="checkbox" id="delete_logs_yes" name="delete_logs_yes" value="yes" />&nbsp;<label for="delete_logs_yes"><?php _e('Yes', 'wp-polls'); ?></label><br /><br />
@@ -384,4 +382,3 @@ if( ! empty( $_POST['do'] ) ) {
 		?>
 	</div>
 	<p><?php _e('Note: If your logging method is by IP and Cookie or by Cookie, users may still be unable to vote if they have voted before as the cookie is still stored in their computer.', 'wp-polls'); ?></p>
-</div>
