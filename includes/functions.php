@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function check_allowtovote() {
 	$current_user_id = (int) get_current_user_id();
-	$allow_to_vote = (int) get_option( 'poll_allowtovote' );
+	$allow_to_vote   = (int) get_option( 'poll_allowtovote' );
 	switch ( $allow_to_vote ) {
 		// Guests Only.
 		case 0:
@@ -80,7 +80,7 @@ function check_voted( $poll_id ) {
 function check_voted_cookie( $poll_id ) {
 	$get_voted_aids = 0;
 	if ( ! empty( $_COOKIE[ 'voted_' . $poll_id ] ) ) {
-		$cookie_value = sanitize_text_field( wp_unslash( $_COOKIE[ 'voted_' . $poll_id ] ) );
+		$cookie_value   = sanitize_text_field( wp_unslash( $_COOKIE[ 'voted_' . $poll_id ] ) );
 		$get_voted_aids = array_map( 'intval', array_map( 'sanitize_key', explode( ',', $cookie_value ) ) );
 	}
 	return $get_voted_aids;
@@ -98,31 +98,35 @@ function check_voted_ip( $poll_id ) {
 	$log_expiry = (int) get_option( 'poll_cookielog_expiry' );
 	$cache_key = 'poll_voted_ip_' . $poll_id . '_' . poll_get_ipaddress();
 	$get_voted_aids = wp_cache_get( $cache_key );
-	
+
 	if ( false === $get_voted_aids ) {
 		if ( $log_expiry > 0 ) {
-			$current_time = strtotime( current_time( 'mysql' ) );
-			$get_voted_aids = $wpdb->get_col(
+			$current_time   = strtotime( current_time( 'mysql' ) );
+			$results = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s AND (%d-(pollip_timestamp+0)) < %d",
 					$poll_id,
 					poll_get_ipaddress(),
 					$current_time,
 					$log_expiry
-				)
+				),
+				ARRAY_A
 			);
+			$get_voted_aids = wp_list_pluck( $results, 'pollip_aid' );
 		} else {
-			$get_voted_aids = $wpdb->get_col(
+			$results = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s",
 					$poll_id,
 					poll_get_ipaddress()
-				)
+				),
+				ARRAY_A
 			);
+			$get_voted_aids = wp_list_pluck( $results, 'pollip_aid' );
 		}
 		wp_cache_set( $cache_key, $get_voted_aids, '', HOUR_IN_SECONDS );
 	}
-	
+
 	if ( $get_voted_aids ) {
 		return $get_voted_aids;
 	}
@@ -146,7 +150,7 @@ function check_voted_username( $poll_id ) {
 	}
 	$pollsip_userid = (int) $user_ID;
 	$log_expiry = (int) get_option( 'poll_cookielog_expiry' );
-	
+
 	if ( $log_expiry > 0 ) {
 		$current_time = current_time( 'timestamp' );
 		$get_voted_aids = $wpdb->get_col(
@@ -167,7 +171,7 @@ function check_voted_username( $poll_id ) {
 			)
 		);
 	}
-	
+
 	if ( $get_voted_aids ) {
 		return $get_voted_aids;
 	} else {
@@ -191,7 +195,7 @@ if ( ! function_exists( 'get_poll_question' ) ) {
 	 */
 	function get_poll_question( $poll_id ) {
 		global $wpdb;
-		$poll_id = (int) $poll_id;
+		$poll_id   = (int) $poll_id;
 		$poll_question = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 		return wp_kses_post( removeslashes( $poll_question ) );
 	}
@@ -293,7 +297,7 @@ if ( ! function_exists( 'get_pollvotes_by_id' ) ) {
 	 */
 	function get_pollvotes_by_id( $poll_id, $display = true ) {
 		global $wpdb;
-		$poll_id = (int) $poll_id;
+		$poll_id    = (int) $poll_id;
 		$totalvotes = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 		if ( $display ) {
 			echo esc_html( $totalvotes );
@@ -351,7 +355,7 @@ if ( ! function_exists( 'get_polltime' ) ) {
 		$poll_id = (int) $poll_id;
 		$cache_key = 'poll_time_' . $poll_id;
 		$timestamp = wp_cache_get( $cache_key );
-		
+
 		if ( false === $timestamp ) {
 			$timestamp = (int) $wpdb->get_var(
 				$wpdb->prepare(
@@ -361,9 +365,9 @@ if ( ! function_exists( 'get_polltime' ) ) {
 			);
 			wp_cache_set( $cache_key, $timestamp, '', HOUR_IN_SECONDS );
 		}
-		
+
 		$formatted_date = gmdate( $date_format, $timestamp );
-		
+
 		if ( $display ) {
 			echo esc_html( $formatted_date );
 		} else {
@@ -384,11 +388,11 @@ function check_voted_multiple( $poll_id, $polls_ips ) {
 		$cookie_value = sanitize_text_field( wp_unslash( $_COOKIE[ "voted_$poll_id" ] ) );
 		return explode( ',', $cookie_value );
 	}
-	
+
 	if ( $polls_ips ) {
 		return $polls_ips;
 	}
-	
+
 	return array();
 }
 
@@ -477,7 +481,7 @@ function display_polls_archive_link( $display = true ) {
 function in_pollarchive() {
 	$poll_archive_url = get_option( 'poll_archive_url' );
 	$poll_archive_url_array = explode( '/', $poll_archive_url );
-	$poll_archive_url = $poll_archive_url_array[ count( $poll_archive_url_array ) - 1 ];
+	$poll_archive_url       = $poll_archive_url_array[ count( $poll_archive_url_array ) - 1 ];
 	if ( empty( $poll_archive_url ) ) {
 		$poll_archive_url = $poll_archive_url_array[ count( $poll_archive_url_array ) - 2 ];
 	}
@@ -518,13 +522,19 @@ function cron_polls_place() {
  */
 function cron_polls_status() {
 	global $wpdb;
-	// Close Poll.
-	$close_polls = $wpdb->query(
-		$wpdb->prepare(
-			"UPDATE $wpdb->pollsq SET pollq_active = 0 WHERE pollq_expiry < %d AND pollq_expiry != 0 AND pollq_active != 0",
-			current_time( 'timestamp' )
-		)
-	);
+	// Close Poll with caching.
+	$current_hour = gmdate( 'YmdH' );
+	$cache_key = 'wp_polls_close_' . $current_hour;
+	$close_polls = wp_cache_get( $cache_key );
+	if ( false === $close_polls ) {
+		$close_polls = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE $wpdb->pollsq SET pollq_active = 0 WHERE pollq_expiry < %d AND pollq_expiry != 0 AND pollq_active != 0",
+				current_time( 'timestamp' )
+			)
+		);
+		wp_cache_set( $cache_key, $close_polls, '', HOUR_IN_SECONDS );
+	}
 	// Open Future Polls.
 	$active_polls = $wpdb->query(
 		$wpdb->prepare(
@@ -568,12 +578,14 @@ function polls_release_lock( $fp, $poll_id ) {
 	if ( is_resource( $fp ) ) {
 		fflush( $fp );
 		flock( $fp, LOCK_UN );
-		fclose( $fp );
-		unlink( polls_lock_file( $poll_id ) );
-
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+		$wp_filesystem->delete( polls_lock_file( $poll_id ) );
 		return true;
 	}
-
 	return false;
 }
 
@@ -639,12 +651,12 @@ if ( ! function_exists( 'removeslashes' ) ) {
 	/**
 	 * Remove slashes from a string.
 	 *
-	 * @param string $string The string to process.
+	 * @param string $input The string to process.
 	 * @return string The string with slashes removed.
 	 */
-	function removeslashes( $string ) {
-		$string = implode( '', explode( '\\', $string ) );
-		return stripslashes( trim( $string ) );
+	function removeslashes( $input ) {
+		$input = implode( '', explode( '\\', $input ) );
+		return stripslashes( trim( $input ) );
 	}
 }
 
@@ -654,70 +666,93 @@ if ( ! function_exists( 'removeslashes' ) ) {
  * @param int    $poll_timestamp The timestamp to edit.
  * @param string $fieldname      The base name for the form fields.
  * @param string $display        CSS display property value.
+ * @return void
  */
 function poll_timestamp( $poll_timestamp, $fieldname = 'pollq_timestamp', $display = 'block' ) {
-	global $month;
+	// Define localized month names.
+	$months = array(
+		1  => __( 'January' ),
+		2  => __( 'February' ),
+		3  => __( 'March' ),
+		4  => __( 'April' ),
+		5  => __( 'May' ),
+		6  => __( 'June' ),
+		7  => __( 'July' ),
+		8  => __( 'August' ),
+		9  => __( 'September' ),
+		10 => __( 'October' ),
+		11 => __( 'November' ),
+		12 => __( 'December' ),
+	);
+
 	echo '<div id="' . esc_attr( $fieldname ) . '" style="display: ' . esc_attr( $display ) . '">' . "\n";
+
+	// Day.
 	$day = (int) gmdate( 'j', $poll_timestamp );
-	echo '<select name="' . esc_attr( $fieldname ) . '_day" size="1">' . "\n";
+	echo '<select name="' . esc_attr( $fieldname ) . '_day">' . "\n";
 	for ( $i = 1; $i <= 31; $i++ ) {
-		if ( $day === $i ) {
-			echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . '</option>' . "\n";
-		} else {
-			echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>' . "\n";
-		}
+		echo '<option value="' . esc_attr( $i ) . '"' . selected( $day, $i, false ) . '>' . esc_html( $i ) . '</option>' . "\n";
 	}
 	echo '</select>&nbsp;&nbsp;' . "\n";
-	$month2 = (int) gmdate( 'n', $poll_timestamp );
-	echo '<select name="' . esc_attr( $fieldname ) . '_month" size="1">' . "\n";
-	for ( $i = 1; $i <= 12; $i++ ) {
-		if ( $i < 10 ) {
-			$ii = '0' . $i;
-		} else {
-			$ii = $i;
-		}
-		if ( $month2 === $i ) {
-			echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $month[ $ii ] ) . '</option>' . "\n";
-		} else {
-			echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $month[ $ii ] ) . '</option>' . "\n";
-		}
+
+	// Month.
+	$month_num = (int) gmdate( 'n', $poll_timestamp );
+	echo '<select name="' . esc_attr( $fieldname ) . '_month">' . "\n";
+	foreach ( $months as $i => $month_name ) {
+		echo '<option value="' . esc_attr( $i ) . '"' . selected( $month_num, $i, false ) . '>' . esc_html( $month_name ) . '</option>' . "\n";
 	}
 	echo '</select>&nbsp;&nbsp;' . "\n";
+
+	// Year.
 	$poll_year = (int) gmdate( 'Y', $poll_timestamp );
-	echo '<select name="' . esc_attr( $fieldname ) . '_year" size="1">' . "\n";
+	echo '<select name="' . esc_attr( $fieldname ) . '_year">' . "\n";
 	for ( $i = 2000; $i <= ( $poll_year + 10 ); $i++ ) {
-		if ( $poll_year === $i ) {
-			echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . '</option>' . "\n";
-		} else {
-			echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>' . "\n";
-		}
+		echo '<option value="' . esc_attr( $i ) . '"' . selected( $poll_year, $i, false ) . '>' . esc_html( $i ) . '</option>' . "\n";
 	}
 	echo '</select>&nbsp;@' . "\n";
+
+	// Time.
 	echo '<span dir="ltr">' . "\n";
+
+	// Hour.
 	$hour = (int) gmdate( 'H', $poll_timestamp );
-	echo '<select name="' . esc_attr( $fieldname ) . '_hour" size="1">' . "\n";
+	echo '<select name="' . esc_attr( $fieldname ) . '_hour">' . "\n";
 	for ( $i = 0; $i < 24; $i++ ) {
-		if ( $hour === $i ) {
-			echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . '</option>' . "\n";
-		} else {
-			echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>' . "\n";
-		}
+		printf(
+			'<option value="%s"%s>%02s</option>' . "\n",
+			esc_attr( $i ),
+			selected( $hour, $i, false ),
+			esc_html( $i )
+		);
 	}
 	echo '</select>&nbsp;:' . "\n";
+
+	// Minute.
 	$minute = (int) gmdate( 'i', $poll_timestamp );
-	echo '<select name="' . esc_attr( $fieldname ) . '_minute" size="1">' . "\n";
+	echo '<select name="' . esc_attr( $fieldname ) . '_minute">' . "\n";
 	for ( $i = 0; $i < 60; $i++ ) {
-		if ( $minute === $i ) {
-			echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . '</option>' . "\n";
-		} else {
-			echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>' . "\n";
-		}
+		printf(
+			'<option value="%s"%s>%02d</option>' . "\n",
+			esc_attr( $i ),
+			selected( $minute, $i, false ),
+			esc_html( $i )
+		);
 	}
 	echo '</select>&nbsp;:' . "\n";
+
+	// Second.
 	$second = (int) gmdate( 's', $poll_timestamp );
-	echo '<select name="' . esc_attr( $fieldname ) . '_second" size="1">' . "\n";
-	for ( $i = 0; $i <= 60; $i++ ) {
-		if ( $second === $i ) {
-			echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . '</option>' . "\n";
-		} else {
-			echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>' . "\n";
+	echo '<select name="' . esc_attr( $fieldname ) . '_second">' . "\n";
+	for ( $i = 0; $i < 60; $i++ ) { // fixed to 0-59.
+		printf(
+			'<option value="%s"%s>%02d</option>' . "\n",
+			esc_attr( $i ),
+			selected( $second, $i, false ),
+			esc_html( $i )
+		);
+	}
+	echo '</select>' . "\n";
+
+	echo '</span>' . "\n";
+	echo '</div>' . "\n";
+}
