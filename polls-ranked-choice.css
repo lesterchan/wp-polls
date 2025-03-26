@@ -1,0 +1,75 @@
+/* Ranked Choice Polls Styles */
+.wp-polls-ranked-choice .poll-answer {
+    cursor: grab;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    position: relative;
+}
+
+/* Hide the actual input elements (radio/checkbox) in ranked choice polls */
+.wp-polls-ranked-choice input[type="radio"],
+.wp-polls-ranked-choice input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Hide the label for the input */
+.wp-polls-ranked-choice label {
+    cursor: grab;
+    display: block;
+    width: 100%;
+}
+
+.wp-polls-ranked-choice .poll-answer.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.wp-polls-ranked-choice .poll-answer:hover {
+    background-color: #f0f0f0;
+}
+
+.wp-polls-ranked-choice .poll-answer-rank {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    background-color: #2271b1;
+    color: #fff;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.wp-polls-ranked-choice .poll-answer-content {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Style for the drag handle */
+.wp-polls-ranked-choice .drag-handle {
+    float: right;
+    color: #aaa;
+    cursor: grab;
+}
+
+/* Mobile-friendly adjustments */
+@media (max-width: 768px) {
+    .wp-polls-ranked-choice .poll-answer {
+        padding: 8px;
+    }
+    
+    .wp-polls-ranked-choice .poll-answer-rank {
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        font-size: 12px;
+    }
+}

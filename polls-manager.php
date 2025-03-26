@@ -357,6 +357,7 @@ switch($mode) {
         $total_ans =  $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->pollsa" );
         $total_votes = 0;
         $total_voters = 0;
+        $i = 0; // Initialize counter for total polls
 ?>
         <!-- Last Action -->
         <div id="message" class="updated" style="display: none;"></div>

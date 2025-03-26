@@ -19,10 +19,26 @@ function vote_poll_process( $poll_id, $poll_aid_array = [] ) {
 
 	do_action( 'wp_polls_vote_poll' );
 
-	// Acquire lock
+	// Acquire lock.
 	$fp_lock = polls_acquire_lock( $poll_id );
 	if ( $fp_lock === false ) {
 		throw new InvalidArgumentException( sprintf( __( 'Unable to obtain lock for Poll ID #%s', 'wp-polls'), $poll_id ) );
+	}
+
+	// Check if this is a ranked choice poll
+	$is_ranked_poll = isset( $_POST['ranked_poll'] ) && sanitize_key( $_POST['ranked_poll'] ) === '1';
+	$ranked_order = isset( $_POST['ranked_order'] ) ? sanitize_text_field( $_POST['ranked_order'] ) : '';
+	$poll_type = '';
+	
+	if ( $is_ranked_poll && ! empty( $ranked_order ) ) {
+		// Get the poll type to confirm it's actually a ranked choice poll
+		$poll_type = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_type FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
+		
+		// If it's truly a ranked poll, use the ranked order data
+		if ( 'ranked' === $poll_type ) {
+			// For ranked polls, the order matters, so we use the ranked_order parameter
+			$poll_aid_array = array_map( 'intval', explode( ',', $ranked_order ) );
+		}
 	}
 
 	$polla_aids = $wpdb->get_col( $wpdb->prepare( "SELECT polla_aid FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
@@ -79,45 +95,113 @@ function vote_poll_process( $poll_id, $poll_aid_array = [] ) {
 		setcookie( 'voted_' . $poll_id, implode(',', $poll_aid_array ), $pollip_timestamp + $cookie_expiry, apply_filters( 'wp_polls_cookiepath', SITECOOKIEPATH ) );
 	}
 
-	$i = 0;
-	foreach ($poll_aid_array as $polla_aid) {
-		$update_polla_votes = $wpdb->query( "UPDATE $wpdb->pollsa SET polla_votes = (polla_votes + 1) WHERE polla_qid = $poll_id AND polla_aid = $polla_aid" );
-		if (!$update_polla_votes) {
-			unset($poll_aid_array[$i]);
-		}
-		$i++;
-	}
-
-	$vote_q = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . count( $poll_aid_array ) . "), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = $poll_id AND pollq_active = 1");
-	if (!$vote_q) {
-		throw new InvalidArgumentException(sprintf(__('Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls'), $poll_id));
-	}
-
-	foreach ($poll_aid_array as $polla_aid) {
-		// Log Ratings In DB If User Choose Logging Method 2, 3 or 4
-		if ( $poll_logging_method > 1 ){
-			$wpdb->insert(
-				$wpdb->pollsip,
-				array(
-					'pollip_qid'       => $poll_id,
-					'pollip_aid'       => $polla_aid,
-					'pollip_ip'        => $pollip_ip,
-					'pollip_host'      => $pollip_host,
-					'pollip_timestamp' => $pollip_timestamp,
-					'pollip_user'      => $pollip_user,
-					'pollip_userid'    => $pollip_userid
-				),
-				array(
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-					'%d'
+	// For ranked polls, handle votes based on rank position
+	if ( 'ranked' === $poll_type ) {
+		// First, record each answer with its rank position
+		// We'll use a weighted voting system where higher ranks get more "points"
+		$total_answers = count( $poll_aid_array );
+		$rank = 1; // Start with rank 1 (highest)
+		
+		foreach ( $poll_aid_array as $polla_aid ) {
+			// For ranked choice polls, we record each vote with its rank
+			// We'll use pollip_aid field to store the answer ID
+			// and create a custom field or entry format to store the rank
+			
+			// Calculate the weight/value of this vote based on rank
+			// Higher ranks get more value (e.g., first choice counts more)
+			$vote_value = $total_answers - ($rank - 1);
+			
+			// Update this answer's vote count based on its rank
+			$update_polla_votes = $wpdb->query( 
+				$wpdb->prepare(
+					"UPDATE $wpdb->pollsa SET polla_votes = (polla_votes + %d) WHERE polla_qid = %d AND polla_aid = %d",
+					$vote_value,
+					$poll_id,
+					$polla_aid
 				)
 			);
+			
+			// Log the vote with rank information
+			if ( $poll_logging_method > 1 ) {
+				$wpdb->insert(
+					$wpdb->pollsip,
+					array(
+						'pollip_qid'       => $poll_id,
+						'pollip_aid'       => $polla_aid,
+						'pollip_ip'        => $pollip_ip,
+						'pollip_host'      => $pollip_host,
+						'pollip_timestamp' => $pollip_timestamp,
+						'pollip_user'      => $pollip_user . ' (Rank: ' . $rank . ')',
+						'pollip_userid'    => $pollip_userid
+					),
+					array(
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%d'
+					)
+				);
+			}
+			
+			$rank++; // Move to next rank
 		}
+		
+		// Update the total votes for the poll
+		// For ranked polls, each voter contributes multiple votes (one per option)
+		$vote_q = $wpdb->query( 
+			$wpdb->prepare(
+				"UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes + %d), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = %d AND pollq_active = 1",
+				array_sum(range(1, $total_answers)),
+				$poll_id
+			)
+		);
+	} else {
+		// For regular polls, process votes as before
+		$i = 0;
+		foreach ($poll_aid_array as $polla_aid) {
+			$update_polla_votes = $wpdb->query( "UPDATE $wpdb->pollsa SET polla_votes = (polla_votes + 1) WHERE polla_qid = $poll_id AND polla_aid = $polla_aid" );
+			if (!$update_polla_votes) {
+				unset($poll_aid_array[$i]);
+			}
+			$i++;
+		}
+
+		$vote_q = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . count( $poll_aid_array ) . "), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = $poll_id AND pollq_active = 1");
+		
+		// Log regular poll votes
+		foreach ($poll_aid_array as $polla_aid) {
+			// Log Ratings In DB If User Choose Logging Method 2, 3 or 4
+			if ( $poll_logging_method > 1 ){
+				$wpdb->insert(
+					$wpdb->pollsip,
+					array(
+						'pollip_qid'       => $poll_id,
+						'pollip_aid'       => $polla_aid,
+						'pollip_ip'        => $pollip_ip,
+						'pollip_host'      => $pollip_host,
+						'pollip_timestamp' => $pollip_timestamp,
+						'pollip_user'      => $pollip_user,
+						'pollip_userid'    => $pollip_userid
+					),
+					array(
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%d'
+					)
+				);
+			}
+		}
+	}
+
+	if (!$vote_q) {
+		throw new InvalidArgumentException(sprintf(__('Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls'), $poll_id));
 	}
 
 	// Release lock

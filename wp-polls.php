@@ -39,38 +39,42 @@ define( 'WP_POLLS_VERSION', '2.78.0' );
 define( 'WP_POLLS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WP_POLLS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
-// Include required files.
+// Include core files.
+require_once WP_POLLS_PLUGIN_DIR . 'includes/core/class-poll-utility.php';
+require_once WP_POLLS_PLUGIN_DIR . 'includes/core/class-poll-vote.php';
+require_once WP_POLLS_PLUGIN_DIR . 'includes/core/class-poll-core.php';
+require_once WP_POLLS_PLUGIN_DIR . 'includes/core/class-poll-data.php';
+require_once WP_POLLS_PLUGIN_DIR . 'includes/core/class-wp-polls-template.php';
+require_once WP_POLLS_PLUGIN_DIR . 'includes/core/class-wp-polls-backward-compatibility.php';
+
+// Include admin files.
+require_once WP_POLLS_PLUGIN_DIR . 'includes/admin/class-poll-manager.php';
+
+// Include legacy files for backward compatibility.
 require_once WP_POLLS_PLUGIN_DIR . 'includes/functions.php';
 require_once WP_POLLS_PLUGIN_DIR . 'includes/template-functions.php';
 require_once WP_POLLS_PLUGIN_DIR . 'includes/shortcodes.php';
-require_once WP_POLLS_PLUGIN_DIR . 'includes/scripts.php'; // Contains enqueue functions
+require_once WP_POLLS_PLUGIN_DIR . 'includes/scripts.php';
 require_once WP_POLLS_PLUGIN_DIR . 'includes/ajax.php';
 require_once WP_POLLS_PLUGIN_DIR . 'includes/class-wp-polls-widget.php';
 require_once WP_POLLS_PLUGIN_DIR . 'includes/database.php';
 require_once WP_POLLS_PLUGIN_DIR . 'includes/admin/admin.php';
 require_once WP_POLLS_PLUGIN_DIR . 'includes/admin/menu.php';
-// includes/admin/editor.php is no longer required to avoid function redeclaration issues
-// TinyMCE functions are in scripts.php
-// includes/enqueue.php is no longer required as scripts.php contains all the enqueue functions
 
-/**
- * Create Text Domain For Translations.
- */
-function polls_textdomain() {
-	load_plugin_textdomain( 'wp-polls' );
-}
-add_action( 'plugins_loaded', 'polls_textdomain' );
+// Include frontend functionality.
+require_once WP_POLLS_PLUGIN_DIR . 'includes/frontend/frontend.php';
+require_once WP_POLLS_PLUGIN_DIR . 'includes/frontend/shortcodes.php';
+
+// Initialize core functionality.
+add_action( 'plugins_loaded', array( 'WP_Polls_Core', 'init' ) );
+add_action( 'plugins_loaded', array( 'WP_Polls_Backward_Compatibility', 'init' ) );
+add_action( 'admin_init', array( 'WP_Polls_Manager', 'init' ) );
 
 // Define database tables.
-polls_define_tables();
+WP_Polls_Data::define_tables();
 
-// Register shortcodes.
-register_polls_shortcodes();
-
-// Initialize widget.
+// Legacy initialization for backward compatibility.
 add_action( 'widgets_init', 'widget_polls_init' );
-
-// Register activation hook.
 register_activation_hook( __FILE__, 'polls_activation' );
 
 /**
@@ -198,19 +202,24 @@ if ( ! function_exists( 'get_pollvoters' ) ) {
 	}
 }
 
-/**
- * Get Poll Time Based on Poll ID and Date Format.
- *
- * @param int    $poll_id     The poll ID.
- * @param string $date_format The date format.
- * @param bool   $display     Whether to display or return the formatted date.
- * @return string|void The formatted date if $display is false.
- */
-if ( ! function_exists( 'get_polltime' ) ) {
+if ( ! function_exists( 'get_polltime' ) ) :
+	/**
+	 * Get Poll Time Based on Poll ID and Date Format.
+	 *
+	 * @param int    $poll_id     The poll ID.
+	 * @param string $date_format The date format.
+	 * @param bool   $display     Whether to display or return the formatted date.
+	 * @return string|void The formatted date if $display is false.
+	 */
 	function get_polltime( $poll_id, $date_format = 'd/m/Y', $display = true ) {
 		global $wpdb;
-		$poll_id = (int) $poll_id;
-		$timestamp = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
+			$poll_id = (int) $poll_id;
+		$cache_key = 'poll_time_' . $poll_id;
+		$timestamp = wp_cache_get( $cache_key );
+		if ( false === $timestamp ) {
+			$timestamp = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
+			wp_cache_set( $cache_key, $timestamp );
+		}
 		$formatted_date = gmdate( $date_format, $timestamp );
 		if ( $display ) {
 			echo esc_html( $formatted_date );
@@ -218,20 +227,74 @@ if ( ! function_exists( 'get_polltime' ) ) {
 			return $formatted_date;
 		}
 	}
-}
+endif;
 
 // Initialize WP-Polls Widget.
 add_action( 'widgets_init', 'widget_polls_init' );
 
-/**
- * Remove slashes from a string.
- *
- * @param string $string The string to remove slashes from.
- * @return string The string with slashes removed.
- */
 if ( ! function_exists( 'removeslashes' ) ) {
+	/**
+	 * Remove slashes from a string.
+	 *
+	 * @param string $string The string to remove slashes from.
+	 * @return string The string with slashes removed.
+	 */
 	function removeslashes( $string ) {
 		$string = implode( '', explode( '\\', $string ) );
 		return stripslashes( trim( $string ) );
 	}
 }
+
+/**
+ * Enhance the poll answer template for ranked choice polls.
+ *
+ * @param string $template The template markup.
+ * @param object $poll_answer The poll answer object.
+ * @param array  $variables The template variables.
+ * @return string The modified template markup.
+ */
+/**
+ * Enhance the poll answer template for ranked choice polls.
+ *
+ * @param string $template  The template markup.
+ * @param object $poll_answer The poll answer object.
+ * @param array  $variables The template variables.
+ * @return string The modified template markup.
+ */
+function wp_polls_ranked_choice_template( $template, $poll_answer, $variables ) {
+	global $wpdb;
+	
+	// Get the poll type from the database.
+	$poll_id = $variables['%POLL_ID%'];
+	$poll_type = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT pollq_type FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1",
+			$poll_id
+		)
+	);
+
+	// If this is a ranked choice poll, modify the template.
+	if ( 'ranked' === $poll_type ) {
+		// Add a rank indicator and wrap the answer in a draggable container.
+		$rank_number = '<span class="poll-answer-rank">1</span>';
+		$drag_handle = '<span class="drag-handle">&#8597;</span>';
+		
+		// Store the original value as a data attribute for JavaScript to use.
+		$original_value_attr = ' data-original-value="' . esc_attr( $variables['%POLL_ANSWER_ID%'] ) . '"';
+		
+		// Find the input element and add the data attribute.
+		$template = preg_replace(
+			'/(<input[^>]*name="poll_' . $poll_id . '.*?")/',
+			'$1' . $original_value_attr,
+			$template
+		);
+		
+		// Wrap the answer in a draggable container with a class.
+		$template = '<div class="poll-answer">' . $rank_number . $template . $drag_handle . '</div>';
+	}
+	
+	return $template;
+}
+
+// Add filter to modify the poll template for ranked choice polls.
+add_filter( 'wp_polls_template_votebody_markup', 'wp_polls_ranked_choice_template', 10, 3 );
