@@ -1,5 +1,5 @@
 <?php
-### Check Whether User Can Manage Polls
+// Check Whether User Can Manage Polls
 if(!current_user_can('manage_polls')) {
 	die('Access Denied');
 }
@@ -18,6 +18,9 @@ if ( ! empty($_POST['do'] ) ) {
 			$text = '';
 			// Poll Question
 			$pollq_question = isset( $_POST['pollq_question'] ) ? wp_kses_post( trim( $_POST['pollq_question'] ) ) : '';
+			// Poll Type
+			$pollq_type = isset( $_POST['pollq_type'] ) ? sanitize_text_field( $_POST['pollq_type'] ) : 'classic';
+
 			if ( ! empty( $pollq_question ) ) {
 				// Poll Start Date
 				$timestamp_sql = '';
@@ -49,7 +52,7 @@ if ( ! empty($_POST['do'] ) ) {
 						$pollq_active = 0;
 					}
 				}
-				// Mutilple Poll
+				// Multiple Poll.
 				$pollq_multiple_yes = isset( $_POST['pollq_multiple_yes'] ) ? (int) sanitize_key( $_POST['pollq_multiple_yes'] ) : 0;
 				$pollq_multiple = 0;
 				if ( $pollq_multiple_yes === 1 ) {
@@ -57,7 +60,7 @@ if ( ! empty($_POST['do'] ) ) {
 				} else {
 					$pollq_multiple = 0;
 				}
-				// Insert Poll
+				// Insert Poll Question (with pollq_type added).
 				$add_poll_question = $wpdb->insert(
 					$wpdb->pollsq,
 					array(
@@ -67,7 +70,8 @@ if ( ! empty($_POST['do'] ) ) {
 						'pollq_active'      => $pollq_active,
 						'pollq_expiry'      => $pollq_expiry,
 						'pollq_multiple'    => $pollq_multiple,
-						'pollq_totalvoters' => 0
+						'pollq_totalvoters' => 0,
+						'pollq_type'        => $pollq_type
 					),
 					array(
 						'%s',
@@ -76,13 +80,14 @@ if ( ! empty($_POST['do'] ) ) {
 						'%d',
 						'%d',
 						'%d',
-						'%d'
+						'%d',
+						'%s'
 					)
 				);
 				if ( ! $add_poll_question ) {
 					$text .= '<p style="color: red;">' . sprintf(__('Error In Adding Poll \'%s\'.', 'wp-polls'), $pollq_question) . '</p>';
 				}
-				// Add Poll Answers
+				// Add Poll Answers.
 				$polla_answers = isset( $_POST['polla_answers'] ) ? $_POST['polla_answers'] : array();
 				$polla_qid = (int) $wpdb->insert_id;
 				foreach ( $polla_answers as $polla_answer ) {
@@ -108,10 +113,10 @@ if ( ! empty($_POST['do'] ) ) {
 						$text .= '<p style="color: red;">' . __( 'Poll\'s Answer is empty.', 'wp-polls' ) . '</p>';
 					}
 				}
-				// Update Lastest Poll ID To Poll Options
+				// Update Lastest Poll ID To Poll Options.
 				$latest_pollid = polls_latest_id();
 				$update_latestpoll = update_option( 'poll_latestpoll', $latest_pollid );
-				// If poll starts in the future use the correct poll ID
+				// If poll starts in the future use the correct poll ID.
 				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 				if ( empty( $text ) ) {
 					$text = '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' (ID: %s) added successfully. Embed this poll with the shortcode: %s or go back to <a href="%s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
@@ -129,7 +134,7 @@ if ( ! empty($_POST['do'] ) ) {
 	}
 }
 
-### Add Poll Form
+### Add Poll Form.
 $poll_noquestion = 2;
 $count = 0;
 ?>
@@ -144,6 +149,18 @@ $count = 0;
 		<tr>
 			<th width="20%" scope="row" valign="top"><?php _e('Question', 'wp-polls') ?></th>
 			<td width="80%"><input type="text" size="70" name="pollq_question" value="" /></td>
+		</tr>
+		<!-- Poll Type -->
+		<tr>
+			<th width="20%" scope="row" valign="top"><?php _e('Poll Type', 'wp-polls') ?></th>
+			<td width="80%">
+				<select name="pollq_type" id="pollq_type">
+					<option value="classic"><?php _e('Classic (Single Choice)', 'wp-polls'); ?></option>
+					<option value="multiple"><?php _e('Multiple Choice', 'wp-polls'); ?></option>
+					<option value="ranked"><?php _e('Ranked Choice', 'wp-polls'); ?></option>
+				</select>
+				<p class="description"><?php _e('Select the type of poll.', 'wp-polls'); ?></p>
+			</td>
 		</tr>
 	</table>
 	<!-- Poll Answers -->
@@ -207,3 +224,57 @@ $count = 0;
 	<p style="text-align: center;"><input type="submit" name="do" value="<?php _e('Add Poll', 'wp-polls'); ?>"  class="button-primary" />&nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e('Cancel', 'wp-polls'); ?>" class="button" onclick="javascript:history.go(-1)" /></p>
 </div>
 </form>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	// Function to handle poll type change.
+	function handlePollTypeChange() {
+		var pollType = $('#pollq_type').val();
+		
+		if (pollType === 'ranked') {
+			// For ranked choice:
+			// 1. Set "allow multiple answers" to "Yes" and disable the dropdown.
+			$('#pollq_multiple_yes').val('1').prop('disabled', true);
+			
+			// 2. Set the max answers dropdown to maximum and disable it.
+			var maxOptions = $('#pollq_multiple option').length;
+			$('#pollq_multiple').val(maxOptions).prop('disabled', true);
+			
+			// Add visual indication that fields are disabled.
+			$('#pollq_multiple_yes, #pollq_multiple').css('opacity', '0.6');
+		} else if (pollType === 'multiple') {
+			// For multiple choice:
+			// 1. Enable "allow multiple answers" dropdown but set it to "Yes"
+			$('#pollq_multiple_yes').val('1').prop('disabled', false);
+			
+			// 2. Enable the max answers dropdown and set to max by default
+			var maxOptions = $('#pollq_multiple option').length;
+			$('#pollq_multiple').val(maxOptions).prop('disabled', false);
+			
+			// Reset visual styling
+			$('#pollq_multiple_yes, #pollq_multiple').css('opacity', '1');
+		} else {
+			// For classic (single choice):
+			// 1. Set "allow multiple answers" to "No" and disable the dropdown
+			$('#pollq_multiple_yes').val('0').prop('disabled', true);
+			
+			// 2. Disable the max answers dropdown
+			$('#pollq_multiple').prop('disabled', true);
+			
+			// Add visual indication that fields are disabled
+			$('#pollq_multiple_yes, #pollq_multiple').css('opacity', '0.6');
+		}
+	}
+	
+	// Add event listener for poll type changes
+	$('#pollq_type').on('change', handlePollTypeChange);
+	
+	// Override the existing check_pollq_multiple function
+	window.check_pollq_multiple = function() {
+		// Don't do anything here - our handlePollTypeChange handles everything
+		// This prevents the default behavior from interfering with our settings
+	};
+	
+	// Initial call to set the correct state on page load
+	handlePollTypeChange();
+});
+</script>
