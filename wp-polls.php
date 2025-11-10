@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.77.3
+Version: 2.77.4
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -36,7 +36,7 @@ if (!defined('ABSPATH')) {
 
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.77.3' );
+define( 'WP_POLLS_VERSION', '2.77.4' );
 
 
 ### Create Text Domain For Translations
@@ -1931,8 +1931,8 @@ function polls_activate() {
 	'<ul class="wp-polls-ul">');
 	add_option('poll_template_votebody', '<li><input type="%POLL_CHECKBOX_RADIO%" id="poll-answer-%POLL_ANSWER_ID%" name="poll_%POLL_ID%" value="%POLL_ANSWER_ID%" /> <label for="poll-answer-%POLL_ANSWER_ID%">%POLL_ANSWER%</label></li>');
 	add_option('poll_template_votefooter', '</ul>'.
-	'<p style="text-align: center;"><input type="button" name="vote" value="   '.__('Vote', 'wp-polls').'   " class="Buttons" onclick="poll_vote(%POLL_ID%);" /></p>'.
-	'<p style="text-align: center;"><a href="#ViewPollResults" onclick="poll_result(%POLL_ID%); return false;" title="'.__('View Results Of This Poll', 'wp-polls').'">'.__('View Results', 'wp-polls').'</a></p>'.
+	'<p style="text-align: center;"><input type="button" name="vote" value="   '.__('Vote', 'wp-polls').'   " class="Buttons" data-poll-id="%POLL_ID%" data-poll-action="vote" /></p>'.
+	'<p style="text-align: center;"><a href="#ViewPollResults" data-poll-id="%POLL_ID%" data-poll-action="result" title="'.__('View Results Of This Poll', 'wp-polls').'">'.__('View Results', 'wp-polls').'</a></p>'.
 	'</div>');
 	add_option('poll_template_resultheader', '<p style="text-align: center;"><strong>%POLL_QUESTION%</strong></p>'.
 	'<div id="polls-%POLL_ID%-ans" class="wp-polls-ans">'.
@@ -1944,7 +1944,7 @@ function polls_activate() {
 	'</div>');
 	add_option('poll_template_resultfooter2', '</ul>'.
 	'<p style="text-align: center;">'.__('Total Voters', 'wp-polls').': <strong>%POLL_TOTALVOTERS%</strong></p>'.
-	'<p style="text-align: center;"><a href="#VotePoll" onclick="poll_booth(%POLL_ID%); return false;" title="'.__('Vote For This Poll', 'wp-polls').'">'.__('Vote', 'wp-polls').'</a></p>'.
+	'<p style="text-align: center;"><a href="#VotePoll" data-poll-id="%POLL_ID%" data-poll-action="booth" title="'.__('Vote For This Poll', 'wp-polls').'">'.__('Vote', 'wp-polls').'</a></p>'.
 	'</div>');
 	add_option('poll_template_disable', __('Sorry, there are no polls available at the moment.', 'wp-polls'));
 	add_option('poll_template_error', __('An error has occurred when processing your poll.', 'wp-polls'));

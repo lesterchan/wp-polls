@@ -7,14 +7,14 @@ if(!current_user_can('manage_polls')) {
 # Allow HTML
 $allowed_tags = wp_kses_allowed_html( 'post' );
 $allowed_tags['input'] = array(
-	'type'      => true,
-	'id'        => true,
-	'name'      => true,
-	'value'     => true,
-	'class'     => true,
-	'onclick'   => true,
+	'type'             => true,
+	'id'               => true,
+	'name'             => true,
+	'value'            => true,
+	'class'            => true,
+	'data-poll-id'     => true,
+	'data-poll-action' => true,
 );
-$allowed_tags['a']['onclick'] = true;
 
 ### Variables Variables Variables
 $base_name = plugin_basename('wp-polls/polls-templates.php');
@@ -100,7 +100,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				default_template = "<li><input type=\"%POLL_CHECKBOX_RADIO%\" id=\"poll-answer-%POLL_ANSWER_ID%\" name=\"poll_%POLL_ID%\" value=\"%POLL_ANSWER_ID%\" /> <label for=\"poll-answer-%POLL_ANSWER_ID%\">%POLL_ANSWER%</label></li>";
 				break;
 			case "votefooter":
-				default_template = "</ul>\n<p style=\"text-align: center;\"><input type=\"button\" name=\"vote\" value=\"   <?php _e('Vote', 'wp-polls'); ?>   \" class=\"Buttons\" onclick=\"poll_vote(%POLL_ID%);\" /></p>\n<p style=\"text-align: center;\"><a href=\"#ViewPollResults\" onclick=\"poll_result(%POLL_ID%); return false;\" title=\"<?php _e('View Results Of This Poll', 'wp-polls'); ?>\"><?php _e('View Results', 'wp-polls'); ?></a></p>\n</div>";
+				default_template = "</ul>\n<p style=\"text-align: center;\"><input type=\"button\" name=\"vote\" value=\"   <?php _e('Vote', 'wp-polls'); ?>   \" class=\"Buttons\" data-poll-id=\"%POLL_ID%\" data-poll-action=\"vote\" /></p>\n<p style=\"text-align: center;\"><a href=\"#ViewPollResults\" data-poll-id=\"%POLL_ID%\" data-poll-action=\"result\" title=\"<?php _e('View Results Of This Poll', 'wp-polls'); ?>\"><?php _e('View Results', 'wp-polls'); ?></a></p>\n</div>";
 				break;
 			case "resultheader":
 				default_template = "<p style=\"text-align: center;\"><strong>%POLL_QUESTION%</strong></p>\n<div id=\"polls-%POLL_ID%-ans\" class=\"wp-polls-ans\">\n<ul class=\"wp-polls-ul\">";
@@ -115,7 +115,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 				default_template = "</ul>\n<p style=\"text-align: center;\"><?php _e('Total Voters', 'wp-polls'); ?>: <strong>%POLL_TOTALVOTERS%</strong></p>\n</div>";
 				break;
 			case "resultfooter2":
-				default_template = "</ul>\n<p style=\"text-align: center;\"><?php _e('Total Voters', 'wp-polls'); ?>: <strong>%POLL_TOTALVOTERS%</strong></p>\n<p style=\"text-align: center;\"><a href=\"#VotePoll\" onclick=\"poll_booth(%POLL_ID%); return false;\" title=\"<?php _e('Vote For This Poll', 'wp-polls'); ?>\"><?php _e('Vote', 'wp-polls'); ?></a></p>\n</div>";
+				default_template = "</ul>\n<p style=\"text-align: center;\"><?php _e('Total Voters', 'wp-polls'); ?>: <strong>%POLL_TOTALVOTERS%</strong></p>\n<p style=\"text-align: center;\"><a href=\"#VotePoll\" data-poll-id=\"%POLL_ID%\" data-poll-action=\"booth\" title=\"<?php _e('Vote For This Poll', 'wp-polls'); ?>\"><?php _e('Vote', 'wp-polls'); ?></a></p>\n</div>";
 				break;
 			case "pollarchivelink":
 				default_template = "<ul>\n<li><a href=\"%POLL_ARCHIVE_URL%\"><?php _e('Polls Archive', 'wp-polls'); ?></a></li>\n</ul>";
