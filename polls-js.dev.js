@@ -212,18 +212,20 @@ function poll_process_success(current_poll_id) {
 }
 
 // On Click Events
-$("[data-poll-action]").on("click", function () {
-	var action = $(this).data("poll-action");
-	var poll_id = $(this).data("poll-id");
-	switch (action) {
-		case "vote":
-			poll_vote(poll_id);
-			break;
-		case "result":
-			poll_result(poll_id);
-			break;
-		case "booth":
-			poll_booth(poll_id);
-			break;
-	}
+jQuery(document).ready(function ($) {
+	$(document).on("click", "[data-poll-action]", function () {
+		var action = $(this).data("poll-action");
+		var poll_id = $(this).data("poll-id");
+		switch (action) {
+			case "vote":
+				poll_vote(poll_id);
+				break;
+			case "result":
+				poll_result(poll_id);
+				break;
+			case "booth":
+				poll_booth(poll_id);
+				break;
+		}
+	});
 });
