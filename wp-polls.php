@@ -1719,7 +1719,7 @@ function polls_wp_stats() {
 ### Function: Add WP-Polls General Stats To WP-Stats Page Options
 function polls_page_admin_general_stats($content) {
 	$stats_display = get_option('stats_display');
-	if( (int) $stats_display['polls'] === 1) {
+	if( (int) ($stats_display['polls'] ?? 0) === 1) {
 		$content .= '<input type="checkbox" name="stats_display[]" id="wpstats_polls" value="polls" checked="checked" />&nbsp;&nbsp;<label for="wpstats_polls">'.__('WP-Polls', 'wp-polls').'</label><br />'."\n";
 	} else {
 		$content .= '<input type="checkbox" name="stats_display[]" id="wpstats_polls" value="polls" />&nbsp;&nbsp;<label for="wpstats_polls">'.__('WP-Polls', 'wp-polls').'</label><br />'."\n";
@@ -1731,7 +1731,7 @@ function polls_page_admin_general_stats($content) {
 ### Function: Add WP-Polls General Stats To WP-Stats Page
 function polls_page_general_stats($content) {
 	$stats_display = get_option('stats_display');
-	if( (int)  $stats_display['polls'] === 1) {
+	if( (int)  ($stats_display['polls'] ?? 0) === 1) {
 		$content .= '<p><strong>'.__('WP-Polls', 'wp-polls').'</strong></p>'."\n";
 		$content .= '<ul>'."\n";
 		$content .= '<li>'.sprintf(_n('<strong>%s</strong> poll was created.', '<strong>%s</strong> polls were created.', get_pollquestions(false), 'wp-polls'), number_format_i18n(get_pollquestions(false))).'</li>'."\n";
