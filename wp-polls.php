@@ -47,10 +47,18 @@ function polls_textdomain() {
 
 
 // Polls Table Name
+// Registering the names in $wpdb->tables is what makes them survive
+// switch_to_blog(): wpdb::set_blog_id() rebuilds every registered table name
+// against the new prefix. A bare assignment keeps pointing at the site that
+// happened to be current when this file loaded.
 global $wpdb;
-$wpdb->pollsq  = $wpdb->prefix . 'pollsq';
-$wpdb->pollsa  = $wpdb->prefix . 'pollsa';
-$wpdb->pollsip = $wpdb->prefix . 'pollsip';
+foreach ( array( 'pollsq', 'pollsa', 'pollsip' ) as $poll_table ) {
+	if ( ! in_array( $poll_table, $wpdb->tables, true ) ) {
+		$wpdb->tables[] = $poll_table;
+	}
+	$wpdb->$poll_table = $wpdb->prefix . $poll_table;
+}
+unset( $poll_table );
 
 
 // Function: Poll Administration Menu
@@ -673,7 +681,11 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 				'%POLL_ID%'                         => $poll_question_id,
 				'%POLL_ANSWER_ID%'                  => $poll_answer_id,
 				'%POLL_ANSWER%'                     => $poll_answer_text,
-				'%POLL_ANSWER_TEXT%'                => htmlspecialchars( wp_strip_all_tags( $poll_answer_text ) ),
+				// esc_attr() rather than htmlspecialchars(): the answer has already
+				// been through wp_kses_post(), so & is already &amp; and
+				// htmlspecialchars() default $double_encode = true turns that into
+				// &amp;amp;, which renders as a literal &amp; in the tooltip.
+				'%POLL_ANSWER_TEXT%'                => esc_attr( wp_strip_all_tags( $poll_answer_text ) ),
 				'%POLL_ANSWER_VOTES%'               => number_format_i18n( $poll_answer_votes ),
 				'%POLL_ANSWER_PERCENTAGE%'          => $poll_answer_percentage,
 				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%' => $poll_multiple_answer_percentage,
@@ -760,10 +772,12 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 
 // Function: Get IP Address
 function poll_get_raw_ipaddress() {
-	$ip           = esc_attr( $_SERVER['REMOTE_ADDR'] );
+	// REMOTE_ADDR is absent under WP-CLI and cron, where this is still reached
+	// through the poll display path. Reading it unguarded warns on PHP 8.
+	$ip           = isset( $_SERVER['REMOTE_ADDR'] ) ? esc_attr( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 	$poll_options = get_option( 'poll_options' );
 	if ( ! empty( $poll_options ) && ! empty( $poll_options['ip_header'] ) && ! empty( $_SERVER[ $poll_options['ip_header'] ] ) ) {
-		$ip = esc_attr( $_SERVER[ $poll_options['ip_header'] ] );
+		$ip = esc_attr( wp_unslash( $_SERVER[ $poll_options['ip_header'] ] ) );
 	}
 
 	return $ip;
@@ -774,7 +788,15 @@ function poll_get_ipaddress() {
 }
 
 function poll_get_hostname() {
-	$ip       = poll_get_raw_ipaddress();
+	$ip = poll_get_raw_ipaddress();
+
+	// gethostbyaddr() warns on anything that is not an IP, which includes the
+	// empty string when REMOTE_ADDR is absent and whatever a spoofable proxy
+	// header happens to contain.
+	if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+		return apply_filters( 'wp_polls_hostname', '' );
+	}
+
 	$hostname = gethostbyaddr( $ip );
 	if ( $hostname === $ip ) {
 		$hostname = wp_privacy_anonymize_ip( $ip );
