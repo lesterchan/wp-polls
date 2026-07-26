@@ -119,13 +119,13 @@ if ( ! empty( $text ) ) {
 	<h2><?php esc_html_e( 'Poll\'s Logs', 'wp-polls' ); ?></h2>
 	<h3><?php echo $poll_question; ?></h3>
 	<p>
-		/* translators: %1$s: value, %2$s: value. */
+		<?php /* translators: %1$s: value, %2$s: value. */ ?>
 		<?php printf( _n( 'There are a total of <strong>%s</strong> recorded vote for this poll.', 'There are a total of <strong>%s</strong> recorded votes for this poll.', $poll_totalrecorded, 'wp-polls' ), esc_html( number_format_i18n( $poll_totalrecorded ) ) ); ?><br />
-		/* translators: %1$s: value, %2$s: value. */
+		<?php /* translators: %1$s: value, %2$s: value. */ ?>
 		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by registered users', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by registered users', $poll_registered, 'wp-polls' ), esc_html( number_format_i18n( $poll_registered ) ) ); ?><br />
-		/* translators: %1$s: value, %2$s: value. */
+		<?php /* translators: %1$s: value, %2$s: value. */ ?>
 		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by comment authors', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by comment authors', $poll_comments, 'wp-polls' ), esc_html( number_format_i18n( $poll_comments ) ) ); ?><br />
-		/* translators: %1$s: value, %2$s: value. */
+		<?php /* translators: %1$s: value, %2$s: value. */ ?>
 		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests', $poll_guest, 'wp-polls' ), esc_html( number_format_i18n( $poll_guest ) ) ); ?>
 	</p>
 </div>
@@ -394,7 +394,7 @@ if ( ! empty( $text ) ) {
 		<?php if ( $poll_logs_count ) { ?>
 			<strong><?php esc_html_e( 'Are You Sure You Want To Delete Logs For This Poll Only?', 'wp-polls' ); ?></strong><br /><br />
 			<input type="checkbox" id="delete_logs_yes" name="delete_logs_yes" value="yes" />&nbsp;<label for="delete_logs_yes"><?php esc_html_e( 'Yes', 'wp-polls' ); ?></label><br /><br />
-			/* translators: %s: value. */
+			<?php /* translators: %s: value. */ ?>
 			<input type="button" name="do" value="<?php esc_attr_e( 'Delete Logs For This Poll Only', 'wp-polls' ); ?>" class="button" data-poll-action="delete-poll-logs" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php printf( esc_attr__( 'You are about to delete poll logs for this poll \'%s\' ONLY. This action is not reversible.', 'wp-polls' ), esc_attr( $poll_question ) ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_delete-poll-logs' ) ); ?>" />
 			<?php
 		} else {
