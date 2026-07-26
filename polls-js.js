@@ -9,23 +9,23 @@
 	'use strict';
 
 	const l10n = window.pollsL10n || {};
-	const show_loading = parseInt( l10n.show_loading, 10 ) > 0;
-	const show_fading = parseInt( l10n.show_fading, 10 ) > 0;
+	const showLoading = parseInt( l10n.show_loading, 10 ) > 0;
+	const showFading = parseInt( l10n.show_fading, 10 ) > 0;
 
 	// Matches the fade duration used before.
 	const FADE_DURATION = 400;
 
 	// The Poll Container For A Given Poll
-	function poll_container( current_poll_id ) {
-		return document.getElementById( 'polls-' + current_poll_id );
+	function pollContainer( currentPollId ) {
+		return document.getElementById( 'polls-' + currentPollId );
 	}
 
 	// Show Or Hide The Loading Indicator
 	// The indicator is hidden by a stylesheet rule, so it needs an explicit
 	// display value rather than just clearing the inline one.
-	function set_loading( current_poll_id, visible ) {
+	function setLoading( currentPollId, visible ) {
 		const loading = document.getElementById(
-			'polls-' + current_poll_id + '-loading',
+			'polls-' + currentPollId + '-loading',
 		);
 		if ( loading ) {
 			loading.style.display = visible ? 'block' : 'none';
@@ -33,7 +33,7 @@
 	}
 
 	// Fade An Element To The Given Opacity
-	function fade_to( element, opacity ) {
+	function fadeTo( element, opacity ) {
 		if ( element ) {
 			element.style.transition = 'opacity ' + FADE_DURATION + 'ms';
 			element.style.opacity = opacity;
@@ -52,17 +52,17 @@
 	}
 
 	// When User Vote For Poll
-	function poll_vote( current_poll_id ) {
-		const form = document.getElementById( 'polls_form_' + current_poll_id );
+	function pollVote( currentPollId ) {
+		const form = document.getElementById( 'polls_form_' + currentPollId );
 		if ( ! form ) {
 			return;
 		}
 
-		const multiple_field = document.getElementById(
-			'poll_multiple_ans_' + current_poll_id,
+		const multipleField = document.getElementById(
+			'poll_multiple_ans_' + currentPollId,
 		);
-		const poll_multiple_ans = multiple_field
-			? parseInt( multiple_field.value, 10 )
+		const pollMultipleAns = multipleField
+			? parseInt( multipleField.value, 10 )
 			: 0;
 
 		const selected = [];
@@ -76,52 +76,52 @@
 			}
 		} );
 
-		if ( poll_multiple_ans > 0 ) {
+		if ( pollMultipleAns > 0 ) {
 			if ( selected.length === 0 ) {
 				alert( l10n.text_valid );
-			} else if ( selected.length > poll_multiple_ans ) {
-				alert( l10n.text_multiple + ' ' + poll_multiple_ans );
+			} else if ( selected.length > pollMultipleAns ) {
+				alert( l10n.text_multiple + ' ' + pollMultipleAns );
 			} else {
-				poll_process( current_poll_id, selected.join( ',' ) );
+				pollProcess( currentPollId, selected.join( ',' ) );
 			}
 			return;
 		}
 
-		const poll_answer_id = selected.length
+		const pollAnswerId = selected.length
 			? parseInt( selected[ selected.length - 1 ], 10 )
 			: 0;
-		if ( poll_answer_id > 0 ) {
-			poll_process( current_poll_id, poll_answer_id );
+		if ( pollAnswerId > 0 ) {
+			pollProcess( currentPollId, pollAnswerId );
 		} else {
 			alert( l10n.text_valid );
 		}
 	}
 
 	// Send A Poll Request And Swap In The Markup That Comes Back
-	function poll_request( current_poll_id, view, extra_fields ) {
-		const nonce_field = document.getElementById(
-			'poll_' + current_poll_id + '_nonce',
+	function pollRequest( currentPollId, view, extraFields ) {
+		const nonceField = document.getElementById(
+			'poll_' + currentPollId + '_nonce',
 		);
 
 		const body = new URLSearchParams();
 		body.append( 'action', 'polls' );
 		body.append( 'view', view );
-		body.append( 'poll_id', current_poll_id );
+		body.append( 'poll_id', currentPollId );
 		body.append(
-			'poll_' + current_poll_id + '_nonce',
-			nonce_field ? nonce_field.value : '',
+			'poll_' + currentPollId + '_nonce',
+			nonceField ? nonceField.value : '',
 		);
-		if ( extra_fields ) {
-			Object.keys( extra_fields ).forEach( function( name ) {
-				body.append( name, extra_fields[ name ] );
+		if ( extraFields ) {
+			Object.keys( extraFields ).forEach( function( name ) {
+				body.append( name, extraFields[ name ] );
 			} );
 		}
 
-		if ( show_fading ) {
-			fade_to( poll_container( current_poll_id ), 0 );
+		if ( showFading ) {
+			fadeTo( pollContainer( currentPollId ), 0 );
 		}
-		if ( show_loading ) {
-			set_loading( current_poll_id, true );
+		if ( showLoading ) {
+			setLoading( currentPollId, true );
 		}
 
 		fetch( l10n.ajax_url, {
@@ -134,35 +134,35 @@
 				return response.text();
 			} )
 			.then( function( data ) {
-				poll_process_success( current_poll_id, data );
+				pollProcessSuccess( currentPollId, data );
 			} )
 			.catch( function() {
 				// Leave the poll readable rather than stuck faded out behind a spinner.
-				set_loading( current_poll_id, false );
-				show( poll_container( current_poll_id ) );
+				setLoading( currentPollId, false );
+				show( pollContainer( currentPollId ) );
 			} );
 	}
 
 	// Process Poll (User Click "Vote" Button)
-	function poll_process( current_poll_id, poll_answer_id ) {
+	function pollProcess( currentPollId, pollAnswerId ) {
 		const fields = {};
-		fields[ 'poll_' + current_poll_id ] = poll_answer_id;
-		poll_request( current_poll_id, 'process', fields );
+		fields[ 'poll_' + currentPollId ] = pollAnswerId;
+		pollRequest( currentPollId, 'process', fields );
 	}
 
 	// Poll's Result (User Click "View Results" Link)
-	function poll_result( current_poll_id ) {
-		poll_request( current_poll_id, 'result' );
+	function pollResult( currentPollId ) {
+		pollRequest( currentPollId, 'result' );
 	}
 
 	// Poll's Voting Booth (User Click "Vote" Link)
-	function poll_booth( current_poll_id ) {
-		poll_request( current_poll_id, 'booth' );
+	function pollBooth( currentPollId ) {
+		pollRequest( currentPollId, 'booth' );
 	}
 
 	// Poll Process Successfully
-	function poll_process_success( current_poll_id, data ) {
-		const container = poll_container( current_poll_id );
+	function pollProcessSuccess( currentPollId, data ) {
+		const container = pollContainer( currentPollId );
 		if ( container ) {
 			const parsed = document.createElement( 'div' );
 			parsed.innerHTML = data;
@@ -172,14 +172,14 @@
 			);
 		}
 
-		if ( show_loading ) {
-			set_loading( current_poll_id, false );
+		if ( showLoading ) {
+			setLoading( currentPollId, false );
 		}
 
-		if ( show_fading ) {
+		if ( showFading ) {
 			// The old poll was faded out and has now been thrown away, so all that
 			// is left to do is make sure the markup that replaced it is visible.
-			show( poll_container( current_poll_id ) );
+			show( pollContainer( currentPollId ) );
 		}
 	}
 
@@ -195,7 +195,7 @@
 			return;
 		}
 
-		const poll_id = trigger.getAttribute( 'data-poll-id' );
+		const pollId = trigger.getAttribute( 'data-poll-id' );
 
 		// The result and booth templates use anchors, so stop the browser
 		// from following the placeholder href while the request runs.
@@ -205,13 +205,13 @@
 
 		switch ( trigger.getAttribute( 'data-poll-action' ) ) {
 			case 'vote':
-				poll_vote( poll_id );
+				pollVote( pollId );
 				break;
 			case 'result':
-				poll_result( poll_id );
+				pollResult( pollId );
 				break;
 			case 'booth':
-				poll_booth( poll_id );
+				pollBooth( pollId );
 				break;
 		}
 	} );

@@ -10,15 +10,15 @@
 
 	const pollsAdminL10n = window.pollsAdminL10n || {};
 
-	let global_poll_id = 0;
-	let global_poll_aid = 0;
-	let global_poll_aid_votes = 0;
-	let count_poll_answer_new = 0;
-	let count_poll_answer = 3;
-	let temp_vote_count = 0;
+	let globalPollId = 0;
+	let globalPollAid = 0;
+	let globalPollAidVotes = 0;
+	let countPollAnswerNew = 0;
+	let countPollAnswer = 3;
+	let tempVoteCount = 0;
 
 	// Post An Admin Action And Show The Response In The Message Box
-	function poll_admin_request( fields, on_success ) {
+	function pollAdminRequest( fields, onSuccess ) {
 		const body = new URLSearchParams();
 		body.append( 'action', 'polls-admin' );
 		Object.keys( fields ).forEach( function( name ) {
@@ -40,14 +40,14 @@
 					message.innerHTML = data;
 					message.style.display = '';
 				}
-				if ( on_success ) {
-					on_success();
+				if ( onSuccess ) {
+					onSuccess();
 				}
 			} );
 	}
 
 	// Remove An Element By Its ID
-	function poll_remove_element( id ) {
+	function pollRemoveElement( id ) {
 		const element = document.getElementById( id );
 		if ( element ) {
 			element.remove();
@@ -55,13 +55,13 @@
 	}
 
 	// Is The "Yes" Confirmation Checkbox Ticked?
-	function poll_delete_logs_confirmed() {
+	function pollDeleteLogsConfirmed() {
 		const checkbox = document.getElementById( 'delete_logs_yes' );
 		return !! checkbox && checkbox.checked;
 	}
 
 	// Replace The Poll Logs Panel With The "No Logs" Message
-	function poll_clear_logs_panel() {
+	function pollClearLogsPanel() {
 		const logs = document.getElementById( 'poll_logs' );
 		if ( logs ) {
 			logs.textContent = pollsAdminL10n.text_no_poll_logs;
@@ -69,61 +69,61 @@
 	}
 
 	// Delete Poll
-	function delete_poll( poll_id, poll_confirm, nonce ) {
-		if ( ! confirm( poll_confirm ) ) {
+	function deletePoll( pollId, pollConfirm, nonce ) {
+		if ( ! confirm( pollConfirm ) ) {
 			return;
 		}
-		global_poll_id = poll_id;
-		poll_admin_request(
+		globalPollId = pollId;
+		pollAdminRequest(
 			{
 				do: pollsAdminL10n.text_delete_poll,
-				pollq_id: poll_id,
+				pollq_id: pollId,
 				_ajax_nonce: nonce,
 			},
 			function() {
-				poll_remove_element( 'poll-' + global_poll_id );
+				pollRemoveElement( 'poll-' + globalPollId );
 			},
 		);
 	}
 
 	// Delete Poll Logs
-	function delete_poll_logs( poll_confirm, nonce ) {
-		if ( ! confirm( poll_confirm ) ) {
+	function deletePollLogs( pollConfirm, nonce ) {
+		if ( ! confirm( pollConfirm ) ) {
 			return;
 		}
-		if ( ! poll_delete_logs_confirmed() ) {
+		if ( ! pollDeleteLogsConfirmed() ) {
 			alert( pollsAdminL10n.text_checkbox_delete_all_logs );
 			return;
 		}
-		poll_admin_request(
+		pollAdminRequest(
 			{
 				do: pollsAdminL10n.text_delete_all_logs,
 				delete_logs_yes: 'yes',
 				_ajax_nonce: nonce,
 			},
-			poll_clear_logs_panel,
+			pollClearLogsPanel,
 		);
 	}
 
 	// Delete Individual Poll Logs
-	function delete_this_poll_logs( poll_id, poll_confirm, nonce ) {
-		if ( ! confirm( poll_confirm ) ) {
+	function deleteThisPollLogs( pollId, pollConfirm, nonce ) {
+		if ( ! confirm( pollConfirm ) ) {
 			return;
 		}
-		if ( ! poll_delete_logs_confirmed() ) {
+		if ( ! pollDeleteLogsConfirmed() ) {
 			alert( pollsAdminL10n.text_checkbox_delete_poll_logs );
 			return;
 		}
-		global_poll_id = poll_id;
-		poll_admin_request(
+		globalPollId = pollId;
+		pollAdminRequest(
 			{
 				do: pollsAdminL10n.text_delete_poll_logs,
-				pollq_id: poll_id,
+				pollq_id: pollId,
 				delete_logs_yes: 'yes',
 				_ajax_nonce: nonce,
 			},
 			function() {
-				poll_clear_logs_panel();
+				pollClearLogsPanel();
 
 				const display = document.getElementById( 'poll_logs_display' );
 				if ( display ) {
@@ -139,98 +139,98 @@
 	}
 
 	// Delete Poll Answer
-	function delete_poll_ans( poll_id, poll_aid, poll_aid_vote, poll_confirm, nonce ) {
-		if ( ! confirm( poll_confirm ) ) {
+	function deletePollAns( pollId, pollAid, pollAidVote, pollConfirm, nonce ) {
+		if ( ! confirm( pollConfirm ) ) {
 			return;
 		}
-		global_poll_id = poll_id;
-		global_poll_aid = poll_aid;
-		global_poll_aid_votes = poll_aid_vote;
-		temp_vote_count = 0;
-		poll_admin_request(
+		globalPollId = pollId;
+		globalPollAid = pollAid;
+		globalPollAidVotes = pollAidVote;
+		tempVoteCount = 0;
+		pollAdminRequest(
 			{
 				do: pollsAdminL10n.text_delete_poll_ans,
-				pollq_id: poll_id,
-				polla_aid: poll_aid,
+				pollq_id: pollId,
+				polla_aid: pollAid,
 				_ajax_nonce: nonce,
 			},
 			function() {
-				const total_votes = document.getElementById( 'poll_total_votes' );
-				if ( total_votes ) {
-					total_votes.textContent =
-						parseInt( total_votes.textContent ) - parseInt( global_poll_aid_votes );
+				const totalVotes = document.getElementById( 'poll_total_votes' );
+				if ( totalVotes ) {
+					totalVotes.textContent =
+						parseInt( totalVotes.textContent ) - parseInt( globalPollAidVotes );
 				}
 
-				const totalvotes_field = document.getElementById( 'pollq_totalvotes' );
-				if ( totalvotes_field ) {
-					totalvotes_field.value = temp_vote_count;
+				const totalvotesField = document.getElementById( 'pollq_totalvotes' );
+				if ( totalvotesField ) {
+					totalvotesField.value = tempVoteCount;
 				}
 
-				poll_remove_element( 'poll-answer-' + global_poll_aid );
-				check_totalvotes();
-				reorder_answer_num();
+				pollRemoveElement( 'poll-answer-' + globalPollAid );
+				checkTotalvotes();
+				reorderAnswerNum();
 			},
 		);
 	}
 
 	// Show Either The Open Or The Close Button
-	function poll_toggle_open_close( show_open ) {
-		const open_button = document.getElementById( 'open_poll' );
-		const close_button = document.getElementById( 'close_poll' );
-		if ( open_button ) {
-			open_button.style.display = show_open ? '' : 'none';
+	function pollToggleOpenClose( showOpen ) {
+		const openButton = document.getElementById( 'open_poll' );
+		const closeButton = document.getElementById( 'close_poll' );
+		if ( openButton ) {
+			openButton.style.display = showOpen ? '' : 'none';
 		}
-		if ( close_button ) {
-			close_button.style.display = show_open ? 'none' : '';
+		if ( closeButton ) {
+			closeButton.style.display = showOpen ? 'none' : '';
 		}
 	}
 
 	// Open Poll
-	function opening_poll( poll_id, poll_confirm, nonce ) {
-		if ( ! confirm( poll_confirm ) ) {
+	function openingPoll( pollId, pollConfirm, nonce ) {
+		if ( ! confirm( pollConfirm ) ) {
 			return;
 		}
-		global_poll_id = poll_id;
-		poll_admin_request(
+		globalPollId = pollId;
+		pollAdminRequest(
 			{
 				do: pollsAdminL10n.text_open_poll,
-				pollq_id: poll_id,
+				pollq_id: pollId,
 				_ajax_nonce: nonce,
 			},
 			function() {
-				poll_toggle_open_close( false );
+				pollToggleOpenClose( false );
 			},
 		);
 	}
 
 	// Close Poll
-	function closing_poll( poll_id, poll_confirm, nonce ) {
-		if ( ! confirm( poll_confirm ) ) {
+	function closingPoll( pollId, pollConfirm, nonce ) {
+		if ( ! confirm( pollConfirm ) ) {
 			return;
 		}
-		global_poll_id = poll_id;
-		poll_admin_request(
+		globalPollId = pollId;
+		pollAdminRequest(
 			{
 				do: pollsAdminL10n.text_close_poll,
-				pollq_id: poll_id,
+				pollq_id: pollId,
 				_ajax_nonce: nonce,
 			},
 			function() {
-				poll_toggle_open_close( true );
+				pollToggleOpenClose( true );
 			},
 		);
 	}
 
 	// Reorder Answer Numbers
-	function reorder_answer_num() {
-		const pollq_multiple = document.getElementById( 'pollq_multiple' );
-		if ( ! pollq_multiple ) {
+	function reorderAnswerNum() {
+		const pollqMultiple = document.getElementById( 'pollq_multiple' );
+		if ( ! pollqMultiple ) {
 			return;
 		}
 
-		const selected = parseInt( pollq_multiple.value );
-		const previous_size = pollq_multiple.options.length;
-		pollq_multiple.innerHTML = '';
+		const selected = parseInt( pollqMultiple.value );
+		const previousSize = pollqMultiple.options.length;
+		pollqMultiple.innerHTML = '';
 
 		const headers = document.querySelectorAll( '#poll_answers tr > th' );
 		Array.prototype.forEach.call( headers, function( header, index ) {
@@ -239,45 +239,45 @@
 			const option = document.createElement( 'option' );
 			option.value = index + 1;
 			option.textContent = index + 1;
-			pollq_multiple.appendChild( option );
+			pollqMultiple.appendChild( option );
 		} );
 
 		if ( selected > 1 ) {
-			const current_size = pollq_multiple.options.length;
-			if ( selected <= current_size ) {
-				pollq_multiple.options[ selected - 1 ].selected = true;
-			} else if ( selected === previous_size ) {
-				pollq_multiple.options[ current_size - 1 ].selected = true;
+			const currentSize = pollqMultiple.options.length;
+			if ( selected <= currentSize ) {
+				pollqMultiple.options[ selected - 1 ].selected = true;
+			} else if ( selected === previousSize ) {
+				pollqMultiple.options[ currentSize - 1 ].selected = true;
 			}
 		}
 	}
 
 	// Calculate Total Votes
-	function check_totalvotes() {
-		temp_vote_count = 0;
+	function checkTotalvotes() {
+		tempVoteCount = 0;
 
-		const vote_fields = document.querySelectorAll(
+		const voteFields = document.querySelectorAll(
 			'#poll_answers tr td input[size="4"]',
 		);
-		Array.prototype.forEach.call( vote_fields, function( vote_field ) {
-			const votes = parseInt( vote_field.value );
+		Array.prototype.forEach.call( voteFields, function( voteField ) {
+			const votes = parseInt( voteField.value );
 			if ( ! isNaN( votes ) ) {
-				temp_vote_count += votes;
+				tempVoteCount += votes;
 			}
 		} );
 
-		const totalvotes_field = document.getElementById( 'pollq_totalvotes' );
-		if ( totalvotes_field ) {
-			totalvotes_field.value = temp_vote_count;
+		const totalvotesField = document.getElementById( 'pollq_totalvotes' );
+		if ( totalvotesField ) {
+			totalvotesField.value = tempVoteCount;
 		}
 	}
 
 	// Build One Answer Row For The Add/Edit Poll Pages
 	// Built through the DOM rather than an HTML string so the translated button
 	// label can never be parsed as markup.
-	function poll_build_answer_row( row_id, input_name, on_remove, votes_name ) {
+	function pollBuildAnswerRow( rowId, inputName, onRemove, votesName ) {
 		const row = document.createElement( 'tr' );
-		row.id = row_id;
+		row.id = rowId;
 
 		const heading = document.createElement( 'th' );
 		heading.width = '20%';
@@ -285,103 +285,103 @@
 		heading.setAttribute( 'valign', 'top' );
 		row.appendChild( heading );
 
-		const answer_cell = document.createElement( 'td' );
-		answer_cell.width = votes_name ? '60%' : '80%';
+		const answerCell = document.createElement( 'td' );
+		answerCell.width = votesName ? '60%' : '80%';
 
-		const answer_field = document.createElement( 'input' );
-		answer_field.type = 'text';
-		answer_field.size = 50;
-		answer_field.maxLength = 200;
-		answer_field.name = input_name;
-		answer_cell.appendChild( answer_field );
-		answer_cell.appendChild( document.createTextNode( '   ' ) );
+		const answerField = document.createElement( 'input' );
+		answerField.type = 'text';
+		answerField.size = 50;
+		answerField.maxLength = 200;
+		answerField.name = inputName;
+		answerCell.appendChild( answerField );
+		answerCell.appendChild( document.createTextNode( '   ' ) );
 
-		const remove_button = document.createElement( 'input' );
-		remove_button.type = 'button';
-		remove_button.className = 'button';
-		remove_button.value = pollsAdminL10n.text_remove_poll_answer;
-		remove_button.addEventListener( 'click', on_remove );
-		answer_cell.appendChild( remove_button );
-		row.appendChild( answer_cell );
+		const removeButton = document.createElement( 'input' );
+		removeButton.type = 'button';
+		removeButton.className = 'button';
+		removeButton.value = pollsAdminL10n.text_remove_poll_answer;
+		removeButton.addEventListener( 'click', onRemove );
+		answerCell.appendChild( removeButton );
+		row.appendChild( answerCell );
 
-		if ( votes_name ) {
-			const votes_cell = document.createElement( 'td' );
-			votes_cell.width = '20%';
-			votes_cell.align = pollsAdminL10n.text_direction;
-			votes_cell.appendChild( document.createTextNode( '0 ' ) );
+		if ( votesName ) {
+			const votesCell = document.createElement( 'td' );
+			votesCell.width = '20%';
+			votesCell.align = pollsAdminL10n.text_direction;
+			votesCell.appendChild( document.createTextNode( '0 ' ) );
 
-			const votes_field = document.createElement( 'input' );
-			votes_field.type = 'text';
-			votes_field.size = 4;
-			votes_field.name = votes_name;
-			votes_field.value = '0';
-			votes_field.addEventListener( 'blur', check_totalvotes );
-			votes_cell.appendChild( votes_field );
-			row.appendChild( votes_cell );
+			const votesField = document.createElement( 'input' );
+			votesField.type = 'text';
+			votesField.size = 4;
+			votesField.name = votesName;
+			votesField.value = '0';
+			votesField.addEventListener( 'blur', checkTotalvotes );
+			votesCell.appendChild( votesField );
+			row.appendChild( votesCell );
 		}
 
 		return row;
 	}
 
 	// Add Poll's Answer In Add Poll Page
-	function add_poll_answer_add() {
+	function addPollAnswerAdd() {
 		const answers = document.getElementById( 'poll_answers' );
 		if ( ! answers ) {
 			return;
 		}
 
-		const row_id = 'poll-answer-' + count_poll_answer;
+		const rowId = 'poll-answer-' + countPollAnswer;
 		answers.appendChild(
-			poll_build_answer_row( row_id, 'polla_answers[]', function() {
-				poll_remove_element( row_id );
-				reorder_answer_num();
+			pollBuildAnswerRow( rowId, 'polla_answers[]', function() {
+				pollRemoveElement( rowId );
+				reorderAnswerNum();
 			} ),
 		);
 
-		count_poll_answer++;
-		reorder_answer_num();
+		countPollAnswer++;
+		reorderAnswerNum();
 	}
 
 	// Remove Poll's Answer In Add Poll Page
-	function remove_poll_answer_add( poll_answer_id ) {
-		poll_remove_element( 'poll-answer-' + poll_answer_id );
-		reorder_answer_num();
+	function removePollAnswerAdd( pollAnswerId ) {
+		pollRemoveElement( 'poll-answer-' + pollAnswerId );
+		reorderAnswerNum();
 	}
 
 	// Add Poll's Answer In Edit Poll Page
-	function add_poll_answer_edit() {
+	function addPollAnswerEdit() {
 		const answers = document.getElementById( 'poll_answers' );
 		if ( ! answers ) {
 			return;
 		}
 
-		const row_id = 'poll-answer-new-' + count_poll_answer_new;
+		const rowId = 'poll-answer-new-' + countPollAnswerNew;
 		answers.appendChild(
-			poll_build_answer_row(
-				row_id,
+			pollBuildAnswerRow(
+				rowId,
 				'polla_answers_new[]',
 				function() {
-					poll_remove_element( row_id );
-					check_totalvotes();
-					reorder_answer_num();
+					pollRemoveElement( rowId );
+					checkTotalvotes();
+					reorderAnswerNum();
 				},
 				'polla_answers_new_votes[]',
 			),
 		);
 
-		count_poll_answer_new++;
-		reorder_answer_num();
+		countPollAnswerNew++;
+		reorderAnswerNum();
 	}
 
 	// Check Poll Whether It Is Multiple Poll Answer
-	function check_pollq_multiple() {
-		const multiple_yes = document.getElementById( 'pollq_multiple_yes' );
+	function checkPollqMultiple() {
+		const multipleYes = document.getElementById( 'pollq_multiple_yes' );
 		const multiple = document.getElementById( 'pollq_multiple' );
-		if ( ! multiple_yes || ! multiple ) {
+		if ( ! multipleYes || ! multiple ) {
 			return;
 		}
 
-		if ( parseInt( multiple_yes.value ) === 1 ) {
+		if ( parseInt( multipleYes.value ) === 1 ) {
 			multiple.disabled = false;
 		} else {
 			multiple.value = 1;
@@ -390,25 +390,25 @@
 	}
 
 	// Show/Hide Poll's Timestamp
-	function check_polltimestamp() {
-		const edit_timestamp = document.getElementById( 'edit_polltimestamp' );
+	function checkPolltimestamp() {
+		const editTimestamp = document.getElementById( 'edit_polltimestamp' );
 		const timestamp = document.getElementById( 'pollq_timestamp' );
-		if ( edit_timestamp && timestamp ) {
-			timestamp.style.display = edit_timestamp.checked ? '' : 'none';
+		if ( editTimestamp && timestamp ) {
+			timestamp.style.display = editTimestamp.checked ? '' : 'none';
 		}
 	}
 
 	// Show/Hide Poll's Expiry Date
-	function check_pollexpiry() {
-		const expiry_no = document.getElementById( 'pollq_expiry_no' );
+	function checkPollexpiry() {
+		const expiryNo = document.getElementById( 'pollq_expiry_no' );
 		const expiry = document.getElementById( 'pollq_expiry' );
-		if ( expiry_no && expiry ) {
-			expiry.style.display = expiry_no.checked ? 'none' : '';
+		if ( expiryNo && expiry ) {
+			expiry.style.display = expiryNo.checked ? 'none' : '';
 		}
 	}
 
 	// Read A data-poll-* Attribute Off An Element
-	function poll_attr( element, name ) {
+	function pollAttr( element, name ) {
 		return element.getAttribute( 'data-poll-' + name ) || '';
 	}
 
@@ -416,105 +416,105 @@
 	// 'on' is the event the action answers to. Anything listening for "focusout"
 	// replaces what used to be an inline onblur; focusout is used rather than blur
 	// because blur does not bubble up to the document.
-	const poll_admin_actions = {
+	const pollAdminActions = {
 		'delete-poll': {
 			on: 'click',
 			run( el ) {
-				delete_poll(
-					poll_attr( el, 'id' ),
-					poll_attr( el, 'confirm' ),
-					poll_attr( el, 'nonce' ),
+				deletePoll(
+					pollAttr( el, 'id' ),
+					pollAttr( el, 'confirm' ),
+					pollAttr( el, 'nonce' ),
 				);
 			},
 		},
 		'delete-answer': {
 			on: 'click',
 			run( el ) {
-				delete_poll_ans(
-					poll_attr( el, 'id' ),
-					poll_attr( el, 'aid' ),
-					poll_attr( el, 'votes' ),
-					poll_attr( el, 'confirm' ),
-					poll_attr( el, 'nonce' ),
+				deletePollAns(
+					pollAttr( el, 'id' ),
+					pollAttr( el, 'aid' ),
+					pollAttr( el, 'votes' ),
+					pollAttr( el, 'confirm' ),
+					pollAttr( el, 'nonce' ),
 				);
 			},
 		},
 		'delete-all-logs': {
 			on: 'click',
 			run( el ) {
-				delete_poll_logs( poll_attr( el, 'confirm' ), poll_attr( el, 'nonce' ) );
+				deletePollLogs( pollAttr( el, 'confirm' ), pollAttr( el, 'nonce' ) );
 			},
 		},
 		'delete-poll-logs': {
 			on: 'click',
 			run( el ) {
-				delete_this_poll_logs(
-					poll_attr( el, 'id' ),
-					poll_attr( el, 'confirm' ),
-					poll_attr( el, 'nonce' ),
+				deleteThisPollLogs(
+					pollAttr( el, 'id' ),
+					pollAttr( el, 'confirm' ),
+					pollAttr( el, 'nonce' ),
 				);
 			},
 		},
 		'open-poll': {
 			on: 'click',
 			run( el ) {
-				opening_poll(
-					poll_attr( el, 'id' ),
-					poll_attr( el, 'confirm' ),
-					poll_attr( el, 'nonce' ),
+				openingPoll(
+					pollAttr( el, 'id' ),
+					pollAttr( el, 'confirm' ),
+					pollAttr( el, 'nonce' ),
 				);
 			},
 		},
 		'close-poll': {
 			on: 'click',
 			run( el ) {
-				closing_poll(
-					poll_attr( el, 'id' ),
-					poll_attr( el, 'confirm' ),
-					poll_attr( el, 'nonce' ),
+				closingPoll(
+					pollAttr( el, 'id' ),
+					pollAttr( el, 'confirm' ),
+					pollAttr( el, 'nonce' ),
 				);
 			},
 		},
 		'add-answer': {
 			on: 'click',
 			run() {
-				add_poll_answer_add();
+				addPollAnswerAdd();
 			},
 		},
 		'add-answer-edit': {
 			on: 'click',
 			run() {
-				add_poll_answer_edit();
+				addPollAnswerEdit();
 			},
 		},
 		'remove-answer': {
 			on: 'click',
 			run( el ) {
-				remove_poll_answer_add( poll_attr( el, 'answer' ) );
+				removePollAnswerAdd( pollAttr( el, 'answer' ) );
 			},
 		},
 		'toggle-timestamp': {
 			on: 'click',
 			run() {
-				check_polltimestamp();
+				checkPolltimestamp();
 			},
 		},
 		'toggle-expiry': {
 			on: 'click',
 			run() {
-				check_pollexpiry();
+				checkPollexpiry();
 			},
 		},
 		'toggle-multiple': {
 			on: 'change',
 			run() {
-				check_pollq_multiple();
+				checkPollqMultiple();
 			},
 		},
 		'total-votes': {
 			on: 'focusout',
 			run() {
-				check_totalvotes();
+				checkTotalvotes();
 			},
 		},
 		'go-back': {
@@ -526,7 +526,7 @@
 	};
 
 	// Route An Event To Its data-poll-action Handler
-	function poll_admin_dispatch( event ) {
+	function pollAdminDispatch( event ) {
 		const target = event.target;
 		if ( ! target || typeof target.closest !== 'function' ) {
 			return;
@@ -537,7 +537,7 @@
 			return;
 		}
 
-		const action = poll_admin_actions[ el.getAttribute( 'data-poll-action' ) ];
+		const action = pollAdminActions[ el.getAttribute( 'data-poll-action' ) ];
 		if ( ! action || action.on !== event.type ) {
 			return;
 		}
@@ -549,7 +549,7 @@
 		action.run( el );
 	}
 
-	document.addEventListener( 'click', poll_admin_dispatch );
-	document.addEventListener( 'change', poll_admin_dispatch );
-	document.addEventListener( 'focusout', poll_admin_dispatch );
+	document.addEventListener( 'click', pollAdminDispatch );
+	document.addEventListener( 'change', pollAdminDispatch );
+	document.addEventListener( 'focusout', pollAdminDispatch );
 }() );

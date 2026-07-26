@@ -1,12 +1,12 @@
 ( function() {
 	tinymce.PluginManager.add( 'polls', function( editor ) {
 		editor.addCommand( 'WP-Polls-Insert_Poll', function() {
-			let poll_id = ( prompt( tinymce.translate( 'Enter Poll ID' ) ) || '' ).trim();
-			while ( isNaN( poll_id ) ) {
-				poll_id = ( prompt( tinymce.translate( 'Error: Poll ID must be numeric' ) + '\n\n' + tinymce.translate( 'Please enter Poll ID again' ) ) || '' ).trim();
+			let pollId = ( prompt( tinymce.translate( 'Enter Poll ID' ) ) || '' ).trim();
+			while ( isNaN( pollId ) ) {
+				pollId = ( prompt( tinymce.translate( 'Error: Poll ID must be numeric' ) + '\n\n' + tinymce.translate( 'Please enter Poll ID again' ) ) || '' ).trim();
 			}
-			if ( poll_id !== '' && Number( poll_id ) >= -1 ) {
-				editor.insertContent( '[poll id="' + poll_id + '"]' );
+			if ( pollId !== '' && Number( pollId ) >= -1 ) {
+				editor.insertContent( '[poll id="' + pollId + '"]' );
 			}
 		} );
 		editor.addButton( 'polls', {

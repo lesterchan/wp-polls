@@ -24,11 +24,10 @@ export default [
 			},
 		},
 		rules: {
-			// Both scripts name every local in snake_case, matching the PHP side they
-			// mirror. Renaming ~210 identifiers is pure churn with no user-visible
-			// effect, and polls-admin-js.js has no test coverage at all, so a bulk
-			// rename there could not be verified. Left as deliberate debt.
-			camelcase: 'off',
+			// Properties stay exempt: the wp_localize_script() objects and the
+			// fields posted to admin-ajax.php are named on the PHP side, so their
+			// keys are snake_case by necessity.
+			camelcase: [ 'error', { properties: 'never' } ],
 
 			// The plugin confirms destructive admin actions and reports vote
 			// validation with the native dialogs. Replacing them means building a
