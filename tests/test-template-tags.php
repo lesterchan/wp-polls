@@ -11,6 +11,8 @@
  */
 
 /**
+ * The global template tags themes call directly.
+ *
  * @covers ::get_poll
  */
 class Test_Polls_Template_Tags extends WP_Polls_TestCase {
@@ -50,7 +52,7 @@ class Test_Polls_Template_Tags extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * get_poll_question() returns the question, filtered.
+	 * The question comes back filtered from get_poll_question().
 	 */
 	public function test_get_poll_question() {
 		$poll_id = $this->make_poll( array( 'pollq_question' => 'Which <em>editor</em>?' ) );
@@ -59,7 +61,7 @@ class Test_Polls_Template_Tags extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * get_poll() renders the poll it is given.
+	 * Calling get_poll() renders the poll it is given.
 	 */
 	public function test_get_poll_renders() {
 		$poll_id = $this->make_poll();
@@ -79,7 +81,7 @@ class Test_Polls_Template_Tags extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * type="result" renders the results rather than the form.
+	 * A type="result" shortcode renders the results rather than the form.
 	 */
 	public function test_poll_shortcode_result_type() {
 		$poll_id = $this->make_poll( array(), array( array( 'A', 1 ) ) );

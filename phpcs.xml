@@ -22,10 +22,37 @@
 	</rule>
 
 	<!-- The public voting endpoint is nonce-checked by check_ajax_referer()
-	     inside the handler, which the sniff cannot see. Scoped to that one
-	     file rather than silenced repo-wide. -->
+	     inside the handler, which the sniff cannot see.
+
+	     Polls_Display only ever reads request data to decide which poll to
+	     render (?pollresult=N, the posted poll_id) and writes nothing, so there
+	     is nothing for a nonce to protect. Every state change goes through
+	     Polls_Vote, which does check one. -->
 	<rule ref="WordPress.Security.NonceVerification">
 		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
+		<exclude-pattern>/includes/class-polls-display.php</exclude-pattern>
+	</rule>
+
+	<!-- Polls_Vote::polls_acquire_lock() takes an flock() advisory lock so two
+	     concurrent votes cannot both read the same tally. WP_Filesystem has no
+	     locking primitive at all — it abstracts over FTP and SSH transports —
+	     so there is nothing to port this to. The deletion does use
+	     wp_delete_file(). -->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fopen">
+		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fwrite">
+		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fclose">
+		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
+	</rule>
+
+	<!-- Creating, indexing and dropping the plugin's own three tables is the
+	     entire job of the installer and the uninstaller. -->
+	<rule ref="WordPress.DB.DirectDatabaseQuery.SchemaChange">
+		<exclude-pattern>/includes/class-polls-install.php</exclude-pattern>
+		<exclude-pattern>/uninstall.php</exclude-pattern>
 	</rule>
 
 	<!-- manage_polls is this plugin's own capability, granted to administrator
@@ -62,6 +89,12 @@
 
 	<!-- Tests assemble their own markup and assert on it. -->
 	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<!-- The class-*.php file naming rule exempts test classes, which follow
+	     PHPUnit's own test-*.php convention. -->
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
 </ruleset>

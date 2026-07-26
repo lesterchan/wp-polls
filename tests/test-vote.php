@@ -6,6 +6,8 @@
  */
 
 /**
+ * Vote recording, duplicate detection and the AJAX endpoint.
+ *
  * @covers Polls_Vote
  */
 class Test_Polls_Vote extends WP_Polls_TestCase {

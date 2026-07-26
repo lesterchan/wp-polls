@@ -101,7 +101,7 @@ class Polls_Options {
 	/**
 	 * Legacy rows that carry no value forward but must still be cleaned up.
 	 *
-	 * poll_archive_show was already dead before 3.0.0. poll_options is NOT
+	 * The poll_archive_show row was already dead before 3.0.0. poll_options is NOT
 	 * listed: it is the row the settings now live in, so deleting it would
 	 * throw away everything the migration just wrote.
 	 *
@@ -176,14 +176,14 @@ class Polls_Options {
 	 * Read one value by dot path, e.g. 'templates.votefooter'.
 	 *
 	 * @param string $path    Dot separated path.
-	 * @param mixed  $default Returned when the path is absent.
+	 * @param mixed  $fallback Returned when the path is absent.
 	 * @return mixed
 	 */
-	public static function get( $path, $default = null ) {
+	public static function get( $path, $fallback = null ) {
 		$value = self::all();
 		foreach ( explode( '.', $path ) as $segment ) {
 			if ( ! is_array( $value ) || ! array_key_exists( $segment, $value ) ) {
-				return $default;
+				return $fallback;
 			}
 			$value = $value[ $segment ];
 		}

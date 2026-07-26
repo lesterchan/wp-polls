@@ -1,28 +1,25 @@
 <?php
+/**
+ * Poll Options admin screen.
+ *
+ * @package WP-Polls
+ */
+
+defined( 'ABSPATH' ) || exit;
+
 // Check Whether User Can Manage Polls.
 if ( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
 }
 
-
-// Variables Variables Variables.
-$base_name = plugin_basename( 'wp-polls/polls-options.php' );
-$base_page = 'admin.php?page=' . $base_name;
-$id        = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
-
-
-// Get Poll Bar Images.
+// Get Poll Bar Images. Each bar is a directory under images/ holding a pollbg.gif.
 $pollbar_path = WP_PLUGIN_DIR . '/wp-polls/images';
 $poll_bars    = array();
-if ( $handle = @opendir( $pollbar_path ) ) {
-	while ( false !== ( $filename = readdir( $handle ) ) ) {
-		if ( substr( $filename, 0, 1 ) !== '.' && substr( $filename, 0, 2 ) !== '..' ) {
-			if ( is_dir( $pollbar_path . '/' . $filename ) ) {
-				$poll_bars[ $filename ] = getimagesize( $pollbar_path . '/' . $filename . '/pollbg.gif' );
-			}
-		}
+foreach ( (array) glob( $pollbar_path . '/*', GLOB_ONLYDIR ) as $pollbar_dir ) {
+	$pollbar_bg = $pollbar_dir . '/pollbg.gif';
+	if ( is_readable( $pollbar_bg ) ) {
+		$poll_bars[ basename( $pollbar_dir ) ] = getimagesize( $pollbar_bg );
 	}
-	closedir( $handle );
 }
 
 // Saving is handled by the Settings API: the form posts to options.php,
@@ -126,16 +123,13 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 					$pollbar_url = plugins_url( 'wp-polls/images' );
 				if ( count( $poll_bars ) > 0 ) {
 					foreach ( $poll_bars as $filename => $pollbar_info ) {
-						$pollbar_name  = esc_attr( $filename );
 						$pollbar_img_h = (int) $pollbar_info[1];
 						echo '<p>' . "\n";
-						if ( $pollbar['style'] == $filename ) {
-							echo '<input type="radio" id="poll_bar_style-' . $pollbar_name . '" name="poll_options[bar][style]" value="' . $pollbar_name . '" checked="checked" data-poll-action="pollbar-style" data-poll-height="' . $pollbar_img_h . '" />';
-						} else {
-							echo '<input type="radio" id="poll_bar_style-' . $pollbar_name . '" name="poll_options[bar][style]" value="' . $pollbar_name . '" data-poll-action="pollbar-style" data-poll-height="' . $pollbar_img_h . '" />';
-						}
-						echo '<label for="poll_bar_style-' . $pollbar_name . '">&nbsp;&nbsp;&nbsp;';
-						echo '<img src="' . esc_url( $pollbar_url . '/' . $filename . '/pollbg.gif' ) . '" height="' . $pollbar_img_h . '" width="100" alt="pollbg.gif" />';
+						echo '<input type="radio" id="poll_bar_style-' . esc_attr( $filename ) . '" name="poll_options[bar][style]" value="' . esc_attr( $filename ) . '"';
+						checked( $filename, $pollbar['style'] );
+						echo ' data-poll-action="pollbar-style" data-poll-height="' . esc_attr( $pollbar_img_h ) . '" />';
+						echo '<label for="poll_bar_style-' . esc_attr( $filename ) . '">&nbsp;&nbsp;&nbsp;';
+						echo '<img src="' . esc_url( $pollbar_url . '/' . $filename . '/pollbg.gif' ) . '" height="' . esc_attr( $pollbar_img_h ) . '" width="100" alt="pollbg.gif" />';
 						echo '&nbsp;&nbsp;&nbsp;(' . esc_html( $filename ) . ')</label>';
 						echo '</p>' . "\n";
 					}
@@ -147,12 +141,12 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 		<tr>
 			<th scope="row" valign="top"><?php esc_html_e( 'Poll Bar Background', 'wp-polls' ); ?></th>
 			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_bg" name="poll_options[bar][background]" value="<?php echo esc_attr( $pollbar['background'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="background" /></td>
-			<td><div id="wp-polls-pollbar-bg" style="background-color: #<?php echo esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['background'] ) ); ?>;"></div></td>
+			<td><div id="wp-polls-pollbar-bg" style="background-color: #<?php echo esc_attr( Polls_Core::sanitize_bar_color( $pollbar['background'] ) ); ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php esc_html_e( 'Poll Bar Border', 'wp-polls' ); ?></th>
 			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_border" name="poll_options[bar][border]" value="<?php echo esc_attr( $pollbar['border'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="border" /></td>
-			<td><div id="wp-polls-pollbar-border" style="background-color: #<?php echo esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['border'] ) ); ?>;"></div></td>
+			<td><div id="wp-polls-pollbar-border" style="background-color: #<?php echo esc_attr( Polls_Core::sanitize_bar_color( $pollbar['border'] ) ); ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php esc_html_e( 'Poll Bar Height', 'wp-polls' ); ?></th>
@@ -163,13 +157,13 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 			<td colspan="2">
 				<?php
 					$pollbar_height     = (int) $pollbar['height'];
-					$pollbar_background = esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['background'] ) );
-					$pollbar_border     = esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['border'] ) );
-				if ( 'use_css' === $pollbar['style'] ) {
-					echo '<div id="wp-polls-pollbar" style="width: 100px; height: ' . $pollbar_height . 'px; background-color: #' . $pollbar_background . '; border: 1px solid #' . $pollbar_border . '"></div>' . "\n";
-				} else {
-					echo '<div id="wp-polls-pollbar" style="width: 100px; height: ' . $pollbar_height . 'px; background-color: #' . $pollbar_background . '; border: 1px solid #' . $pollbar_border . '; background-image: url(\'' . esc_url( plugins_url( 'wp-polls/images/' . $pollbar['style'] . '/pollbg.gif' ) ) . '\');"></div>' . "\n";
+					$pollbar_background = Polls_Core::sanitize_bar_color( $pollbar['background'] );
+					$pollbar_border     = Polls_Core::sanitize_bar_color( $pollbar['border'] );
+					$pollbar_style      = 'width: 100px; height: ' . $pollbar_height . 'px; background-color: #' . $pollbar_background . '; border: 1px solid #' . $pollbar_border . ';';
+				if ( 'use_css' !== $pollbar['style'] ) {
+					$pollbar_style .= ' background-image: url(\'' . esc_url( plugins_url( 'wp-polls/images/' . $pollbar['style'] . '/pollbg.gif' ) ) . '\');';
 				}
+					echo '<div id="wp-polls-pollbar" style="' . esc_attr( $pollbar_style ) . '"></div>' . "\n";
 				?>
 			</td>
 		</tr>
@@ -330,14 +324,13 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 					<?php
 						$polls = $wpdb->get_results( "SELECT pollq_id, pollq_question FROM $wpdb->pollsq ORDER BY pollq_id DESC" );
 					if ( $polls ) {
+						$current_poll = (int) Polls_Options::get( 'current_poll' );
 						foreach ( $polls as $poll ) {
 							$poll_question = removeslashes( $poll->pollq_question );
 							$poll_id       = (int) $poll->pollq_id;
-							if ( $poll_id === (int) Polls_Options::get( 'current_poll' ) ) {
-								echo '<option value="' . $poll_id . '" selected="selected">' . esc_attr( $poll_question ) . '</option>';
-							} else {
-								echo '<option value="' . $poll_id . '">' . esc_attr( $poll_question ) . '</option>';
-							}
+							echo '<option value="' . esc_attr( $poll_id ) . '"';
+							selected( $poll_id, $current_poll );
+							echo '>' . esc_html( $poll_question ) . '</option>';
 						}
 					}
 					?>

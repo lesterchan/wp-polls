@@ -27,12 +27,12 @@ class Polls_Display {
 	 * Poll template vote markup.
 	 *
 	 * @param mixed $template  Value.
-	 * @param mixed $object    Value.
+	 * @param mixed $poll      Value.
 	 * @param mixed $variables Value.
 	 *
 	 * @return mixed
 	 */
-	public static function poll_template_vote_markup( $template, $object, $variables ) {
+	public static function poll_template_vote_markup( $template, $poll, $variables ) {
 		return str_replace( array_keys( $variables ), array_values( $variables ), $template );
 	}
 
@@ -62,8 +62,8 @@ class Polls_Display {
 		$poll_question_totalvotes  = (int) $poll_question->pollq_totalvotes;
 		$poll_question_totalvoters = (int) $poll_question->pollq_totalvoters;
 		/* translators: 1: value, 2: value. */
-		$poll_start_date           = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_question->pollq_timestamp ) );
-		$poll_expiry               = trim( $poll_question->pollq_expiry );
+		$poll_start_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_question->pollq_timestamp ) );
+		$poll_expiry     = trim( $poll_question->pollq_expiry );
 		if ( empty( $poll_expiry ) ) {
 			$poll_end_date = __( 'No Expiry', 'wp-polls' );
 		} else {
@@ -93,7 +93,7 @@ class Polls_Display {
 		if ( $poll_question && $poll_answers ) {
 			// Display Poll Voting Form.
 			$temp_pollvote .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
-			$temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"" . ( isset( $_SERVER['SCRIPT_NAME'] ) ? esc_url( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '' ) . "\" method=\"post\">\n";
+			$temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"" . ( isset( $_SERVER['SCRIPT_NAME'] ) ? esc_url( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) ) : '' ) . "\" method=\"post\">\n";
 			$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" id=\"poll_{$poll_question_id}_nonce\" name=\"wp-polls-nonce\" value=\"" . wp_create_nonce( 'poll_' . $poll_question_id . '-nonce' ) . "\" /></p>\n";
 			$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" name=\"poll_id\" value=\"$poll_question_id\" /></p>\n";
 			if ( $poll_multiple_ans > 0 ) {
@@ -170,8 +170,9 @@ class Polls_Display {
 	/**
 	 * Display Results Form.
 	 *
-	 * @param mixed $poll_id    Value.
-	 * @param mixed $user_voted Optional.
+	 * @param mixed $poll_id         Value.
+	 * @param mixed $user_voted      Optional.
+	 * @param bool  $display_loading Whether to emit the AJAX loading placeholder.
 	 *
 	 * @return mixed
 	 */
@@ -211,8 +212,8 @@ class Polls_Display {
 		$poll_question_totalvoters = (int) $poll_question->pollq_totalvoters;
 		$poll_question_active      = (int) $poll_question->pollq_active;
 		/* translators: 1: value, 2: value. */
-		$poll_start_date           = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_question->pollq_timestamp ) );
-		$poll_expiry               = trim( $poll_question->pollq_expiry );
+		$poll_start_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_question->pollq_timestamp ) );
+		$poll_expiry     = trim( $poll_question->pollq_expiry );
 		if ( empty( $poll_expiry ) ) {
 			$poll_end_date = __( 'No Expiry', 'wp-polls' );
 		} else {
@@ -404,7 +405,7 @@ class Polls_Display {
 		$template_pollarchivelink = str_replace( '%POLL_ARCHIVE_URL%', esc_url( Polls_Options::get( 'archive.url' ) ), $template_pollarchivelink );
 		if ( $display ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Stored template, filtered by Polls_Settings on save.
-		echo $template_pollarchivelink;
+			echo $template_pollarchivelink;
 		} else {
 			return $template_pollarchivelink;
 		}
@@ -519,7 +520,7 @@ class Polls_Display {
 		}
 
 		// Get Poll IPs.
-		$ips = $wpdb->get_results( "SELECT pollip_qid, pollip_aid FROM $wpdb->pollsip WHERE pollip_qid IN ($poll_questions_ids) AND pollip_ip = '" . Polls_Vote::poll_get_ipaddress() . "' ORDER BY pollip_qid ASC" );
+		$ips = $wpdb->get_results( $wpdb->prepare( "SELECT pollip_qid, pollip_aid FROM $wpdb->pollsip WHERE pollip_qid IN ($poll_questions_ids) AND pollip_ip = %s ORDER BY pollip_qid ASC", Polls_Vote::poll_get_ipaddress() ) );
 		if ( $ips ) {
 			foreach ( $ips as $ip ) {
 				$polls_ips[ (int) $ip->pollip_qid ][] = (int) $ip->pollip_aid;
@@ -539,7 +540,7 @@ class Polls_Display {
 			$poll_totalvotes_zero  = $polls_question['totalvotes'] <= 0;
 			$poll_totalvoters_zero = $polls_question['totalvoters'] <= 0;
 			/* translators: 1: value, 2: value. */
-			$poll_start_date       = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $polls_question['start'] ) );
+			$poll_start_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $polls_question['start'] ) );
 			if ( empty( $polls_question['end'] ) ) {
 				$poll_end_date = __( 'No Expiry', 'wp-polls' );
 			} else {
@@ -802,7 +803,7 @@ class Polls_Display {
 		if ( (int) Polls_Options::get( 'current_poll' ) === -1 ) {
 			if ( $display ) {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Stored template, filtered by Polls_Settings on save.
-			echo removeslashes( Polls_Options::get( 'templates.disable' ) );
+				echo removeslashes( Polls_Options::get( 'templates.disable' ) );
 				return '';
 			}
 
@@ -825,7 +826,7 @@ class Polls_Display {
 						if ( $pollresult_id > 0 ) {
 							$poll_id = $pollresult_id;
 						} elseif ( isset( $_POST['poll_id'] ) && (int) $_POST['poll_id'] > 0 ) {
-							$poll_id = isset( $_POST['poll_id'] ) ? (int) $_POST['poll_id'] : 0;
+							$poll_id = (int) $_POST['poll_id'];
 						}
 						// Current Poll ID Is Not Specified.
 					} elseif ( (int) Polls_Options::get( 'current_poll' ) === 0 ) {
@@ -877,7 +878,7 @@ class Polls_Display {
 			if ( 1 === $poll_close || (int) $check_voted > 0 || ( is_array( $check_voted ) && count( $check_voted ) > 0 ) ) {
 				if ( $display ) {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup, escaped while the template was assembled.
-				echo self::display_pollresult( $poll_id, $check_voted );
+					echo self::display_pollresult( $poll_id, $check_voted );
 				} else {
 					return self::display_pollresult( $poll_id, $check_voted );
 				}
@@ -886,14 +887,14 @@ class Polls_Display {
 				$disable_poll_js   = '<script type="text/javascript">document.querySelectorAll(\'' . $disable_poll_form . ' input, ' . $disable_poll_form . ' select, ' . $disable_poll_form . ' textarea, ' . $disable_poll_form . ' button\').forEach(function (field) { field.disabled = true; });</script>';
 				if ( $display ) {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup, escaped while the template was assembled.
-				echo self::display_pollvote( $poll_id ) . $disable_poll_js;
+					echo self::display_pollvote( $poll_id ) . $disable_poll_js;
 				} else {
 					return self::display_pollvote( $poll_id ) . $disable_poll_js;
 				}
 			} elseif ( 1 === $poll_active ) {
 				if ( $display ) {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup, escaped while the template was assembled.
-				echo self::display_pollvote( $poll_id );
+					echo self::display_pollvote( $poll_id );
 				} else {
 					return self::display_pollvote( $poll_id );
 				}

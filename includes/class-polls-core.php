@@ -45,13 +45,13 @@ class Polls_Core {
 	 * @return mixed
 	 */
 	public static function poll_scripts() {
-		if ( @file_exists( get_stylesheet_directory() . '/polls-css.css' ) ) {
+		if ( file_exists( get_stylesheet_directory() . '/polls-css.css' ) ) {
 			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/polls-css.css', false, WP_POLLS_VERSION, 'all' );
 		} else {
 			wp_enqueue_style( 'wp-polls', plugins_url( 'wp-polls/polls-css.css' ), false, WP_POLLS_VERSION, 'all' );
 		}
 		if ( is_rtl() ) {
-			if ( @file_exists( get_stylesheet_directory() . '/polls-css-rtl.css' ) ) {
+			if ( file_exists( get_stylesheet_directory() . '/polls-css-rtl.css' ) ) {
 				wp_enqueue_style( 'wp-polls-rtl', get_stylesheet_directory_uri() . '/polls-css-rtl.css', false, WP_POLLS_VERSION, 'all' );
 			} else {
 				wp_enqueue_style( 'wp-polls-rtl', plugins_url( 'wp-polls/polls-css-rtl.css' ), false, WP_POLLS_VERSION, 'all' );
@@ -61,8 +61,8 @@ class Polls_Core {
 		// This lands in an inline <style> block on every front end page, so never
 		// trust the stored values even though only 'manage_polls' can set them.
 		$pollbar_height     = (int) $pollbar['height'];
-		$pollbar_background = self::_polls_sanitize_hex_color( $pollbar['background'] );
-		$pollbar_border     = self::_polls_sanitize_hex_color( $pollbar['border'] );
+		$pollbar_background = self::sanitize_bar_color( $pollbar['background'] );
+		$pollbar_border     = self::sanitize_bar_color( $pollbar['border'] );
 		if ( 'use_css' === $pollbar['style'] ) {
 			$pollbar_css  = '.wp-polls .pollbar {' . "\n";
 			$pollbar_css .= "\t" . 'margin: 1px;' . "\n";
@@ -104,11 +104,14 @@ class Polls_Core {
 	/**
 	 * Poll page shortcode.
 	 *
-	 * @param mixed $atts Value.
+	 * Takes no attributes; $atts is accepted only because add_shortcode() passes it.
 	 *
-	 * @return mixed
+	 * @param array|string $atts Shortcode attributes. Unused.
+	 *
+	 * @return string
 	 */
 	public static function poll_page_shortcode( $atts ) {
+		unset( $atts );
 		return Polls_Display::polls_archive();
 	}
 
@@ -168,15 +171,15 @@ class Polls_Core {
 	 */
 	public static function cron_polls_status() {
 		global $wpdb;
+		$now = current_time( 'timestamp' );
 		// Close Poll.
-		$close_polls = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_active = 0 WHERE pollq_expiry < '" . current_time( 'timestamp' ) . "' AND pollq_expiry != 0 AND pollq_active != 0" );
+		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->pollsq SET pollq_active = 0 WHERE pollq_expiry < %d AND pollq_expiry != 0 AND pollq_active != 0", $now ) );
 		// Open Future Polls.
-		$active_polls = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_active = 1 WHERE pollq_timestamp <= '" . current_time( 'timestamp' ) . "' AND pollq_active = -1" );
+		$active_polls = $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->pollsq SET pollq_active = 1 WHERE pollq_timestamp <= %d AND pollq_active = -1", $now ) );
 		// Update Latest Poll If Future Poll Is Opened.
 		if ( $active_polls ) {
-			$update_latestpoll = Polls_Options::set( 'latest_poll', self::polls_latest_id() );
+			Polls_Options::set( 'latest_poll', self::polls_latest_id() );
 		}
-		return;
 	}
 
 	/**
@@ -204,13 +207,13 @@ class Polls_Core {
 	}
 
 	/**
-	 * Sanitize A 3 Or 6 Digit Hex Colour Stored Without Its Leading '#'.
+	 * Sanitize a 3 or 6 digit hex colour for the poll bar, stored without its leading '#'.
 	 *
 	 * @param mixed $color Value.
 	 *
 	 * @return mixed
 	 */
-	public static function _polls_sanitize_hex_color( $color ) {
+	public static function sanitize_bar_color( $color ) {
 		$color = substr( trim( (string) $color ), 0, 6 );
 
 		if ( ! preg_match( '/^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $color ) ) {

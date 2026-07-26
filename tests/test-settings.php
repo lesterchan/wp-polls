@@ -11,6 +11,8 @@
  */
 
 /**
+ * Settings API registration and the sanitize callback both screens share.
+ *
  * @covers Polls_Settings
  */
 class Test_Polls_Settings extends WP_Polls_TestCase {
@@ -110,7 +112,7 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * onclick must not survive a template save; data-poll-* must.
+	 * An onclick attribute must not survive a template save; data-poll-* must.
 	 *
 	 * This is the XSS fix from 3.0.0 - if the allow list ever regains onclick,
 	 * this fails.

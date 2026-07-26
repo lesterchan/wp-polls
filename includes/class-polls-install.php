@@ -193,13 +193,7 @@ class Polls_Install {
 	public static function activate() {
 		global $wpdb;
 
-		if ( @is_file( ABSPATH . '/wp-admin/includes/upgrade.php' ) ) {
-			include_once ABSPATH . '/wp-admin/includes/upgrade.php';
-		} elseif ( @is_file( ABSPATH . '/wp-admin/upgrade-functions.php' ) ) {
-			include_once ABSPATH . '/wp-admin/upgrade-functions.php';
-		} else {
-			die( 'We have problem finding your \'/wp-admin/upgrade-functions.php\' and \'/wp-admin/includes/upgrade.php\'' );
-		}
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		// Create Poll Tables (3 Tables).
 		$charset_collate = $wpdb->get_charset_collate();
@@ -328,7 +322,7 @@ class Polls_Install {
 		$key_name = array();
 		if ( count( $index ) > 0 ) {
 			foreach ( $index as $i ) {
-				$key_name[] = $i->Key_name;
+				$key_name[] = $i->Key_name; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Column name returned by SHOW INDEX.
 			}
 		}
 		if ( ! in_array( 'pollip_ip', $key_name, true ) ) {
@@ -347,7 +341,7 @@ class Polls_Install {
 
 		// Change column datatype for wp_pollsip.
 		$col_pollip_qid = $wpdb->get_row( "DESCRIBE $wpdb->pollsip pollip_qid" );
-		if ( 'varchar(10)' === $col_pollip_qid->Type ) {
+		if ( 'varchar(10)' === $col_pollip_qid->Type ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Column name returned by DESCRIBE.
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_qid int(10) NOT NULL default '0';" );
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_aid int(10) NOT NULL default '0';" );
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_timestamp int(10) NOT NULL default '0';" );

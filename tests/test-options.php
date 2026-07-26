@@ -10,6 +10,8 @@
  */
 
 /**
+ * The consolidated poll_options row: defaults, dot paths and migration.
+ *
  * @covers Polls_Options
  */
 class Test_Polls_Options extends WP_Polls_TestCase {
@@ -31,7 +33,7 @@ class Test_Polls_Options extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * set() writes one leaf without disturbing its siblings.
+	 * Writing one leaf with set() leaves its siblings alone.
 	 */
 	public function test_set_writes_one_leaf_only() {
 		$before = Polls_Options::get( 'templates.votebody' );

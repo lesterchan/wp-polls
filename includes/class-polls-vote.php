@@ -59,15 +59,12 @@ class Polls_Vote {
 			// Do Not Log.
 			case 0:
 				return 0;
-				break;
 			// Logged By Cookie.
 			case 1:
 				return self::check_voted_cookie( $poll_id );
-				break;
 			// Logged By IP.
 			case 2:
 				return self::check_voted_ip( $poll_id );
-				break;
 			// Logged By Cookie And IP.
 			case 3:
 				$check_voted_cookie = self::check_voted_cookie( $poll_id );
@@ -75,11 +72,9 @@ class Polls_Vote {
 					return $check_voted_cookie;
 				}
 				return self::check_voted_ip( $poll_id );
-				break;
 			// Logged By Username.
 			case 4:
 				return self::check_voted_username( $poll_id );
-				break;
 		}
 	}
 
@@ -176,10 +171,10 @@ class Polls_Vote {
 	public static function poll_get_raw_ipaddress() {
 		// REMOTE_ADDR is absent under WP-CLI and cron, where this is still reached
 		// through the poll display path. Reading it unguarded warns on PHP 8.
-		$ip        = isset( $_SERVER['REMOTE_ADDR'] ) ? esc_attr( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ip        = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 		$ip_header = Polls_Options::get( 'ip_header', '' );
 		if ( ! empty( $ip_header ) && ! empty( $_SERVER[ $ip_header ] ) ) {
-			$ip = esc_attr( wp_unslash( $_SERVER[ $ip_header ] ) );
+			$ip = sanitize_text_field( wp_unslash( $_SERVER[ $ip_header ] ) );
 		}
 
 		return $ip;
@@ -254,7 +249,7 @@ class Polls_Vote {
 			fflush( $fp );
 			flock( $fp, LOCK_UN );
 			fclose( $fp );
-			unlink( self::polls_lock_file( $poll_id ) );
+			wp_delete_file( self::polls_lock_file( $poll_id ) );
 
 			return true;
 		}
@@ -280,6 +275,10 @@ class Polls_Vote {
 	 * @param mixed $poll_aid_array Optional.
 	 *
 	 * @return mixed
+	 *
+	 * @throws InvalidArgumentException When the poll lock cannot be acquired, when an
+	 *                                  answer id does not belong to the poll, or when
+	 *                                  the visitor has already voted.
 	 */
 	public static function vote_poll_process( $poll_id, $poll_aid_array = array() ) {
 		global $wpdb, $user_identity, $user_ID;
@@ -332,7 +331,7 @@ class Polls_Vote {
 		if ( ! empty( $user_identity ) ) {
 			$pollip_user = $user_identity;
 		} elseif ( ! empty( $_COOKIE[ 'comment_author_' . COOKIEHASH ] ) ) {
-			$pollip_user = $_COOKIE[ 'comment_author_' . COOKIEHASH ];
+			$pollip_user = sanitize_text_field( wp_unslash( $_COOKIE[ 'comment_author_' . COOKIEHASH ] ) );
 		} else {
 			$pollip_user = __( 'Guest', 'wp-polls' );
 		}
@@ -434,11 +433,11 @@ class Polls_Vote {
 			}
 
 			// Which View.
-			switch ( sanitize_key( $_REQUEST['view'] ) ) {
+			switch ( isset( $_REQUEST['view'] ) ? sanitize_key( $_REQUEST['view'] ) : '' ) {
 				// Poll Vote.
 				case 'process':
 					try {
-						$poll_answer_ids = isset( $_POST[ "poll_$poll_id" ] ) ? $_POST[ "poll_$poll_id" ] : '';
+						$poll_answer_ids = isset( $_POST[ "poll_$poll_id" ] ) ? sanitize_text_field( wp_unslash( $_POST[ "poll_$poll_id" ] ) ) : '';
 						$poll_aid_array  = array_unique( array_map( 'intval', array_map( 'sanitize_key', explode( ',', $poll_answer_ids ) ) ) );
 						// Poll markup, not data: the answer text went through
 						// wp_kses_post() and %POLL_ANSWER_TEXT% through esc_attr() while
@@ -463,8 +462,8 @@ class Polls_Vote {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup assembled and escaped by Polls_Display.
 					echo Polls_Display::display_pollvote( $poll_id, false );
 					break;
-			} // End switch($_REQUEST['view'])
-		} // End if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'polls')
+			} // End of the view switch.
+		} // End of the polls action guard.
 		exit();
 	}
 }

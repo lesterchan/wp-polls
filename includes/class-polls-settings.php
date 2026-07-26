@@ -87,8 +87,8 @@ class Polls_Settings {
 		if ( isset( $input['bar'] ) && is_array( $input['bar'] ) ) {
 			$bar                          = $input['bar'];
 			$current['bar']['style']      = isset( $bar['style'] ) ? sanitize_text_field( $bar['style'] ) : $current['bar']['style'];
-			$current['bar']['background'] = isset( $bar['background'] ) ? Polls_Core::_polls_sanitize_hex_color( $bar['background'] ) : $current['bar']['background'];
-			$current['bar']['border']     = isset( $bar['border'] ) ? Polls_Core::_polls_sanitize_hex_color( $bar['border'] ) : $current['bar']['border'];
+			$current['bar']['background'] = isset( $bar['background'] ) ? Polls_Core::sanitize_bar_color( $bar['background'] ) : $current['bar']['background'];
+			$current['bar']['border']     = isset( $bar['border'] ) ? Polls_Core::sanitize_bar_color( $bar['border'] ) : $current['bar']['border'];
 			$current['bar']['height']     = isset( $bar['height'] ) ? max( 1, (int) $bar['height'] ) : $current['bar']['height'];
 
 			// The style is a directory name under images/, or the CSS sentinel.
@@ -150,20 +150,19 @@ class Polls_Settings {
 	/**
 	 * Directory names under images/ that can be used as a poll bar style.
 	 *
+	 * Requires a pollbg.gif, so this accepts exactly the styles the Poll Options
+	 * screen offers rather than every directory that happens to be there.
+	 *
 	 * @return array
 	 */
 	public static function bar_styles() {
 		$styles = array();
 		$path   = WP_PLUGIN_DIR . '/wp-polls/images';
-		$handle = @opendir( $path );
 
-		if ( $handle ) {
-			while ( false !== ( $filename = readdir( $handle ) ) ) {
-				if ( '.' !== substr( $filename, 0, 1 ) && is_dir( $path . '/' . $filename ) ) {
-					$styles[] = $filename;
-				}
+		foreach ( (array) glob( $path . '/*', GLOB_ONLYDIR ) as $dir ) {
+			if ( is_readable( $dir . '/pollbg.gif' ) ) {
+				$styles[] = basename( $dir );
 			}
-			closedir( $handle );
 		}
 
 		return $styles;

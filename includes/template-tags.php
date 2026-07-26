@@ -147,7 +147,7 @@ if ( ! function_exists( 'get_polltime' ) ) {
 		global $wpdb;
 		$poll_id        = (int) $poll_id;
 		$timestamp      = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
-		$formatted_date = date( $date_format, $timestamp );
+		$formatted_date = gmdate( $date_format, $timestamp );
 		if ( $display ) {
 			echo esc_html( $formatted_date );
 		} else {
@@ -160,13 +160,13 @@ if ( ! function_exists( 'removeslashes' ) ) {
 	/**
 	 * Removeslashes.
 	 *
-	 * @param mixed $string Value.
+	 * @param mixed $text Value.
 	 *
 	 * @return mixed
 	 */
-	function removeslashes( $string ) {
-		$string = implode( '', explode( '\\', $string ) );
-		return stripslashes( trim( $string ) );
+	function removeslashes( $text ) {
+		$text = implode( '', explode( '\\', $text ) );
+		return stripslashes( trim( $text ) );
 	}
 }
 

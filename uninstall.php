@@ -1,7 +1,10 @@
 <?php
-/*
- * Uninstall plugin
+/**
+ * Uninstall WP-Polls: drops the three poll tables and deletes every option row.
+ *
+ * @package WP-Polls
  */
+
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit();
 }

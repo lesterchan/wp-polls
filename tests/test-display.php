@@ -6,6 +6,8 @@
  */
 
 /**
+ * Poll and result markup assembled by Polls_Display.
+ *
  * @covers Polls_Display
  */
 class Test_Polls_Display extends WP_Polls_TestCase {
