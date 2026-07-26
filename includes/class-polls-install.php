@@ -43,6 +43,13 @@ class Polls_Install {
 
 	// Function: Activate Plugin.
 
+	/**
+	 * Activation.
+	 *
+	 * @param mixed $network_wide Value.
+	 *
+	 * @return mixed
+	 */
 	public static function activation( $network_wide ) {
 		if ( is_multisite() && $network_wide ) {
 			// wp_get_sites() was removed in WP 5.1, so network activation has
@@ -65,6 +72,11 @@ class Polls_Install {
 	// Plugin updates do not fire the activation hook, so the stored version is
 	// checked on every admin request and the outstanding upgrades are run once.
 
+	/**
+	 * Upgrade.
+	 *
+	 * @return mixed
+	 */
 	public static function upgrade() {
 		$installed_version = get_option( 'poll_version' );
 		$is_pre_3          = empty( $installed_version ) || version_compare( $installed_version, '3.0.0', '<' );
@@ -96,10 +108,11 @@ class Polls_Install {
 		update_option( 'poll_version', WP_POLLS_VERSION );
 	}
 
-	// Function: Convert Inline onclick Handlers In The Footer Templates To data-poll-* Attributes
-	// 'onclick' is no longer an allowed attribute in polls-templates.php, so a stored
-	// template that still relies on it would lose its handler the next time the poll
-	// templates are saved, leaving the vote button and the result/booth links dead.
+	/**
+	 * Function: Convert Inline onclick Handlers In The Footer Templates To data-poll-* Attributes.
+	 *
+	 * @return mixed
+	 */
 	public static function upgrade_templates_onclick() {
 		foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
 			$template = Polls_Options::get( 'templates.' . $key );
@@ -127,6 +140,11 @@ class Polls_Install {
 	// the stock templates automatically; this covers the ones too customised to
 	// convert, which would otherwise fail silently on the front end.
 
+	/**
+	 * Onclick notice.
+	 *
+	 * @return mixed
+	 */
 	public static function onclick_notice() {
 		global $hook_suffix;
 
@@ -143,6 +161,7 @@ class Polls_Install {
 		echo wp_kses_post( __( '<strong>WP-Polls:</strong> one of your poll templates still uses an inline <code>onclick</code> handler. Inline handlers are no longer used, so the vote button or the result/vote links in that template will not do anything.', 'wp-polls' ) );
 		echo '</p><p>';
 		printf(
+			/* translators: %s: value. */
 			wp_kses_post( __( 'Open <a href="%s">Poll Templates</a> and press <strong>Restore Default Template</strong> on the Voting Form Footer and Result Footer, or replace the handler yourself with <code>data-poll-id="%%POLL_ID%%"</code> and <code>data-poll-action="vote"</code> (or <code>result</code> / <code>booth</code>).', 'wp-polls' ) ),
 			esc_url( admin_url( 'admin.php?page=wp-polls/polls-templates.php' ) )
 		);
@@ -166,6 +185,11 @@ class Polls_Install {
 		return false;
 	}
 
+	/**
+	 * Activate.
+	 *
+	 * @return mixed
+	 */
 	public static function activate() {
 		global $wpdb;
 

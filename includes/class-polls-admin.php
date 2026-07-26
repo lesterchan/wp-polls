@@ -30,6 +30,11 @@ class Polls_Admin {
 
 	// Function: Poll Administration Menu.
 
+	/**
+	 * Poll menu.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_menu() {
 		add_menu_page( __( 'Polls', 'wp-polls' ), __( 'Polls', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-manager.php', '', 'dashicons-chart-bar' );
 
@@ -41,6 +46,13 @@ class Polls_Admin {
 
 	// Function: Enqueue Polls Stylesheets/JavaScripts In WP-Admin.
 
+	/**
+	 * Poll scripts admin.
+	 *
+	 * @param mixed $hook_suffix Value.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_scripts_admin( $hook_suffix ) {
 		$poll_admin_pages = array( 'wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php', 'wp-polls/polls-uninstall.php' );
 		if ( in_array( $hook_suffix, $poll_admin_pages, true ) ) {
@@ -70,6 +82,11 @@ class Polls_Admin {
 
 	// Function: Displays Polls Footer In WP-Admin.
 
+	/**
+	 * Poll footer admin.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_footer_admin() {
 		?>
 		<script type="text/javascript">
@@ -88,6 +105,11 @@ class Polls_Admin {
 
 	// Function: Add Quick Tag For Poll In TinyMCE >= WordPress 2.5.
 
+	/**
+	 * Poll tinymce addbuttons.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_tinymce_addbuttons() {
 		if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pages' ) ) {
 			return;
@@ -99,11 +121,25 @@ class Polls_Admin {
 		}
 	}
 
+	/**
+	 * Poll tinymce registerbutton.
+	 *
+	 * @param mixed $buttons Value.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_tinymce_registerbutton( $buttons ) {
 		array_push( $buttons, 'separator', 'polls' );
 		return $buttons;
 	}
 
+	/**
+	 * Poll tinymce addplugin.
+	 *
+	 * @param mixed $plugin_array Value.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_tinymce_addplugin( $plugin_array ) {
 		if ( WP_DEBUG ) {
 			$plugin_array['polls'] = plugins_url( 'wp-polls/tinymce/plugins/polls/plugin.js?v=' . WP_POLLS_VERSION );
@@ -113,6 +149,13 @@ class Polls_Admin {
 		return $plugin_array;
 	}
 
+	/**
+	 * Poll tinymce translation.
+	 *
+	 * @param mixed $mce_translation Value.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_tinymce_translation( $mce_translation ) {
 		$mce_translation['Enter Poll ID']                  = esc_js( __( 'Enter Poll ID', 'wp-polls' ) );
 		$mce_translation['Error: Poll ID must be numeric'] = esc_js( __( 'Error: Poll ID must be numeric', 'wp-polls' ) );
@@ -121,7 +164,15 @@ class Polls_Admin {
 		return $mce_translation;
 	}
 
-	// Edit Timestamp Options.
+	/**
+	 * Edit Timestamp Options.
+	 *
+	 * @param mixed $poll_timestamp Value.
+	 * @param mixed $fieldname      Optional.
+	 * @param mixed $display        Optional.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_timestamp( $poll_timestamp, $fieldname = 'pollq_timestamp', $display = 'block' ) {
 		global $month;
 		echo '<div id="' . $fieldname . '" style="display: ' . $display . '">' . "\n";
@@ -198,6 +249,11 @@ class Polls_Admin {
 
 	// Function: Manage Polls.
 
+	/**
+	 * Manage poll.
+	 *
+	 * @return mixed
+	 */
 	public static function manage_poll() {
 		global $wpdb;
 
@@ -236,8 +292,10 @@ class Polls_Admin {
 						if ( sanitize_key( trim( $_POST['delete_logs_yes'] ) ) === 'yes' ) {
 							$delete_logs = $wpdb->delete( $wpdb->pollsip, array( 'pollip_qid' => $pollq_id ), array( '%d' ) );
 							if ( $delete_logs ) {
+								/* translators: %s: value. */
 								echo '<p style="color: green;">' . sprintf( __( 'All Logs For \'%s\' Has Been Deleted.', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
 							} else {
+								/* translators: %s: value. */
 								echo '<p style="color: red;">' . sprintf( __( 'An Error Has Occurred While Deleting All Logs For \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
 							}
 						}
@@ -268,8 +326,10 @@ class Polls_Admin {
 						);
 						$update_pollq_totalvotes = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes - $polla_votes) WHERE pollq_id = $pollq_id" );
 						if ( $delete_polla_answers ) {
+							/* translators: %s: value. */
 							echo '<p style="color: green;">' . sprintf( __( 'Poll Answer \'%s\' Deleted Successfully.', 'wp-polls' ), $polla_answers ) . '</p>';
 						} else {
+							/* translators: %s: value. */
 							echo '<p style="color: red;">' . sprintf( __( 'Error In Deleting Poll Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p>';
 						}
 						break;
@@ -294,8 +354,10 @@ class Polls_Admin {
 							)
 						);
 						if ( $open_poll ) {
+							/* translators: %s: value. */
 							echo '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Is Now Opened', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
 						} else {
+							/* translators: %s: value. */
 							echo '<p style="color: red;">' . sprintf( __( 'Error Opening Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
 						}
 						break;
@@ -320,8 +382,10 @@ class Polls_Admin {
 							)
 						);
 						if ( $close_poll ) {
+							/* translators: %s: value. */
 							echo '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Is Now Closed', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
 						} else {
+							/* translators: %s: value. */
 							echo '<p style="color: red;">' . sprintf( __( 'Error Closing Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
 						}
 						break;
@@ -335,9 +399,11 @@ class Polls_Admin {
 						$delete_poll_ip          = $wpdb->delete( $wpdb->pollsip, array( 'pollip_qid' => $pollq_id ), array( '%d' ) );
 						$poll_option_lastestpoll = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'poll_latestpoll'" );
 						if ( ! $delete_poll_question ) {
+							/* translators: %s: value. */
 							echo '<p style="color: red;">' . sprintf( __( 'Error In Deleting Poll \'%s\' Question', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
 						}
 						if ( empty( $text ) ) {
+							/* translators: %s: value. */
 							echo '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Deleted Successfully', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
 						}
 
@@ -353,6 +419,11 @@ class Polls_Admin {
 
 	// Function: Plug Into WP-Stats.
 
+	/**
+	 * Polls wp stats.
+	 *
+	 * @return mixed
+	 */
 	public static function polls_wp_stats() {
 		add_filter( 'wp_stats_page_admin_plugins', array( __CLASS__, 'polls_page_admin_general_stats' ) );
 		add_filter( 'wp_stats_page_plugins', array( __CLASS__, 'polls_page_general_stats' ) );
@@ -387,8 +458,11 @@ class Polls_Admin {
 		if ( (int) ( $stats_display['polls'] ?? 0 ) === 1 ) {
 			$content .= '<p><strong>' . __( 'WP-Polls', 'wp-polls' ) . '</strong></p>' . "\n";
 			$content .= '<ul>' . "\n";
+			/* translators: %1$s: value, %2$s: value. */
 			$content .= '<li>' . sprintf( _n( '<strong>%s</strong> poll was created.', '<strong>%s</strong> polls were created.', get_pollquestions( false ), 'wp-polls' ), esc_html( number_format_i18n( get_pollquestions( false ) ) ) ) . '</li>' . "\n";
+			/* translators: %1$s: value, %2$s: value. */
 			$content .= '<li>' . sprintf( _n( '<strong>%s</strong> polls\' answer was given.', '<strong>%s</strong> polls\' answers were given.', get_pollanswers( false ), 'wp-polls' ), esc_html( number_format_i18n( get_pollanswers( false ) ) ) ) . '</li>' . "\n";
+			/* translators: %1$s: value, %2$s: value. */
 			$content .= '<li>' . sprintf( _n( '<strong>%s</strong> vote was cast.', '<strong>%s</strong> votes were cast.', get_pollvotes( false ), 'wp-polls' ), esc_html( number_format_i18n( get_pollvotes( false ) ) ) ) . '</li>' . "\n";
 			$content .= '</ul>' . "\n";
 		}

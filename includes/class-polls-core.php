@@ -28,12 +28,22 @@ class Polls_Core {
 
 	// Create Text Domain For Translations.
 
+	/**
+	 * Polls textdomain.
+	 *
+	 * @return mixed
+	 */
 	public static function polls_textdomain() {
 		load_plugin_textdomain( 'wp-polls' );
 	}
 
 	// Function: Enqueue Polls JavaScripts/CSS.
 
+	/**
+	 * Poll scripts.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_scripts() {
 		if ( @file_exists( get_stylesheet_directory() . '/polls-css.css' ) ) {
 			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/polls-css.css', false, WP_POLLS_VERSION, 'all' );
@@ -91,12 +101,26 @@ class Polls_Core {
 
 	// Function: Short Code For Inserting Polls Archive Into Page.
 
+	/**
+	 * Poll page shortcode.
+	 *
+	 * @param mixed $atts Value.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_page_shortcode( $atts ) {
 		return Polls_Display::polls_archive();
 	}
 
 	// Function: Short Code For Inserting Polls Into Posts.
 
+	/**
+	 * Poll shortcode.
+	 *
+	 * @param mixed $atts Value.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_shortcode( $atts ) {
 		$attributes = shortcode_atts(
 			array(
@@ -137,6 +161,11 @@ class Polls_Core {
 
 	// Funcion: Check All Polls Status To Check If It Expires.
 
+	/**
+	 * Cron polls status.
+	 *
+	 * @return mixed
+	 */
 	public static function cron_polls_status() {
 		global $wpdb;
 		// Close Poll.
@@ -164,6 +193,11 @@ class Polls_Core {
 	// Class: WP-Polls Widget
 	// Function: Init WP-Polls Widget.
 
+	/**
+	 * Widget polls init.
+	 *
+	 * @return mixed
+	 */
 	public static function widget_polls_init() {
 		self::polls_textdomain();
 		register_widget( 'Polls_Widget' );

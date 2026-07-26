@@ -53,7 +53,13 @@ class Polls_Vote {
 		}
 	}
 
-	// Funcrion: Check Voted By Cookie Or IP.
+	/**
+	 * Funcrion: Check Voted By Cookie Or IP.
+	 *
+	 * @param mixed $poll_id Value.
+	 *
+	 * @return mixed
+	 */
 	public static function check_voted( $poll_id ) {
 		$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
 		switch ( $poll_logging_method ) {
@@ -186,10 +192,20 @@ class Polls_Vote {
 		return $ip;
 	}
 
+	/**
+	 * Poll get ipaddress.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_get_ipaddress() {
 		return apply_filters( 'wp_polls_ipaddress', wp_hash( self::poll_get_raw_ipaddress() ) );
 	}
 
+	/**
+	 * Poll get hostname.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_get_hostname() {
 		$ip = self::poll_get_raw_ipaddress();
 
@@ -212,6 +228,13 @@ class Polls_Vote {
 		return apply_filters( 'wp_polls_hostname', $hostname );
 	}
 
+	/**
+	 * Polls acquire lock.
+	 *
+	 * @param mixed $poll_id Value.
+	 *
+	 * @return mixed
+	 */
 	public static function polls_acquire_lock( $poll_id ) {
 		$fp = fopen( self::polls_lock_file( $poll_id ), 'w+' );
 
@@ -225,6 +248,14 @@ class Polls_Vote {
 		return $fp;
 	}
 
+	/**
+	 * Polls release lock.
+	 *
+	 * @param mixed $fp      Value.
+	 * @param mixed $poll_id Value.
+	 *
+	 * @return mixed
+	 */
 	public static function polls_release_lock( $fp, $poll_id ) {
 		if ( is_resource( $fp ) ) {
 			fflush( $fp );
@@ -238,10 +269,25 @@ class Polls_Vote {
 		return false;
 	}
 
+	/**
+	 * Polls lock file.
+	 *
+	 * @param mixed $poll_id Value.
+	 *
+	 * @return mixed
+	 */
 	public static function polls_lock_file( $poll_id ) {
 		return apply_filters( 'wp_polls_lock_file', get_temp_dir() . '/wp-blog-' . get_current_blog_id() . '-wp-polls-' . $poll_id . '.lock', $poll_id );
 	}
 
+	/**
+	 * Vote poll process.
+	 *
+	 * @param mixed $poll_id        Value.
+	 * @param mixed $poll_aid_array Optional.
+	 *
+	 * @return mixed
+	 */
 	public static function vote_poll_process( $poll_id, $poll_aid_array = array() ) {
 		global $wpdb, $user_identity, $user_ID;
 
@@ -250,6 +296,7 @@ class Polls_Vote {
 		// Acquire lock.
 		$fp_lock = self::polls_acquire_lock( $poll_id );
 		if ( $fp_lock === false ) {
+			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'Unable to obtain lock for Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
@@ -257,29 +304,35 @@ class Polls_Vote {
 		$is_real    = count( array_intersect( $poll_aid_array, $polla_aids ) ) === count( $poll_aid_array );
 
 		if ( ! $is_real ) {
+			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'Invalid Answer to Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
 		if ( ! self::check_allowtovote() ) {
+			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'User is not allowed to vote for Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
 		if ( empty( $poll_aid_array ) ) {
+			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'No answers given for Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
 		if ( $poll_id === 0 ) {
+			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'Invalid Poll ID. Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
 		$is_poll_open = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsq WHERE pollq_id = %d AND pollq_active = 1", $poll_id ) );
 
 		if ( $is_poll_open === 0 ) {
+			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id ) );
 		}
 
 		$check_voted = self::check_voted( $poll_id );
 		if ( ! empty( $check_voted ) ) {
+			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'You Had Already Voted For This Poll. Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
@@ -318,6 +371,7 @@ class Polls_Vote {
 
 		$vote_q = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . count( $poll_aid_array ) . "), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = $poll_id AND pollq_active = 1" );
 		if ( ! $vote_q ) {
+			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
@@ -358,6 +412,11 @@ class Polls_Vote {
 
 	// Function: Vote Poll.
 
+	/**
+	 * Vote poll.
+	 *
+	 * @return mixed
+	 */
 	public static function vote_poll() {
 		global $wpdb, $user_identity, $user_ID;
 

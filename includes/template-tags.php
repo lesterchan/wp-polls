@@ -15,6 +15,13 @@ defined( 'ABSPATH' ) || exit;
 
 // Function: Get Poll Question Based On Poll ID.
 if ( ! function_exists( 'get_poll_question' ) ) {
+	/**
+	 * Get poll question.
+	 *
+	 * @param mixed $poll_id Value.
+	 *
+	 * @return mixed
+	 */
 	function get_poll_question( $poll_id ) {
 		global $wpdb;
 		$poll_id       = (int) $poll_id;
@@ -25,6 +32,13 @@ if ( ! function_exists( 'get_poll_question' ) ) {
 
 // Function: Get Poll Total Questions.
 if ( ! function_exists( 'get_pollquestions' ) ) {
+	/**
+	 * Get pollquestions.
+	 *
+	 * @param mixed $display Optional.
+	 *
+	 * @return mixed
+	 */
 	function get_pollquestions( $display = true ) {
 		global $wpdb;
 		$totalpollq = (int) $wpdb->get_var( "SELECT COUNT(pollq_id) FROM $wpdb->pollsq" );
@@ -38,6 +52,13 @@ if ( ! function_exists( 'get_pollquestions' ) ) {
 
 // Function: Get Poll Total Answers.
 if ( ! function_exists( 'get_pollanswers' ) ) {
+	/**
+	 * Get pollanswers.
+	 *
+	 * @param mixed $display Optional.
+	 *
+	 * @return mixed
+	 */
 	function get_pollanswers( $display = true ) {
 		global $wpdb;
 		$totalpolla = (int) $wpdb->get_var( "SELECT COUNT(polla_aid) FROM $wpdb->pollsa" );
@@ -51,6 +72,13 @@ if ( ! function_exists( 'get_pollanswers' ) ) {
 
 // Function: Get Poll Total Votes.
 if ( ! function_exists( 'get_pollvotes' ) ) {
+	/**
+	 * Get pollvotes.
+	 *
+	 * @param mixed $display Optional.
+	 *
+	 * @return mixed
+	 */
 	function get_pollvotes( $display = true ) {
 		global $wpdb;
 		$totalvotes = (int) $wpdb->get_var( "SELECT SUM(pollq_totalvotes) FROM $wpdb->pollsq" );
@@ -64,6 +92,14 @@ if ( ! function_exists( 'get_pollvotes' ) ) {
 
 // Function: Get Poll Votes Based on Poll ID.
 if ( ! function_exists( 'get_pollvotes_by_id' ) ) {
+	/**
+	 * Get pollvotes by id.
+	 *
+	 * @param mixed $poll_id Value.
+	 * @param mixed $display Optional.
+	 *
+	 * @return mixed
+	 */
 	function get_pollvotes_by_id( $poll_id, $display = true ) {
 		global $wpdb;
 		$poll_id    = (int) $poll_id;
@@ -78,6 +114,13 @@ if ( ! function_exists( 'get_pollvotes_by_id' ) ) {
 
 // Function: Get Poll Total Voters.
 if ( ! function_exists( 'get_pollvoters' ) ) {
+	/**
+	 * Get pollvoters.
+	 *
+	 * @param mixed $display Optional.
+	 *
+	 * @return mixed
+	 */
 	function get_pollvoters( $display = true ) {
 		global $wpdb;
 		$totalvoters = (int) $wpdb->get_var( "SELECT SUM(pollq_totalvoters) FROM $wpdb->pollsq" );
@@ -91,6 +134,15 @@ if ( ! function_exists( 'get_pollvoters' ) ) {
 
 // Function: Get Poll Time Based on Poll ID and Date Format.
 if ( ! function_exists( 'get_polltime' ) ) {
+	/**
+	 * Get polltime.
+	 *
+	 * @param mixed $poll_id     Value.
+	 * @param mixed $date_format Optional.
+	 * @param mixed $display     Optional.
+	 *
+	 * @return mixed
+	 */
 	function get_polltime( $poll_id, $date_format = 'd/m/Y', $display = true ) {
 		global $wpdb;
 		$poll_id        = (int) $poll_id;
@@ -105,6 +157,13 @@ if ( ! function_exists( 'get_polltime' ) ) {
 }
 
 if ( ! function_exists( 'removeslashes' ) ) {
+	/**
+	 * Removeslashes.
+	 *
+	 * @param mixed $string Value.
+	 *
+	 * @return mixed
+	 */
 	function removeslashes( $string ) {
 		$string = implode( '', explode( '\\', $string ) );
 		return stripslashes( trim( $string ) );
@@ -119,6 +178,14 @@ if ( ! function_exists( 'removeslashes' ) ) {
  * @return string|void
  */
 if ( ! function_exists( 'get_poll' ) ) {
+	/**
+	 * Get poll.
+	 *
+	 * @param mixed $poll_id Optional.
+	 * @param mixed $display Optional.
+	 *
+	 * @return mixed
+	 */
 	function get_poll( $poll_id = 0, $display = true ) {
 		return Polls_Display::get_poll( $poll_id, $display );
 	}
@@ -131,6 +198,13 @@ if ( ! function_exists( 'get_poll' ) ) {
  * @return string|void
  */
 if ( ! function_exists( 'display_polls_archive_link' ) ) {
+	/**
+	 * Display polls archive link.
+	 *
+	 * @param mixed $display Optional.
+	 *
+	 * @return mixed
+	 */
 	function display_polls_archive_link( $display = true ) {
 		return Polls_Display::display_polls_archive_link( $display );
 	}
@@ -142,6 +216,11 @@ if ( ! function_exists( 'display_polls_archive_link' ) ) {
  * @return bool
  */
 if ( ! function_exists( 'in_pollarchive' ) ) {
+	/**
+	 * In pollarchive.
+	 *
+	 * @return mixed
+	 */
 	function in_pollarchive() {
 		return Polls_Display::in_pollarchive();
 	}
@@ -157,6 +236,11 @@ if ( ! function_exists( 'in_pollarchive' ) ) {
  * @return void
  */
 if ( ! function_exists( 'vote_poll' ) ) {
+	/**
+	 * Vote poll.
+	 *
+	 * @return mixed
+	 */
 	function vote_poll() {
 		Polls_Vote::vote_poll();
 	}

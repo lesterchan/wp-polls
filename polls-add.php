@@ -80,6 +80,7 @@ if ( ! empty( $_POST['do'] ) ) {
 					)
 				);
 				if ( ! $add_poll_question ) {
+					/* translators: %s: value. */
 					$text .= '<p style="color: red;">' . sprintf( __( 'Error In Adding Poll \'%s\'.', 'wp-polls' ), $pollq_question ) . '</p>';
 				}
 				// Add Poll Answers.
@@ -102,6 +103,7 @@ if ( ! empty( $_POST['do'] ) ) {
 							)
 						);
 						if ( ! $add_poll_answers ) {
+							/* translators: %s: value. */
 							$text .= '<p style="color: red;">' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer ) . '</p>';
 						}
 					} else {
@@ -114,8 +116,10 @@ if ( ! empty( $_POST['do'] ) ) {
 				// If poll starts in the future use the correct poll ID.
 				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 				if ( empty( $text ) ) {
+					/* translators: 1: value, 2: value, 3: value, 4: value. */
 					$text = '<p style="color: green;">' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
 				} elseif ( $add_poll_question ) {
+						/* translators: 1: value, 2: value, 3: value, 4: value. */
 						$text .= '<p style="color: green;">' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
 				}
 				do_action( 'wp_polls_add_poll', $latest_pollid );
@@ -160,6 +164,7 @@ if ( ! empty( $text ) ) {
 		<?php
 		for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
 			echo "<tr id=\"poll-answer-$i\">\n";
+			/* translators: %s: value. */
 			echo '<th width="20%" scope="row" valign="top">' . sprintf( __( 'Answer %s', 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . "</th>\n";
 			echo '<td width="80%"><input type="text" size="50" maxlength="200" name="polla_answers[]" />&nbsp;&nbsp;&nbsp;<input type="button" value="' . esc_attr__( 'Remove', 'wp-polls' ) . '" data-poll-action="remove-answer" data-poll-answer="' . $i . "\" class=\"button\" /></td>\n";
 			echo "</tr>\n";
