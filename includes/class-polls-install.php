@@ -148,8 +148,7 @@ class Polls_Install {
 	public static function onclick_notice() {
 		global $hook_suffix;
 
-		$poll_admin_pages = array( 'wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php' );
-		if ( ! in_array( $hook_suffix, $poll_admin_pages, true ) ) {
+		if ( ! in_array( $hook_suffix, Polls_Admin::admin_pages(), true ) ) {
 			return;
 		}
 

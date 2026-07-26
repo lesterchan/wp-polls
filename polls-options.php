@@ -13,7 +13,7 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 }
 
 // Get Poll Bar Images. Each bar is a directory under images/ holding a pollbg.gif.
-$pollbar_path = WP_PLUGIN_DIR . '/wp-polls/images';
+$pollbar_path = WP_POLLS_DIR . 'images';
 $poll_bars    = array();
 foreach ( (array) glob( $pollbar_path . '/*', GLOB_ONLYDIR ) as $pollbar_dir ) {
 	$pollbar_bg = $pollbar_dir . '/pollbg.gif';
@@ -70,7 +70,7 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 				if(pollbar_style == "use_css") {
 					preview.style.backgroundImage = "none";
 				} else {
-					preview.style.backgroundImage = "url('<?php echo esc_url( plugins_url( 'wp-polls/images/' ) ); ?>" + pollbar_style + "/pollbg.gif')";
+					preview.style.backgroundImage = "url('<?php echo esc_url( WP_POLLS_URL . 'images/' ); ?>" + pollbar_style + "/pollbg.gif')";
 				}
 			}
 		}
@@ -120,7 +120,7 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 			<td colspan="2">
 				<?php
 					$pollbar     = Polls_Options::get( 'bar' );
-					$pollbar_url = plugins_url( 'wp-polls/images' );
+					$pollbar_url = WP_POLLS_URL . 'images';
 				if ( count( $poll_bars ) > 0 ) {
 					foreach ( $poll_bars as $filename => $pollbar_info ) {
 						$pollbar_img_h = (int) $pollbar_info[1];
@@ -161,7 +161,7 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 					$pollbar_border     = Polls_Core::sanitize_bar_color( $pollbar['border'] );
 					$pollbar_style      = 'width: 100px; height: ' . $pollbar_height . 'px; background-color: #' . $pollbar_background . '; border: 1px solid #' . $pollbar_border . ';';
 				if ( 'use_css' !== $pollbar['style'] ) {
-					$pollbar_style .= ' background-image: url(\'' . esc_url( plugins_url( 'wp-polls/images/' . $pollbar['style'] . '/pollbg.gif' ) ) . '\');';
+					$pollbar_style .= ' background-image: url(\'' . esc_url( WP_POLLS_URL . 'images/' . $pollbar['style'] . '/pollbg.gif' ) . '\');';
 				}
 					echo '<div id="wp-polls-pollbar" style="' . esc_attr( $pollbar_style ) . '"></div>' . "\n";
 				?>

@@ -157,7 +157,7 @@ class Polls_Settings {
 	 */
 	public static function bar_styles() {
 		$styles = array();
-		$path   = WP_PLUGIN_DIR . '/wp-polls/images';
+		$path   = WP_POLLS_DIR . 'images';
 
 		foreach ( (array) glob( $path . '/*', GLOB_ONLYDIR ) as $dir ) {
 			if ( is_readable( $dir . '/pollbg.gif' ) ) {

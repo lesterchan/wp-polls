@@ -36,13 +36,13 @@ class Polls_Core {
 		if ( file_exists( get_stylesheet_directory() . '/polls-css.css' ) ) {
 			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/polls-css.css', false, WP_POLLS_VERSION, 'all' );
 		} else {
-			wp_enqueue_style( 'wp-polls', plugins_url( 'wp-polls/polls-css.css' ), false, WP_POLLS_VERSION, 'all' );
+			wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'polls-css.css', false, WP_POLLS_VERSION, 'all' );
 		}
 		if ( is_rtl() ) {
 			if ( file_exists( get_stylesheet_directory() . '/polls-css-rtl.css' ) ) {
 				wp_enqueue_style( 'wp-polls-rtl', get_stylesheet_directory_uri() . '/polls-css-rtl.css', false, WP_POLLS_VERSION, 'all' );
 			} else {
-				wp_enqueue_style( 'wp-polls-rtl', plugins_url( 'wp-polls/polls-css-rtl.css' ), false, WP_POLLS_VERSION, 'all' );
+				wp_enqueue_style( 'wp-polls-rtl', WP_POLLS_URL . 'polls-css-rtl.css', false, WP_POLLS_VERSION, 'all' );
 			}
 		}
 		$pollbar = Polls_Options::get( 'bar' );
@@ -66,13 +66,13 @@ class Polls_Core {
 			$pollbar_css .= "\t" . 'font-size: ' . ( $pollbar_height - 2 ) . 'px;' . "\n";
 			$pollbar_css .= "\t" . 'line-height: ' . $pollbar_height . 'px;' . "\n";
 			$pollbar_css .= "\t" . 'height: ' . $pollbar_height . 'px;' . "\n";
-			$pollbar_css .= "\t" . 'background-image: url(\'' . esc_url( plugins_url( 'wp-polls/images/' . $pollbar['style'] . '/pollbg.gif' ) ) . '\');' . "\n";
+			$pollbar_css .= "\t" . 'background-image: url(\'' . esc_url( WP_POLLS_URL . 'images/' . $pollbar['style'] . '/pollbg.gif' ) . '\');' . "\n";
 			$pollbar_css .= "\t" . 'border: 1px solid #' . $pollbar_border . ';' . "\n";
 			$pollbar_css .= '}' . "\n";
 		}
 		wp_add_inline_style( 'wp-polls', $pollbar_css );
 		$poll_ajax_style = Polls_Options::get( 'ajax' );
-		wp_enqueue_script( 'wp-polls', plugins_url( 'wp-polls/polls-js.js' ), array(), WP_POLLS_VERSION, true );
+		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'polls-js.js', array(), WP_POLLS_VERSION, true );
 		wp_localize_script(
 			'wp-polls',
 			'pollsL10n',

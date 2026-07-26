@@ -11,7 +11,7 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 }
 
 // Variables Variables Variables.
-$base_name = plugin_basename( 'wp-polls/polls-templates.php' );
+$base_name = WP_POLLS_SLUG . '/polls-templates.php';
 $base_page = 'admin.php?page=' . $base_name;
 
 ?>

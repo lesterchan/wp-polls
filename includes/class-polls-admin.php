@@ -28,6 +28,24 @@ class Polls_Admin {
 		add_action( 'plugins_loaded', array( __CLASS__, 'polls_wp_stats' ) );
 	}
 
+	/**
+	 * The hook suffixes WordPress reports for this plugin's own admin screens.
+	 *
+	 * The logs screen is absent on purpose: polls-logs.php renders inside
+	 * polls-manager.php under mode=logs, so it arrives with the manager's
+	 * hook suffix.
+	 *
+	 * @return array
+	 */
+	public static function admin_pages() {
+		return array(
+			WP_POLLS_SLUG . '/polls-manager.php',
+			WP_POLLS_SLUG . '/polls-add.php',
+			WP_POLLS_SLUG . '/polls-options.php',
+			WP_POLLS_SLUG . '/polls-templates.php',
+		);
+	}
+
 	// Function: Poll Administration Menu.
 
 	/**
@@ -36,12 +54,14 @@ class Polls_Admin {
 	 * @return mixed
 	 */
 	public static function poll_menu() {
-		add_menu_page( __( 'Polls', 'wp-polls' ), __( 'Polls', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-manager.php', '', 'dashicons-chart-bar' );
+		$manager = WP_POLLS_SLUG . '/polls-manager.php';
 
-		add_submenu_page( 'wp-polls/polls-manager.php', __( 'Manage Polls', 'wp-polls' ), __( 'Manage Polls', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-manager.php' );
-		add_submenu_page( 'wp-polls/polls-manager.php', __( 'Add Poll', 'wp-polls' ), __( 'Add Poll', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-add.php' );
-		add_submenu_page( 'wp-polls/polls-manager.php', __( 'Poll Options', 'wp-polls' ), __( 'Poll Options', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-options.php' );
-		add_submenu_page( 'wp-polls/polls-manager.php', __( 'Poll Templates', 'wp-polls' ), __( 'Poll Templates', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-templates.php' );
+		add_menu_page( __( 'Polls', 'wp-polls' ), __( 'Polls', 'wp-polls' ), 'manage_polls', $manager, '', 'dashicons-chart-bar' );
+
+		add_submenu_page( $manager, __( 'Manage Polls', 'wp-polls' ), __( 'Manage Polls', 'wp-polls' ), 'manage_polls', $manager );
+		add_submenu_page( $manager, __( 'Add Poll', 'wp-polls' ), __( 'Add Poll', 'wp-polls' ), 'manage_polls', WP_POLLS_SLUG . '/polls-add.php' );
+		add_submenu_page( $manager, __( 'Poll Options', 'wp-polls' ), __( 'Poll Options', 'wp-polls' ), 'manage_polls', WP_POLLS_SLUG . '/polls-options.php' );
+		add_submenu_page( $manager, __( 'Poll Templates', 'wp-polls' ), __( 'Poll Templates', 'wp-polls' ), 'manage_polls', WP_POLLS_SLUG . '/polls-templates.php' );
 	}
 
 	// Function: Enqueue Polls Stylesheets/JavaScripts In WP-Admin.
@@ -54,12 +74,9 @@ class Polls_Admin {
 	 * @return mixed
 	 */
 	public static function poll_scripts_admin( $hook_suffix ) {
-		// polls-logs.php is not listed: it renders inside polls-manager.php under
-		// mode=logs, so it arrives with the manager's hook suffix.
-		$poll_admin_pages = array( 'wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php' );
-		if ( in_array( $hook_suffix, $poll_admin_pages, true ) ) {
-			wp_enqueue_style( 'wp-polls-admin', plugins_url( 'wp-polls/polls-admin-css.css' ), false, WP_POLLS_VERSION, 'all' );
-			wp_enqueue_script( 'wp-polls-admin', plugins_url( 'wp-polls/polls-admin-js.js' ), array(), WP_POLLS_VERSION, true );
+		if ( in_array( $hook_suffix, self::admin_pages(), true ) ) {
+			wp_enqueue_style( 'wp-polls-admin', WP_POLLS_URL . 'polls-admin-css.css', false, WP_POLLS_VERSION, 'all' );
+			wp_enqueue_script( 'wp-polls-admin', WP_POLLS_URL . 'polls-admin-js.js', array(), WP_POLLS_VERSION, true );
 			wp_localize_script(
 				'wp-polls-admin',
 				'pollsAdminL10n',
@@ -97,7 +114,7 @@ class Polls_Admin {
 				while(isNaN(poll_id)) {
 					poll_id = (prompt("<?php echo esc_js( __( 'Error: Poll ID must be numeric', 'wp-polls' ) ); ?>\n\n<?php echo esc_js( __( 'Please enter Poll ID again', 'wp-polls' ) ); ?>") || '').trim();
 				}
-				if (poll_id >= -1 && poll_id != null && poll_id != "") {
+				if (poll_id !== "" && Number(poll_id) >= -1) {
 					QTags.insertContent('[poll id="' + poll_id + '"]');
 				}
 			});
@@ -144,9 +161,9 @@ class Polls_Admin {
 	 */
 	public static function poll_tinymce_addplugin( $plugin_array ) {
 		if ( WP_DEBUG ) {
-			$plugin_array['polls'] = plugins_url( 'wp-polls/tinymce/plugins/polls/plugin.js?v=' . WP_POLLS_VERSION );
+			$plugin_array['polls'] = WP_POLLS_URL . 'tinymce/plugins/polls/plugin.js?v=' . WP_POLLS_VERSION;
 		} else {
-			$plugin_array['polls'] = plugins_url( 'wp-polls/tinymce/plugins/polls/plugin.min.js?v=' . WP_POLLS_VERSION );
+			$plugin_array['polls'] = WP_POLLS_URL . 'tinymce/plugins/polls/plugin.min.js?v=' . WP_POLLS_VERSION;
 		}
 		return $plugin_array;
 	}

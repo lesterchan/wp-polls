@@ -11,7 +11,7 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 }
 
 // Variables Variables Variables.
-$base_name = plugin_basename( 'wp-polls/polls-manager.php' );
+$base_name = WP_POLLS_SLUG . '/polls-manager.php';
 $base_page = 'admin.php?page=' . $base_name;
 $poll_mode = isset( $_GET['mode'] ) ? sanitize_key( wp_unslash( $_GET['mode'] ) ) : '';
 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Selects which poll to display; the write paths below verify their own nonces.

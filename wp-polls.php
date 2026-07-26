@@ -45,6 +45,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'WP_POLLS_VERSION', '3.0.0' );
 define( 'WP_POLLS_MAIN_FILE', __FILE__ );
 
+// Paths. Derived from this file so the plugin keeps working if its directory is
+// renamed. WP_POLLS_SLUG is that directory name on its own: the admin menu uses
+// the legacy "plugin file as menu slug" form, so the slug ends up inside page
+// URLs and in the hook suffix WordPress hands back.
+define( 'WP_POLLS_DIR', plugin_dir_path( __FILE__ ) );
+define( 'WP_POLLS_URL', plugin_dir_url( __FILE__ ) );
+define( 'WP_POLLS_SLUG', dirname( plugin_basename( __FILE__ ) ) );
+
 // Classes. Required at file load because the activation hook and the option
 // accessor are both reached before any action fires.
 require_once __DIR__ . '/includes/class-polls-templates.php';

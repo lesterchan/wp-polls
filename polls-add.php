@@ -11,7 +11,7 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 }
 
 // Poll Manager.
-$base_name = plugin_basename( 'wp-polls/polls-manager.php' );
+$base_name = WP_POLLS_SLUG . '/polls-manager.php';
 $base_page = 'admin.php?page=' . $base_name;
 
 // Form Processing.
