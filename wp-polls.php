@@ -42,6 +42,8 @@ define( 'WP_POLLS_VERSION', '3.0.0' );
 // accessor are both reached before any action fires.
 require_once __DIR__ . '/includes/class-polls-templates.php';
 require_once __DIR__ . '/includes/class-polls-options.php';
+require_once __DIR__ . '/includes/class-polls-settings.php';
+Polls_Settings::init();
 
 
 // Create Text Domain For Translations

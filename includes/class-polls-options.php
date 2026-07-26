@@ -47,21 +47,21 @@ class Polls_Options {
 	 */
 	public static function legacy_map() {
 		$map = array(
-			'poll_bar'           => 'bar',
-			'poll_ajax_style'    => 'ajax',
-			'poll_ans_sortby'    => 'sort.answers_by',
-			'poll_ans_sortorder' => 'sort.answers_order',
+			'poll_bar'                  => 'bar',
+			'poll_ajax_style'           => 'ajax',
+			'poll_ans_sortby'           => 'sort.answers_by',
+			'poll_ans_sortorder'        => 'sort.answers_order',
 			'poll_ans_result_sortby'    => 'sort.results_by',
 			'poll_ans_result_sortorder' => 'sort.results_order',
-			'poll_archive_perpage'     => 'archive.per_page',
-			'poll_archive_displaypoll' => 'archive.display_poll',
-			'poll_archive_url'         => 'archive.url',
-			'poll_currentpoll'    => 'current_poll',
-			'poll_latestpoll'     => 'latest_poll',
-			'poll_close'          => 'close',
-			'poll_logging_method' => 'logging_method',
-			'poll_cookielog_expiry' => 'cookie_expiry',
-			'poll_allowtovote'    => 'allow_to_vote',
+			'poll_archive_perpage'      => 'archive.per_page',
+			'poll_archive_displaypoll'  => 'archive.display_poll',
+			'poll_archive_url'          => 'archive.url',
+			'poll_currentpoll'          => 'current_poll',
+			'poll_latestpoll'           => 'latest_poll',
+			'poll_close'                => 'close',
+			'poll_logging_method'       => 'logging_method',
+			'poll_cookielog_expiry'     => 'cookie_expiry',
+			'poll_allowtovote'          => 'allow_to_vote',
 		);
 
 		foreach ( self::template_keys() as $key ) {
@@ -196,10 +196,10 @@ class Polls_Options {
 	 * @return bool
 	 */
 	public static function set( $path, $value ) {
-		$all     = self::all();
-		$cursor  = &$all;
+		$all      = self::all();
+		$cursor   = &$all;
 		$segments = explode( '.', $path );
-		$last    = array_pop( $segments );
+		$last     = array_pop( $segments );
 		foreach ( $segments as $segment ) {
 			if ( ! isset( $cursor[ $segment ] ) || ! is_array( $cursor[ $segment ] ) ) {
 				$cursor[ $segment ] = array();

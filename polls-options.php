@@ -25,84 +25,16 @@ if ( $handle = @opendir( $pollbar_path ) ) {
 	closedir( $handle );
 }
 
-// If Form Is Submitted
-if ( isset( $_POST['Submit'] ) && $_POST['Submit'] ) {
-	check_admin_referer( 'wp-polls_options' );
-	$poll_bar_style            = isset( $_POST['poll_bar_style'] ) && in_array( $_POST['poll_bar_style'], array_merge( array_keys( $poll_bars ), array( 'use_css' ) ), true ) ? $_POST['poll_bar_style'] : 'default';
-	$poll_bar_background       = isset( $_POST['poll_bar_bg'] ) ? _polls_sanitize_hex_color( $_POST['poll_bar_bg'] ) : '000000';
-	$poll_bar_border           = isset( $_POST['poll_bar_border'] ) ? _polls_sanitize_hex_color( $_POST['poll_bar_border'] ) : '000000';
-	$poll_bar_height           = isset( $_POST['poll_bar_height'] ) ? (int) sanitize_key( $_POST['poll_bar_height'] ) : 10;
-	$poll_bar                  = array(
-		'style'      => $poll_bar_style,
-		'background' => $poll_bar_background,
-		'border'     => $poll_bar_border,
-		'height'     => $poll_bar_height,
-	);
-	$poll_ajax_style           = array(
-		'loading' => isset( $_POST['poll_ajax_style_loading'] ) ? (int) sanitize_key( $_POST['poll_ajax_style_loading'] ) : 1,
-		'fading'  => isset( $_POST['poll_ajax_style_fading'] ) ? (int) sanitize_key( $_POST['poll_ajax_style_fading'] ) : 1,
-	);
-	$poll_ans_sortby           = isset( $_POST['poll_ans_sortby'] ) && in_array( $_POST['poll_ans_sortby'], array( 'polla_votes', 'polla_aid', 'polla_answers', 'RAND()' ), true ) ? $_POST['poll_ans_sortby'] : 'polla_aid';
-	$poll_ans_sortorder        = isset( $_POST['poll_ans_sortorder'] ) && in_array( $_POST['poll_ans_sortorder'], array( 'asc', 'desc' ), true ) ? $_POST['poll_ans_sortorder'] : 'asc';
-	$poll_ans_result_sortby    = isset( $_POST['poll_ans_result_sortby'] ) && in_array( $_POST['poll_ans_result_sortby'], array( 'polla_votes', 'polla_aid', 'polla_answers', 'RAND()' ), true ) ? $_POST['poll_ans_result_sortby'] : 'polla_votes';
-	$poll_ans_result_sortorder = isset( $_POST['poll_ans_result_sortorder'] ) && in_array( $_POST['poll_ans_result_sortorder'], array( 'asc', 'desc' ), true ) ? $_POST['poll_ans_result_sortorder'] : 'desc';
-	$poll_archive_perpage      = isset( $_POST['poll_archive_perpage'] ) ? (int) sanitize_key( $_POST['poll_archive_perpage'] ) : 0;
-	$poll_archive_displaypoll  = isset( $_POST['poll_archive_displaypoll'] ) ? (int) sanitize_key( $_POST['poll_archive_displaypoll'] ) : 0;
-	$poll_archive_url          = isset( $_POST['poll_archive_url'] ) ? esc_url_raw( strip_tags( trim( $_POST['poll_archive_url'] ) ) ) : '';
-	$poll_currentpoll          = isset( $_POST['poll_currentpoll'] ) ? (int) sanitize_key( $_POST['poll_currentpoll'] ) : 0;
-	$poll_close                = isset( $_POST['poll_close'] ) ? (int) sanitize_key( $_POST['poll_close'] ) : 0;
-	$poll_logging_method       = isset( $_POST['poll_logging_method'] ) ? (int) sanitize_key( $_POST['poll_logging_method'] ) : 0;
-	$poll_cookielog_expiry     = isset( $_POST['poll_cookielog_expiry'] ) ? (int) sanitize_key( $_POST['poll_cookielog_expiry'] ) : 0;
-	$poll_allowtovote          = isset( $_POST['poll_allowtovote'] ) ? (int) sanitize_key( $_POST['poll_allowtovote'] ) : 0;
-
-	$poll_ip_header = ! empty( $_POST['poll_ip_header'] ) ? sanitize_text_field( wp_unslash( $_POST['poll_ip_header'] ) ) : '';
-
-	$update_poll_queries   = array();
-	$update_poll_text      = array();
-	$update_poll_queries[] = Polls_Options::set( 'bar', $poll_bar );
-	$update_poll_queries[] = Polls_Options::set( 'ajax', $poll_ajax_style );
-	$update_poll_queries[] = Polls_Options::set( 'sort.answers_by', $poll_ans_sortby );
-	$update_poll_queries[] = Polls_Options::set( 'sort.answers_order', $poll_ans_sortorder );
-	$update_poll_queries[] = Polls_Options::set( 'sort.results_by', $poll_ans_result_sortby );
-	$update_poll_queries[] = Polls_Options::set( 'sort.results_order', $poll_ans_result_sortorder );
-	$update_poll_queries[] = Polls_Options::set( 'archive.per_page', $poll_archive_perpage );
-	$update_poll_queries[] = Polls_Options::set( 'archive.display_poll', $poll_archive_displaypoll );
-	$update_poll_queries[] = Polls_Options::set( 'archive.url', $poll_archive_url );
-	$update_poll_queries[] = Polls_Options::set( 'current_poll', $poll_currentpoll );
-	$update_poll_queries[] = Polls_Options::set( 'close', $poll_close );
-	$update_poll_queries[] = Polls_Options::set( 'logging_method', $poll_logging_method );
-	$update_poll_queries[] = Polls_Options::set( 'cookie_expiry', $poll_cookielog_expiry );
-	$update_poll_queries[] = Polls_Options::set( 'allow_to_vote', $poll_allowtovote );
-	$update_poll_queries[] = Polls_Options::set( 'ip_header', $poll_ip_header );
-	$update_poll_text[]    = __( 'Poll Bar Style', 'wp-polls' );
-	$update_poll_text[]    = __( 'Poll AJAX Style', 'wp-polls' );
-	$update_poll_text[]    = __( 'Sort Poll Answers By Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Sort Order Of Poll Answers Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Sort Poll Results By Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Sort Order Of Poll Results Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Number Of Polls Per Page To Display In Poll Archive Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Type Of Polls To Display In Poll Archive Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Poll Archive URL Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Show Poll Achive Link Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Current Active Poll Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Poll Close Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Logging Method', 'wp-polls' );
-	$update_poll_text[]    = __( 'Cookie And Log Expiry Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Allow To Vote Option', 'wp-polls' );
-	$update_poll_text[]    = __( 'Poll Options', 'wp-polls' );
-	$i                     = 0;
-	$text                  = '';
-	foreach ( $update_poll_queries as $update_poll_query ) {
-		if ( $update_poll_query ) {
-			$text .= '<p style="color: green;">' . $update_poll_text[ $i ] . ' ' . __( 'Updated', 'wp-polls' ) . '</p>';
-		}
-		++$i;
+// Saving is handled by the Settings API: the form posts to options.php,
+// which validates the nonce and hands the input to Polls_Settings::sanitize().
+// cron_polls_place() still has to run afterwards because the cookie/log expiry
+// option decides the schedule.
+add_action(
+	'update_option_' . Polls_Options::OPTION,
+	function () {
+		cron_polls_place();
 	}
-	if ( empty( $text ) ) {
-		$text = '<p style="color: red;">' . __( 'No Poll Option Updated', 'wp-polls' ) . '</p>';
-	}
-	cron_polls_place();
-}
+);
 
 $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 ?>
@@ -135,7 +67,7 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 				border_preview.style.backgroundColor = pollbar_border;
 			}
 		} else if(where == "style") {
-			var checked_style = document.querySelector("input[name='poll_bar_style']:checked");
+			var checked_style = document.querySelector("input[name='wp_polls[bar][style]']:checked");
 			var pollbar_style = checked_style ? checked_style.value : "";
 			if(preview) {
 				if(pollbar_style == "use_css") {
@@ -178,12 +110,9 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 })();
 /* ]]> */
 </script>
-<?php
-if ( ! empty( $text ) ) {
-	echo '<!-- Last Action --><div id="message" class="updated fade"><p>' . $text . '</p></div>'; }
-?>
-<form id="poll_options_form" method="post" action="<?php echo admin_url( 'admin.php?page=' . plugin_basename( __FILE__ ) ); ?>">
-<?php wp_nonce_field( 'wp-polls_options' ); ?>
+<?php settings_errors(); ?>
+<form id="poll_options_form" method="post" action="options.php">
+<?php settings_fields( Polls_Settings::GROUP ); ?>
 <div class="wrap">
 	<h2><?php _e( 'Poll Options', 'wp-polls' ); ?></h2>
 	<!-- Poll Bar Style -->
@@ -201,9 +130,9 @@ if ( ! empty( $text ) ) {
 						$pollbar_img_h = (int) $pollbar_info[1];
 						echo '<p>' . "\n";
 						if ( $pollbar['style'] == $filename ) {
-							echo '<input type="radio" id="poll_bar_style-' . $pollbar_name . '" name="poll_bar_style" value="' . $pollbar_name . '" checked="checked" data-poll-action="pollbar-style" data-poll-height="' . $pollbar_img_h . '" />';
+							echo '<input type="radio" id="poll_bar_style-' . $pollbar_name . '" name="wp_polls[bar][style]" value="' . $pollbar_name . '" checked="checked" data-poll-action="pollbar-style" data-poll-height="' . $pollbar_img_h . '" />';
 						} else {
-							echo '<input type="radio" id="poll_bar_style-' . $pollbar_name . '" name="poll_bar_style" value="' . $pollbar_name . '" data-poll-action="pollbar-style" data-poll-height="' . $pollbar_img_h . '" />';
+							echo '<input type="radio" id="poll_bar_style-' . $pollbar_name . '" name="wp_polls[bar][style]" value="' . $pollbar_name . '" data-poll-action="pollbar-style" data-poll-height="' . $pollbar_img_h . '" />';
 						}
 						echo '<label for="poll_bar_style-' . $pollbar_name . '">&nbsp;&nbsp;&nbsp;';
 						echo '<img src="' . esc_url( $pollbar_url . '/' . $filename . '/pollbg.gif' ) . '" height="' . $pollbar_img_h . '" width="100" alt="pollbg.gif" />';
@@ -212,22 +141,22 @@ if ( ! empty( $text ) ) {
 					}
 				}
 				?>
-				<input type="radio" id="poll_bar_style-use_css" name="poll_bar_style" value="use_css"<?php checked( 'use_css', $pollbar['style'] ); ?> data-poll-action="pollbar-style" /><label for="poll_bar_style-use_css"> <?php _e( 'Use CSS Style', 'wp-polls' ); ?></label>
+				<input type="radio" id="poll_bar_style-use_css" name="wp_polls[bar][style]" value="use_css"<?php checked( 'use_css', $pollbar['style'] ); ?> data-poll-action="pollbar-style" /><label for="poll_bar_style-use_css"> <?php _e( 'Use CSS Style', 'wp-polls' ); ?></label>
 			</td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Poll Bar Background', 'wp-polls' ); ?></th>
-			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_bg" name="poll_bar_bg" value="<?php echo esc_attr( $pollbar['background'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="background" /></td>
+			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_bg" name="wp_polls[bar][background]" value="<?php echo esc_attr( $pollbar['background'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="background" /></td>
 			<td><div id="wp-polls-pollbar-bg" style="background-color: #<?php echo esc_attr( _polls_sanitize_hex_color( $pollbar['background'] ) ); ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Poll Bar Border', 'wp-polls' ); ?></th>
-			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_border" name="poll_bar_border" value="<?php echo esc_attr( $pollbar['border'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="border" /></td>
+			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_border" name="wp_polls[bar][border]" value="<?php echo esc_attr( $pollbar['border'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="border" /></td>
 			<td><div id="wp-polls-pollbar-border" style="background-color: #<?php echo esc_attr( _polls_sanitize_hex_color( $pollbar['border'] ) ); ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Poll Bar Height', 'wp-polls' ); ?></th>
-			<td colspan="2" dir="ltr"><input type="text" id="poll_bar_height" name="poll_bar_height" value="<?php echo esc_attr( $pollbar['height'] ); ?>" size="2" maxlength="2" data-poll-action="pollbar-update" data-poll-field="height" />px</td>
+			<td colspan="2" dir="ltr"><input type="text" id="poll_bar_height" name="wp_polls[bar][height]" value="<?php echo esc_attr( $pollbar['height'] ); ?>" size="2" maxlength="2" data-poll-action="pollbar-update" data-poll-field="height" />px</td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Your poll bar will look like this', 'wp-polls' ); ?></th>
@@ -253,7 +182,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Show Loading Image With Text', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_ajax_style_loading" size="1">
+				<select name="wp_polls[ajax][loading]" size="1">
 					<option value="0"<?php selected( '0', $poll_ajax_style['loading'] ); ?>><?php _e( 'No', 'wp-polls' ); ?></option>
 					<option value="1"<?php selected( '1', $poll_ajax_style['loading'] ); ?>><?php _e( 'Yes', 'wp-polls' ); ?></option>
 				</select>
@@ -262,7 +191,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Show Fading In And Fading Out Of Poll', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_ajax_style_fading" size="1">
+				<select name="wp_polls[ajax][fading]" size="1">
 					<option value="0"<?php selected( '0', $poll_ajax_style['fading'] ); ?>><?php _e( 'No', 'wp-polls' ); ?></option>
 					<option value="1"<?php selected( '1', $poll_ajax_style['fading'] ); ?>><?php _e( 'Yes', 'wp-polls' ); ?></option>
 				</select>
@@ -276,7 +205,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Sort Poll Answers By:', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_ans_sortby" size="1">
+				<select name="wp_polls[sort][answers_by]" size="1">
 					<option value="polla_votes"<?php selected( 'polla_votes', Polls_Options::get( 'sort.answers_by' ) ); ?>><?php _e( 'Votes Cast', 'wp-polls' ); ?></option>
 					<option value="polla_aid"<?php selected( 'polla_aid', Polls_Options::get( 'sort.answers_by' ) ); ?>><?php _e( 'Exact Order', 'wp-polls' ); ?></option>
 					<option value="polla_answers"<?php selected( 'polla_answers', Polls_Options::get( 'sort.answers_by' ) ); ?>><?php _e( 'Alphabetical Order', 'wp-polls' ); ?></option>
@@ -287,7 +216,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Sort Order Of Poll Answers:', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_ans_sortorder" size="1">
+				<select name="wp_polls[sort][answers_order]" size="1">
 					<option value="asc"<?php selected( 'asc', Polls_Options::get( 'sort.answers_order' ) ); ?>><?php _e( 'Ascending', 'wp-polls' ); ?></option>
 					<option value="desc"<?php selected( 'desc', Polls_Options::get( 'sort.answers_order' ) ); ?>><?php _e( 'Descending', 'wp-polls' ); ?></option>
 				</select>
@@ -301,7 +230,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Sort Poll Results By:', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_ans_result_sortby" size="1">
+				<select name="wp_polls[sort][results_by]" size="1">
 					<option value="polla_votes"<?php selected( 'polla_votes', Polls_Options::get( 'sort.results_by' ) ); ?>><?php _e( 'Votes Cast', 'wp-polls' ); ?></option>
 					<option value="polla_aid"<?php selected( 'polla_aid', Polls_Options::get( 'sort.results_by' ) ); ?>><?php _e( 'Exact Order', 'wp-polls' ); ?></option>
 					<option value="polla_answers"<?php selected( 'polla_answers', Polls_Options::get( 'sort.results_by' ) ); ?>><?php _e( 'Alphabetical Order', 'wp-polls' ); ?></option>
@@ -312,7 +241,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Sort Order Of Poll Results:', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_ans_result_sortorder" size="1">
+				<select name="wp_polls[sort][results_order]" size="1">
 					<option value="asc"<?php selected( 'asc', Polls_Options::get( 'sort.results_order' ) ); ?>><?php _e( 'Ascending', 'wp-polls' ); ?></option>
 					<option value="desc"<?php selected( 'desc', Polls_Options::get( 'sort.results_order' ) ); ?>><?php _e( 'Descending', 'wp-polls' ); ?></option>
 				</select>
@@ -326,7 +255,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Who Is Allowed To Vote?', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_allowtovote" size="1">
+				<select name="wp_polls[allow_to_vote]" size="1">
 					<option value="0"<?php selected( '0', Polls_Options::get( 'allow_to_vote' ) ); ?>><?php _e( 'Guests Only', 'wp-polls' ); ?></option>
 					<option value="1"<?php selected( '1', Polls_Options::get( 'allow_to_vote' ) ); ?>><?php _e( 'Registered Users Only', 'wp-polls' ); ?></option>
 					<option value="2"<?php selected( '2', Polls_Options::get( 'allow_to_vote' ) ); ?>><?php _e( 'Registered Users And Guests', 'wp-polls' ); ?></option>
@@ -341,7 +270,7 @@ if ( ! empty( $text ) ) {
 		<tr valign="top">
 			<th scope="row" valign="top"><?php _e( 'Poll Logging Method:', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_logging_method" size="1">
+				<select name="wp_polls[logging_method]" size="1">
 					<option value="0"<?php selected( '0', Polls_Options::get( 'logging_method' ) ); ?>><?php _e( 'Do Not Log', 'wp-polls' ); ?></option>
 					<option value="1"<?php selected( '1', Polls_Options::get( 'logging_method' ) ); ?>><?php _e( 'Logged By Cookie', 'wp-polls' ); ?></option>
 					<option value="2"<?php selected( '2', Polls_Options::get( 'logging_method' ) ); ?>><?php _e( 'Logged By IP', 'wp-polls' ); ?></option>
@@ -352,11 +281,11 @@ if ( ! empty( $text ) ) {
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Expiry Time For Cookie And Log:', 'wp-polls' ); ?></th>
-			<td><input type="text" name="poll_cookielog_expiry" value="<?php echo (int) esc_attr( Polls_Options::get( 'cookie_expiry' ) ); ?>" size="10" /> <?php _e( 'seconds (0 to disable)', 'wp-polls' ); ?></td>
+			<td><input type="text" name="wp_polls[cookie_expiry]" value="<?php echo (int) esc_attr( Polls_Options::get( 'cookie_expiry' ) ); ?>" size="10" /> <?php _e( 'seconds (0 to disable)', 'wp-polls' ); ?></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Header That Contains The IP:', 'wp-polls' ); ?></th>
-			<td><input type="text" name="poll_ip_header" value="<?php echo esc_attr( $poll_options['ip_header'] ); ?>" size="30" /> <?php _e( 'You can leave it blank to use the default', 'wp-polls' ); ?><br /><?php _e( 'Example: REMOTE_ADDR', 'wp-polls' ); ?></td>
+			<td><input type="text" name="wp_polls[ip_header]" value="<?php echo esc_attr( $poll_options['ip_header'] ); ?>" size="30" /> <?php _e( 'You can leave it blank to use the default', 'wp-polls' ); ?><br /><?php _e( 'Example: REMOTE_ADDR', 'wp-polls' ); ?></td>
 		</tr>
 	</table>
 
@@ -365,12 +294,12 @@ if ( ! empty( $text ) ) {
 	<table class="form-table">
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Number Of Polls Per Page:', 'wp-polls' ); ?></th>
-			<td><input type="text" name="poll_archive_perpage" value="<?php echo (int) esc_attr( Polls_Options::get( 'archive.per_page' ) ); ?>" size="2" /></td>
+			<td><input type="text" name="wp_polls[archive][per_page]" value="<?php echo (int) esc_attr( Polls_Options::get( 'archive.per_page' ) ); ?>" size="2" /></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Type Of Polls To Display In Poll Archive:', 'wp-polls' ); ?></th>
 			<td>
-				<select name="poll_archive_displaypoll" size="1">
+				<select name="wp_polls[archive][display_poll]" size="1">
 					<option value="1"<?php selected( '1', Polls_Options::get( 'archive.display_poll' ) ); ?>><?php _e( 'Closed Polls Only', 'wp-polls' ); ?></option>
 					<option value="2"<?php selected( '2', Polls_Options::get( 'archive.display_poll' ) ); ?>><?php _e( 'Opened Polls Only', 'wp-polls' ); ?></option>
 					<option value="3"<?php selected( '3', Polls_Options::get( 'archive.display_poll' ) ); ?>><?php _e( 'Closed And Opened Polls', 'wp-polls' ); ?></option>
@@ -379,7 +308,7 @@ if ( ! empty( $text ) ) {
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Poll Archive URL:', 'wp-polls' ); ?></th>
-			<td><input type="text" name="poll_archive_url" value="<?php echo esc_url( Polls_Options::get( 'archive.url' ) ); ?>" size="50" dir="ltr" /></td>
+			<td><input type="text" name="wp_polls[archive][url]" value="<?php echo esc_url( Polls_Options::get( 'archive.url' ) ); ?>" size="50" dir="ltr" /></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Note', 'wp-polls' ); ?></th>
@@ -393,7 +322,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Current Active Poll', 'wp-polls' ); ?>:</th>
 			<td>
-				<select name="poll_currentpoll" size="1">
+				<select name="wp_polls[current_poll]" size="1">
 					<option value="-1"<?php selected( -1, Polls_Options::get( 'current_poll' ) ); ?>><?php _e( 'Do NOT Display Poll (Disable)', 'wp-polls' ); ?></option>
 					<option value="-2"<?php selected( -2, Polls_Options::get( 'current_poll' ) ); ?>><?php _e( 'Display Random Poll', 'wp-polls' ); ?></option>
 					<option value="0"<?php selected( 0, Polls_Options::get( 'current_poll' ) ); ?>><?php _e( 'Display Latest Poll', 'wp-polls' ); ?></option>
@@ -418,7 +347,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'When Poll Is Closed', 'wp-polls' ); ?>:</th>
 			<td>
-				<select name="poll_close" size="1">
+				<select name="wp_polls[close]" size="1">
 					<option value="1"<?php selected( 1, Polls_Options::get( 'close' ) ); ?>><?php _e( 'Display Poll\'s Results', 'wp-polls' ); ?></option>
 					<option value="3"<?php selected( 3, Polls_Options::get( 'close' ) ); ?>><?php _e( 'Display Disabled Poll\'s Voting Form', 'wp-polls' ); ?></option>
 					<option value="2"<?php selected( 2, Polls_Options::get( 'close' ) ); ?>><?php _e( 'Do Not Display Poll In Post/Sidebar', 'wp-polls' ); ?></option>
