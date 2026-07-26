@@ -8,8 +8,8 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 $base_name = plugin_basename( 'wp-polls/polls-manager.php' );
 $base_page = 'admin.php?page=' . $base_name;
 $mode      = ( isset( $_GET['mode'] ) ? sanitize_key( trim( $_GET['mode'] ) ) : '' );
-$poll_id   = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
-$poll_aid  = ( isset( $_GET['aid'] ) ? (int) sanitize_key( $_GET['aid'] ) : 0 );
+$poll_id   = ( isset( $_GET['id'] ) ? (int) $_GET['id'] : 0 );
+$poll_aid  = ( isset( $_GET['aid'] ) ? (int) $_GET['aid'] : 0 );
 
 // Form Processing.
 if ( ! empty( $_POST['do'] ) ) {
@@ -19,41 +19,41 @@ if ( ! empty( $_POST['do'] ) ) {
 		case __( 'Edit Poll', 'wp-polls' ):
 			check_admin_referer( 'wp-polls_edit-poll' );
 			// Poll ID.
-			$pollq_id = (int) sanitize_key( $_POST['pollq_id'] );
+			$pollq_id = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
 			// Poll Total Votes.
-			$pollq_totalvotes = (int) sanitize_key( $_POST['pollq_totalvotes'] );
+			$pollq_totalvotes = isset( $_POST['pollq_totalvotes'] ) ? (int) $_POST['pollq_totalvotes'] : 0;
 			// Poll Total Voters.
-			$pollq_totalvoters = (int) sanitize_key( $_POST['pollq_totalvoters'] );
+			$pollq_totalvoters = isset( $_POST['pollq_totalvoters'] ) ? (int) $_POST['pollq_totalvoters'] : 0;
 			// Poll Question.
 			$pollq_question = esc_sql( wp_kses_post( trim( $_POST['pollq_question'] ) ) );
 			// Poll Active.
-			$pollq_active = (int) sanitize_key( $_POST['pollq_active'] );
+			$pollq_active = isset( $_POST['pollq_active'] ) ? (int) $_POST['pollq_active'] : 0;
 			// Poll Start Date.
 			$pollq_timestamp    = isset( $_POST['poll_timestamp_old'] ) ? $_POST['poll_timestamp_old'] : current_time( 'timestamp' );
-			$edit_polltimestamp = isset( $_POST['edit_polltimestamp'] ) && (int) sanitize_key( $_POST['edit_polltimestamp'] ) === 1 ? 1 : 0;
+			$edit_polltimestamp = ( isset( $_POST['edit_polltimestamp'] ) && 1 === (int) $_POST['edit_polltimestamp'] ) ? 1 : 0;
 			if ( 1 === $edit_polltimestamp ) {
-				$pollq_timestamp_day    = (int) sanitize_key( $_POST['pollq_timestamp_day'] );
-				$pollq_timestamp_month  = (int) sanitize_key( $_POST['pollq_timestamp_month'] );
-				$pollq_timestamp_year   = (int) sanitize_key( $_POST['pollq_timestamp_year'] );
-				$pollq_timestamp_hour   = (int) sanitize_key( $_POST['pollq_timestamp_hour'] );
-				$pollq_timestamp_minute = (int) sanitize_key( $_POST['pollq_timestamp_minute'] );
-				$pollq_timestamp_second = (int) sanitize_key( $_POST['pollq_timestamp_second'] );
+				$pollq_timestamp_day    = isset( $_POST['pollq_timestamp_day'] ) ? (int) $_POST['pollq_timestamp_day'] : 0;
+				$pollq_timestamp_month  = isset( $_POST['pollq_timestamp_month'] ) ? (int) $_POST['pollq_timestamp_month'] : 0;
+				$pollq_timestamp_year   = isset( $_POST['pollq_timestamp_year'] ) ? (int) $_POST['pollq_timestamp_year'] : 0;
+				$pollq_timestamp_hour   = isset( $_POST['pollq_timestamp_hour'] ) ? (int) $_POST['pollq_timestamp_hour'] : 0;
+				$pollq_timestamp_minute = isset( $_POST['pollq_timestamp_minute'] ) ? (int) $_POST['pollq_timestamp_minute'] : 0;
+				$pollq_timestamp_second = isset( $_POST['pollq_timestamp_second'] ) ? (int) $_POST['pollq_timestamp_second'] : 0;
 				$pollq_timestamp        = gmmktime( $pollq_timestamp_hour, $pollq_timestamp_minute, $pollq_timestamp_second, $pollq_timestamp_month, $pollq_timestamp_day, $pollq_timestamp_year );
 				if ( $pollq_timestamp > current_time( 'timestamp' ) ) {
 					$pollq_active = -1;
 				}
 			}
 			// Poll End Date.
-			$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
+			$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) $_POST['pollq_expiry_no'] : 0;
 			if ( 1 === $pollq_expiry_no ) {
 				$pollq_expiry = 0;
 			} else {
-				$pollq_expiry_day    = (int) sanitize_key( $_POST['pollq_expiry_day'] );
-				$pollq_expiry_month  = (int) sanitize_key( $_POST['pollq_expiry_month'] );
-				$pollq_expiry_year   = (int) sanitize_key( $_POST['pollq_expiry_year'] );
-				$pollq_expiry_hour   = (int) sanitize_key( $_POST['pollq_expiry_hour'] );
-				$pollq_expiry_minute = (int) sanitize_key( $_POST['pollq_expiry_minute'] );
-				$pollq_expiry_second = (int) sanitize_key( $_POST['pollq_expiry_second'] );
+				$pollq_expiry_day    = isset( $_POST['pollq_expiry_day'] ) ? (int) $_POST['pollq_expiry_day'] : 0;
+				$pollq_expiry_month  = isset( $_POST['pollq_expiry_month'] ) ? (int) $_POST['pollq_expiry_month'] : 0;
+				$pollq_expiry_year   = isset( $_POST['pollq_expiry_year'] ) ? (int) $_POST['pollq_expiry_year'] : 0;
+				$pollq_expiry_hour   = isset( $_POST['pollq_expiry_hour'] ) ? (int) $_POST['pollq_expiry_hour'] : 0;
+				$pollq_expiry_minute = isset( $_POST['pollq_expiry_minute'] ) ? (int) $_POST['pollq_expiry_minute'] : 0;
+				$pollq_expiry_second = isset( $_POST['pollq_expiry_second'] ) ? (int) $_POST['pollq_expiry_second'] : 0;
 				$pollq_expiry        = gmmktime( $pollq_expiry_hour, $pollq_expiry_minute, $pollq_expiry_second, $pollq_expiry_month, $pollq_expiry_day, $pollq_expiry_year );
 				if ( $pollq_expiry <= current_time( 'timestamp' ) ) {
 					$pollq_active = 0;
@@ -65,10 +65,10 @@ if ( ! empty( $_POST['do'] ) ) {
 				}
 			}
 			// Mutilple Poll.
-			$pollq_multiple_yes = (int) sanitize_key( $_POST['pollq_multiple_yes'] );
+			$pollq_multiple_yes = isset( $_POST['pollq_multiple_yes'] ) ? (int) $_POST['pollq_multiple_yes'] : 0;
 			$pollq_multiple     = 0;
 			if ( 1 === $pollq_multiple_yes ) {
-				$pollq_multiple = (int) sanitize_key( $_POST['pollq_multiple'] );
+				$pollq_multiple = isset( $_POST['pollq_multiple'] ) ? (int) $_POST['pollq_multiple'] : 0;
 			} else {
 				$pollq_multiple = 0;
 			}

@@ -426,7 +426,7 @@ class Polls_Vote {
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) . '' );
 
 			// Get Poll ID.
-			$poll_id = ( isset( $_REQUEST['poll_id'] ) ? (int) sanitize_key( $_REQUEST['poll_id'] ) : 0 );
+			$poll_id = ( isset( $_REQUEST['poll_id'] ) ? (int) $_REQUEST['poll_id'] : 0 );
 
 			// Ensure Poll ID Is Valid.
 			if ( 0 === $poll_id ) {
@@ -449,7 +449,9 @@ class Polls_Vote {
 						$poll_aid_array  = array_unique( array_map( 'intval', array_map( 'sanitize_key', explode( ',', $poll_answer_ids ) ) ) );
 						echo self::vote_poll_process( $poll_id, $poll_aid_array );
 					} catch ( Exception $e ) {
-						echo $e->getMessage();
+						// Escaped here rather than at each throw site, so the message
+						// is escaped exactly once at the point it reaches the browser.
+						echo esc_html( $e->getMessage() );
 					}
 					break;
 				// Poll Result.

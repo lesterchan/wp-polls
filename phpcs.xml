@@ -30,6 +30,13 @@
 
 	<!-- manage_polls is this plugin's own capability, granted to administrator
 	     on activation. The sniff only knows core's list. -->
+	<!-- Exception messages from the voting endpoint are escaped once where they
+	     are echoed, in Polls_Vote::vote_poll(), rather than at each of the eight
+	     throw sites. Escaping at both would double encode. -->
+	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
+	</rule>
+
 	<rule ref="WordPress.WP.Capabilities">
 		<properties>
 			<property name="custom_capabilities" type="array">

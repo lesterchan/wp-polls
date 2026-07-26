@@ -419,7 +419,7 @@ class Polls_Display {
 		global $wpdb, $in_pollsarchive;
 		// Polls Variables.
 		$in_pollsarchive             = true;
-		$page                        = isset( $_GET['poll_page'] ) ? (int) sanitize_key( $_GET['poll_page'] ) : 0;
+		$page                        = isset( $_GET['poll_page'] ) ? (int) $_GET['poll_page'] : 0;
 		$polls_questions             = array();
 		$polls_answers               = array();
 		$polls_ips                   = array();

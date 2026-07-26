@@ -287,7 +287,7 @@ class Polls_Admin {
 					// Delete Poll Logs For Individual Poll.
 					case __( 'Delete Logs For This Poll Only', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_delete-poll-logs' );
-						$pollq_id       = (int) sanitize_key( $_POST['pollq_id'] );
+						$pollq_id       = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
 						$pollq_question = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d", $pollq_id ) );
 						if ( sanitize_key( trim( $_POST['delete_logs_yes'] ) ) === 'yes' ) {
 							$delete_logs = $wpdb->delete( $wpdb->pollsip, array( 'pollip_qid' => $pollq_id ), array( '%d' ) );
@@ -303,8 +303,8 @@ class Polls_Admin {
 					// Delete Poll's Answer.
 					case __( 'Delete Poll Answer', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_delete-poll-answer' );
-						$pollq_id                = (int) sanitize_key( $_POST['pollq_id'] );
-						$polla_aid               = (int) sanitize_key( $_POST['polla_aid'] );
+						$pollq_id                = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
+						$polla_aid               = isset( $_POST['polla_aid'] ) ? (int) $_POST['polla_aid'] : 0;
 						$poll_answers            = $wpdb->get_row( $wpdb->prepare( "SELECT polla_votes, polla_answers FROM $wpdb->pollsa WHERE polla_aid = %d AND polla_qid = %d", $polla_aid, $pollq_id ) );
 						$polla_votes             = (int) $poll_answers->polla_votes;
 						$polla_answers           = wp_kses_post( removeslashes( trim( $poll_answers->polla_answers ) ) );
@@ -336,7 +336,7 @@ class Polls_Admin {
 					// Open Poll.
 					case __( 'Open Poll', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_open-poll' );
-						$pollq_id       = (int) sanitize_key( $_POST['pollq_id'] );
+						$pollq_id       = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
 						$pollq_question = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d", $pollq_id ) );
 						$open_poll      = $wpdb->update(
 							$wpdb->pollsq,
@@ -364,7 +364,7 @@ class Polls_Admin {
 					// Close Poll.
 					case __( 'Close Poll', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_close-poll' );
-						$pollq_id       = (int) sanitize_key( $_POST['pollq_id'] );
+						$pollq_id       = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
 						$pollq_question = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d", $pollq_id ) );
 						$close_poll     = $wpdb->update(
 							$wpdb->pollsq,
@@ -392,7 +392,7 @@ class Polls_Admin {
 					// Delete Poll.
 					case __( 'Delete Poll', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_delete-poll' );
-						$pollq_id                = (int) sanitize_key( $_POST['pollq_id'] );
+						$pollq_id                = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
 						$pollq_question          = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d", $pollq_id ) );
 						$delete_poll_question    = $wpdb->delete( $wpdb->pollsq, array( 'pollq_id' => $pollq_id ), array( '%d' ) );
 						$delete_poll_answers     = $wpdb->delete( $wpdb->pollsa, array( 'polla_qid' => $pollq_id ), array( '%d' ) );

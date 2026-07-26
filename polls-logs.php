@@ -39,12 +39,12 @@ if ( ! empty( $_POST['do'] ) ) {
 	$num_choices_sql      = '';
 	$num_choices_sign_sql = '';
 	$order_by             = '';
-	switch ( (int) sanitize_key( $_POST['filter'] ) ) {
+	switch ( isset( $_POST['filter'] ) ? (int) $_POST['filter'] : 0 ) {
 		case 1:
-			$users_voted_for     = (int) sanitize_key( $_POST['users_voted_for'] );
-			$exclude_registered  = isset( $_POST['exclude_registered'] ) && (int) sanitize_key( $_POST['exclude_registered'] ) === 1;
-			$exclude_comment     = isset( $_POST['exclude_comment'] ) && (int) sanitize_key( $_POST['exclude_comment'] ) === 1;
-			$exclude_guest       = isset( $_POST['exclude_guest'] ) && (int) sanitize_key( $_POST['exclude_guest'] ) === 1;
+			$users_voted_for     = isset( $_POST['users_voted_for'] ) ? (int) $_POST['users_voted_for'] : 0;
+			$exclude_registered  = isset( $_POST['exclude_registered'] ) && 1 === (int) $_POST['exclude_registered'];
+			$exclude_comment     = isset( $_POST['exclude_comment'] ) && 1 === (int) $_POST['exclude_comment'];
+			$exclude_guest       = isset( $_POST['exclude_guest'] ) && 1 === (int) $_POST['exclude_guest'];
 			$users_voted_for_sql = "AND pollip_aid = $users_voted_for";
 			if ( $exclude_registered ) {
 				$registered_sql = 'AND pollip_userid = 0';
@@ -62,9 +62,9 @@ if ( ! empty( $_POST['do'] ) ) {
 			$order_by = 'pollip_timestamp DESC';
 			break;
 		case 2:
-			$exclude_registered_2 = (int) sanitize_key( $_POST['exclude_registered_2'] );
-			$exclude_comment_2    = (int) sanitize_key( $_POST['exclude_comment_2'] );
-			$num_choices          = (int) sanitize_key( $_POST['num_choices'] );
+			$exclude_registered_2 = isset( $_POST['exclude_registered_2'] ) ? (int) $_POST['exclude_registered_2'] : 0;
+			$exclude_comment_2    = isset( $_POST['exclude_comment_2'] ) ? (int) $_POST['exclude_comment_2'] : 0;
+			$num_choices          = isset( $_POST['num_choices'] ) ? (int) $_POST['num_choices'] : 0;
 			$num_choices_sign     = sanitize_key( $_POST['num_choices_sign'] );
 			switch ( $num_choices_sign ) {
 				case 'more':
@@ -281,7 +281,7 @@ if ( ! empty( $text ) ) {
 			$j                = 0;
 			$poll_last_aid    = -1;
 			$temp_pollip_user = null;
-			if ( isset( $_POST['filter'] ) && (int) sanitize_key( $_POST['filter'] ) > 1 ) {
+			if ( isset( $_POST['filter'] ) && (int) $_POST['filter'] > 1 ) {
 				echo "<tr class=\"thead\">\n";
 				echo '<th>' . __( 'Answer', 'wp-polls' ) . "</th>\n";
 				echo '<th>' . __( 'Hashed IP / Host', 'wp-polls' ) . "</th>\n";

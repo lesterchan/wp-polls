@@ -21,12 +21,12 @@ if ( ! empty( $_POST['do'] ) ) {
 			if ( ! empty( $pollq_question ) ) {
 				// Poll Start Date.
 				$timestamp_sql          = '';
-				$pollq_timestamp_day    = isset( $_POST['pollq_timestamp_day'] ) ? (int) sanitize_key( $_POST['pollq_timestamp_day'] ) : 0;
-				$pollq_timestamp_month  = isset( $_POST['pollq_timestamp_month'] ) ? (int) sanitize_key( $_POST['pollq_timestamp_month'] ) : 0;
-				$pollq_timestamp_year   = isset( $_POST['pollq_timestamp_year'] ) ? (int) sanitize_key( $_POST['pollq_timestamp_year'] ) : 0;
-				$pollq_timestamp_hour   = isset( $_POST['pollq_timestamp_hour'] ) ? (int) sanitize_key( $_POST['pollq_timestamp_hour'] ) : 0;
-				$pollq_timestamp_minute = isset( $_POST['pollq_timestamp_minute'] ) ? (int) sanitize_key( $_POST['pollq_timestamp_minute'] ) : 0;
-				$pollq_timestamp_second = isset( $_POST['pollq_timestamp_second'] ) ? (int) sanitize_key( $_POST['pollq_timestamp_second'] ) : 0;
+				$pollq_timestamp_day    = isset( $_POST['pollq_timestamp_day'] ) ? (int) $_POST['pollq_timestamp_day'] : 0;
+				$pollq_timestamp_month  = isset( $_POST['pollq_timestamp_month'] ) ? (int) $_POST['pollq_timestamp_month'] : 0;
+				$pollq_timestamp_year   = isset( $_POST['pollq_timestamp_year'] ) ? (int) $_POST['pollq_timestamp_year'] : 0;
+				$pollq_timestamp_hour   = isset( $_POST['pollq_timestamp_hour'] ) ? (int) $_POST['pollq_timestamp_hour'] : 0;
+				$pollq_timestamp_minute = isset( $_POST['pollq_timestamp_minute'] ) ? (int) $_POST['pollq_timestamp_minute'] : 0;
+				$pollq_timestamp_second = isset( $_POST['pollq_timestamp_second'] ) ? (int) $_POST['pollq_timestamp_second'] : 0;
 				$pollq_timestamp        = gmmktime( $pollq_timestamp_hour, $pollq_timestamp_minute, $pollq_timestamp_second, $pollq_timestamp_month, $pollq_timestamp_day, $pollq_timestamp_year );
 				if ( $pollq_timestamp > current_time( 'timestamp' ) ) {
 					$pollq_active = -1;
@@ -34,26 +34,26 @@ if ( ! empty( $_POST['do'] ) ) {
 					$pollq_active = 1;
 				}
 				// Poll End Date.
-				$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
+				$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) $_POST['pollq_expiry_no'] : 0;
 				if ( 1 === $pollq_expiry_no ) {
 					$pollq_expiry = 0;
 				} else {
-					$pollq_expiry_day    = isset( $_POST['pollq_expiry_day'] ) ? (int) sanitize_key( $_POST['pollq_expiry_day'] ) : 0;
-					$pollq_expiry_month  = isset( $_POST['pollq_expiry_month'] ) ? (int) sanitize_key( $_POST['pollq_expiry_month'] ) : 0;
-					$pollq_expiry_year   = isset( $_POST['pollq_expiry_year'] ) ? (int) sanitize_key( $_POST['pollq_expiry_year'] ) : 0;
-					$pollq_expiry_hour   = isset( $_POST['pollq_expiry_hour'] ) ? (int) sanitize_key( $_POST['pollq_expiry_hour'] ) : 0;
-					$pollq_expiry_minute = isset( $_POST['pollq_expiry_minute'] ) ? (int) sanitize_key( $_POST['pollq_expiry_minute'] ) : 0;
-					$pollq_expiry_second = isset( $_POST['pollq_expiry_second'] ) ? (int) sanitize_key( $_POST['pollq_expiry_second'] ) : 0;
+					$pollq_expiry_day    = isset( $_POST['pollq_expiry_day'] ) ? (int) $_POST['pollq_expiry_day'] : 0;
+					$pollq_expiry_month  = isset( $_POST['pollq_expiry_month'] ) ? (int) $_POST['pollq_expiry_month'] : 0;
+					$pollq_expiry_year   = isset( $_POST['pollq_expiry_year'] ) ? (int) $_POST['pollq_expiry_year'] : 0;
+					$pollq_expiry_hour   = isset( $_POST['pollq_expiry_hour'] ) ? (int) $_POST['pollq_expiry_hour'] : 0;
+					$pollq_expiry_minute = isset( $_POST['pollq_expiry_minute'] ) ? (int) $_POST['pollq_expiry_minute'] : 0;
+					$pollq_expiry_second = isset( $_POST['pollq_expiry_second'] ) ? (int) $_POST['pollq_expiry_second'] : 0;
 					$pollq_expiry        = gmmktime( $pollq_expiry_hour, $pollq_expiry_minute, $pollq_expiry_second, $pollq_expiry_month, $pollq_expiry_day, $pollq_expiry_year );
 					if ( $pollq_expiry <= current_time( 'timestamp' ) ) {
 						$pollq_active = 0;
 					}
 				}
 				// Mutilple Poll.
-				$pollq_multiple_yes = isset( $_POST['pollq_multiple_yes'] ) ? (int) sanitize_key( $_POST['pollq_multiple_yes'] ) : 0;
+				$pollq_multiple_yes = isset( $_POST['pollq_multiple_yes'] ) ? (int) $_POST['pollq_multiple_yes'] : 0;
 				$pollq_multiple     = 0;
 				if ( 1 === $pollq_multiple_yes ) {
-					$pollq_multiple = isset( $_POST['pollq_multiple'] ) ? (int) sanitize_key( $_POST['pollq_multiple'] ) : 0;
+					$pollq_multiple = isset( $_POST['pollq_multiple'] ) ? (int) $_POST['pollq_multiple'] : 0;
 				} else {
 					$pollq_multiple = 0;
 				}
