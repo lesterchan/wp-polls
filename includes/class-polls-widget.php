@@ -8,13 +8,13 @@
 defined( 'ABSPATH' ) || exit;
 
 class Polls_Widget extends WP_Widget {
-	// Constructor
+	// Constructor.
 	public function __construct() {
 		$widget_ops = array( 'description' => __( 'WP-Polls polls', 'wp-polls' ) );
 		parent::__construct( 'polls-widget', __( 'Polls', 'wp-polls' ), $widget_ops );
 	}
 
-	// Display Widget
+	// Display Widget.
 	public function widget( $args, $instance ) {
 		$title               = apply_filters( 'widget_title', esc_attr( $instance['title'] ) );
 		$poll_id             = (int) $instance['poll_id'];
@@ -30,7 +30,7 @@ class Polls_Widget extends WP_Widget {
 		echo $args['after_widget'];
 	}
 
-	// When Widget Control Form Is Posted
+	// When Widget Control Form Is Posted.
 	public function update( $new_instance, $old_instance ) {
 		if ( ! isset( $new_instance['submit'] ) ) {
 			return false;
@@ -42,7 +42,7 @@ class Polls_Widget extends WP_Widget {
 		return $instance;
 	}
 
-	// DIsplay Widget Control Form
+	// DIsplay Widget Control Form.
 	public function form( $instance ) {
 		global $wpdb;
 		$instance            = wp_parse_args(

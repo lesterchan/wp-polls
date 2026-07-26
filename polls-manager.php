@@ -1,34 +1,34 @@
 <?php
-// Check Whether User Can Manage Polls
+// Check Whether User Can Manage Polls.
 if ( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
 }
 
-// Variables Variables Variables
+// Variables Variables Variables.
 $base_name = plugin_basename( 'wp-polls/polls-manager.php' );
 $base_page = 'admin.php?page=' . $base_name;
 $mode      = ( isset( $_GET['mode'] ) ? sanitize_key( trim( $_GET['mode'] ) ) : '' );
 $poll_id   = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 $poll_aid  = ( isset( $_GET['aid'] ) ? (int) sanitize_key( $_GET['aid'] ) : 0 );
 
-// Form Processing
+// Form Processing.
 if ( ! empty( $_POST['do'] ) ) {
-	// Decide What To Do
+	// Decide What To Do.
 	switch ( $_POST['do'] ) {
-		// Edit Poll
+		// Edit Poll.
 		case __( 'Edit Poll', 'wp-polls' ):
 			check_admin_referer( 'wp-polls_edit-poll' );
-			// Poll ID
+			// Poll ID.
 			$pollq_id = (int) sanitize_key( $_POST['pollq_id'] );
-			// Poll Total Votes
+			// Poll Total Votes.
 			$pollq_totalvotes = (int) sanitize_key( $_POST['pollq_totalvotes'] );
-			// Poll Total Voters
+			// Poll Total Voters.
 			$pollq_totalvoters = (int) sanitize_key( $_POST['pollq_totalvoters'] );
-			// Poll Question
+			// Poll Question.
 			$pollq_question = esc_sql( wp_kses_post( trim( $_POST['pollq_question'] ) ) );
-			// Poll Active
+			// Poll Active.
 			$pollq_active = (int) sanitize_key( $_POST['pollq_active'] );
-			// Poll Start Date
+			// Poll Start Date.
 			$pollq_timestamp    = isset( $_POST['poll_timestamp_old'] ) ? $_POST['poll_timestamp_old'] : current_time( 'timestamp' );
 			$edit_polltimestamp = isset( $_POST['edit_polltimestamp'] ) && (int) sanitize_key( $_POST['edit_polltimestamp'] ) === 1 ? 1 : 0;
 			if ( $edit_polltimestamp === 1 ) {
@@ -43,7 +43,7 @@ if ( ! empty( $_POST['do'] ) ) {
 					$pollq_active = -1;
 				}
 			}
-			// Poll End Date
+			// Poll End Date.
 			$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
 			if ( $pollq_expiry_no === 1 ) {
 				$pollq_expiry = 0;
@@ -64,7 +64,7 @@ if ( ! empty( $_POST['do'] ) ) {
 					}
 				}
 			}
-			// Mutilple Poll
+			// Mutilple Poll.
 			$pollq_multiple_yes = (int) sanitize_key( $_POST['pollq_multiple_yes'] );
 			$pollq_multiple     = 0;
 			if ( $pollq_multiple_yes == 1 ) {
@@ -72,7 +72,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			} else {
 				$pollq_multiple = 0;
 			}
-			// Update Poll's Question
+			// Update Poll's Question.
 			$text               = '';
 			$edit_poll_question = $wpdb->update(
 				$wpdb->pollsq,
@@ -104,7 +104,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			if ( ! $edit_poll_question ) {
 				$text = '<p style="color: blue">' . sprintf( __( 'No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p>';
 			}
-			// Update Polls' Answers
+			// Update Polls' Answers.
 			$polla_aids     = array();
 			$get_polla_aids = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY polla_aid ASC", $pollq_id ) );
 			if ( $get_polla_aids ) {
@@ -142,7 +142,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			} else {
 				$text .= '<p style="color: red">' . sprintf( __( 'Invalid Poll \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p>';
 			}
-			// Add Poll Answers (If Needed)
+			// Add Poll Answers (If Needed).
 			$polla_answers_new = isset( $_POST['polla_answers_new'] ) ? $_POST['polla_answers_new'] : array();
 			if ( ! empty( $polla_answers_new ) ) {
 				$i                       = 0;
@@ -176,7 +176,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			if ( empty( $text ) ) {
 				$text = '<p style="color: green">' . sprintf( __( 'Poll \'%s\' Edited Successfully.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p>';
 			}
-			// Update Lastest Poll ID To Poll Options
+			// Update Lastest Poll ID To Poll Options.
 			$latest_pollid     = Polls_Core::polls_latest_id();
 			$update_latestpoll = Polls_Options::set( 'latest_poll', $latest_pollid );
 			do_action( 'wp_polls_update_poll', $pollq_id );
@@ -185,13 +185,13 @@ if ( ! empty( $_POST['do'] ) ) {
 	}
 }
 
-// Determines Which Mode It Is
+// Determines Which Mode It Is.
 switch ( $mode ) {
-	// Poll Logging
+	// Poll Logging.
 	case 'logs':
 		require 'polls-logs.php';
 		break;
-	// Edit A Poll
+	// Edit A Poll.
 	case 'edit':
 		$last_col_align     = is_rtl() ? 'right' : 'left';
 		$poll_question      = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_question, pollq_timestamp, pollq_totalvotes, pollq_active, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
@@ -213,7 +213,7 @@ switch ( $mode ) {
 		?>
 
 		<!-- Edit Poll -->
-		<form method="post" action="<?php echo admin_url( 'admin.php?page=' . plugin_basename( __FILE__ ) . '&amp;mode=edit&amp;id=' . $poll_id ); ?>">
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . plugin_basename( __FILE__ ) . '&amp;mode=edit&amp;id=' . $poll_id ) ); ?>">
 		<?php wp_nonce_field( 'wp-polls_edit-poll' ); ?>
 		<input type="hidden" name="pollq_id" value="<?php echo esc_attr( $poll_id ); ?>" />
 		<input type="hidden" name="pollq_active" value="<?php echo esc_attr( $poll_active ); ?>" />
@@ -251,11 +251,11 @@ switch ( $mode ) {
 							$polla_votes                  = (int) $poll_answer->polla_votes;
 							$pollip_answers[ $polla_aid ] = $polla_answers;
 							echo "<tr id=\"poll-answer-$polla_aid\">\n";
-							echo '<th width="20%" scope="row" valign="top">' . sprintf( __( 'Answer %s', 'wp-polls' ), number_format_i18n( $i ) ) . '</th>' . "\n";
+							echo '<th width="20%" scope="row" valign="top">' . sprintf( __( 'Answer %s', 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . '</th>' . "\n";
 							echo "<td width=\"60%\"><input type=\"text\" size=\"50\" maxlength=\"200\" name=\"polla_aid-$polla_aid\" value=\"" . esc_attr( $polla_answers ) . '" />&nbsp;&nbsp;&nbsp;';
 							$delete_answer_confirm = sprintf( __( 'You are about to delete this poll\'s answer \'%s\'.', 'wp-polls' ), $polla_answers );
 							echo '<input type="button" value="' . esc_attr__( 'Delete', 'wp-polls' ) . "\" class=\"button\" data-poll-action=\"delete-answer\" data-poll-id=\"$poll_id\" data-poll-aid=\"$polla_aid\" data-poll-votes=\"$polla_votes\" data-poll-confirm=\"" . esc_attr( $delete_answer_confirm ) . '" data-poll-nonce="' . esc_attr( wp_create_nonce( 'wp-polls_delete-poll-answer' ) ) . "\" /></td>\n";
-							echo '<td width="20%" align="' . $last_col_align . '">' . number_format_i18n( $polla_votes ) . " <input type=\"text\" size=\"4\" id=\"polla_votes-$polla_aid\" name=\"polla_votes-$polla_aid\" value=\"$polla_votes\" data-poll-action=\"total-votes\" /></td>\n</tr>\n";
+							echo '<td width="20%" align="' . $last_col_align . '">' . esc_html( number_format_i18n( $polla_votes ) ) . " <input type=\"text\" size=\"4\" id=\"polla_votes-$polla_aid\" name=\"polla_votes-$polla_aid\" value=\"$polla_votes\" data-poll-action=\"total-votes\" /></td>\n</tr>\n";
 							$poll_actual_totalvotes += $polla_votes;
 							++$i;
 						}
@@ -266,12 +266,12 @@ switch ( $mode ) {
 					<tr>
 						<td width="20%">&nbsp;</td>
 						<td width="60%"><input type="button" value="<?php esc_attr_e( 'Add Answer', 'wp-polls' ); ?>" data-poll-action="add-answer-edit" class="button" /></td>
-						<td width="20%" align="<?php echo $last_col_align; ?>"><strong><?php esc_html_e( 'Total Votes:', 'wp-polls' ); ?></strong> <strong id="poll_total_votes"><?php echo number_format_i18n( $poll_actual_totalvotes ); ?></strong> <input type="text" size="4" readonly="readonly" id="pollq_totalvotes" name="pollq_totalvotes" value="<?php echo esc_attr( $poll_actual_totalvotes ); ?>" data-poll-action="total-votes" /></td>
+						<td width="20%" align="<?php echo $last_col_align; ?>"><strong><?php esc_html_e( 'Total Votes:', 'wp-polls' ); ?></strong> <strong id="poll_total_votes"><?php echo esc_html( number_format_i18n( $poll_actual_totalvotes ) ); ?></strong> <input type="text" size="4" readonly="readonly" id="pollq_totalvotes" name="pollq_totalvotes" value="<?php echo esc_attr( $poll_actual_totalvotes ); ?>" data-poll-action="total-votes" /></td>
 					</tr>
 					<tr>
 						<td width="20%">&nbsp;</td>
 						<td width="60%">&nbsp;</td>
-						<td width="20%" align="<?php echo $last_col_align; ?>"><strong><?php esc_html_e( 'Total Voters:', 'wp-polls' ); ?> <?php echo number_format_i18n( $poll_totalvoters ); ?></strong> <input type="text" size="4" name="pollq_totalvoters" value="<?php echo $poll_totalvoters; ?>" /></td>
+						<td width="20%" align="<?php echo $last_col_align; ?>"><strong><?php esc_html_e( 'Total Voters:', 'wp-polls' ); ?> <?php echo esc_html( number_format_i18n( $poll_totalvoters ) ); ?></strong> <input type="text" size="4" name="pollq_totalvoters" value="<?php echo $poll_totalvoters; ?>" /></td>
 					</tr>
 				</tbody>
 			</table>
@@ -304,9 +304,9 @@ switch ( $mode ) {
 							<?php
 							for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
 								if ( $poll_multiple > 0 && $poll_multiple == $i ) {
-									echo "<option value=\"$i\" selected=\"selected\">" . number_format_i18n( $i ) . "</option>\n";
+									echo "<option value=\"$i\" selected=\"selected\">" . esc_html( number_format_i18n( $i ) ) . "</option>\n";
 								} else {
-									echo "<option value=\"$i\">" . number_format_i18n( $i ) . "</option>\n";
+									echo "<option value=\"$i\">" . esc_html( number_format_i18n( $i ) ) . "</option>\n";
 								}
 							}
 							?>
@@ -372,7 +372,7 @@ switch ( $mode ) {
 		</form>
 		<?php
 		break;
-	// Main Page
+	// Main Page.
 	default:
 		$polls        = $wpdb->get_results( "SELECT * FROM $wpdb->pollsq  ORDER BY pollq_timestamp DESC" );
 		$total_ans    = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->pollsa" );
@@ -433,7 +433,7 @@ switch ( $mode ) {
 								}
 							}
 							echo "<tr id=\"poll-$poll_id\" $style>\n";
-							echo '<td><strong>' . number_format_i18n( $poll_id ) . '</strong></td>' . "\n";
+							echo '<td><strong>' . esc_html( number_format_i18n( $poll_id ) ) . '</strong></td>' . "\n";
 							echo '<td>';
 							if ( $current_poll > 0 ) {
 								if ( $current_poll === $poll_id ) {
@@ -445,7 +445,7 @@ switch ( $mode ) {
 								}
 							}
 							echo wp_kses_post( $poll_question ) . "</td>\n";
-							echo '<td>' . number_format_i18n( $poll_totalvoters ) . "</td>\n";
+							echo '<td>' . esc_html( number_format_i18n( $poll_totalvoters ) ) . "</td>\n";
 							echo "<td>$poll_date</td>\n";
 							echo "<td>$poll_expiry_text</td>\n";
 							echo '<td>';
@@ -483,19 +483,19 @@ switch ( $mode ) {
 			<table class="widefat">
 			<tr>
 				<th><?php esc_html_e( 'Total Polls:', 'wp-polls' ); ?></th>
-				<td><?php echo number_format_i18n( $i ); ?></td>
+				<td><?php echo esc_html( number_format_i18n( $i ) ); ?></td>
 			</tr>
 			<tr class="alternate">
 				<th><?php esc_html_e( 'Total Polls\' Answers:', 'wp-polls' ); ?></th>
-				<td><?php echo number_format_i18n( $total_ans ); ?></td>
+				<td><?php echo esc_html( number_format_i18n( $total_ans ) ); ?></td>
 			</tr>
 			<tr>
 				<th><?php esc_html_e( 'Total Votes Cast:', 'wp-polls' ); ?></th>
-				<td><?php echo number_format_i18n( $total_votes ); ?></td>
+				<td><?php echo esc_html( number_format_i18n( $total_votes ) ); ?></td>
 			</tr>
 			<tr class="alternate">
 				<th><?php esc_html_e( 'Total Voters:', 'wp-polls' ); ?></th>
-				<td><?php echo number_format_i18n( $total_voters ); ?></td>
+				<td><?php echo esc_html( number_format_i18n( $total_voters ) ); ?></td>
 			</tr>
 			</table>
 		</div>

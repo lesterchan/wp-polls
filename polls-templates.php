@@ -1,10 +1,10 @@
 <?php
-// Check Whether User Can Manage Polls
+// Check Whether User Can Manage Polls.
 if ( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
 }
 
-// Variables Variables Variables
+// Variables Variables Variables.
 $base_name = plugin_basename( 'wp-polls/polls-templates.php' );
 $base_page = 'admin.php?page=' . $base_name;
 $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );

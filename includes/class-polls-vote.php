@@ -22,50 +22,54 @@ class Polls_Vote {
 		add_action( 'wp_ajax_nopriv_polls', array( __CLASS__, 'vote_poll' ) );
 	}
 
-	// Function: Check Who Is Allow To Vote
+	/**
+	 * Check Who Is Allow To Vote.
+	 *
+	 * @return mixed
+	 */
 	public static function check_allowtovote() {
 		global $user_ID;
 		$user_ID       = (int) $user_ID;
 		$allow_to_vote = (int) Polls_Options::get( 'allow_to_vote' );
 		switch ( $allow_to_vote ) {
-			// Guests Only
+			// Guests Only.
 			case 0:
 				if ( $user_ID > 0 ) {
 					return false;
 				}
 				return true;
 				break;
-			// Registered Users Only
+			// Registered Users Only.
 			case 1:
 				if ( $user_ID === 0 ) {
 					return false;
 				}
 				return true;
 				break;
-			// Registered Users And Guests
+			// Registered Users And Guests.
 			case 2:
 			default:
 				return true;
 		}
 	}
 
-	// Funcrion: Check Voted By Cookie Or IP
+	// Funcrion: Check Voted By Cookie Or IP.
 	public static function check_voted( $poll_id ) {
 		$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
 		switch ( $poll_logging_method ) {
-			// Do Not Log
+			// Do Not Log.
 			case 0:
 				return 0;
 				break;
-			// Logged By Cookie
+			// Logged By Cookie.
 			case 1:
 				return self::check_voted_cookie( $poll_id );
 				break;
-			// Logged By IP
+			// Logged By IP.
 			case 2:
 				return self::check_voted_ip( $poll_id );
 				break;
-			// Logged By Cookie And IP
+			// Logged By Cookie And IP.
 			case 3:
 				$check_voted_cookie = self::check_voted_cookie( $poll_id );
 				if ( ! empty( $check_voted_cookie ) ) {
@@ -73,14 +77,20 @@ class Polls_Vote {
 				}
 				return self::check_voted_ip( $poll_id );
 				break;
-			// Logged By Username
+			// Logged By Username.
 			case 4:
 				return self::check_voted_username( $poll_id );
 				break;
 		}
 	}
 
-	// Function: Check Voted By Cookie
+	/**
+	 * Check Voted By Cookie.
+	 *
+	 * @param mixed $poll_id Value.
+	 *
+	 * @return mixed
+	 */
 	public static function check_voted_cookie( $poll_id ) {
 		$get_voted_aids = 0;
 		if ( ! empty( $_COOKIE[ 'voted_' . $poll_id ] ) ) {
@@ -90,7 +100,13 @@ class Polls_Vote {
 		return $get_voted_aids;
 	}
 
-	// Function: Check Voted By IP
+	/**
+	 * Check Voted By IP.
+	 *
+	 * @param mixed $poll_id Value.
+	 *
+	 * @return mixed
+	 */
 	public static function check_voted_ip( $poll_id ) {
 		global $wpdb;
 		$log_expiry     = (int) Polls_Options::get( 'cookie_expiry' );
@@ -98,7 +114,7 @@ class Polls_Vote {
 		if ( $log_expiry > 0 ) {
 			$log_expiry_sql = ' AND (' . current_time( 'timestamp' ) . '-(pollip_timestamp+0)) < ' . $log_expiry;
 		}
-		// Check IP From IP Logging Database
+		// Check IP From IP Logging Database.
 		$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s", $poll_id, self::poll_get_ipaddress() ) . $log_expiry_sql );
 		if ( $get_voted_aids ) {
 			return $get_voted_aids;
@@ -107,10 +123,16 @@ class Polls_Vote {
 		return 0;
 	}
 
-	// Function: Check Voted By Username
+	/**
+	 * Check Voted By Username.
+	 *
+	 * @param mixed $poll_id Value.
+	 *
+	 * @return mixed
+	 */
 	public static function check_voted_username( $poll_id ) {
 		global $wpdb, $user_ID;
-		// Check IP If User Is Guest
+		// Check IP If User Is Guest.
 		if ( ! is_user_logged_in() ) {
 			return 1;
 		}
@@ -120,7 +142,7 @@ class Polls_Vote {
 		if ( $log_expiry > 0 ) {
 			$log_expiry_sql = ' AND (' . current_time( 'timestamp' ) . '-(pollip_timestamp+0)) < ' . $log_expiry;
 		}
-		// Check User ID From IP Logging Database
+		// Check User ID From IP Logging Database.
 		$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_userid = %d", $poll_id, $pollsip_userid ) . $log_expiry_sql );
 		if ( $get_voted_aids ) {
 			return $get_voted_aids;
@@ -129,7 +151,14 @@ class Polls_Vote {
 		}
 	}
 
-	// Function: Check Voted To Get Voted Answer
+	/**
+	 * Check Voted To Get Voted Answer.
+	 *
+	 * @param mixed $poll_id   Value.
+	 * @param mixed $polls_ips Value.
+	 *
+	 * @return mixed
+	 */
 	public static function check_voted_multiple( $poll_id, $polls_ips ) {
 		if ( ! empty( $_COOKIE[ "voted_$poll_id" ] ) ) {
 			return explode( ',', $_COOKIE[ "voted_$poll_id" ] );
@@ -140,7 +169,11 @@ class Polls_Vote {
 		}
 	}
 
-	// Function: Get IP Address
+	/**
+	 * Get IP Address.
+	 *
+	 * @return mixed
+	 */
 	public static function poll_get_raw_ipaddress() {
 		// REMOTE_ADDR is absent under WP-CLI and cron, where this is still reached
 		// through the poll display path. Reading it unguarded warns on PHP 8.
@@ -214,7 +247,7 @@ class Polls_Vote {
 
 		do_action( 'wp_polls_vote_poll' );
 
-		// Acquire lock
+		// Acquire lock.
 		$fp_lock = self::polls_acquire_lock( $poll_id );
 		if ( $fp_lock === false ) {
 			throw new InvalidArgumentException( sprintf( __( 'Unable to obtain lock for Poll ID #%s', 'wp-polls' ), $poll_id ) );
@@ -265,7 +298,7 @@ class Polls_Vote {
 		$pollip_timestamp    = current_time( 'timestamp' );
 		$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
 
-		// Only Create Cookie If User Choose Logging Method 1 Or 3
+		// Only Create Cookie If User Choose Logging Method 1 Or 3.
 		if ( $poll_logging_method === 1 || $poll_logging_method === 3 ) {
 			$cookie_expiry = (int) Polls_Options::get( 'cookie_expiry' );
 			if ( $cookie_expiry === 0 ) {
@@ -289,7 +322,7 @@ class Polls_Vote {
 		}
 
 		foreach ( $poll_aid_array as $polla_aid ) {
-			// Log Ratings In DB If User Choose Logging Method 2, 3 or 4
+			// Log Ratings In DB If User Choose Logging Method 2, 3 or 4.
 			if ( $poll_logging_method > 1 ) {
 				$wpdb->insert(
 					$wpdb->pollsip,
@@ -315,7 +348,7 @@ class Polls_Vote {
 			}
 		}
 
-		// Release lock
+		// Release lock.
 		self::polls_release_lock( $fp_lock, $poll_id );
 
 		do_action( 'wp_polls_vote_poll_success' );
@@ -323,34 +356,34 @@ class Polls_Vote {
 		return Polls_Display::display_pollresult( $poll_id, $poll_aid_array, false );
 	}
 
-	// Function: Vote Poll
+	// Function: Vote Poll.
 
 	public static function vote_poll() {
 		global $wpdb, $user_identity, $user_ID;
 
 		if ( isset( $_REQUEST['action'] ) && sanitize_key( $_REQUEST['action'] ) === 'polls' ) {
-			// Load Headers
+			// Load Headers.
 			Polls_Core::polls_textdomain();
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) . '' );
 
-			// Get Poll ID
+			// Get Poll ID.
 			$poll_id = ( isset( $_REQUEST['poll_id'] ) ? (int) sanitize_key( $_REQUEST['poll_id'] ) : 0 );
 
-			// Ensure Poll ID Is Valid
+			// Ensure Poll ID Is Valid.
 			if ( $poll_id === 0 ) {
 				esc_html_e( 'Invalid Poll ID', 'wp-polls' );
 				exit();
 			}
 
-			// Verify Referer
+			// Verify Referer.
 			if ( ! check_ajax_referer( 'poll_' . $poll_id . '-nonce', 'poll_' . $poll_id . '_nonce', false ) ) {
 				esc_html_e( 'Failed To Verify Referrer', 'wp-polls' );
 				exit();
 			}
 
-			// Which View
+			// Which View.
 			switch ( sanitize_key( $_REQUEST['view'] ) ) {
-				// Poll Vote
+				// Poll Vote.
 				case 'process':
 					try {
 						$poll_answer_ids = isset( $_POST[ "poll_$poll_id" ] ) ? $_POST[ "poll_$poll_id" ] : '';
@@ -360,11 +393,11 @@ class Polls_Vote {
 						echo $e->getMessage();
 					}
 					break;
-				// Poll Result
+				// Poll Result.
 				case 'result':
 					echo Polls_Display::display_pollresult( $poll_id, 0, false );
 					break;
-				// Poll Booth Aka Poll Voting Form
+				// Poll Booth Aka Poll Voting Form.
 				case 'booth':
 					echo Polls_Display::display_pollvote( $poll_id, false );
 					break;

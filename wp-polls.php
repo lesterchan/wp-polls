@@ -35,13 +35,13 @@
 */
 
 
-// Exit if accessed directly
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 
-// Version
+// Version.
 define( 'WP_POLLS_VERSION', '3.0.0' );
 define( 'WP_POLLS_MAIN_FILE', __FILE__ );
 

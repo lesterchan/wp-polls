@@ -41,7 +41,7 @@ class Polls_Install {
 		add_action( 'admin_notices', array( __CLASS__, 'onclick_notice' ) );
 	}
 
-	// Function: Activate Plugin
+	// Function: Activate Plugin.
 
 	public static function activation( $network_wide ) {
 		if ( is_multisite() && $network_wide ) {
@@ -108,7 +108,7 @@ class Polls_Install {
 				continue;
 			}
 
-			// onclick="poll_result(%POLL_ID%); return false;" => data-poll-id="%POLL_ID%" data-poll-action="result"
+			// onclick="poll_result(%POLL_ID%); return false;" => data-poll-id="%POLL_ID%" data-poll-action="result".
 			$migrated = preg_replace(
 				'/onclick\s*=\s*\\\\?(["\'])\s*poll_(vote|result|booth)\s*\(\s*%POLL_ID%\s*\)\s*;?\s*(?:return\s+false\s*;?\s*)?\\\\?\1/i',
 				'data-poll-id="%POLL_ID%" data-poll-action="$2"',
@@ -149,7 +149,11 @@ class Polls_Install {
 		echo '</p></div>';
 	}
 
-	// Function: Check Whether Any Poll Template Still Contains An Inline onclick Handler
+	/**
+	 * Check Whether Any Poll Template Still Contains An Inline onclick Handler.
+	 *
+	 * @return mixed
+	 */
 	public static function templates_have_onclick() {
 		foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
 			$template = Polls_Options::get( 'templates.' . $key );
@@ -173,7 +177,7 @@ class Polls_Install {
 			die( 'We have problem finding your \'/wp-admin/upgrade-functions.php\' and \'/wp-admin/includes/upgrade.php\'' );
 		}
 
-		// Create Poll Tables (3 Tables)
+		// Create Poll Tables (3 Tables).
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$create_table            = array();
@@ -226,11 +230,11 @@ class Polls_Install {
 			}
 			update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
 		}
-		// Check Whether It is Install Or Upgrade
+		// Check Whether It is Install Or Upgrade.
 		$first_poll = $wpdb->get_var( "SELECT pollq_id FROM $wpdb->pollsq LIMIT 1" );
-		// If Install, Insert 1st Poll Question With 5 Poll Answers
+		// If Install, Insert 1st Poll Question With 5 Poll Answers.
 		if ( empty( $first_poll ) ) {
-			// Insert Poll Question (1 Record)
+			// Insert Poll Question (1 Record).
 			$insert_pollq = $wpdb->insert(
 				$wpdb->pollsq,
 				array(
@@ -240,7 +244,7 @@ class Polls_Install {
 				array( '%s', '%s' )
 			);
 			if ( $insert_pollq ) {
-				// Insert Poll Answers  (5 Records)
+				// Insert Poll Answers  (5 Records).
 				$wpdb->insert(
 					$wpdb->pollsa,
 					array(
@@ -295,7 +299,7 @@ class Polls_Install {
 			$wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvoters = pollq_totalvotes" );
 		}
 
-		// Index
+		// Index.
 		$index    = $wpdb->get_results( "SHOW INDEX FROM $wpdb->pollsip;" );
 		$key_name = array();
 		if ( count( $index ) > 0 ) {
@@ -312,12 +316,12 @@ class Polls_Install {
 		if ( ! in_array( 'pollip_ip_qid_aid', $key_name, true ) ) {
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid_aid (pollip_ip, pollip_qid, pollip_aid);" );
 		}
-		// No longer needed index
+		// No longer needed index.
 		if ( in_array( 'pollip_ip_qid', $key_name, true ) ) {
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip DROP INDEX pollip_ip_qid;" );
 		}
 
-		// Change column datatype for wp_pollsip
+		// Change column datatype for wp_pollsip.
 		$col_pollip_qid = $wpdb->get_row( "DESCRIBE $wpdb->pollsip pollip_qid" );
 		if ( 'varchar(10)' === $col_pollip_qid->Type ) {
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_qid int(10) NOT NULL default '0';" );
@@ -326,7 +330,7 @@ class Polls_Install {
 			$wpdb->query( "ALTER TABLE $wpdb->pollsq MODIFY COLUMN pollq_expiry int(10) NOT NULL default '0';" );
 		}
 
-		// Set 'manage_polls' Capabilities To Administrator
+		// Set 'manage_polls' Capabilities To Administrator.
 		$role = get_role( 'administrator' );
 		if ( ! $role->has_cap( 'manage_polls' ) ) {
 			$role->add_cap( 'manage_polls' );

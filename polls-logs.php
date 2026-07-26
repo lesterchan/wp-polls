@@ -1,11 +1,11 @@
 <?php
-// Check Whether User Can Manage Polls
+// Check Whether User Can Manage Polls.
 if ( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
 }
 
 
-// Variables
+// Variables.
 $max_records                   = 2000;
 $pollip_answers                = array();
 $poll_question_data            = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_multiple, pollq_question, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
@@ -28,7 +28,7 @@ $exclude_guest      = 0;
 $users_voted_for = null;
 $what_user_voted = null;
 
-// Process Filters
+// Process Filters.
 if ( ! empty( $_POST['do'] ) ) {
 	check_admin_referer( 'wp-polls_logs' );
 	$registered_sql       = '';
@@ -119,10 +119,10 @@ if ( ! empty( $text ) ) {
 	<h2><?php esc_html_e( 'Poll\'s Logs', 'wp-polls' ); ?></h2>
 	<h3><?php echo $poll_question; ?></h3>
 	<p>
-		<?php printf( _n( 'There are a total of <strong>%s</strong> recorded vote for this poll.', 'There are a total of <strong>%s</strong> recorded votes for this poll.', $poll_totalrecorded, 'wp-polls' ), number_format_i18n( $poll_totalrecorded ) ); ?><br />
-		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by registered users', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by registered users', $poll_registered, 'wp-polls' ), number_format_i18n( $poll_registered ) ); ?><br />
-		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by comment authors', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by comment authors', $poll_comments, 'wp-polls' ), number_format_i18n( $poll_comments ) ); ?><br />
-		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests', $poll_guest, 'wp-polls' ), number_format_i18n( $poll_guest ) ); ?>
+		<?php printf( _n( 'There are a total of <strong>%s</strong> recorded vote for this poll.', 'There are a total of <strong>%s</strong> recorded votes for this poll.', $poll_totalrecorded, 'wp-polls' ), esc_html( number_format_i18n( $poll_totalrecorded ) ) ); ?><br />
+		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by registered users', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by registered users', $poll_registered, 'wp-polls' ), esc_html( number_format_i18n( $poll_registered ) ) ); ?><br />
+		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by comment authors', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by comment authors', $poll_comments, 'wp-polls' ), esc_html( number_format_i18n( $poll_comments ) ) ); ?><br />
+		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests', $poll_guest, 'wp-polls' ), esc_html( number_format_i18n( $poll_guest ) ) ); ?>
 	</p>
 </div>
 <?php if ( $poll_totalrecorded > 0 && apply_filters( 'wp_polls_log_show_log_filter', true ) ) { ?>
@@ -131,7 +131,7 @@ if ( ! empty( $text ) ) {
 	<table width="100%" cellspacing="0" cellpadding="0">
 		<tr>
 			<td width="50%">
-				<form method="post" action="<?php echo admin_url( 'admin.php?page=' . $base_name . '&amp;mode=logs&amp;id=' . $poll_id ); ?>">
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . $base_name . '&amp;mode=logs&amp;id=' . $poll_id ) ); ?>">
 				<?php wp_nonce_field( 'wp-polls_logs' ); ?>
 				<p style="display: none;"><input type="hidden" name="filter" value="1" /></p>
 				<table class="form-table">
@@ -172,7 +172,7 @@ if ( ! empty( $text ) ) {
 			</td>
 			<td width="50%">
 				<?php if ( $poll_multiple > 0 ) { ?>
-					<form method="post" action="<?php echo admin_url( 'admin.php?page=' . $base_name . '&amp;mode=logs&amp;id=' . $poll_id ); ?>">
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . $base_name . '&amp;mode=logs&amp;id=' . $poll_id ) ); ?>">
 					<?php wp_nonce_field( 'wp-polls_logs' ); ?>
 					<p style="display: none;"><input type="hidden" name="filter" value="2" /></p>
 					<table class="form-table">
@@ -193,9 +193,9 @@ if ( ! empty( $text ) ) {
 										if ( $i == 1 ) {
 											echo '<option value="1">' . __( '1 Answer', 'wp-polls' ) . '</option>';
 										} elseif ( $i == $num_choices ) {
-												echo '<option value="' . $i . '" selected="selected">' . sprintf( _n( '%s Answer', '%s Answers', $i, 'wp-polls' ), number_format_i18n( $i ) ) . '</option>';
+												echo '<option value="' . $i . '" selected="selected">' . sprintf( _n( '%s Answer', '%s Answers', $i, 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . '</option>';
 										} else {
-											echo '<option value="' . $i . '">' . sprintf( _n( '%s Answer', '%s Answers', $i, 'wp-polls' ), number_format_i18n( $i ) ) . '</option>';
+											echo '<option value="' . $i . '">' . sprintf( _n( '%s Answer', '%s Answers', $i, 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . '</option>';
 										}
 									}
 									?>
@@ -223,7 +223,7 @@ if ( ! empty( $text ) ) {
 		<tr>
 			<td>
 				<?php if ( $poll_voters ) { ?>
-				<form method="post" action="<?php echo admin_url( 'admin.php?page=' . $base_name . '&amp;mode=logs&amp;id=' . $poll_id ); ?>">
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . $base_name . '&amp;mode=logs&amp;id=' . $poll_id ) ); ?>">
 					<?php wp_nonce_field( 'wp-polls_logs' ); ?>
 				<p style="display: none;"><input type="hidden" name="filter" value="3" /></p>
 				<table class="form-table">
@@ -235,9 +235,9 @@ if ( ! empty( $text ) ) {
 								if ( $poll_voters ) {
 									foreach ( $poll_voters as $pollip_user ) {
 										if ( $pollip_user == $what_user_voted ) {
-											echo '<option value="' . removeslashes( esc_attr( $pollip_user ) ) . '" selected="selected">' . removeslashes( esc_attr( $pollip_user ) ) . '</option>';
+											echo '<option value="' . esc_attr( removeslashes( $pollip_user ) ) . '" selected="selected">' . esc_attr( removeslashes( $pollip_user ) ) . '</option>';
 										} else {
-											echo '<option value="' . removeslashes( esc_attr( $pollip_user ) ) . '">' . removeslashes( esc_attr( $pollip_user ) ) . '</option>';
+											echo '<option value="' . esc_attr( removeslashes( $pollip_user ) ) . '">' . esc_attr( removeslashes( $pollip_user ) ) . '</option>';
 										}
 									}
 								}
@@ -266,7 +266,7 @@ if ( ! empty( $text ) ) {
 		<?php
 		if ( $poll_ips ) {
 			if ( empty( $_POST['do'] ) ) {
-				echo '<p>' . sprintf( __( 'This default filter is limited to display only <strong>%s</strong> records.', 'wp-polls' ), number_format_i18n( $max_records ) ) . '</p>';
+				echo '<p>' . sprintf( __( 'This default filter is limited to display only <strong>%s</strong> records.', 'wp-polls' ), esc_html( number_format_i18n( $max_records ) ) ) . '</p>';
 			}
 			echo '<table class="widefat">' . "\n";
 			echo '<tr class="highlight"><td colspan="4">' . $poll_question . '</td></tr>';
@@ -348,7 +348,7 @@ if ( ! empty( $text ) ) {
 				}
 			}
 			echo "<tr class=\"highlight\">\n";
-			echo '<td colspan="4">' . sprintf( __( 'Total number of records that matches this filter: <strong>%s</strong>', 'wp-polls' ), number_format_i18n( $j ) ) . '</td>';
+			echo '<td colspan="4">' . sprintf( __( 'Total number of records that matches this filter: <strong>%s</strong>', 'wp-polls' ), esc_html( number_format_i18n( $j ) ) ) . '</td>';
 			echo "</tr>\n";
 			echo '</table>' . "\n";
 		}

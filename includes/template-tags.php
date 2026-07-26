@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Function: Get Poll Question Based On Poll ID
+// Function: Get Poll Question Based On Poll ID.
 if ( ! function_exists( 'get_poll_question' ) ) {
 	function get_poll_question( $poll_id ) {
 		global $wpdb;
@@ -23,7 +23,7 @@ if ( ! function_exists( 'get_poll_question' ) ) {
 	}
 }
 
-// Function: Get Poll Total Questions
+// Function: Get Poll Total Questions.
 if ( ! function_exists( 'get_pollquestions' ) ) {
 	function get_pollquestions( $display = true ) {
 		global $wpdb;
@@ -36,7 +36,7 @@ if ( ! function_exists( 'get_pollquestions' ) ) {
 	}
 }
 
-// Function: Get Poll Total Answers
+// Function: Get Poll Total Answers.
 if ( ! function_exists( 'get_pollanswers' ) ) {
 	function get_pollanswers( $display = true ) {
 		global $wpdb;
@@ -49,7 +49,7 @@ if ( ! function_exists( 'get_pollanswers' ) ) {
 	}
 }
 
-// Function: Get Poll Total Votes
+// Function: Get Poll Total Votes.
 if ( ! function_exists( 'get_pollvotes' ) ) {
 	function get_pollvotes( $display = true ) {
 		global $wpdb;
@@ -62,7 +62,7 @@ if ( ! function_exists( 'get_pollvotes' ) ) {
 	}
 }
 
-// Function: Get Poll Votes Based on Poll ID
+// Function: Get Poll Votes Based on Poll ID.
 if ( ! function_exists( 'get_pollvotes_by_id' ) ) {
 	function get_pollvotes_by_id( $poll_id, $display = true ) {
 		global $wpdb;
@@ -76,7 +76,7 @@ if ( ! function_exists( 'get_pollvotes_by_id' ) ) {
 	}
 }
 
-// Function: Get Poll Total Voters
+// Function: Get Poll Total Voters.
 if ( ! function_exists( 'get_pollvoters' ) ) {
 	function get_pollvoters( $display = true ) {
 		global $wpdb;
@@ -89,7 +89,7 @@ if ( ! function_exists( 'get_pollvoters' ) ) {
 	}
 }
 
-// Function: Get Poll Time Based on Poll ID and Date Format
+// Function: Get Poll Time Based on Poll ID and Date Format.
 if ( ! function_exists( 'get_polltime' ) ) {
 	function get_polltime( $poll_id, $date_format = 'd/m/Y', $display = true ) {
 		global $wpdb;

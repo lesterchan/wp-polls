@@ -1,25 +1,25 @@
 <?php
-// Check Whether User Can Manage Polls
+// Check Whether User Can Manage Polls.
 if ( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
 }
 
-// Poll Manager
+// Poll Manager.
 $base_name = plugin_basename( 'wp-polls/polls-manager.php' );
 $base_page = 'admin.php?page=' . $base_name;
 
-// Form Processing
+// Form Processing.
 if ( ! empty( $_POST['do'] ) ) {
-	// Decide What To Do
+	// Decide What To Do.
 	switch ( $_POST['do'] ) {
-		// Add Poll
+		// Add Poll.
 		case __( 'Add Poll', 'wp-polls' ):
 			check_admin_referer( 'wp-polls_add-poll' );
 			$text = '';
-			// Poll Question
+			// Poll Question.
 			$pollq_question = isset( $_POST['pollq_question'] ) ? wp_kses_post( trim( $_POST['pollq_question'] ) ) : '';
 			if ( ! empty( $pollq_question ) ) {
-				// Poll Start Date
+				// Poll Start Date.
 				$timestamp_sql          = '';
 				$pollq_timestamp_day    = isset( $_POST['pollq_timestamp_day'] ) ? (int) sanitize_key( $_POST['pollq_timestamp_day'] ) : 0;
 				$pollq_timestamp_month  = isset( $_POST['pollq_timestamp_month'] ) ? (int) sanitize_key( $_POST['pollq_timestamp_month'] ) : 0;
@@ -33,7 +33,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				} else {
 					$pollq_active = 1;
 				}
-				// Poll End Date
+				// Poll End Date.
 				$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
 				if ( $pollq_expiry_no === 1 ) {
 					$pollq_expiry = 0;
@@ -49,7 +49,7 @@ if ( ! empty( $_POST['do'] ) ) {
 						$pollq_active = 0;
 					}
 				}
-				// Mutilple Poll
+				// Mutilple Poll.
 				$pollq_multiple_yes = isset( $_POST['pollq_multiple_yes'] ) ? (int) sanitize_key( $_POST['pollq_multiple_yes'] ) : 0;
 				$pollq_multiple     = 0;
 				if ( $pollq_multiple_yes === 1 ) {
@@ -57,7 +57,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				} else {
 					$pollq_multiple = 0;
 				}
-				// Insert Poll
+				// Insert Poll.
 				$add_poll_question = $wpdb->insert(
 					$wpdb->pollsq,
 					array(
@@ -82,7 +82,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				if ( ! $add_poll_question ) {
 					$text .= '<p style="color: red;">' . sprintf( __( 'Error In Adding Poll \'%s\'.', 'wp-polls' ), $pollq_question ) . '</p>';
 				}
-				// Add Poll Answers
+				// Add Poll Answers.
 				$polla_answers = isset( $_POST['polla_answers'] ) ? $_POST['polla_answers'] : array();
 				$polla_qid     = (int) $wpdb->insert_id;
 				foreach ( $polla_answers as $polla_answer ) {
@@ -108,10 +108,10 @@ if ( ! empty( $_POST['do'] ) ) {
 						$text .= '<p style="color: red;">' . __( 'Poll\'s Answer is empty.', 'wp-polls' ) . '</p>';
 					}
 				}
-				// Update Lastest Poll ID To Poll Options
+				// Update Lastest Poll ID To Poll Options.
 				$latest_pollid     = Polls_Core::polls_latest_id();
 				$update_latestpoll = Polls_Options::set( 'latest_poll', $latest_pollid );
-				// If poll starts in the future use the correct poll ID
+				// If poll starts in the future use the correct poll ID.
 				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 				if ( empty( $text ) ) {
 					$text = '<p style="color: green;">' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
@@ -127,7 +127,7 @@ if ( ! empty( $_POST['do'] ) ) {
 	}
 }
 
-// Add Poll Form
+// Add Poll Form.
 $poll_noquestion = 2;
 $count           = 0;
 ?>
@@ -135,7 +135,7 @@ $count           = 0;
 if ( ! empty( $text ) ) {
 	echo '<!-- Last Action --><div id="message" class="updated fade">' . removeslashes( $text ) . '</div>'; }
 ?>
-<form method="post" action="<?php echo admin_url( 'admin.php?page=' . plugin_basename( __FILE__ ) ); ?>">
+<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . plugin_basename( __FILE__ ) ) ); ?>">
 <?php wp_nonce_field( 'wp-polls_add-poll' ); ?>
 <div class="wrap">
 	<h2><?php esc_html_e( 'Add Poll', 'wp-polls' ); ?></h2>
@@ -160,7 +160,7 @@ if ( ! empty( $text ) ) {
 		<?php
 		for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
 			echo "<tr id=\"poll-answer-$i\">\n";
-			echo '<th width="20%" scope="row" valign="top">' . sprintf( __( 'Answer %s', 'wp-polls' ), number_format_i18n( $i ) ) . "</th>\n";
+			echo '<th width="20%" scope="row" valign="top">' . sprintf( __( 'Answer %s', 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . "</th>\n";
 			echo '<td width="80%"><input type="text" size="50" maxlength="200" name="polla_answers[]" />&nbsp;&nbsp;&nbsp;<input type="button" value="' . esc_attr__( 'Remove', 'wp-polls' ) . '" data-poll-action="remove-answer" data-poll-answer="' . $i . "\" class=\"button\" /></td>\n";
 			echo "</tr>\n";
 			++$count;
@@ -186,7 +186,7 @@ if ( ! empty( $text ) ) {
 				<select name="pollq_multiple" id="pollq_multiple" size="1" disabled="disabled">
 					<?php
 					for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
-						echo "<option value=\"$i\">" . number_format_i18n( $i ) . "</option>\n";
+						echo "<option value=\"$i\">" . esc_html( number_format_i18n( $i ) ) . "</option>\n";
 					}
 					?>
 				</select>

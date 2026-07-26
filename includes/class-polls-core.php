@@ -26,13 +26,13 @@ class Polls_Core {
 		add_shortcode( 'poll', array( __CLASS__, 'poll_shortcode' ) );
 	}
 
-	// Create Text Domain For Translations
+	// Create Text Domain For Translations.
 
 	public static function polls_textdomain() {
 		load_plugin_textdomain( 'wp-polls' );
 	}
 
-	// Function: Enqueue Polls JavaScripts/CSS
+	// Function: Enqueue Polls JavaScripts/CSS.
 
 	public static function poll_scripts() {
 		if ( @file_exists( get_stylesheet_directory() . '/polls-css.css' ) ) {
@@ -89,13 +89,13 @@ class Polls_Core {
 		);
 	}
 
-	// Function: Short Code For Inserting Polls Archive Into Page
+	// Function: Short Code For Inserting Polls Archive Into Page.
 
 	public static function poll_page_shortcode( $atts ) {
 		return Polls_Display::polls_archive();
 	}
 
-	// Function: Short Code For Inserting Polls Into Posts
+	// Function: Short Code For Inserting Polls Into Posts.
 
 	public static function poll_shortcode( $atts ) {
 		$attributes = shortcode_atts(
@@ -108,7 +108,7 @@ class Polls_Core {
 		if ( ! is_feed() ) {
 			$id = (int) $attributes['id'];
 
-			// To maintain backward compatibility with [poll=1]. Props @tz-ua
+			// To maintain backward compatibility with [poll=1]. Props @tz-ua.
 			if ( ! $id && isset( $atts[0] ) ) {
 				$id = (int) trim( $atts[0], '="\'' );
 			}
@@ -123,7 +123,11 @@ class Polls_Core {
 		}
 	}
 
-	// Function: Place Cron
+	/**
+	 * Place Cron.
+	 *
+	 * @return mixed
+	 */
 	public static function cron_polls_place() {
 		wp_clear_scheduled_hook( 'polls_cron' );
 		if ( ! wp_next_scheduled( 'polls_cron' ) ) {
@@ -131,22 +135,26 @@ class Polls_Core {
 		}
 	}
 
-	// Funcion: Check All Polls Status To Check If It Expires
+	// Funcion: Check All Polls Status To Check If It Expires.
 
 	public static function cron_polls_status() {
 		global $wpdb;
-		// Close Poll
+		// Close Poll.
 		$close_polls = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_active = 0 WHERE pollq_expiry < '" . current_time( 'timestamp' ) . "' AND pollq_expiry != 0 AND pollq_active != 0" );
-		// Open Future Polls
+		// Open Future Polls.
 		$active_polls = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_active = 1 WHERE pollq_timestamp <= '" . current_time( 'timestamp' ) . "' AND pollq_active = -1" );
-		// Update Latest Poll If Future Poll Is Opened
+		// Update Latest Poll If Future Poll Is Opened.
 		if ( $active_polls ) {
 			$update_latestpoll = Polls_Options::set( 'latest_poll', self::polls_latest_id() );
 		}
 		return;
 	}
 
-	// Funcion: Get Latest Poll ID
+	/**
+	 * Get Latest Poll ID.
+	 *
+	 * @return mixed
+	 */
 	public static function polls_latest_id() {
 		global $wpdb;
 		$poll_id = $wpdb->get_var( "SELECT pollq_id FROM $wpdb->pollsq WHERE pollq_active = 1 ORDER BY pollq_timestamp DESC LIMIT 1" );
@@ -154,14 +162,20 @@ class Polls_Core {
 	}
 
 	// Class: WP-Polls Widget
-	// Function: Init WP-Polls Widget
+	// Function: Init WP-Polls Widget.
 
 	public static function widget_polls_init() {
 		self::polls_textdomain();
 		register_widget( 'Polls_Widget' );
 	}
 
-	// Function: Sanitize A 3 Or 6 Digit Hex Colour Stored Without Its Leading '#'
+	/**
+	 * Sanitize A 3 Or 6 Digit Hex Colour Stored Without Its Leading '#'.
+	 *
+	 * @param mixed $color Value.
+	 *
+	 * @return mixed
+	 */
 	public static function _polls_sanitize_hex_color( $color ) {
 		$color = substr( trim( (string) $color ), 0, 6 );
 
