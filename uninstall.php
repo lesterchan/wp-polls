@@ -6,40 +6,19 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit();
 }
 
-$option_names = array(
-	'poll_template_voteheader',
-	'poll_template_votebody',
-	'poll_template_votefooter',
-	'poll_template_resultheader',
-	'poll_template_resultbody',
-	'poll_template_resultbody2',
-	'poll_template_resultfooter',
-	'poll_template_resultfooter2',
-	'poll_template_disable',
-	'poll_template_error',
-	'poll_currentpoll',
-	'poll_latestpoll',
-	'poll_archive_perpage',
-	'poll_ans_sortby',
-	'poll_ans_sortorder',
-	'poll_ans_result_sortby',
-	'poll_ans_result_sortorder',
-	'poll_logging_method',
-	'poll_allowtovote',
-	'poll_archive_show',
-	'poll_archive_url',
-	'poll_bar',
-	'poll_close',
-	'poll_ajax_style',
-	'poll_template_pollarchivelink',
-	'widget_polls',
-	'poll_archive_displaypoll',
-	'poll_template_pollarchiveheader',
-	'poll_template_pollarchivefooter',
-	'poll_cookielog_expiry',
-	'poll_options',
-	'widget_polls-widget',
-	'poll_version',
+require_once __DIR__ . '/includes/class-polls-templates.php';
+require_once __DIR__ . '/includes/class-polls-options.php';
+
+// From 4.0.0 the settings are a single row. The pre-4.0.0 names are still
+// listed because an install that was never loaded after upgrading - deleted
+// straight from the plugins screen - still has them, and they would otherwise
+// be orphaned forever. The list is taken from Polls_Options so it cannot
+// drift from the migration's idea of which rows belong to the plugin.
+$option_names = array_merge(
+	array( Polls_Options::OPTION, 'poll_version' ),
+	array_keys( Polls_Options::legacy_map() ),
+	Polls_Options::legacy_extra_rows(),
+	array( 'widget_polls', 'widget_polls-widget' )
 );
 
 

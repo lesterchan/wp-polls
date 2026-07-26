@@ -110,7 +110,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				}
 				// Update Lastest Poll ID To Poll Options
 				$latest_pollid     = polls_latest_id();
-				$update_latestpoll = update_option( 'poll_latestpoll', $latest_pollid );
+				$update_latestpoll = Polls_Options::set( 'latest_poll', $latest_pollid );
 				// If poll starts in the future use the correct poll ID
 				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 				if ( empty( $text ) ) {

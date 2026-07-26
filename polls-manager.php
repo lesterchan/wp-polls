@@ -178,7 +178,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			}
 			// Update Lastest Poll ID To Poll Options
 			$latest_pollid     = polls_latest_id();
-			$update_latestpoll = update_option( 'poll_latestpoll', $latest_pollid );
+			$update_latestpoll = Polls_Options::set( 'latest_poll', $latest_pollid );
 			do_action( 'wp_polls_update_poll', $pollq_id );
 			cron_polls_place();
 			break;
@@ -403,8 +403,8 @@ switch ( $mode ) {
 					<?php
 					if ( $polls ) {
 						$i            = 0;
-						$current_poll = (int) get_option( 'poll_currentpoll' );
-						$latest_poll  = (int) get_option( 'poll_latestpoll' );
+						$current_poll = (int) Polls_Options::get( 'current_poll' );
+						$latest_poll  = (int) Polls_Options::get( 'latest_poll' );
 						foreach ( $polls as $poll ) {
 							$poll_id          = (int) $poll->pollq_id;
 							$poll_question    = removeslashes( $poll->pollq_question );

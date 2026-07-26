@@ -38,6 +38,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Version
 define( 'WP_POLLS_VERSION', '3.0.0' );
 
+// Classes. Required at file load because the activation hook and the option
+// accessor are both reached before any action fires.
+require_once __DIR__ . '/includes/class-polls-templates.php';
+require_once __DIR__ . '/includes/class-polls-options.php';
+
 
 // Create Text Domain For Translations
 add_action( 'plugins_loaded', 'polls_textdomain' );
@@ -84,13 +89,13 @@ function get_poll( $temp_poll_id = 0, $display = true ) {
 	}
 	$temp_poll_id = (int) $temp_poll_id;
 	// Check Whether Poll Is Disabled
-	if ( (int) get_option( 'poll_currentpoll' ) === -1 ) {
+	if ( (int) Polls_Options::get( 'current_poll' ) === -1 ) {
 		if ( $display ) {
-			echo removeslashes( get_option( 'poll_template_disable' ) );
+			echo removeslashes( Polls_Options::get( 'templates.disable' ) );
 			return '';
 		}
 
-		return removeslashes( get_option( 'poll_template_disable' ) );
+		return removeslashes( Polls_Options::get( 'templates.disable' ) );
 		// Poll Is Enabled
 	} else {
 		do_action( 'wp_polls_get_poll' );
@@ -103,7 +108,7 @@ function get_poll( $temp_poll_id = 0, $display = true ) {
 			// Latest Poll
 			case 0:
 				// Random Poll
-				if ( (int) get_option( 'poll_currentpoll' ) === -2 ) {
+				if ( (int) Polls_Options::get( 'current_poll' ) === -2 ) {
 					$random_poll_id = $wpdb->get_var( "SELECT pollq_id FROM $wpdb->pollsq WHERE pollq_active = 1 ORDER BY RAND() LIMIT 1" );
 					$poll_id        = (int) $random_poll_id;
 					if ( $pollresult_id > 0 ) {
@@ -112,12 +117,12 @@ function get_poll( $temp_poll_id = 0, $display = true ) {
 						$poll_id = (int) $_POST['poll_id'];
 					}
 					// Current Poll ID Is Not Specified
-				} elseif ( (int) get_option( 'poll_currentpoll' ) === 0 ) {
+				} elseif ( (int) Polls_Options::get( 'current_poll' ) === 0 ) {
 					// Get Lastest Poll ID
-					$poll_id = (int) get_option( 'poll_latestpoll' );
+					$poll_id = (int) Polls_Options::get( 'latest_poll' );
 				} else {
 					// Get Current Poll ID
-					$poll_id = (int) get_option( 'poll_currentpoll' );
+					$poll_id = (int) Polls_Options::get( 'current_poll' );
 				}
 				break;
 			// Take Poll ID From Arguments
@@ -148,7 +153,7 @@ function get_poll( $temp_poll_id = 0, $display = true ) {
 		$check_voted = check_voted( $poll_id );
 		$poll_close  = 0;
 		if ( $poll_active === 0 ) {
-			$poll_close = (int) get_option( 'poll_close' );
+			$poll_close = (int) Polls_Options::get( 'close' );
 		}
 		if ( $poll_close === 2 ) {
 			if ( $display ) {
@@ -197,7 +202,7 @@ function poll_scripts() {
 			wp_enqueue_style( 'wp-polls-rtl', plugins_url( 'wp-polls/polls-css-rtl.css' ), false, WP_POLLS_VERSION, 'all' );
 		}
 	}
-	$pollbar = get_option( 'poll_bar' );
+	$pollbar = Polls_Options::get( 'bar' );
 	// This lands in an inline <style> block on every front end page, so never
 	// trust the stored values even though only 'manage_polls' can set them.
 	$pollbar_height     = (int) $pollbar['height'];
@@ -223,7 +228,7 @@ function poll_scripts() {
 		$pollbar_css .= '}' . "\n";
 	}
 	wp_add_inline_style( 'wp-polls', $pollbar_css );
-	$poll_ajax_style = get_option( 'poll_ajax_style' );
+	$poll_ajax_style = Polls_Options::get( 'ajax' );
 	wp_enqueue_script( 'wp-polls', plugins_url( 'wp-polls/polls-js.js' ), array(), WP_POLLS_VERSION, true );
 	wp_localize_script(
 		'wp-polls',
@@ -328,7 +333,7 @@ function poll_tinymce_translation( $mce_translation ) {
 function check_allowtovote() {
 	global $user_ID;
 	$user_ID       = (int) $user_ID;
-	$allow_to_vote = (int) get_option( 'poll_allowtovote' );
+	$allow_to_vote = (int) Polls_Options::get( 'allow_to_vote' );
 	switch ( $allow_to_vote ) {
 		// Guests Only
 		case 0:
@@ -354,7 +359,7 @@ function check_allowtovote() {
 
 // Funcrion: Check Voted By Cookie Or IP
 function check_voted( $poll_id ) {
-	$poll_logging_method = (int) get_option( 'poll_logging_method' );
+	$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
 	switch ( $poll_logging_method ) {
 		// Do Not Log
 		case 0:
@@ -398,7 +403,7 @@ function check_voted_cookie( $poll_id ) {
 // Function: Check Voted By IP
 function check_voted_ip( $poll_id ) {
 	global $wpdb;
-	$log_expiry     = (int) get_option( 'poll_cookielog_expiry' );
+	$log_expiry     = (int) Polls_Options::get( 'cookie_expiry' );
 	$log_expiry_sql = '';
 	if ( $log_expiry > 0 ) {
 		$log_expiry_sql = ' AND (' . current_time( 'timestamp' ) . '-(pollip_timestamp+0)) < ' . $log_expiry;
@@ -421,7 +426,7 @@ function check_voted_username( $poll_id ) {
 		return 1;
 	}
 	$pollsip_userid = (int) $user_ID;
-	$log_expiry     = (int) get_option( 'poll_cookielog_expiry' );
+	$log_expiry     = (int) Polls_Options::get( 'cookie_expiry' );
 	$log_expiry_sql = '';
 	if ( $log_expiry > 0 ) {
 		$log_expiry_sql = ' AND (' . current_time( 'timestamp' ) . '-(pollip_timestamp+0)) < ' . $log_expiry;
@@ -459,7 +464,7 @@ function display_pollvote( $poll_id, $display_loading = true ) {
 	$poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 	// No poll could be loaded from the database
 	if ( ! $poll_question ) {
-		return removeslashes( get_option( 'poll_template_disable' ) );
+		return removeslashes( Polls_Options::get( 'templates.disable' ) );
 	}
 
 	// Poll Question Variables
@@ -476,7 +481,7 @@ function display_pollvote( $poll_id, $display_loading = true ) {
 	}
 	$poll_multiple_ans = (int) $poll_question->pollq_multiple;
 
-	$template_question = removeslashes( get_option( 'poll_template_voteheader' ) );
+	$template_question = removeslashes( Polls_Options::get( 'templates.voteheader' ) );
 
 	$template_question_variables = array(
 		'%POLL_QUESTION%'         => $poll_question_text,
@@ -512,7 +517,7 @@ function display_pollvote( $poll_id, $display_loading = true ) {
 			$poll_answer_votes               = (int) $poll_answer->polla_votes;
 			$poll_answer_percentage          = $poll_question_totalvotes > 0 ? round( ( $poll_answer_votes / $poll_question_totalvotes ) * 100 ) : 0;
 			$poll_multiple_answer_percentage = $poll_question_totalvoters > 0 ? round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 ) : 0;
-			$template_answer                 = removeslashes( get_option( 'poll_template_votebody' ) );
+			$template_answer                 = removeslashes( Polls_Options::get( 'templates.votebody' ) );
 
 			$template_answer_variables = array(
 				'%POLL_ID%'                         => $poll_question_id,
@@ -541,7 +546,7 @@ function display_pollvote( $poll_id, $display_loading = true ) {
 			}
 		}
 		// Voting Form Footer Variables
-		$template_footer = removeslashes( get_option( 'poll_template_votefooter' ) );
+		$template_footer = removeslashes( Polls_Options::get( 'templates.votefooter' ) );
 
 		$template_footer_variables = array(
 			'%POLL_ID%'               => $poll_question_id,
@@ -559,13 +564,13 @@ function display_pollvote( $poll_id, $display_loading = true ) {
 		$temp_pollvote .= "\t</form>\n";
 		$temp_pollvote .= "</div>\n";
 		if ( $display_loading ) {
-			$poll_ajax_style = get_option( 'poll_ajax_style' );
+			$poll_ajax_style = Polls_Options::get( 'ajax' );
 			if ( (int) $poll_ajax_style['loading'] === 1 ) {
 				$temp_pollvote .= "<div id=\"polls-$poll_question_id-loading\" class=\"wp-polls-loading\"><img src=\"" . plugins_url( 'wp-polls/images/loading.gif' ) . '" width="16" height="16" alt="' . __( 'Loading', 'wp-polls' ) . ' ..." title="' . __( 'Loading', 'wp-polls' ) . ' ..." class="wp-polls-image" />&nbsp;' . __( 'Loading', 'wp-polls' ) . " ...</div>\n";
 			}
 		}
 	} else {
-		$temp_pollvote .= removeslashes( get_option( 'poll_template_disable' ) );
+		$temp_pollvote .= removeslashes( Polls_Options::get( 'templates.disable' ) );
 	}
 	// Return Poll Vote Template
 	return $temp_pollvote;
@@ -600,7 +605,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 	$poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_active, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 	// No poll could be loaded from the database
 	if ( ! $poll_question ) {
-		return removeslashes( get_option( 'poll_template_disable' ) );
+		return removeslashes( Polls_Options::get( 'templates.disable' ) );
 	}
 	// Poll Question Variables
 	$poll_question_text        = wp_kses_post( removeslashes( $poll_question->pollq_question ) );
@@ -616,7 +621,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		$poll_end_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_expiry ) );
 	}
 	$poll_multiple_ans  = (int) $poll_question->pollq_multiple;
-	$template_question  = removeslashes( get_option( 'poll_template_resultheader' ) );
+	$template_question  = removeslashes( Polls_Options::get( 'templates.resultheader' ) );
 	$template_variables = array(
 		'%POLL_QUESTION%'    => $poll_question_text,
 		'%POLL_ID%'          => $poll_question_id,
@@ -696,11 +701,11 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 			// Let User See What Options They Voted
 			if ( in_array( $poll_answer_id, $user_voted, true ) ) {
 				// Results Body Variables
-				$template_answer = removeslashes( get_option( 'poll_template_resultbody2' ) );
+				$template_answer = removeslashes( Polls_Options::get( 'templates.resultbody2' ) );
 				$template_answer = apply_filters( 'wp_polls_template_resultbody2_markup', $template_answer, $poll_answer, $template_variables );
 			} else {
 				// Results Body Variables
-				$template_answer = removeslashes( get_option( 'poll_template_resultbody' ) );
+				$template_answer = removeslashes( Polls_Options::get( 'templates.resultbody' ) );
 				$template_answer = apply_filters( 'wp_polls_template_resultbody_markup', $template_answer, $poll_answer, $template_variables );
 			}
 
@@ -745,10 +750,10 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		$template_variables = apply_filters( 'wp_polls_template_resultfooter_variables', $template_variables );
 
 		if ( ! empty( $user_voted ) || $poll_question_active === 0 || ! check_allowtovote() ) {
-			$template_footer = removeslashes( get_option( 'poll_template_resultfooter' ) );
+			$template_footer = removeslashes( Polls_Options::get( 'templates.resultfooter' ) );
 			$template_footer = apply_filters( 'wp_polls_template_resultfooter_markup', $template_footer, $poll_question, $template_variables );
 		} else {
-			$template_footer = removeslashes( get_option( 'poll_template_resultfooter2' ) );
+			$template_footer = removeslashes( Polls_Options::get( 'templates.resultfooter2' ) );
 			$template_footer = apply_filters( 'wp_polls_template_resultfooter2_markup', $template_footer, $poll_question, $template_variables );
 		}
 
@@ -757,13 +762,13 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 		$temp_pollresult .= "\t\t<input type=\"hidden\" id=\"poll_{$poll_question_id}_nonce\" name=\"wp-polls-nonce\" value=\"" . wp_create_nonce( 'poll_' . $poll_question_id . '-nonce' ) . "\" />\n";
 		$temp_pollresult .= "</div>\n";
 		if ( $display_loading ) {
-			$poll_ajax_style = get_option( 'poll_ajax_style' );
+			$poll_ajax_style = Polls_Options::get( 'ajax' );
 			if ( (int) $poll_ajax_style['loading'] === 1 ) {
 				$temp_pollresult .= "<div id=\"polls-$poll_question_id-loading\" class=\"wp-polls-loading\"><img src=\"" . plugins_url( 'wp-polls/images/loading.gif' ) . '" width="16" height="16" alt="' . __( 'Loading', 'wp-polls' ) . ' ..." title="' . __( 'Loading', 'wp-polls' ) . ' ..." class="wp-polls-image" />&nbsp;' . __( 'Loading', 'wp-polls' ) . " ...</div>\n";
 			}
 		}
 	} else {
-		$temp_pollresult .= removeslashes( get_option( 'poll_template_disable' ) );
+		$temp_pollresult .= removeslashes( Polls_Options::get( 'templates.disable' ) );
 	}
 	// Return Poll Result
 	return apply_filters( 'wp_polls_result_markup', $temp_pollresult );
@@ -775,9 +780,9 @@ function poll_get_raw_ipaddress() {
 	// REMOTE_ADDR is absent under WP-CLI and cron, where this is still reached
 	// through the poll display path. Reading it unguarded warns on PHP 8.
 	$ip           = isset( $_SERVER['REMOTE_ADDR'] ) ? esc_attr( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-	$poll_options = get_option( 'poll_options' );
-	if ( ! empty( $poll_options ) && ! empty( $poll_options['ip_header'] ) && ! empty( $_SERVER[ $poll_options['ip_header'] ] ) ) {
-		$ip = esc_attr( wp_unslash( $_SERVER[ $poll_options['ip_header'] ] ) );
+	$ip_header = Polls_Options::get( 'ip_header', '' );
+	if ( ! empty( $ip_header ) && ! empty( $_SERVER[ $ip_header ] ) ) {
+		$ip = esc_attr( wp_unslash( $_SERVER[ $ip_header ] ) );
 	}
 
 	return $ip;
@@ -955,7 +960,7 @@ function check_voted_multiple( $poll_id, $polls_ips ) {
 
 // Function: Polls Archive Link
 function polls_archive_link( $page ) {
-	$polls_archive_url = get_option( 'poll_archive_url' );
+	$polls_archive_url = Polls_Options::get( 'archive.url' );
 	if ( $page > 0 ) {
 		if ( strpos( $polls_archive_url, '?' ) !== false ) {
 			$polls_archive_url = "$polls_archive_url&amp;poll_page=$page";
@@ -969,8 +974,8 @@ function polls_archive_link( $page ) {
 
 // Function: Displays Polls Archive Link
 function display_polls_archive_link( $display = true ) {
-	$template_pollarchivelink = removeslashes( get_option( 'poll_template_pollarchivelink' ) );
-	$template_pollarchivelink = str_replace( '%POLL_ARCHIVE_URL%', esc_url( get_option( 'poll_archive_url' ) ), $template_pollarchivelink );
+	$template_pollarchivelink = removeslashes( Polls_Options::get( 'templates.pollarchivelink' ) );
+	$template_pollarchivelink = str_replace( '%POLL_ARCHIVE_URL%', esc_url( Polls_Options::get( 'archive.url' ) ), $template_pollarchivelink );
 	if ( $display ) {
 		echo $template_pollarchivelink;
 	} else {
@@ -989,13 +994,13 @@ function polls_archive() {
 	$polls_questions             = array();
 	$polls_answers               = array();
 	$polls_ips                   = array();
-	$polls_perpage               = (int) get_option( 'poll_archive_perpage' );
+	$polls_perpage               = (int) Polls_Options::get( 'archive.per_page' );
 	$poll_questions_ids          = '0';
 	$poll_voted                  = false;
 	$poll_voted_aid              = 0;
 	$poll_id                     = 0;
 	$pollsarchive_output_archive = '';
-	$polls_type                  = (int) get_option( 'poll_archive_displaypoll' );
+	$polls_type                  = (int) Polls_Options::get( 'archive.display_poll' );
 	$polls_type_sql              = '';
 	// Determine What Type Of Polls To Show
 	switch ( $polls_type ) {
@@ -1110,9 +1115,9 @@ function polls_archive() {
 			$poll_end_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $polls_question['end'] ) );
 		}
 		// Archive Poll Header
-		$template_archive_header = removeslashes( get_option( 'poll_template_pollarchiveheader' ) );
+		$template_archive_header = removeslashes( Polls_Options::get( 'templates.pollarchiveheader' ) );
 		// Poll Question Variables
-		$template_question = removeslashes( get_option( 'poll_template_resultheader' ) );
+		$template_question = removeslashes( Polls_Options::get( 'templates.resultheader' ) );
 		$template_question = str_replace( '%POLL_QUESTION%', $polls_question['question'], $template_question );
 		$template_question = str_replace( '%POLL_ID%', $polls_question['id'], $template_question );
 		$template_question = str_replace( '%POLL_TOTALVOTES%', number_format_i18n( $polls_question['totalvotes'] ), $template_question );
@@ -1153,9 +1158,9 @@ function polls_archive() {
 			$polls_answer['answers'] = wp_kses_post( $polls_answer['answers'] );
 			// Let User See What Options They Voted
 			if ( isset( $polls_ips[ $polls_question['id'] ] ) && in_array( $polls_answer['aid'], check_voted_multiple( $polls_question['id'], $polls_ips[ $polls_question['id'] ] ), true ) ) {
-				$template_answer = removeslashes( get_option( 'poll_template_resultbody2' ) );
+				$template_answer = removeslashes( Polls_Options::get( 'templates.resultbody2' ) );
 			} else {
-				$template_answer = removeslashes( get_option( 'poll_template_resultbody' ) );
+				$template_answer = removeslashes( Polls_Options::get( 'templates.resultbody' ) );
 			}
 
 			$template_answer = str_replace(
@@ -1202,7 +1207,7 @@ function polls_archive() {
 			}
 		}
 		// Results Footer Variables
-		$template_footer = removeslashes( get_option( 'poll_template_resultfooter' ) );
+		$template_footer = removeslashes( Polls_Options::get( 'templates.resultfooter' ) );
 		$template_footer = str_replace( '%POLL_ID%', $polls_question['id'], $template_footer );
 		$template_footer = str_replace( '%POLL_START_DATE%', $poll_start_date, $template_footer );
 		$template_footer = str_replace( '%POLL_END_DATE%', $poll_end_date, $template_footer );
@@ -1220,7 +1225,7 @@ function polls_archive() {
 			$template_footer = str_replace( '%POLL_MULTIPLE_ANS_MAX%', '1', $template_footer );
 		}
 		// Archive Poll Footer
-		$template_archive_footer = removeslashes( get_option( 'poll_template_pollarchivefooter' ) );
+		$template_archive_footer = removeslashes( Polls_Options::get( 'templates.pollarchivefooter' ) );
 		$template_archive_footer = str_replace( '%POLL_START_DATE%', $poll_start_date, $template_archive_footer );
 		$template_archive_footer = str_replace( '%POLL_END_DATE%', $poll_end_date, $template_archive_footer );
 		$template_archive_footer = str_replace( '%POLL_TOTALVOTES%', number_format_i18n( $polls_question['totalvotes'] ), $template_archive_footer );
@@ -1245,7 +1250,7 @@ function polls_archive() {
 
 	// Polls Archive Paging
 	if ( $max_page > 1 ) {
-		$pollsarchive_output_archive .= removeslashes( get_option( 'poll_template_pollarchivepagingheader' ) );
+		$pollsarchive_output_archive .= removeslashes( Polls_Options::get( 'templates.pollarchivepagingheader' ) );
 		if ( function_exists( 'wp_pagenavi' ) ) {
 			$pollsarchive_output_archive .= '<div class="wp-pagenavi">' . "\n";
 		} else {
@@ -1274,7 +1279,7 @@ function polls_archive() {
 			$pollsarchive_output_archive .= '<a href="' . polls_archive_link( $max_page ) . '" title="' . __( 'Last &raquo;', 'wp-polls' ) . '">&#8201;' . __( 'Last &raquo;', 'wp-polls' ) . '&#8201;</a>';
 		}
 		$pollsarchive_output_archive .= '</div>';
-		$pollsarchive_output_archive .= removeslashes( get_option( 'poll_template_pollarchivepagingfooter' ) );
+		$pollsarchive_output_archive .= removeslashes( Polls_Options::get( 'templates.pollarchivepagingfooter' ) );
 	}
 
 	// Output Polls Archive Page
@@ -1376,7 +1381,7 @@ function cron_polls_status() {
 	$active_polls = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_active = 1 WHERE pollq_timestamp <= '" . current_time( 'timestamp' ) . "' AND pollq_active = -1" );
 	// Update Latest Poll If Future Poll Is Opened
 	if ( $active_polls ) {
-		$update_latestpoll = update_option( 'poll_latestpoll', polls_latest_id() );
+		$update_latestpoll = Polls_Options::set( 'latest_poll', polls_latest_id() );
 	}
 	return;
 }
@@ -1392,7 +1397,7 @@ function polls_latest_id() {
 
 // Check If In Poll Archive Page
 function in_pollarchive() {
-	$poll_archive_url       = get_option( 'poll_archive_url' );
+	$poll_archive_url       = Polls_Options::get( 'archive.url' );
 	$poll_archive_url_array = explode( '/', $poll_archive_url );
 	$poll_archive_url       = $poll_archive_url_array[ count( $poll_archive_url_array ) - 1 ];
 	if ( empty( $poll_archive_url ) ) {
@@ -1460,11 +1465,11 @@ function vote_poll_process( $poll_id, $poll_aid_array = array() ) {
 	$pollip_ip           = poll_get_ipaddress();
 	$pollip_host         = poll_get_hostname();
 	$pollip_timestamp    = current_time( 'timestamp' );
-	$poll_logging_method = (int) get_option( 'poll_logging_method' );
+	$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
 
 	// Only Create Cookie If User Choose Logging Method 1 Or 3
 	if ( $poll_logging_method === 1 || $poll_logging_method === 3 ) {
-		$cookie_expiry = (int) get_option( 'poll_cookielog_expiry' );
+		$cookie_expiry = (int) Polls_Options::get( 'cookie_expiry' );
 		if ( $cookie_expiry === 0 ) {
 			$cookie_expiry = YEAR_IN_SECONDS;
 		}
@@ -1719,7 +1724,7 @@ function manage_poll() {
 					}
 
 					// Update Lastest Poll ID To Poll Options
-					update_option( 'poll_latestpoll', polls_latest_id() );
+					Polls_Options::set( 'latest_poll', polls_latest_id() );
 					do_action( 'wp_polls_delete_poll', $pollq_id );
 					break;
 			}
@@ -1759,7 +1764,7 @@ function polls_lock_file( $poll_id ) {
 }
 
 function _polls_get_ans_sort() {
-	$order_by = get_option( 'poll_ans_sortby' );
+	$order_by = Polls_Options::get( 'sort.answers_by' );
 	switch ( $order_by ) {
 		case 'polla_votes':
 		case 'polla_aid':
@@ -1770,12 +1775,12 @@ function _polls_get_ans_sort() {
 			$order_by = 'polla_aid';
 			break;
 	}
-	$sort_order = get_option( 'poll_ans_sortorder' ) === 'desc' ? 'desc' : 'asc';
+	$sort_order = Polls_Options::get( 'sort.answers_order' ) === 'desc' ? 'desc' : 'asc';
 	return array( $order_by, $sort_order );
 }
 
 function _polls_get_ans_result_sort() {
-	$order_by = get_option( 'poll_ans_result_sortby' );
+	$order_by = Polls_Options::get( 'sort.results_by' );
 	switch ( $order_by ) {
 		case 'polla_votes':
 		case 'polla_aid':
@@ -1786,7 +1791,7 @@ function _polls_get_ans_result_sort() {
 			$order_by = 'polla_aid';
 			break;
 	}
-	$sort_order = get_option( 'poll_ans_result_sortorder' ) === 'desc' ? 'desc' : 'asc';
+	$sort_order = Polls_Options::get( 'sort.results_order' ) === 'desc' ? 'desc' : 'asc';
 	return array( $order_by, $sort_order );
 }
 
@@ -1973,6 +1978,13 @@ function polls_upgrade() {
 		return;
 	}
 
+	// Version 4.0.0: fold the ~30 scattered option rows into a single one.
+	// Must run before anything else that touches templates, so there is only
+	// one place they live by the time the later steps read them.
+	if ( empty( $installed_version ) || version_compare( $installed_version, '4.0.0', '<' ) ) {
+		Polls_Options::migrate_from_legacy_rows();
+	}
+
 	// Version 3.0.0: Inline onclick handlers were replaced by data-poll-* attributes.
 	if ( empty( $installed_version ) || version_compare( $installed_version, '3.0.0', '<' ) ) {
 		polls_upgrade_templates_onclick();
@@ -1987,10 +1999,8 @@ function polls_upgrade() {
 // template that still relies on it would lose its handler the next time the poll
 // templates are saved, leaving the vote button and the result/booth links dead.
 function polls_upgrade_templates_onclick() {
-	$option_names = array( 'poll_template_votefooter', 'poll_template_resultfooter2' );
-
-	foreach ( $option_names as $option_name ) {
-		$template = get_option( $option_name );
+	foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
+		$template = Polls_Options::get( 'templates.' . $key );
 
 		if ( ! is_string( $template ) || stripos( $template, 'onclick' ) === false ) {
 			continue;
@@ -2004,7 +2014,7 @@ function polls_upgrade_templates_onclick() {
 		);
 
 		if ( null !== $migrated && $migrated !== $template ) {
-			update_option( $option_name, $migrated );
+			Polls_Options::set( 'templates.' . $key, $migrated );
 		}
 	}
 }
@@ -2041,10 +2051,8 @@ function polls_onclick_notice() {
 
 // Function: Check Whether Any Poll Template Still Contains An Inline onclick Handler
 function polls_templates_have_onclick() {
-	$option_names = array( 'poll_template_votefooter', 'poll_template_resultfooter2' );
-
-	foreach ( $option_names as $option_name ) {
-		$template = get_option( $option_name );
+	foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
+		$template = Polls_Options::get( 'templates.' . $key );
 
 		if ( is_string( $template ) && stripos( $template, 'onclick' ) !== false ) {
 			return true;
@@ -2162,101 +2170,17 @@ function polls_activate() {
 			);
 		}
 	}
-	// Add In Options (16 Records)
-	add_option(
-		'poll_template_voteheader',
-		'<p style="text-align: center;"><strong>%POLL_QUESTION%</strong></p>' .
-		'<div id="polls-%POLL_ID%-ans" class="wp-polls-ans">' .
-		'<ul class="wp-polls-ul">'
-	);
-	add_option( 'poll_template_votebody', '<li><input type="%POLL_CHECKBOX_RADIO%" id="poll-answer-%POLL_ANSWER_ID%" name="poll_%POLL_ID%" value="%POLL_ANSWER_ID%" /> <label for="poll-answer-%POLL_ANSWER_ID%">%POLL_ANSWER%</label></li>' );
-	add_option(
-		'poll_template_votefooter',
-		'</ul>' .
-		'<p style="text-align: center;"><input type="button" name="vote" value="   ' . __( 'Vote', 'wp-polls' ) . '   " class="Buttons" data-poll-id="%POLL_ID%" data-poll-action="vote" /></p>' .
-		'<p style="text-align: center;"><a href="#ViewPollResults" data-poll-id="%POLL_ID%" data-poll-action="result" title="' . __( 'View Results Of This Poll', 'wp-polls' ) . '">' . __( 'View Results', 'wp-polls' ) . '</a></p>' .
-		'</div>'
-	);
-	add_option(
-		'poll_template_resultheader',
-		'<p style="text-align: center;"><strong>%POLL_QUESTION%</strong></p>' .
-		'<div id="polls-%POLL_ID%-ans" class="wp-polls-ans">' .
-		'<ul class="wp-polls-ul">'
-	);
-	add_option( 'poll_template_resultbody', '<li>%POLL_ANSWER% <small>(%POLL_ANSWER_PERCENTAGE%%' . __( ',', 'wp-polls' ) . ' %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')</small><div class="pollbar" style="width: %POLL_ANSWER_IMAGEWIDTH%%;" title="%POLL_ANSWER_TEXT% (%POLL_ANSWER_PERCENTAGE%% | %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')"></div></li>' );
-	add_option( 'poll_template_resultbody2', '<li><strong><i>%POLL_ANSWER% <small>(%POLL_ANSWER_PERCENTAGE%%' . __( ',', 'wp-polls' ) . ' %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')</small></i></strong><div class="pollbar" style="width: %POLL_ANSWER_IMAGEWIDTH%%;" title="' . __( 'You Have Voted For This Choice', 'wp-polls' ) . ' - %POLL_ANSWER_TEXT% (%POLL_ANSWER_PERCENTAGE%% | %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')"></div></li>' );
-	add_option(
-		'poll_template_resultfooter',
-		'</ul>' .
-		'<p style="text-align: center;">' . __( 'Total Voters', 'wp-polls' ) . ': <strong>%POLL_TOTALVOTERS%</strong></p>' .
-		'</div>'
-	);
-	add_option(
-		'poll_template_resultfooter2',
-		'</ul>' .
-		'<p style="text-align: center;">' . __( 'Total Voters', 'wp-polls' ) . ': <strong>%POLL_TOTALVOTERS%</strong></p>' .
-		'<p style="text-align: center;"><a href="#VotePoll" data-poll-id="%POLL_ID%" data-poll-action="booth" title="' . __( 'Vote For This Poll', 'wp-polls' ) . '">' . __( 'Vote', 'wp-polls' ) . '</a></p>' .
-		'</div>'
-	);
-	add_option( 'poll_template_disable', __( 'Sorry, there are no polls available at the moment.', 'wp-polls' ) );
-	add_option( 'poll_template_error', __( 'An error has occurred when processing your poll.', 'wp-polls' ) );
-	add_option( 'poll_currentpoll', 0 );
-	add_option( 'poll_latestpoll', 1 );
-	add_option( 'poll_archive_perpage', 5 );
-	add_option( 'poll_ans_sortby', 'polla_aid' );
-	add_option( 'poll_ans_sortorder', 'asc' );
-	add_option( 'poll_ans_result_sortby', 'polla_votes' );
-	add_option( 'poll_ans_result_sortorder', 'desc' );
-	// Database Upgrade For WP-Polls 2.1
-	add_option( 'poll_logging_method', '3' );
-	add_option( 'poll_allowtovote', '2' );
-	// Database Upgrade For WP-Polls 2.12
-	add_option( 'poll_archive_url', site_url( 'pollsarchive' ) );
-	// Database Upgrade For WP-Polls 2.13
-	add_option(
-		'poll_bar',
-		array(
-			'style'      => 'default',
-			'background' => 'd8e1eb',
-			'border'     => 'c8c8c8',
-			'height'     => 8,
-		)
-	);
-	// Database Upgrade For WP-Polls 2.14
-	add_option( 'poll_close', 1 );
-	// Database Upgrade For WP-Polls 2.20
-	add_option(
-		'poll_ajax_style',
-		array(
-			'loading' => 1,
-			'fading'  => 1,
-		)
-	);
-	add_option(
-		'poll_template_pollarchivelink',
-		'<ul>' .
-		'<li><a href="%POLL_ARCHIVE_URL%">' . __( 'Polls Archive', 'wp-polls' ) . '</a></li>' .
-		'</ul>'
-	);
-	add_option( 'poll_archive_displaypoll', 2 );
-	add_option( 'poll_template_pollarchiveheader', '' );
-	add_option( 'poll_template_pollarchivefooter', '<p>' . __( 'Start Date:', 'wp-polls' ) . ' %POLL_START_DATE%<br />' . __( 'End Date:', 'wp-polls' ) . ' %POLL_END_DATE%</p>' );
+	// Options live in one row from 4.0.0 onward. Defaults come from
+	// Polls_Options so activation and the settings screen cannot drift.
+	add_option( Polls_Options::OPTION, Polls_Options::defaults() );
+	Polls_Options::flush();
 
+	// Backfill pollq_totalvoters for installs that predate the column being
+	// populated: before 2.74 only pollq_totalvotes was maintained.
 	$pollq_totalvoters = (int) $wpdb->get_var( "SELECT SUM(pollq_totalvoters) FROM $wpdb->pollsq" );
 	if ( 0 === $pollq_totalvoters ) {
 		$wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvoters = pollq_totalvotes" );
 	}
-
-	// Database Upgrade For WP-Polls 2.30
-	add_option( 'poll_cookielog_expiry', 0 );
-	add_option( 'poll_template_pollarchivepagingheader', '' );
-	add_option( 'poll_template_pollarchivepagingfooter', '' );
-
-	// Database Upgrade For WP-Polls 2.50
-	delete_option( 'poll_archive_show' );
-
-	// Database Upgrade for WP-Polls 2.76
-	add_option( 'poll_options', array( 'ip_header' => '' ) );
 
 	// Index
 	$index    = $wpdb->get_results( "SHOW INDEX FROM $wpdb->pollsip;" );
