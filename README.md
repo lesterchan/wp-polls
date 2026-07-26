@@ -34,11 +34,17 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * FIXED: On multisite the three poll tables were not registered with `$wpdb`, so any query made inside `switch_to_blog()` read and wrote the wrong site's polls.
 * FIXED: Adding or removing a poll answer in wp-admin no longer breaks. It called jQuery's `.size()`, which was removed in jQuery 3.
 * FIXED: The poll bar tooltip showed a literal `&amp;` for any answer containing an ampersand.
+* FIXED: Poll Logs had the same double encoding: an answer containing an ampersand showed a literal `&amp;` in both the answer filter and the log table.
+* FIXED: Voters identified by the comment author cookie were logged with a backslash before any apostrophe, so a commenter named `O'Brien` appeared in Poll Logs as `O\'Brien`.
 * FIXED: `$_SERVER['REMOTE_ADDR']` is no longer read unguarded, which warned under WP-CLI and cron on PHP 8.
 * FIXED: The result and vote links no longer follow their placeholder `href` when clicked.
 * FIXED: Removed the duplicated shortcode registration.
 * FIXED: Undefined array key warnings on missing stats_display options.
 * FIXED: Warnings when rendering a poll whose ID no longer exists.
+* FIXED: The voting endpoint read `$_REQUEST['view']` without checking it was set, which warned on PHP 8 for any request that left it out.
+* FIXED: Activation looked for `wp-admin/upgrade-functions.php`, which WordPress removed in 2.x, and stopped with an error message if it found neither that nor the current file.
+* FIXED: Poll Options could offer a poll bar style that saving then rejected, reverting it while still reporting "Settings saved." The screen and the sanitiser now build the list of available styles the same way.
+* FIXED: Every stylesheet, script and image URL was built from a hardcoded `wp-polls/` path, so renaming the plugin directory left WP-Polls loading none of its own assets. All paths now come from the plugin file itself.
 * CHANGED: Poll Options and Poll Templates now use the WordPress Settings API instead of hand-rolled form handling.
 * CHANGED: Removed every remaining inline `onclick`/`onblur`/`onchange` handler from the admin pages in favour of `data-poll-action` attributes and delegated listeners, so poll questions and answers no longer have to be escaped into a JavaScript context.
 * CHANGED: Dropped the jQuery dependency. Both scripts, the inline admin scripts and the TinyMCE plugin now use the browser's own APIs, so WP-Polls no longer forces jQuery to load on the front end.
@@ -49,6 +55,8 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 
 #### Upgrade Notice
 Your settings move into a single `poll_options` row automatically the first time wp-admin is loaded after upgrading. If you customised the Voting Form Footer or Result Footer templates, the `onclick` handlers in them are converted too; anything too customised to convert is reported on the Poll Templates page.
+
+If you renamed the plugin directory from `wp-polls`, its stylesheets, scripts and poll bar images were not loading. They will start working on upgrade with no action needed.
 
 ### 2.77.3
 * FIXED: XSS In poll-logs.php.
