@@ -210,9 +210,9 @@ switch($mode) {
         <!-- Edit Poll -->
         <form method="post" action="<?php echo admin_url('admin.php?page='.plugin_basename(__FILE__).'&amp;mode=edit&amp;id='.$poll_id); ?>">
         <?php wp_nonce_field('wp-polls_edit-poll'); ?>
-        <input type="hidden" name="pollq_id" value="<?php echo $poll_id; ?>" />
-        <input type="hidden" name="pollq_active" value="<?php echo $poll_active; ?>" />
-        <input type="hidden" name="poll_timestamp_old" value="<?php echo $poll_timestamp; ?>" />
+        <input type="hidden" name="pollq_id" value="<?php echo esc_attr( $poll_id ); ?>" />
+        <input type="hidden" name="pollq_active" value="<?php echo esc_attr( $poll_active ); ?>" />
+        <input type="hidden" name="poll_timestamp_old" value="<?php echo esc_attr( $poll_timestamp ); ?>" />
         <div class="wrap">
             <h2><?php _e('Edit Poll', 'wp-polls'); ?></h2>
             <!-- Poll Question -->
@@ -248,8 +248,9 @@ switch($mode) {
                                 echo "<tr id=\"poll-answer-$polla_aid\">\n";
                                 echo '<th width="20%" scope="row" valign="top">'.sprintf(__('Answer %s', 'wp-polls'), number_format_i18n($i)).'</th>'."\n";
                                 echo "<td width=\"60%\"><input type=\"text\" size=\"50\" maxlength=\"200\" name=\"polla_aid-$polla_aid\" value=\"". esc_attr( $polla_answers ) . "\" />&nbsp;&nbsp;&nbsp;";
-                                echo "<input type=\"button\" value=\"".__('Delete', 'wp-polls')."\" onclick=\"delete_poll_ans($poll_id, $polla_aid, $polla_votes, '".sprintf(esc_js(__('You are about to delete this poll\'s answer \'%s\'.', 'wp-polls')), esc_js( esc_attr( $polla_answers ) ) ) . "', '".wp_create_nonce('wp-polls_delete-poll-answer')."');\" class=\"button\" /></td>\n";
-                                echo '<td width="20%" align="'.$last_col_align.'">'.number_format_i18n($polla_votes)." <input type=\"text\" size=\"4\" id=\"polla_votes-$polla_aid\" name=\"polla_votes-$polla_aid\" value=\"$polla_votes\" onblur=\"check_totalvotes();\" /></td>\n</tr>\n";
+                                $delete_answer_confirm = sprintf( __( 'You are about to delete this poll\'s answer \'%s\'.', 'wp-polls' ), $polla_answers );
+                                echo "<input type=\"button\" value=\"".esc_attr__('Delete', 'wp-polls')."\" class=\"button\" data-poll-action=\"delete-answer\" data-poll-id=\"$poll_id\" data-poll-aid=\"$polla_aid\" data-poll-votes=\"$polla_votes\" data-poll-confirm=\"".esc_attr( $delete_answer_confirm )."\" data-poll-nonce=\"".esc_attr( wp_create_nonce('wp-polls_delete-poll-answer') )."\" /></td>\n";
+                                echo '<td width="20%" align="'.$last_col_align.'">'.number_format_i18n($polla_votes)." <input type=\"text\" size=\"4\" id=\"polla_votes-$polla_aid\" name=\"polla_votes-$polla_aid\" value=\"$polla_votes\" data-poll-action=\"total-votes\" /></td>\n</tr>\n";
                                 $poll_actual_totalvotes += $polla_votes;
                                 $i++;
                             }
@@ -259,8 +260,8 @@ switch($mode) {
                 <tbody>
                     <tr>
                         <td width="20%">&nbsp;</td>
-                        <td width="60%"><input type="button" value="<?php _e('Add Answer', 'wp-polls') ?>" onclick="add_poll_answer_edit();" class="button" /></td>
-                        <td width="20%" align="<?php echo $last_col_align; ?>"><strong><?php _e('Total Votes:', 'wp-polls'); ?></strong> <strong id="poll_total_votes"><?php echo number_format_i18n($poll_actual_totalvotes); ?></strong> <input type="text" size="4" readonly="readonly" id="pollq_totalvotes" name="pollq_totalvotes" value="<?php echo $poll_actual_totalvotes; ?>" onblur="check_totalvotes();" /></td>
+                        <td width="60%"><input type="button" value="<?php _e('Add Answer', 'wp-polls') ?>" data-poll-action="add-answer-edit" class="button" /></td>
+                        <td width="20%" align="<?php echo $last_col_align; ?>"><strong><?php _e('Total Votes:', 'wp-polls'); ?></strong> <strong id="poll_total_votes"><?php echo number_format_i18n($poll_actual_totalvotes); ?></strong> <input type="text" size="4" readonly="readonly" id="pollq_totalvotes" name="pollq_totalvotes" value="<?php echo esc_attr( $poll_actual_totalvotes ); ?>" data-poll-action="total-votes" /></td>
                     </tr>
                     <tr>
                         <td width="20%">&nbsp;</td>
@@ -275,7 +276,7 @@ switch($mode) {
                 <tr>
                     <th width="40%" scope="row" valign="top"><?php _e('Allows Users To Select More Than One Answer?', 'wp-polls'); ?></th>
                     <td width="60%">
-                        <select name="pollq_multiple_yes" id="pollq_multiple_yes" size="1" onchange="check_pollq_multiple();">
+                        <select name="pollq_multiple_yes" id="pollq_multiple_yes" size="1" data-poll-action="toggle-multiple">
                             <option value="0"<?php selected('0', $poll_multiple); ?>><?php _e('No', 'wp-polls'); ?></option>
                             <option value="1"<?php if($poll_multiple > 0) { echo ' selected="selected"'; } ?>><?php _e('Yes', 'wp-polls'); ?></option>
                         </select>
@@ -305,7 +306,7 @@ switch($mode) {
                     <th width="20%" scope="row" valign="top"><?php _e('Start Date/Time', 'wp-polls'); ?></th>
                     <td width="80%">
                         <?php echo mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_timestamp)); ?><br />
-                        <input type="checkbox" name="edit_polltimestamp" id="edit_polltimestamp" value="1" onclick="check_polltimestamp()" />&nbsp;<label for="edit_polltimestamp"><?php _e('Edit Start Date/Time', 'wp-polls'); ?></label><br />
+                        <input type="checkbox" name="edit_polltimestamp" id="edit_polltimestamp" value="1" data-poll-action="toggle-timestamp" />&nbsp;<label for="edit_polltimestamp"><?php _e('Edit Start Date/Time', 'wp-polls'); ?></label><br />
                         <?php poll_timestamp($poll_timestamp, 'pollq_timestamp', 'none'); ?>
                     </td>
                 </tr>
@@ -320,7 +321,7 @@ switch($mode) {
                             }
                         ?>
                         <br />
-                        <input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" onclick="check_pollexpiry();" <?php if(empty($poll_expiry)) { echo 'checked="checked"'; } ?> />
+                        <input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" data-poll-action="toggle-expiry" <?php if(empty($poll_expiry)) { echo 'checked="checked"'; } ?> />
                         <label for="pollq_expiry_no"><?php _e('Do NOT Expire This Poll', 'wp-polls'); ?></label><br />
                         <?php
                             if(empty($poll_expiry)) {
@@ -343,9 +344,9 @@ switch($mode) {
                     $poll_close_display = 'none';
                 }
             ?>
-                <input type="button" class="button" name="do" id="close_poll" value="<?php _e('Close Poll', 'wp-polls'); ?>" onclick="closing_poll(<?php echo $poll_id; ?>, '<?php printf(esc_js(__('You are about to CLOSE this poll \'%s\'.', 'wp-polls')), esc_attr( esc_js( $poll_question_text ) ) ); ?>', '<?php echo wp_create_nonce('wp-polls_close-poll'); ?>');" style="display: <?php echo $poll_close_display; ?>;" />
-                <input type="button" class="button" name="do" id="open_poll" value="<?php _e('Open Poll', 'wp-polls'); ?>" onclick="opening_poll(<?php echo $poll_id; ?>, '<?php printf(esc_js(__('You are about to OPEN this poll \'%s\'.', 'wp-polls')), esc_attr( esc_js( $poll_question_text ) ) ); ?>', '<?php echo wp_create_nonce('wp-polls_open-poll'); ?>');" style="display: <?php echo $poll_open_display; ?>;" />
-                &nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e('Cancel', 'wp-polls'); ?>" class="button" onclick="javascript:history.go(-1)" />
+                <input type="button" class="button" name="do" id="close_poll" value="<?php _e('Close Poll', 'wp-polls'); ?>" data-poll-action="close-poll" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php printf( esc_attr__('You are about to CLOSE this poll \'%s\'.', 'wp-polls'), esc_attr( $poll_question_text ) ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce('wp-polls_close-poll') ); ?>" style="display: <?php echo esc_attr( $poll_close_display ); ?>;" />
+                <input type="button" class="button" name="do" id="open_poll" value="<?php _e('Open Poll', 'wp-polls'); ?>" data-poll-action="open-poll" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php printf( esc_attr__('You are about to OPEN this poll \'%s\'.', 'wp-polls'), esc_attr( $poll_question_text ) ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce('wp-polls_open-poll') ); ?>" style="display: <?php echo esc_attr( $poll_open_display ); ?>;" />
+                &nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e('Cancel', 'wp-polls'); ?>" class="button" data-poll-action="go-back" />
             </p>
         </div>
         </form>
@@ -438,7 +439,8 @@ switch($mode) {
                                 echo "</td>\n";
                                 echo "<td><a href=\"$base_page&amp;mode=logs&amp;id=$poll_id\" class=\"edit\">".__('Logs', 'wp-polls')."</a></td>\n";
                                 echo "<td><a href=\"$base_page&amp;mode=edit&amp;id=$poll_id\" class=\"edit\">".__('Edit', 'wp-polls')."</a></td>\n";
-                                echo "<td><a href=\"#DeletePoll\" onclick=\"delete_poll($poll_id, '".sprintf(esc_js(__('You are about to delete this poll, \'%s\'.', 'wp-polls')), esc_js($poll_question))."', '".wp_create_nonce('wp-polls_delete-poll')."');\" class=\"delete\">".__('Delete', 'wp-polls')."</a></td>\n";
+                                $delete_poll_confirm = sprintf( __( 'You are about to delete this poll, \'%s\'.', 'wp-polls' ), $poll_question );
+                                echo "<td><a href=\"#DeletePoll\" class=\"delete\" data-poll-action=\"delete-poll\" data-poll-id=\"$poll_id\" data-poll-confirm=\"".esc_attr( $delete_poll_confirm )."\" data-poll-nonce=\"".esc_attr( wp_create_nonce('wp-polls_delete-poll') )."\">".esc_html__('Delete', 'wp-polls')."</a></td>\n";
                                 echo '</tr>';
                                 $i++;
                                 $total_votes+= $poll_totalvotes;
@@ -490,7 +492,7 @@ switch($mode) {
             ?>
                 <strong><?php _e('Are You Sure You Want To Delete All Polls Logs?', 'wp-polls'); ?></strong><br /><br />
                 <input type="checkbox" name="delete_logs_yes" id="delete_logs_yes" value="yes" />&nbsp;<label for="delete_logs_yes"><?php _e('Yes', 'wp-polls'); ?></label><br /><br />
-                <input type="button" value="<?php _e('Delete All Logs', 'wp-polls'); ?>" class="button" onclick="delete_poll_logs('<?php echo esc_js(__('You are about to delete all poll logs. This action is not reversible.', 'wp-polls')); ?>', '<?php echo wp_create_nonce('wp-polls_delete-polls-logs'); ?>');" />
+                <input type="button" value="<?php _e('Delete All Logs', 'wp-polls'); ?>" class="button" data-poll-action="delete-all-logs" data-poll-confirm="<?php echo esc_attr__('You are about to delete all poll logs. This action is not reversible.', 'wp-polls'); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce('wp-polls_delete-polls-logs') ); ?>" />
             <?php
                 } else {
                     _e('No poll logs available.', 'wp-polls');

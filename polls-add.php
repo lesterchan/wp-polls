@@ -152,7 +152,7 @@ $count = 0;
 		<tfoot>
 			<tr>
 				<td width="20%">&nbsp;</td>
-				<td width="80%"><input type="button" value="<?php _e('Add Answer', 'wp-polls') ?>" onclick="add_poll_answer_add();" class="button" /></td>
+				<td width="80%"><input type="button" value="<?php _e('Add Answer', 'wp-polls') ?>" data-poll-action="add-answer" class="button" /></td>
 			</tr>
 		</tfoot>
 		<tbody id="poll_answers">
@@ -160,7 +160,7 @@ $count = 0;
 			for($i = 1; $i <= $poll_noquestion; $i++) {
 				echo "<tr id=\"poll-answer-$i\">\n";
 				echo "<th width=\"20%\" scope=\"row\" valign=\"top\">".sprintf(__('Answer %s', 'wp-polls'), number_format_i18n($i))."</th>\n";
-				echo "<td width=\"80%\"><input type=\"text\" size=\"50\" maxlength=\"200\" name=\"polla_answers[]\" />&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"".__('Remove', 'wp-polls')."\" onclick=\"remove_poll_answer_add(".$i.");\" class=\"button\" /></td>\n";
+				echo "<td width=\"80%\"><input type=\"text\" size=\"50\" maxlength=\"200\" name=\"polla_answers[]\" />&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\"".esc_attr__('Remove', 'wp-polls')."\" data-poll-action=\"remove-answer\" data-poll-answer=\"".$i."\" class=\"button\" /></td>\n";
 				echo "</tr>\n";
 				$count++;
 			}
@@ -173,7 +173,7 @@ $count = 0;
 		<tr>
 			<th width="40%" scope="row" valign="top"><?php _e('Allows Users To Select More Than One Answer?', 'wp-polls'); ?></th>
 			<td width="60%">
-				<select name="pollq_multiple_yes" id="pollq_multiple_yes" size="1" onchange="check_pollq_multiple();">
+				<select name="pollq_multiple_yes" id="pollq_multiple_yes" size="1" data-poll-action="toggle-multiple">
 					<option value="0"><?php _e('No', 'wp-polls'); ?></option>
 					<option value="1"><?php _e('Yes', 'wp-polls'); ?></option>
 				</select>
@@ -201,9 +201,9 @@ $count = 0;
 		</tr>
 		<tr>
 			<th width="20%" scope="row" valign="top"><?php _e('End Date/Time', 'wp-polls') ?></th>
-			<td width="80%"><input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" onclick="check_pollexpiry();" />&nbsp;&nbsp;<label for="pollq_expiry_no"><?php _e('Do NOT Expire This Poll', 'wp-polls'); ?></label><?php poll_timestamp(current_time('timestamp'), 'pollq_expiry', 'none'); ?></td>
+			<td width="80%"><input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" data-poll-action="toggle-expiry" />&nbsp;&nbsp;<label for="pollq_expiry_no"><?php _e('Do NOT Expire This Poll', 'wp-polls'); ?></label><?php poll_timestamp(current_time('timestamp'), 'pollq_expiry', 'none'); ?></td>
 		</tr>
 	</table>
-	<p style="text-align: center;"><input type="submit" name="do" value="<?php _e('Add Poll', 'wp-polls'); ?>"  class="button-primary" />&nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e('Cancel', 'wp-polls'); ?>" class="button" onclick="javascript:history.go(-1)" /></p>
+	<p style="text-align: center;"><input type="submit" name="do" value="<?php _e('Add Poll', 'wp-polls'); ?>"  class="button-primary" />&nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e('Cancel', 'wp-polls'); ?>" class="button" data-poll-action="go-back" /></p>
 </div>
 </form>

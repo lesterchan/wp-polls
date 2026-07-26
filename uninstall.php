@@ -38,6 +38,7 @@ $option_names = array(
 	, 'poll_cookielog_expiry'
 	, 'poll_options'
 	, 'widget_polls-widget'
+	, 'poll_version'
 );
 
 

@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: https://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.77.4
+Version: 3.0.0
 Author: Lester 'GaMerZ' Chan
 Author URI: https://lesterchan.net
 Text Domain: wp-polls
@@ -36,7 +36,7 @@ if (!defined('ABSPATH')) {
 
 
 ### Version
-define( 'WP_POLLS_VERSION', '2.77.4' );
+define( 'WP_POLLS_VERSION', '3.0.0' );
 
 
 ### Create Text Domain For Translations
@@ -156,7 +156,8 @@ function get_poll($temp_poll_id = 0, $display = true) {
 				return display_pollresult($poll_id, $check_voted);
 			}
 		} elseif( $poll_close === 3 || ! check_allowtovote() ) {
-			$disable_poll_js = '<script type="text/javascript">jQuery("#polls_form_'.$poll_id.' :input").each(function (i){jQuery(this).attr("disabled","disabled")});</script>';
+			$disable_poll_form = '#polls_form_' . (int) $poll_id;
+			$disable_poll_js = '<script type="text/javascript">document.querySelectorAll(\''.$disable_poll_form.' input, '.$disable_poll_form.' select, '.$disable_poll_form.' textarea, '.$disable_poll_form.' button\').forEach(function (field) { field.disabled = true; });</script>';
 			if($display) {
 				echo display_pollvote($poll_id).$disable_poll_js;
 			} else {
@@ -189,28 +190,33 @@ function poll_scripts() {
 		}
 	}
 	$pollbar = get_option( 'poll_bar' );
+	// This lands in an inline <style> block on every front end page, so never
+	// trust the stored values even though only 'manage_polls' can set them.
+	$pollbar_height     = (int) $pollbar['height'];
+	$pollbar_background = _polls_sanitize_hex_color( $pollbar['background'] );
+	$pollbar_border     = _polls_sanitize_hex_color( $pollbar['border'] );
 	if( $pollbar['style'] === 'use_css' ) {
 		$pollbar_css = '.wp-polls .pollbar {'."\n";
 		$pollbar_css .= "\t".'margin: 1px;'."\n";
-		$pollbar_css .= "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
-		$pollbar_css .= "\t".'line-height: '.$pollbar['height'].'px;'."\n";
-		$pollbar_css .= "\t".'height: '.$pollbar['height'].'px;'."\n";
-		$pollbar_css .= "\t".'background: #'.$pollbar['background'].';'."\n";
-		$pollbar_css .= "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
+		$pollbar_css .= "\t".'font-size: '.($pollbar_height-2).'px;'."\n";
+		$pollbar_css .= "\t".'line-height: '.$pollbar_height.'px;'."\n";
+		$pollbar_css .= "\t".'height: '.$pollbar_height.'px;'."\n";
+		$pollbar_css .= "\t".'background: #'.$pollbar_background.';'."\n";
+		$pollbar_css .= "\t".'border: 1px solid #'.$pollbar_border.';'."\n";
 		$pollbar_css .= '}'."\n";
 	} else {
 		$pollbar_css = '.wp-polls .pollbar {'."\n";
 		$pollbar_css .= "\t".'margin: 1px;'."\n";
-		$pollbar_css .= "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
-		$pollbar_css .= "\t".'line-height: '.$pollbar['height'].'px;'."\n";
-		$pollbar_css .= "\t".'height: '.$pollbar['height'].'px;'."\n";
-		$pollbar_css .= "\t".'background-image: url(\''.plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif').'\');'."\n";
-		$pollbar_css .= "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
+		$pollbar_css .= "\t".'font-size: '.($pollbar_height-2).'px;'."\n";
+		$pollbar_css .= "\t".'line-height: '.$pollbar_height.'px;'."\n";
+		$pollbar_css .= "\t".'height: '.$pollbar_height.'px;'."\n";
+		$pollbar_css .= "\t".'background-image: url(\''.esc_url( plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif') ).'\');'."\n";
+		$pollbar_css .= "\t".'border: 1px solid #'.$pollbar_border.';'."\n";
 		$pollbar_css .= '}'."\n";
 	}
 	wp_add_inline_style( 'wp-polls', $pollbar_css );
 	$poll_ajax_style = get_option('poll_ajax_style');
-	wp_enqueue_script('wp-polls', plugins_url('wp-polls/polls-js.js'), array('jquery'), WP_POLLS_VERSION, true);
+	wp_enqueue_script('wp-polls', plugins_url('wp-polls/polls-js.js'), array(), WP_POLLS_VERSION, true);
 	wp_localize_script('wp-polls', 'pollsL10n', array(
 		'ajax_url' => admin_url('admin-ajax.php'),
 		'text_wait' => __('Your last request is still being processed. Please wait a while ...', 'wp-polls'),
@@ -228,7 +234,7 @@ function poll_scripts_admin($hook_suffix) {
 	$poll_admin_pages = array('wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php', 'wp-polls/polls-uninstall.php');
 	if(in_array($hook_suffix, $poll_admin_pages, true)) {
 		wp_enqueue_style('wp-polls-admin', plugins_url('wp-polls/polls-admin-css.css'), false, WP_POLLS_VERSION, 'all');
-		wp_enqueue_script('wp-polls-admin', plugins_url('wp-polls/polls-admin-js.js'), array('jquery'), WP_POLLS_VERSION, true);
+		wp_enqueue_script('wp-polls-admin', plugins_url('wp-polls/polls-admin-js.js'), array(), WP_POLLS_VERSION, true);
 		wp_localize_script('wp-polls-admin', 'pollsAdminL10n', array(
 			'admin_ajax_url' => admin_url('admin-ajax.php'),
 			'text_direction' => is_rtl() ? 'right' : 'left',
@@ -257,9 +263,9 @@ function poll_footer_admin() {
 ?>
 	<script type="text/javascript">
 		QTags.addButton('ed_wp_polls', '<?php echo esc_js(__('Poll', 'wp-polls')); ?>', function() {
-			var poll_id = jQuery.trim(prompt('<?php echo esc_js(__('Enter Poll ID', 'wp-polls')); ?>'));
+			var poll_id = (prompt('<?php echo esc_js(__('Enter Poll ID', 'wp-polls')); ?>') || '').trim();
 			while(isNaN(poll_id)) {
-				poll_id = jQuery.trim(prompt("<?php echo esc_js(__('Error: Poll ID must be numeric', 'wp-polls')); ?>\n\n<?php echo esc_js(__('Please enter Poll ID again', 'wp-polls')); ?>"));
+				poll_id = (prompt("<?php echo esc_js(__('Error: Poll ID must be numeric', 'wp-polls')); ?>\n\n<?php echo esc_js(__('Please enter Poll ID again', 'wp-polls')); ?>") || '').trim();
 			}
 			if (poll_id >= -1 && poll_id != null && poll_id != "") {
 				QTags.insertContent('[poll id="' + poll_id + '"]');
@@ -435,6 +441,10 @@ function display_pollvote($poll_id, $display_loading = true) {
 	$temp_pollvote = '';
 	// Get Poll Question Data
 	$poll_question = $wpdb->get_row( $wpdb->prepare( "SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
+	// No poll could be loaded from the database
+	if ( ! $poll_question ) {
+		return removeslashes( get_option( 'poll_template_disable' ) );
+	}
 
 	// Poll Question Variables
 	$poll_question_text = wp_kses_post( removeslashes( $poll_question->pollq_question ) );
@@ -472,7 +482,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 	if($poll_question && $poll_answers) {
 		// Display Poll Voting Form
 		$temp_pollvote .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
-		$temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"" . sanitize_text_field( $_SERVER['SCRIPT_NAME'] ) ."\" method=\"post\">\n";
+		$temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"" . esc_url( $_SERVER['SCRIPT_NAME'] ) ."\" method=\"post\">\n";
 		$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" id=\"poll_{$poll_question_id}_nonce\" name=\"wp-polls-nonce\" value=\"".wp_create_nonce('poll_'.$poll_question_id.'-nonce')."\" /></p>\n";
 		$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" name=\"poll_id\" value=\"$poll_question_id\" /></p>\n";
 		if($poll_multiple_ans > 0) {
@@ -510,7 +520,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 		$poll_result_url = preg_replace('/pollresult=(\d+)/i', 'pollresult='.$poll_question_id, $poll_result_url);
 		if(isset($_GET['pollresult']) && (int) $_GET['pollresult'] === 0) {
 			if(strpos($poll_result_url, '?') !== false) {
-				$poll_result_url = "$poll_result_url&amp;pollresult=$poll_question_id";
+				$poll_result_url = "$poll_result_url&pollresult=$poll_question_id";
 			} else {
 				$poll_result_url = "$poll_result_url?pollresult=$poll_question_id";
 			}
@@ -520,7 +530,7 @@ function display_pollvote($poll_id, $display_loading = true) {
 
 		$template_footer_variables = array(
 			'%POLL_ID%'               => $poll_question_id,
-			'%POLL_RESULT_URL%'       => $poll_result_url,
+			'%POLL_RESULT_URL%'       => esc_url( $poll_result_url ),
 			'%POLL_START_DATE%'       => $poll_start_date,
 			'%POLL_END_DATE%'         => $poll_end_date,
 			'%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1
@@ -927,7 +937,7 @@ function polls_archive_link($page) {
 ### Function: Displays Polls Archive Link
 function display_polls_archive_link($display = true) {
 	$template_pollarchivelink = removeslashes(get_option('poll_template_pollarchivelink'));
-	$template_pollarchivelink = str_replace("%POLL_ARCHIVE_URL%", get_option('poll_archive_url'), $template_pollarchivelink);
+	$template_pollarchivelink = str_replace("%POLL_ARCHIVE_URL%", esc_url( get_option('poll_archive_url') ), $template_pollarchivelink);
 	if($display) {
 		echo $template_pollarchivelink;
 	} else{
@@ -1492,7 +1502,8 @@ function vote_poll() {
 			// Poll Vote
 			case 'process':
 				try {
-					$poll_aid_array = array_unique( array_map('intval', array_map('sanitize_key', explode( ',', $_POST["poll_$poll_id"] ) ) ) );
+					$poll_answer_ids = isset( $_POST["poll_$poll_id"] ) ? $_POST["poll_$poll_id"] : '';
+					$poll_aid_array = array_unique( array_map('intval', array_map('sanitize_key', explode( ',', $poll_answer_ids ) ) ) );
 					echo vote_poll_process($poll_id, $poll_aid_array);
 				} catch (Exception $e) {
 					echo $e->getMessage();
@@ -1516,6 +1527,14 @@ function vote_poll() {
 add_action('wp_ajax_polls-admin', 'manage_poll');
 function manage_poll() {
 	global $wpdb;
+
+	// Every branch below is an administrative action. The per-action nonces are
+	// only ever rendered on pages that already require 'manage_polls', but check
+	// the capability itself rather than relying on the nonce for authorisation.
+	if( ! current_user_can( 'manage_polls' ) ) {
+		exit();
+	}
+
 	### Form Processing
 	if( isset( $_POST['action'] ) && sanitize_key( $_POST['action'] ) === 'polls-admin' ) {
 		if( ! empty( $_POST['do'] ) ) {
@@ -1842,6 +1861,18 @@ if( ! function_exists( 'removeslashes' ) ) {
 	}
 }
 
+
+### Function: Sanitize A 3 Or 6 Digit Hex Colour Stored Without Its Leading '#'
+function _polls_sanitize_hex_color( $color ) {
+	$color = substr( trim( (string) $color ), 0, 6 );
+
+	if ( ! preg_match( '/^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $color ) ) {
+		return '000000';
+	}
+
+	return $color;
+}
+
 ### Function: Activate Plugin
 register_activation_hook( __FILE__, 'polls_activation' );
 function polls_activation( $network_wide ) {
@@ -1859,6 +1890,99 @@ function polls_activation( $network_wide ) {
 		polls_activate();
 	}
 }
+
+### Function: Run Version Specific Upgrades
+// Plugin updates do not fire the activation hook, so the stored version is
+// checked on every admin request and the outstanding upgrades are run once.
+add_action( 'admin_init', 'polls_upgrade' );
+function polls_upgrade() {
+	$installed_version = get_option( 'poll_version' );
+
+	if ( WP_POLLS_VERSION === $installed_version ) {
+		return;
+	}
+
+	// Version 3.0.0: Inline onclick handlers were replaced by data-poll-* attributes.
+	if ( empty( $installed_version ) || version_compare( $installed_version, '3.0.0', '<' ) ) {
+		polls_upgrade_templates_onclick();
+	}
+
+	update_option( 'poll_version', WP_POLLS_VERSION );
+}
+
+
+### Function: Convert Inline onclick Handlers In The Footer Templates To data-poll-* Attributes
+// 'onclick' is no longer an allowed attribute in polls-templates.php, so a stored
+// template that still relies on it would lose its handler the next time the poll
+// templates are saved, leaving the vote button and the result/booth links dead.
+function polls_upgrade_templates_onclick() {
+	$option_names = array( 'poll_template_votefooter', 'poll_template_resultfooter2' );
+
+	foreach ( $option_names as $option_name ) {
+		$template = get_option( $option_name );
+
+		if ( ! is_string( $template ) || stripos( $template, 'onclick' ) === false ) {
+			continue;
+		}
+
+		// onclick="poll_result(%POLL_ID%); return false;" => data-poll-id="%POLL_ID%" data-poll-action="result"
+		$migrated = preg_replace(
+			'/onclick\s*=\s*\\\\?(["\'])\s*poll_(vote|result|booth)\s*\(\s*%POLL_ID%\s*\)\s*;?\s*(?:return\s+false\s*;?\s*)?\\\\?\1/i',
+			'data-poll-id="%POLL_ID%" data-poll-action="$2"',
+			$template
+		);
+
+		if ( null !== $migrated && $migrated !== $template ) {
+			update_option( $option_name, $migrated );
+		}
+	}
+}
+
+
+### Function: Warn When A Poll Template Still Relies On An Inline onclick Handler
+// Since 3.0.0 the scripts export nothing, so an onclick left behind by a
+// customised template no longer calls anything at all. The upgrade converts
+// the stock templates automatically; this covers the ones too customised to
+// convert, which would otherwise fail silently on the front end.
+add_action( 'admin_notices', 'polls_onclick_notice' );
+function polls_onclick_notice() {
+	global $hook_suffix;
+
+	$poll_admin_pages = array( 'wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php' );
+	if ( ! in_array( $hook_suffix, $poll_admin_pages, true ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_polls' ) || ! polls_templates_have_onclick() ) {
+		return;
+	}
+
+	echo '<div class="notice notice-warning"><p>';
+	echo wp_kses_post( __( '<strong>WP-Polls:</strong> one of your poll templates still uses an inline <code>onclick</code> handler. Inline handlers are no longer used, so the vote button or the result/vote links in that template will not do anything.', 'wp-polls' ) );
+	echo '</p><p>';
+	printf(
+		wp_kses_post( __( 'Open <a href="%s">Poll Templates</a> and press <strong>Restore Default Template</strong> on the Voting Form Footer and Result Footer, or replace the handler yourself with <code>data-poll-id="%%POLL_ID%%"</code> and <code>data-poll-action="vote"</code> (or <code>result</code> / <code>booth</code>).', 'wp-polls' ) ),
+		esc_url( admin_url( 'admin.php?page=wp-polls/polls-templates.php' ) )
+	);
+	echo '</p></div>';
+}
+
+
+### Function: Check Whether Any Poll Template Still Contains An Inline onclick Handler
+function polls_templates_have_onclick() {
+	$option_names = array( 'poll_template_votefooter', 'poll_template_resultfooter2' );
+
+	foreach ( $option_names as $option_name ) {
+		$template = get_option( $option_name );
+
+		if ( is_string( $template ) && stripos( $template, 'onclick' ) !== false ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 
 function polls_activate() {
 	global $wpdb;
@@ -2025,5 +2149,11 @@ function polls_activate() {
 	if( ! $role->has_cap( 'manage_polls' ) ) {
 		$role->add_cap( 'manage_polls' );
 	}
+
+	// Run any outstanding version upgrades and record the current version.
+	// Called here as well as on 'admin_init' so that network activation
+	// upgrades every site while it is switched to.
+	polls_upgrade();
+
 	cron_polls_place();
 }

@@ -29,8 +29,8 @@ if( $handle = @opendir( $pollbar_path ) ) {
 if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	check_admin_referer('wp-polls_options');
 	$poll_bar_style             = isset( $_POST['poll_bar_style'] ) && in_array( $_POST['poll_bar_style'], array_merge( array_keys( $poll_bars ), array( 'use_css' ) ), true ) ? $_POST['poll_bar_style'] : 'default';
-	$poll_bar_background        = isset( $_POST['poll_bar_bg'] ) ? substr( strip_tags( trim( $_POST['poll_bar_bg'] ) ), 0, 6 ) : '000000';
-	$poll_bar_border            = isset( $_POST['poll_bar_border'] ) ? substr( strip_tags( trim( $_POST['poll_bar_border'] ) ), 0, 6 ) : '000000';
+	$poll_bar_background        = isset( $_POST['poll_bar_bg'] ) ? _polls_sanitize_hex_color( $_POST['poll_bar_bg'] ) : '000000';
+	$poll_bar_border            = isset( $_POST['poll_bar_border'] ) ? _polls_sanitize_hex_color( $_POST['poll_bar_border'] ) : '000000';
 	$poll_bar_height            = isset( $_POST['poll_bar_height'] ) ? (int) sanitize_key( $_POST['poll_bar_height'] ) : 10;
 	$poll_bar                   = array(
 		'style'         => $poll_bar_style,
@@ -113,27 +113,74 @@ if ( empty( $poll_options ) ) {
 ?>
 <script type="text/javascript">
 /* <![CDATA[*/
+(function () {
+	function poll_field_value(id) {
+		var field = document.getElementById(id);
+		return field ? field.value : "";
+	}
 	function set_pollbar_height(height) {
-			jQuery("#poll_bar_height").val(height);
+		var field = document.getElementById("poll_bar_height");
+		if(field) {
+			field.value = height;
+		}
 	}
 	function update_pollbar(where) {
-		pollbar_background = "#" + jQuery("#poll_bar_bg").val();
-		pollbar_border = "#" + jQuery("#poll_bar_border").val();
-		pollbar_height = jQuery("#poll_bar_height").val() + "px";
-		if(where  == "background") {
-			jQuery("#wp-polls-pollbar-bg").css("background-color", pollbar_background);
+		var pollbar_background = "#" + poll_field_value("poll_bar_bg");
+		var pollbar_border = "#" + poll_field_value("poll_bar_border");
+		var pollbar_height = poll_field_value("poll_bar_height") + "px";
+		var preview = document.getElementById("wp-polls-pollbar");
+		if(where == "background") {
+			var background_preview = document.getElementById("wp-polls-pollbar-bg");
+			if(background_preview) {
+				background_preview.style.backgroundColor = pollbar_background;
+			}
 		} else if(where == "border") {
-			jQuery("#wp-polls-pollbar-border").css("background-color", pollbar_border);
+			var border_preview = document.getElementById("wp-polls-pollbar-border");
+			if(border_preview) {
+				border_preview.style.backgroundColor = pollbar_border;
+			}
 		} else if(where == "style") {
-			pollbar_style = jQuery("input[name='poll_bar_style']:checked").val();
-			if(pollbar_style == "use_css") {
-				jQuery("#wp-polls-pollbar").css("background-image", "none");
-			} else {
-				jQuery("#wp-polls-pollbar").css("background-image", "url('<?php echo plugins_url('wp-polls/images/'); ?>" + pollbar_style + "/pollbg.gif')");
+			var checked_style = document.querySelector("input[name='poll_bar_style']:checked");
+			var pollbar_style = checked_style ? checked_style.value : "";
+			if(preview) {
+				if(pollbar_style == "use_css") {
+					preview.style.backgroundImage = "none";
+				} else {
+					preview.style.backgroundImage = "url('<?php echo esc_url( plugins_url('wp-polls/images/') ); ?>" + pollbar_style + "/pollbg.gif')";
+				}
 			}
 		}
-		jQuery("#wp-polls-pollbar").css({"background-color":pollbar_background, "border":"1px solid " + pollbar_border, "height":pollbar_height});
+		if(preview) {
+			preview.style.backgroundColor = pollbar_background;
+			preview.style.border = "1px solid " + pollbar_border;
+			preview.style.height = pollbar_height;
+		}
 	}
+	document.addEventListener("click", function (event) {
+		var target = event.target;
+		if(!target || typeof target.closest !== "function") {
+			return;
+		}
+		var radio = target.closest('[data-poll-action="pollbar-style"]');
+		if(radio) {
+			var height = radio.getAttribute("data-poll-height");
+			if(height) {
+				set_pollbar_height(height);
+			}
+			update_pollbar("style");
+		}
+	});
+	document.addEventListener("focusout", function (event) {
+		var target = event.target;
+		if(!target || typeof target.closest !== "function") {
+			return;
+		}
+		var field = target.closest('[data-poll-action="pollbar-update"]');
+		if(field) {
+			update_pollbar(field.getAttribute("data-poll-field") || "");
+		}
+	});
+})();
 /* ]]> */
 </script>
 <?php if(!empty($text)) { echo '<!-- Last Action --><div id="message" class="updated fade"><p>'.$text.'</p></div>'; } ?>
@@ -152,44 +199,49 @@ if ( empty( $poll_options ) ) {
 					$pollbar_url = plugins_url('wp-polls/images');
 					if( count( $poll_bars ) > 0 ) {
 						foreach( $poll_bars as $filename => $pollbar_info ) {
+							$pollbar_name  = esc_attr( $filename );
+							$pollbar_img_h = (int) $pollbar_info[1];
 							echo '<p>'."\n";
 							if($pollbar['style'] == $filename) {
-								echo '<input type="radio" id="poll_bar_style-'.$filename.'" name="poll_bar_style" value="'.$filename.'" checked="checked" onclick="set_pollbar_height('.$pollbar_info[1].'); update_pollbar(\'style\');" />';
+								echo '<input type="radio" id="poll_bar_style-'.$pollbar_name.'" name="poll_bar_style" value="'.$pollbar_name.'" checked="checked" data-poll-action="pollbar-style" data-poll-height="'.$pollbar_img_h.'" />';
 							} else {
-								echo '<input type="radio" id="poll_bar_style-'.$filename.'" name="poll_bar_style" value="'.$filename.'" onclick="set_pollbar_height('.$pollbar_info[1].'); update_pollbar(\'style\');" />';
+								echo '<input type="radio" id="poll_bar_style-'.$pollbar_name.'" name="poll_bar_style" value="'.$pollbar_name.'" data-poll-action="pollbar-style" data-poll-height="'.$pollbar_img_h.'" />';
 							}
-							echo '<label for="poll_bar_style-'.$filename.'">&nbsp;&nbsp;&nbsp;';
-							echo '<img src="'.$pollbar_url.'/'.$filename.'/pollbg.gif" height="'.$pollbar_info[1].'" width="100" alt="pollbg.gif" />';
-							echo '&nbsp;&nbsp;&nbsp;('.$filename.')</label>';
+							echo '<label for="poll_bar_style-'.$pollbar_name.'">&nbsp;&nbsp;&nbsp;';
+							echo '<img src="'.esc_url( $pollbar_url.'/'.$filename.'/pollbg.gif' ).'" height="'.$pollbar_img_h.'" width="100" alt="pollbg.gif" />';
+							echo '&nbsp;&nbsp;&nbsp;('.esc_html( $filename ).')</label>';
 							echo '</p>'."\n";
 						}
 					}
 				?>
-				<input type="radio" id="poll_bar_style-use_css" name="poll_bar_style" value="use_css"<?php checked('use_css', $pollbar['style']); ?> onclick="update_pollbar('style');" /><label for="poll_bar_style-use_css"> <?php _e('Use CSS Style', 'wp-polls'); ?></label>
+				<input type="radio" id="poll_bar_style-use_css" name="poll_bar_style" value="use_css"<?php checked('use_css', $pollbar['style']); ?> data-poll-action="pollbar-style" /><label for="poll_bar_style-use_css"> <?php _e('Use CSS Style', 'wp-polls'); ?></label>
 			</td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Poll Bar Background', 'wp-polls'); ?></th>
-			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_bg" name="poll_bar_bg" value="<?php echo esc_attr( $pollbar['background'] ); ?>" size="6" maxlength="6" onblur="update_pollbar('background');" /></td>
-			<td><div id="wp-polls-pollbar-bg" style="background-color: #<?php echo $pollbar['background']; ?>;"></div></td>
+			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_bg" name="poll_bar_bg" value="<?php echo esc_attr( $pollbar['background'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="background" /></td>
+			<td><div id="wp-polls-pollbar-bg" style="background-color: #<?php echo esc_attr( _polls_sanitize_hex_color( $pollbar['background'] ) ); ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Poll Bar Border', 'wp-polls'); ?></th>
-			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_border" name="poll_bar_border" value="<?php echo esc_attr( $pollbar['border'] ); ?>" size="6" maxlength="6" onblur="update_pollbar('border');" /></td>
-			<td><div id="wp-polls-pollbar-border" style="background-color: #<?php echo $pollbar['border']; ?>;"></div></td>
+			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_border" name="poll_bar_border" value="<?php echo esc_attr( $pollbar['border'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="border" /></td>
+			<td><div id="wp-polls-pollbar-border" style="background-color: #<?php echo esc_attr( _polls_sanitize_hex_color( $pollbar['border'] ) ); ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Poll Bar Height', 'wp-polls'); ?></th>
-			<td colspan="2" dir="ltr"><input type="text" id="poll_bar_height" name="poll_bar_height" value="<?php echo $pollbar['height']; ?>" size="2" maxlength="2" onblur="update_pollbar('height');" />px</td>
+			<td colspan="2" dir="ltr"><input type="text" id="poll_bar_height" name="poll_bar_height" value="<?php echo esc_attr( $pollbar['height'] ); ?>" size="2" maxlength="2" data-poll-action="pollbar-update" data-poll-field="height" />px</td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e('Your poll bar will look like this', 'wp-polls'); ?></th>
 			<td colspan="2">
 				<?php
+					$pollbar_height     = (int) $pollbar['height'];
+					$pollbar_background = esc_attr( _polls_sanitize_hex_color( $pollbar['background'] ) );
+					$pollbar_border     = esc_attr( _polls_sanitize_hex_color( $pollbar['border'] ) );
 					if($pollbar['style'] == 'use_css') {
-						echo '<div id="wp-polls-pollbar" style="width: 100px; height: '.$pollbar['height'].'px; background-color: #'.$pollbar['background'].'; border: 1px solid #'.$pollbar['border'].'"></div>'."\n";
+						echo '<div id="wp-polls-pollbar" style="width: 100px; height: '.$pollbar_height.'px; background-color: #'.$pollbar_background.'; border: 1px solid #'.$pollbar_border.'"></div>'."\n";
 					} else {
-						echo '<div id="wp-polls-pollbar" style="width: 100px; height: '.$pollbar['height'].'px; background-color: #'.$pollbar['background'].'; border: 1px solid #'.$pollbar['border'].'; background-image: url(\''.plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif').'\');"></div>'."\n";
+						echo '<div id="wp-polls-pollbar" style="width: 100px; height: '.$pollbar_height.'px; background-color: #'.$pollbar_background.'; border: 1px solid #'.$pollbar_border.'; background-image: url(\''.esc_url( plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif') ).'\');"></div>'."\n";
 					}
 				?>
 			</td>
