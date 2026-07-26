@@ -175,19 +175,19 @@ class Polls_Admin {
 	 */
 	public static function poll_timestamp( $poll_timestamp, $fieldname = 'pollq_timestamp', $display = 'block' ) {
 		global $month;
-		echo '<div id="' . $fieldname . '" style="display: ' . $display . '">' . "\n";
+		echo '<div id="' . esc_attr( $fieldname ) . '" style="display: ' . esc_attr( $display ) . '">' . "\n";
 		$day = (int) gmdate( 'j', $poll_timestamp );
-		echo '<select name="' . $fieldname . '_day" size="1">' . "\n";
+		echo '<select name="' . esc_attr( $fieldname ) . '_day" size="1">' . "\n";
 		for ( $i = 1; $i <= 31; $i++ ) {
 			if ( $day === $i ) {
-				echo "<option value=\"$i\" selected=\"selected\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . "</option>\n";
 			} else {
-				echo "<option value=\"$i\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . "</option>\n";
 			}
 		}
 		echo '</select>&nbsp;&nbsp;' . "\n";
 		$month2 = (int) gmdate( 'n', $poll_timestamp );
-		echo '<select name="' . $fieldname . '_month" size="1">' . "\n";
+		echo '<select name="' . esc_attr( $fieldname ) . '_month" size="1">' . "\n";
 		for ( $i = 1; $i <= 12; $i++ ) {
 			if ( $i < 10 ) {
 				$ii = '0' . $i;
@@ -195,51 +195,51 @@ class Polls_Admin {
 				$ii = $i;
 			}
 			if ( $month2 === $i ) {
-				echo "<option value=\"$i\" selected=\"selected\">$month[$ii]</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $month[ $ii ] ) . "</option>\n";
 			} else {
-				echo "<option value=\"$i\">$month[$ii]</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $month[ $ii ] ) . "</option>\n";
 			}
 		}
 		echo '</select>&nbsp;&nbsp;' . "\n";
 		$year = (int) gmdate( 'Y', $poll_timestamp );
-		echo '<select name="' . $fieldname . '_year" size="1">' . "\n";
+		echo '<select name="' . esc_attr( $fieldname ) . '_year" size="1">' . "\n";
 		for ( $i = 2000; $i <= ( $year + 10 ); $i++ ) {
 			if ( $year === $i ) {
-				echo "<option value=\"$i\" selected=\"selected\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . "</option>\n";
 			} else {
-				echo "<option value=\"$i\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . "</option>\n";
 			}
 		}
 		echo '</select>&nbsp;@' . "\n";
 		echo '<span dir="ltr">' . "\n";
 		$hour = (int) gmdate( 'H', $poll_timestamp );
-		echo '<select name="' . $fieldname . '_hour" size="1">' . "\n";
+		echo '<select name="' . esc_attr( $fieldname ) . '_hour" size="1">' . "\n";
 		for ( $i = 0; $i < 24; $i++ ) {
 			if ( $hour === $i ) {
-				echo "<option value=\"$i\" selected=\"selected\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . "</option>\n";
 			} else {
-				echo "<option value=\"$i\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . "</option>\n";
 			}
 		}
 		echo '</select>&nbsp;:' . "\n";
 		$minute = (int) gmdate( 'i', $poll_timestamp );
-		echo '<select name="' . $fieldname . '_minute" size="1">' . "\n";
+		echo '<select name="' . esc_attr( $fieldname ) . '_minute" size="1">' . "\n";
 		for ( $i = 0; $i < 60; $i++ ) {
 			if ( $minute === $i ) {
-				echo "<option value=\"$i\" selected=\"selected\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . "</option>\n";
 			} else {
-				echo "<option value=\"$i\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . "</option>\n";
 			}
 		}
 
 		echo '</select>&nbsp;:' . "\n";
 		$second = (int) gmdate( 's', $poll_timestamp );
-		echo '<select name="' . $fieldname . '_second" size="1">' . "\n";
+		echo '<select name="' . esc_attr( $fieldname ) . '_second" size="1">' . "\n";
 		for ( $i = 0; $i <= 60; $i++ ) {
 			if ( $second === $i ) {
-				echo "<option value=\"$i\" selected=\"selected\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( $i ) . "</option>\n";
 			} else {
-				echo "<option value=\"$i\">$i</option>\n";
+				echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . "</option>\n";
 			}
 		}
 		echo '</select>' . "\n";
@@ -265,7 +265,10 @@ class Polls_Admin {
 		}
 
 		// Form Processing.
-		if ( isset( $_POST['action'] ) && sanitize_key( $_POST['action'] ) === 'polls-admin' ) {
+		// Each branch below calls check_ajax_referer() with its own action before
+		// touching anything; the dispatch itself only reads which branch to take.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['action'] ) && 'polls-admin' === sanitize_key( wp_unslash( $_POST['action'] ) ) ) {
 			if ( ! empty( $_POST['do'] ) ) {
 				// Set Header.
 				header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) . '' );
@@ -275,12 +278,12 @@ class Polls_Admin {
 					// Delete Polls Logs.
 					case __( 'Delete All Logs', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_delete-polls-logs' );
-						if ( sanitize_key( trim( $_POST['delete_logs_yes'] ) ) === 'yes' ) {
+						if ( isset( $_POST['delete_logs_yes'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['delete_logs_yes'] ) ) ) {
 							$delete_logs = $wpdb->query( "DELETE FROM $wpdb->pollsip" );
 							if ( $delete_logs ) {
-								echo '<p style="color: green;">' . __( 'All Polls Logs Have Been Deleted.', 'wp-polls' ) . '</p>';
+								echo wp_kses_post( '<p style="color: green;">' . __( 'All Polls Logs Have Been Deleted.', 'wp-polls' ) . '</p>' );
 							} else {
-								echo '<p style="color: red;">' . __( 'An Error Has Occurred While Deleting All Polls Logs.', 'wp-polls' ) . '</p>';
+								echo wp_kses_post( '<p style="color: red;">' . __( 'An Error Has Occurred While Deleting All Polls Logs.', 'wp-polls' ) . '</p>' );
 							}
 						}
 						break;
@@ -289,14 +292,14 @@ class Polls_Admin {
 						check_ajax_referer( 'wp-polls_delete-poll-logs' );
 						$pollq_id       = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
 						$pollq_question = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d", $pollq_id ) );
-						if ( sanitize_key( trim( $_POST['delete_logs_yes'] ) ) === 'yes' ) {
+						if ( isset( $_POST['delete_logs_yes'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['delete_logs_yes'] ) ) ) {
 							$delete_logs = $wpdb->delete( $wpdb->pollsip, array( 'pollip_qid' => $pollq_id ), array( '%d' ) );
 							if ( $delete_logs ) {
 								/* translators: %s: value. */
-								echo '<p style="color: green;">' . sprintf( __( 'All Logs For \'%s\' Has Been Deleted.', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
+								echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'All Logs For \'%s\' Has Been Deleted.', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
 							} else {
 								/* translators: %s: value. */
-								echo '<p style="color: red;">' . sprintf( __( 'An Error Has Occurred While Deleting All Logs For \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
+								echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'An Error Has Occurred While Deleting All Logs For \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
 							}
 						}
 						break;
@@ -327,10 +330,10 @@ class Polls_Admin {
 						$update_pollq_totalvotes = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes - $polla_votes) WHERE pollq_id = $pollq_id" );
 						if ( $delete_polla_answers ) {
 							/* translators: %s: value. */
-							echo '<p style="color: green;">' . sprintf( __( 'Poll Answer \'%s\' Deleted Successfully.', 'wp-polls' ), $polla_answers ) . '</p>';
+							echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'Poll Answer \'%s\' Deleted Successfully.', 'wp-polls' ), $polla_answers ) . '</p>' );
 						} else {
 							/* translators: %s: value. */
-							echo '<p style="color: red;">' . sprintf( __( 'Error In Deleting Poll Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p>';
+							echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'Error In Deleting Poll Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p>' );
 						}
 						break;
 					// Open Poll.
@@ -355,10 +358,10 @@ class Polls_Admin {
 						);
 						if ( $open_poll ) {
 							/* translators: %s: value. */
-							echo '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Is Now Opened', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
+							echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Is Now Opened', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
 						} else {
 							/* translators: %s: value. */
-							echo '<p style="color: red;">' . sprintf( __( 'Error Opening Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
+							echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'Error Opening Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
 						}
 						break;
 					// Close Poll.
@@ -383,10 +386,10 @@ class Polls_Admin {
 						);
 						if ( $close_poll ) {
 							/* translators: %s: value. */
-							echo '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Is Now Closed', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
+							echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Is Now Closed', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
 						} else {
 							/* translators: %s: value. */
-							echo '<p style="color: red;">' . sprintf( __( 'Error Closing Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
+							echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'Error Closing Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
 						}
 						break;
 					// Delete Poll.
@@ -400,11 +403,11 @@ class Polls_Admin {
 						$poll_option_lastestpoll = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'poll_latestpoll'" );
 						if ( ! $delete_poll_question ) {
 							/* translators: %s: value. */
-							echo '<p style="color: red;">' . sprintf( __( 'Error In Deleting Poll \'%s\' Question', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
+							echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'Error In Deleting Poll \'%s\' Question', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
 						}
 						if ( empty( $text ) ) {
 							/* translators: %s: value. */
-							echo '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Deleted Successfully', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>';
+							echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Deleted Successfully', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
 						}
 
 						// Update Lastest Poll ID To Poll Options.
