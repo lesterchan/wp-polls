@@ -1,4 +1,10 @@
 <?php
+/**
+ * Add Poll admin screen.
+ *
+ * @package WP-Polls
+ */
+
 // Check Whether User Can Manage Polls.
 if ( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
@@ -17,7 +23,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			check_admin_referer( 'wp-polls_add-poll' );
 			$text = '';
 			// Poll Question.
-			$pollq_question = isset( $_POST['pollq_question'] ) ? wp_kses_post( trim( $_POST['pollq_question'] ) ) : '';
+			$pollq_question = isset( $_POST['pollq_question'] ) ? trim( wp_kses_post( wp_unslash( $_POST['pollq_question'] ) ) ) : '';
 			if ( ! empty( $pollq_question ) ) {
 				// Poll Start Date.
 				$timestamp_sql          = '';
@@ -84,7 +90,7 @@ if ( ! empty( $_POST['do'] ) ) {
 					$text .= '<p style="color: red;">' . sprintf( __( 'Error In Adding Poll \'%s\'.', 'wp-polls' ), $pollq_question ) . '</p>';
 				}
 				// Add Poll Answers.
-				$polla_answers = isset( $_POST['polla_answers'] ) ? $_POST['polla_answers'] : array();
+				$polla_answers = isset( $_POST['polla_answers'] ) ? array_map( 'trim', array_map( 'wp_kses_post', wp_unslash( (array) $_POST['polla_answers'] ) ) ) : array();
 				$polla_qid     = (int) $wpdb->insert_id;
 				foreach ( $polla_answers as $polla_answer ) {
 					$polla_answer = wp_kses_post( trim( $polla_answer ) );
@@ -137,7 +143,7 @@ $count           = 0;
 ?>
 <?php
 if ( ! empty( $text ) ) {
-	echo '<!-- Last Action --><div id="message" class="updated fade">' . removeslashes( $text ) . '</div>'; }
+	echo wp_kses_post( '<!-- Last Action --><div id="message" class="updated fade">' . removeslashes( $text ) . '</div>' ); }
 ?>
 <form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . plugin_basename( __FILE__ ) ) ); ?>">
 <?php wp_nonce_field( 'wp-polls_add-poll' ); ?>
@@ -163,9 +169,12 @@ if ( ! empty( $text ) ) {
 		<tbody id="poll_answers">
 		<?php
 		for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
-			echo "<tr id=\"poll-answer-$i\">\n";
-			/* translators: %s: value. */
-			echo '<th width="20%" scope="row" valign="top">' . sprintf( __( 'Answer %s', 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . "</th>\n";
+			echo '<tr id="poll-answer-' . esc_attr( $i ) . '">' . "\n";
+			/* translators: %s: answer number. */
+			echo wp_kses_post( '<th width="20%" scope="row" valign="top">' . sprintf( __( 'Answer %s', 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . '</th>' ) . "\n";
+			// wp_kses_post() would strip both <input> elements this row is made
+			// of. The markup is a literal; the only interpolation is esc_attr'd.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '<td width="80%"><input type="text" size="50" maxlength="200" name="polla_answers[]" />&nbsp;&nbsp;&nbsp;<input type="button" value="' . esc_attr__( 'Remove', 'wp-polls' ) . '" data-poll-action="remove-answer" data-poll-answer="' . $i . "\" class=\"button\" /></td>\n";
 			echo "</tr>\n";
 			++$count;
@@ -191,7 +200,7 @@ if ( ! empty( $text ) ) {
 				<select name="pollq_multiple" id="pollq_multiple" size="1" disabled="disabled">
 					<?php
 					for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
-						echo "<option value=\"$i\">" . esc_html( number_format_i18n( $i ) ) . "</option>\n";
+						echo '<option value="' . esc_attr( $i ) . '">' . esc_html( number_format_i18n( $i ) ) . "</option>\n";
 					}
 					?>
 				</select>
