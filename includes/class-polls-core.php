@@ -18,23 +18,11 @@ class Polls_Core {
 	 * @return void
 	 */
 	public static function init() {
-		add_action( 'plugins_loaded', array( __CLASS__, 'polls_textdomain' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'poll_scripts' ) );
 		add_action( 'widgets_init', array( __CLASS__, 'widget_polls_init' ) );
 		add_action( 'polls_cron', array( __CLASS__, 'cron_polls_status' ) );
 		add_shortcode( 'page_polls', array( __CLASS__, 'poll_page_shortcode' ) );
 		add_shortcode( 'poll', array( __CLASS__, 'poll_shortcode' ) );
-	}
-
-	// Create Text Domain For Translations.
-
-	/**
-	 * Polls textdomain.
-	 *
-	 * @return mixed
-	 */
-	public static function polls_textdomain() {
-		load_plugin_textdomain( 'wp-polls' );
 	}
 
 	// Function: Enqueue Polls JavaScripts/CSS.
@@ -202,7 +190,6 @@ class Polls_Core {
 	 * @return mixed
 	 */
 	public static function widget_polls_init() {
-		self::polls_textdomain();
 		register_widget( 'Polls_Widget' );
 	}
 
