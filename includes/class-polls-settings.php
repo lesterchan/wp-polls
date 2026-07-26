@@ -2,7 +2,7 @@
 /**
  * Settings API registration for the Poll Options and Poll Templates screens.
  *
- * Both screens write into the same wp_polls row. That matters: the Settings
+ * Both screens write into the same poll_options row. That matters: the Settings
  * API hands sanitize_callback only the fields the submitting form rendered,
  * and update_option() then replaces the entire row - so a naive callback that
  * returns its input would erase whichever half of the settings the other
@@ -24,7 +24,7 @@ class Polls_Settings {
 	 *
 	 * @var string
 	 */
-	const GROUP = 'wp_polls_settings';
+	const GROUP = 'poll_options_group';
 
 	/**
 	 * Hook registration.

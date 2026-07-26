@@ -3,7 +3,9 @@
  * Consolidated option storage for WP-Polls.
  *
  * Everything the plugin configures lives in one wp_options row holding a
- * nested array, rather than the thirty separate rows used up to 3.0.0. The
+ * nested array, rather than the thirty separate rows used up to 3.0.0. It
+ * reuses the existing poll_options name, which before 4.0.0 held only the
+ * ip_header setting. The
  * value is a plain PHP array: update_option() serialises it and get_option()
  * unserialises it, so there is no encode/decode layer at the call sites and
  * register_setting()'s sanitize_callback receives the structure intact.
@@ -19,7 +21,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Reads and writes the single wp_polls option.
+ * Reads and writes the single poll_options row.
  */
 class Polls_Options {
 
@@ -28,7 +30,7 @@ class Polls_Options {
 	 *
 	 * @var string
 	 */
-	const OPTION = 'wp_polls';
+	const OPTION = 'poll_options';
 
 	/**
 	 * Runtime cache so a page render does not re-read the row per lookup.
@@ -99,13 +101,14 @@ class Polls_Options {
 	/**
 	 * Legacy rows that carry no value forward but must still be cleaned up.
 	 *
-	 * poll_options only ever held ip_header, which is promoted to a top level
-	 * key. poll_archive_show was already dead before 3.0.0.
+	 * poll_archive_show was already dead before 3.0.0. poll_options is NOT
+	 * listed: it is the row the settings now live in, so deleting it would
+	 * throw away everything the migration just wrote.
 	 *
 	 * @return array
 	 */
 	public static function legacy_extra_rows() {
-		return array( 'poll_options', 'poll_archive_show' );
+		return array( 'poll_archive_show' );
 	}
 
 	/**
@@ -264,7 +267,7 @@ class Polls_Options {
 	public static function migrate_from_legacy_rows() {
 		// Start from whatever is already stored, not from the defaults. The
 		// version gate is the primary guard, but it is not sufficient on its
-		// own: an install whose poll_version row is missing while wp_polls
+		// own: an install whose poll_version row is missing while poll_options
 		// survives - a partial restore, a downgrade and re-upgrade, an
 		// over-eager cleanup plugin - would otherwise have every setting
 		// overwritten with defaults, because there are no legacy rows left to
@@ -288,11 +291,9 @@ class Polls_Options {
 			}
 		}
 
-		// poll_options was a one-key bag; promote its only member.
-		$poll_options = get_option( 'poll_options', array() );
-		if ( is_array( $poll_options ) && isset( $poll_options['ip_header'] ) ) {
-			$values['ip_header'] = $poll_options['ip_header'];
-		}
+		// Pre-4.0.0 the row held only { ip_header: ... }. No special case is
+		// needed: it is the same row, so all() above already merged that single
+		// key over the defaults.
 
 		self::save( $values );
 

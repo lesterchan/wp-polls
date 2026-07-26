@@ -187,7 +187,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="voteheader" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_voteheader" name="wp_polls[templates][voteheader]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.voteheader' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_voteheader" name="poll_options[templates][voteheader]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.voteheader' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -200,7 +200,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_CHECKBOX_RADIO%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="votebody" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_votebody" name="wp_polls[templates][votebody]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.votebody' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_votebody" name="poll_options[templates][votebody]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.votebody' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -211,7 +211,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 					<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="votefooter" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_votefooter" name="wp_polls[templates][votefooter]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.votefooter' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_votefooter" name="poll_options[templates][votefooter]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.votefooter' ) ) ); ?></textarea></td>
 		</tr>
 	</table>
 
@@ -231,7 +231,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="resultheader" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultheader" name="wp_polls[templates][resultheader]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultheader' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultheader" name="poll_options[templates][resultheader]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultheader' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -247,7 +247,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="resultbody" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody" name="wp_polls[templates][resultbody]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultbody' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody" name="poll_options[templates][resultbody]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultbody' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -263,7 +263,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="resultbody2" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody2" name="wp_polls[templates][resultbody2]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultbody2' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody2" name="poll_options[templates][resultbody2]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultbody2' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -283,7 +283,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="resultfooter" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter" name="wp_polls[templates][resultfooter]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultfooter' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter" name="poll_options[templates][resultfooter]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultfooter' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -303,7 +303,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="resultfooter2" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter2" name="wp_polls[templates][resultfooter2]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultfooter2' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultfooter2" name="poll_options[templates][resultfooter2]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultfooter2' ) ) ); ?></textarea></td>
 		</tr>
 	</table>
 
@@ -317,7 +317,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_ARCHIVE_URL%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="pollarchivelink" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchivelink" name="wp_polls[templates][pollarchivelink]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchivelink' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchivelink" name="poll_options[templates][pollarchivelink]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchivelink' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -326,7 +326,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- <?php _e( 'N/A', 'wp-polls' ); ?></p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="pollarchiveheader" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchiveheader" name="wp_polls[templates][pollarchiveheader]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchiveheader' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchiveheader" name="poll_options[templates][pollarchiveheader]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchiveheader' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -345,7 +345,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANS_MAX%</p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="pollarchivefooter" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchivefooter" name="wp_polls[templates][pollarchivefooter]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchivefooter' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchivefooter" name="poll_options[templates][pollarchivefooter]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchivefooter' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -354,7 +354,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- <?php _e( 'N/A', 'wp-polls' ); ?></p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="pollarchivepagingheader" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchivepagingheader" name="wp_polls[templates][pollarchivepagingheader]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchivepagingheader' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchivepagingheader" name="poll_options[templates][pollarchivepagingheader]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchivepagingheader' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -363,7 +363,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- <?php _e( 'N/A', 'wp-polls' ); ?></p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="pollarchivepagingfooter" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchivepagingfooter" name="wp_polls[templates][pollarchivepagingfooter]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchivepagingfooter' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_pollarchivepagingfooter" name="poll_options[templates][pollarchivepagingfooter]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.pollarchivepagingfooter' ) ) ); ?></textarea></td>
 		</tr>
 	</table>
 
@@ -377,7 +377,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- <?php _e( 'N/A', 'wp-polls' ); ?></p><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="disable" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_disable" name="wp_polls[templates][disable]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.disable' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_disable" name="poll_options[templates][disable]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.disable' ) ) ); ?></textarea></td>
 		</tr>
 		<tr>
 			<td width="30%" valign="top">
@@ -386,7 +386,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 				<p style="margin: 2px 0">- <?php _e( 'N/A', 'wp-polls' ); ?><br /><br />
 				<input type="button" name="RestoreDefault" value="<?php _e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="error" class="button" />
 			</td>
-			<td valign="top"><textarea cols="80" rows="15" id="poll_template_error" name="wp_polls[templates][error]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.error' ) ) ); ?></textarea></td>
+			<td valign="top"><textarea cols="80" rows="15" id="poll_template_error" name="poll_options[templates][error]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.error' ) ) ); ?></textarea></td>
 		</tr>
 	</table>
 	<p class="submit">
