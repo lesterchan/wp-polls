@@ -21,7 +21,7 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
 
 ## Changelog
-### Version 3.0.0
+### 3.0.0
 * BREAKING: The scripts no longer define any global JavaScript functions. `poll_vote()`, `poll_result()`, `poll_booth()` and the admin equivalents are now private, so custom templates or themes that called them directly must move to `data-poll-id` / `data-poll-action` attributes. WP-Polls converts the stock templates for you on upgrade and warns in wp-admin about any it could not convert.
 * FIXED: XSS in polls-templates.php. Inline `onclick` handlers are replaced by `data-poll-action` / `data-poll-id` attributes and `onclick` is no longer an allowed attribute in poll templates.
 * ADDED: Upgrade routine that rewrites stored vote/result footer templates still using `onclick`, plus a warning on the Poll Templates page if any handler could not be converted automatically.
@@ -38,104 +38,104 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 #### Upgrade Notice
 If you customised the Voting Form Footer or Result Footer templates, WP-Polls converts the `onclick` handlers for you on upgrade. If your customisation was too far from the default to convert, the Poll Templates page tells you which handler to replace.
 
-### Version 2.77.3
+### 2.77.3
 * FIXED: XSS In poll-logs.php.
 
-### Version 2.77.2
+### 2.77.2
 * FIXED: Read from default REMOTE_ADDR unless specified in options
 
-### Version 2.77.1
+### 2.77.1
 * FIXED: Support mutex lock for multi-site. Props @yrkmann.
 
-### Version 2.77.0
+### 2.77.0
 * NEW: Use mutex lock to prevent race condition.
 
-### Version 2.76.0
+### 2.76.0
 * NEW: Supports specifying which header to read the user's IP from. Props Marc Montpas.
 
-### Version 2.75.6
+### 2.75.6
 * NEW: New filter for template variables: wp_polls_template_votebody_variables, wp_polls_template_votefooter, wp_polls_template_resultheader_variables, wp_polls_template_resultbody_variables, wp_polls_template_resultfooter_variables. Props @Liblastic.
 * NEW: composer.json
 * FIXED: Missing space for check_voted_username MySQL query
 
-### Version 2.75.5
+### 2.75.5
 * NEW: New filter for templates: wp_polls_template_resultheader_markup, wp_polls_template_resultbody_markup, wp_polls_template_resultbody2_markup, wp_polls_template_resultfooter_markup, wp_polls_template_resultfooter2_markup. Props @Jaska.
 
-### Version 2.75.4
+### 2.75.4
 * FIXED: Unable to edit poll because of class-wp-block-parser.php.
 
-### Version 2.75.3
+### 2.75.3
 * FIXED: Broken filter for templates
 * FIXED: Divison by 0 by totalvoters
 * FIXED: Add whitelist to sortby poll answers
 
-### Versiob 2.75.2
+### 2.75.2
 * FIXED: Missing str_replace for wp_polls_template filter
 
-### Version 2.75.1
+### 2.75.1
 * FIXED: Use array() instead of [] as a few users are still on < PHP 5.4. Props @bearlydoug.
 * FIXED: pollq_expiry is now 0 instead of blank string. Props @hpiirainen.
 
-### Version 2.75
+### 2.75
 * FIXED: Standardize all filters to begin with `wp_polls` rather than `poll`
 * NEW: Added `wp_polls_ipaddress` and `wp_polls_hostname` to allow user to overwrite it.
 
-### Version 2.74.1
+### 2.74.1
 * FIXED: Don't use PHP 5.4 Short array syntax.
 * FIXED: Division by zero 
 * FIXED: Wrong database column type for pollq_expiry
 
-### Version 2.74
+### 2.74
 * NEW: Hashed IP and anonymize Hostname to make it GDPR compliance
 * NEW: If Do Not Log is set in Poll Options, do not log to DB
 * NEW: Support %POLL_MULTIPLE_ANSWER_PERCENTAGE%. This is total votes divided by total voters.
 
-### Version 2.73.8
+### 2.73.8
 * FIXED: Bug fixes and stricter type checking
 
-### Version 2.73.7
+### 2.73.7
 * FIXED: Unable to save input HTML tags for footer templates
 
-### Version 2.73.6
+### 2.73.6
 * FIXED: Unable to vote for multiple answers
 * FIXED: input HTML tags being removed when saving templates
 
-### Version 2.73.5
+### 2.73.5
 * FIXED: Parsed error in SERVER variable.
 
-### Version 2.73.4
+### 2.73.4
 * FIXED: sanitize_key on top of intval.
 
-### Version 2.73.3
+### 2.73.3
 * NEW: Added sort by votes casted to poll answers.
 * NEW: For polls with mutiple answers, we divided by total votes instead of total voters. Props @ljxprime.
 * FIXED: Do not display poll option is not respected when poll is closed.
 * FIXED: pollip_qid, pollip_aid, pollip_timestamp are now int(10) in pollsip table.
 * FIXED: pollq_expiry is now int(10) in pollsq table.
 
-### Version 2.73.2
+### 2.73.2
 * NEW: Bump WordPress 4.7
 * FIXED: Change cron to hourly instead of twice daily.
 
-### Version 2.73.1
+### 2.73.1
 * FIXED: Allow local IP
 * FIXED: XSS on Poll bar option. Props [Netsparker Web Application Security Scanner](https://www.netsparker.com/)
 * FIXED: Stricter Poll pptions check
  
-### Version 2.73
+### 2.73
 * NEW: Display Poll Questions at the top of the Poll Logs table
 * FIXED: Remove slashes
 
-### Version 2.72
+### 2.72
 * NEW: Use translate.wordpress.org to translate the plugin
 * FIXED: SQL Injection fixes. Props [Jay Dansand](https://github.com/jaydansand)
 * FIXED: Use $wpdb->insert(), $wpdb->update() and $wpdb->delete() as much as possible
 * FIXED Remove poll_archive_show option from UI
 
-### Version 2.71
+### 2.71
 * FIXED: Use wp_kses_post() to get filter always bad tags
 
-### Version 2.70
+### 2.70
 * NEW: Add wp_polls_vote_poll_success action hook
 * NEW: Add wp_polls_add_poll, wp_polls_update_poll, wp_polls_delete_poll action hooks
 * FIXED: PHP Notices
