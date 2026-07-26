@@ -127,11 +127,19 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 			}
 		);
 
+		$depth = ob_get_level();
+		$html  = '';
+
 		try {
 			ob_start();
 			require WP_POLLS_DIR . $file;
-			$html = ob_get_clean();
 		} finally {
+			// check_admin_referer() calls wp_die(), which throws out of the
+			// require, so the buffer has to be closed here or it leaks into the
+			// next test and PHPUnit reports the run as risky.
+			while ( ob_get_level() > $depth ) {
+				$html = ob_get_clean() . $html;
+			}
 			restore_error_handler();
 			$_GET     = array();
 			$_POST    = array();
