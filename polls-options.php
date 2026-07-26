@@ -27,12 +27,12 @@ if ( $handle = @opendir( $pollbar_path ) ) {
 
 // Saving is handled by the Settings API: the form posts to options.php,
 // which validates the nonce and hands the input to Polls_Settings::sanitize().
-// cron_polls_place() still has to run afterwards because the cookie/log expiry
+// Polls_Core::cron_polls_place() still has to run afterwards because the cookie/log expiry
 // option decides the schedule.
 add_action(
 	'update_option_' . Polls_Options::OPTION,
 	function () {
-		cron_polls_place();
+		Polls_Core::cron_polls_place();
 	}
 );
 
@@ -147,12 +147,12 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Poll Bar Background', 'wp-polls' ); ?></th>
 			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_bg" name="poll_options[bar][background]" value="<?php echo esc_attr( $pollbar['background'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="background" /></td>
-			<td><div id="wp-polls-pollbar-bg" style="background-color: #<?php echo esc_attr( _polls_sanitize_hex_color( $pollbar['background'] ) ); ?>;"></div></td>
+			<td><div id="wp-polls-pollbar-bg" style="background-color: #<?php echo esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['background'] ) ); ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Poll Bar Border', 'wp-polls' ); ?></th>
 			<td width="10%" dir="ltr">#<input type="text" id="poll_bar_border" name="poll_options[bar][border]" value="<?php echo esc_attr( $pollbar['border'] ); ?>" size="6" maxlength="6" data-poll-action="pollbar-update" data-poll-field="border" /></td>
-			<td><div id="wp-polls-pollbar-border" style="background-color: #<?php echo esc_attr( _polls_sanitize_hex_color( $pollbar['border'] ) ); ?>;"></div></td>
+			<td><div id="wp-polls-pollbar-border" style="background-color: #<?php echo esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['border'] ) ); ?>;"></div></td>
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php _e( 'Poll Bar Height', 'wp-polls' ); ?></th>
@@ -163,8 +163,8 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 			<td colspan="2">
 				<?php
 					$pollbar_height     = (int) $pollbar['height'];
-					$pollbar_background = esc_attr( _polls_sanitize_hex_color( $pollbar['background'] ) );
-					$pollbar_border     = esc_attr( _polls_sanitize_hex_color( $pollbar['border'] ) );
+					$pollbar_background = esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['background'] ) );
+					$pollbar_border     = esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['border'] ) );
 				if ( $pollbar['style'] == 'use_css' ) {
 					echo '<div id="wp-polls-pollbar" style="width: 100px; height: ' . $pollbar_height . 'px; background-color: #' . $pollbar_background . '; border: 1px solid #' . $pollbar_border . '"></div>' . "\n";
 				} else {

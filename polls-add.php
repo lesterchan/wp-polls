@@ -109,7 +109,7 @@ if ( ! empty( $_POST['do'] ) ) {
 					}
 				}
 				// Update Lastest Poll ID To Poll Options
-				$latest_pollid     = polls_latest_id();
+				$latest_pollid     = Polls_Core::polls_latest_id();
 				$update_latestpoll = Polls_Options::set( 'latest_poll', $latest_pollid );
 				// If poll starts in the future use the correct poll ID
 				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
@@ -119,7 +119,7 @@ if ( ! empty( $_POST['do'] ) ) {
 						$text .= '<p style="color: green;">' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
 				}
 				do_action( 'wp_polls_add_poll', $latest_pollid );
-				cron_polls_place();
+				Polls_Core::cron_polls_place();
 			} else {
 				$text .= '<p style="color: red;">' . __( 'Poll Question is empty.', 'wp-polls' ) . '</p>';
 			}

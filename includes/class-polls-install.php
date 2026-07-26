@@ -305,6 +305,6 @@ class Polls_Install {
 		// upgrades every site while it is switched to.
 		self::upgrade();
 
-		cron_polls_place();
+		Polls_Core::cron_polls_place();
 	}
 }

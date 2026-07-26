@@ -87,8 +87,8 @@ class Polls_Settings {
 		if ( isset( $input['bar'] ) && is_array( $input['bar'] ) ) {
 			$bar                          = $input['bar'];
 			$current['bar']['style']      = isset( $bar['style'] ) ? sanitize_text_field( $bar['style'] ) : $current['bar']['style'];
-			$current['bar']['background'] = isset( $bar['background'] ) ? _polls_sanitize_hex_color( $bar['background'] ) : $current['bar']['background'];
-			$current['bar']['border']     = isset( $bar['border'] ) ? _polls_sanitize_hex_color( $bar['border'] ) : $current['bar']['border'];
+			$current['bar']['background'] = isset( $bar['background'] ) ? Polls_Core::_polls_sanitize_hex_color( $bar['background'] ) : $current['bar']['background'];
+			$current['bar']['border']     = isset( $bar['border'] ) ? Polls_Core::_polls_sanitize_hex_color( $bar['border'] ) : $current['bar']['border'];
 			$current['bar']['height']     = isset( $bar['height'] ) ? max( 1, (int) $bar['height'] ) : $current['bar']['height'];
 
 			// The style is a directory name under images/, or the CSS sentinel.

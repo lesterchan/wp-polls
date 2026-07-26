@@ -342,7 +342,7 @@ class Polls_Admin {
 						}
 
 						// Update Lastest Poll ID To Poll Options
-						Polls_Options::set( 'latest_poll', polls_latest_id() );
+						Polls_Options::set( 'latest_poll', Polls_Core::polls_latest_id() );
 						do_action( 'wp_polls_delete_poll', $pollq_id );
 						break;
 				}

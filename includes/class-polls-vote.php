@@ -330,7 +330,7 @@ class Polls_Vote {
 
 		if ( isset( $_REQUEST['action'] ) && sanitize_key( $_REQUEST['action'] ) === 'polls' ) {
 			// Load Headers
-			polls_textdomain();
+			Polls_Core::polls_textdomain();
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) . '' );
 
 			// Get Poll ID

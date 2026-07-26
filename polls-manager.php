@@ -177,10 +177,10 @@ if ( ! empty( $_POST['do'] ) ) {
 				$text = '<p style="color: green">' . sprintf( __( 'Poll \'%s\' Edited Successfully.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p>';
 			}
 			// Update Lastest Poll ID To Poll Options
-			$latest_pollid     = polls_latest_id();
+			$latest_pollid     = Polls_Core::polls_latest_id();
 			$update_latestpoll = Polls_Options::set( 'latest_poll', $latest_pollid );
 			do_action( 'wp_polls_update_poll', $pollq_id );
-			cron_polls_place();
+			Polls_Core::cron_polls_place();
 			break;
 	}
 }
