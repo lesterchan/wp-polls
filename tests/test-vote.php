@@ -293,4 +293,52 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		$this->assertSame( '203.0.113.10', Polls_Vote::poll_get_raw_ipaddress() );
 		$this->assertSame( wp_hash( '203.0.113.10' ), Polls_Vote::poll_get_ipaddress() );
 	}
+
+	/**
+	 * The constant opts in without a filter.
+	 *
+	 * Defining it in the shared run would change what every other IP test asserts,
+	 * so this one gets its own process.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 *
+	 * @return void
+	 */
+	public function test_trust_proxy_constant_opts_in() {
+		define( 'WP_POLLS_TRUST_PROXY', true );
+
+		Polls_Options::set( 'ip_header', '' );
+		$_SERVER['REMOTE_ADDR']          = '198.51.100.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 10.0.0.1';
+
+		$ip = Polls_Vote::poll_get_raw_ipaddress();
+
+		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+
+		$this->assertSame( '203.0.113.7', $ip );
+	}
+
+	/**
+	 * A named header still wins over the constant.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 *
+	 * @return void
+	 */
+	public function test_named_header_beats_the_constant() {
+		define( 'WP_POLLS_TRUST_PROXY', true );
+
+		Polls_Options::set( 'ip_header', 'HTTP_CF_CONNECTING_IP' );
+		$_SERVER['REMOTE_ADDR']           = '198.51.100.5';
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '203.0.113.99';
+		$_SERVER['HTTP_X_FORWARDED_FOR']  = '203.0.113.7';
+
+		$ip = Polls_Vote::poll_get_raw_ipaddress();
+
+		unset( $_SERVER['HTTP_CF_CONNECTING_IP'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
+
+		$this->assertSame( '203.0.113.99', $ip );
+	}
 }
