@@ -54,7 +54,9 @@ class Polls_Admin {
 	 * @return mixed
 	 */
 	public static function poll_scripts_admin( $hook_suffix ) {
-		$poll_admin_pages = array( 'wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php', 'wp-polls/polls-uninstall.php' );
+		// polls-logs.php is not listed: it renders inside polls-manager.php under
+		// mode=logs, so it arrives with the manager's hook suffix.
+		$poll_admin_pages = array( 'wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php' );
 		if ( in_array( $hook_suffix, $poll_admin_pages, true ) ) {
 			wp_enqueue_style( 'wp-polls-admin', plugins_url( 'wp-polls/polls-admin-css.css' ), false, WP_POLLS_VERSION, 'all' );
 			wp_enqueue_script( 'wp-polls-admin', plugins_url( 'wp-polls/polls-admin-js.js' ), array(), WP_POLLS_VERSION, true );
