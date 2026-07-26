@@ -37,12 +37,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Version
 define( 'WP_POLLS_VERSION', '3.0.0' );
+define( 'WP_POLLS_MAIN_FILE', __FILE__ );
 
 // Classes. Required at file load because the activation hook and the option
 // accessor are both reached before any action fires.
 require_once __DIR__ . '/includes/class-polls-templates.php';
 require_once __DIR__ . '/includes/class-polls-options.php';
 require_once __DIR__ . '/includes/class-polls-settings.php';
+require_once __DIR__ . '/includes/class-polls-widget.php';
+require_once __DIR__ . '/includes/class-polls-install.php';
+Polls_Install::init();
 Polls_Settings::init();
 
 
@@ -781,7 +785,7 @@ function display_pollresult( $poll_id, $user_voted = array(), $display_loading =
 function poll_get_raw_ipaddress() {
 	// REMOTE_ADDR is absent under WP-CLI and cron, where this is still reached
 	// through the poll display path. Reading it unguarded warns on PHP 8.
-	$ip           = isset( $_SERVER['REMOTE_ADDR'] ) ? esc_attr( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$ip        = isset( $_SERVER['REMOTE_ADDR'] ) ? esc_attr( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 	$ip_header = Polls_Options::get( 'ip_header', '' );
 	if ( ! empty( $ip_header ) && ! empty( $_SERVER[ $ip_header ] ) ) {
 		$ip = esc_attr( wp_unslash( $_SERVER[ $ip_header ] ) );
@@ -1834,102 +1838,11 @@ function polls_page_general_stats( $content ) {
 
 
 // Class: WP-Polls Widget
-class WP_Widget_Polls extends WP_Widget {
-	// Constructor
-	public function __construct() {
-		$widget_ops = array( 'description' => __( 'WP-Polls polls', 'wp-polls' ) );
-		parent::__construct( 'polls-widget', __( 'Polls', 'wp-polls' ), $widget_ops );
-	}
-
-	// Display Widget
-	public function widget( $args, $instance ) {
-		$title               = apply_filters( 'widget_title', esc_attr( $instance['title'] ) );
-		$poll_id             = (int) $instance['poll_id'];
-		$display_pollarchive = (int) $instance['display_pollarchive'];
-		echo $args['before_widget'];
-		if ( ! empty( $title ) ) {
-			echo $args['before_title'] . $title . $args['after_title'];
-		}
-		get_poll( $poll_id );
-		if ( $display_pollarchive ) {
-			display_polls_archive_link();
-		}
-		echo $args['after_widget'];
-	}
-
-	// When Widget Control Form Is Posted
-	public function update( $new_instance, $old_instance ) {
-		if ( ! isset( $new_instance['submit'] ) ) {
-			return false;
-		}
-		$instance                        = $old_instance;
-		$instance['title']               = strip_tags( $new_instance['title'] );
-		$instance['poll_id']             = (int) $new_instance['poll_id'];
-		$instance['display_pollarchive'] = (int) $new_instance['display_pollarchive'];
-		return $instance;
-	}
-
-	// DIsplay Widget Control Form
-	public function form( $instance ) {
-		global $wpdb;
-		$instance            = wp_parse_args(
-			(array) $instance,
-			array(
-				'title'               => __( 'Polls', 'wp-polls' ),
-				'poll_id'             => 0,
-				'display_pollarchive' => 1,
-			)
-		);
-		$title               = esc_attr( $instance['title'] );
-		$poll_id             = (int) $instance['poll_id'];
-		$display_pollarchive = (int) $instance['display_pollarchive'];
-		?>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'wp-polls' ); ?> <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" /></label>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'display_pollarchive' ); ?>"><?php _e( 'Display Polls Archive Link Below Poll?', 'wp-polls' ); ?>
-				<select name="<?php echo $this->get_field_name( 'display_pollarchive' ); ?>" id="<?php echo $this->get_field_id( 'display_pollarchive' ); ?>" class="widefat">
-					<option value="0"<?php selected( 0, $display_pollarchive ); ?>><?php _e( 'No', 'wp-polls' ); ?></option>
-					<option value="1"<?php selected( 1, $display_pollarchive ); ?>><?php _e( 'Yes', 'wp-polls' ); ?></option>
-				</select>
-			</label>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'poll_id' ); ?>"><?php _e( 'Poll To Display:', 'wp-polls' ); ?>
-				<select name="<?php echo $this->get_field_name( 'poll_id' ); ?>" id="<?php echo $this->get_field_id( 'poll_id' ); ?>" class="widefat">
-					<option value="-1"<?php selected( -1, $poll_id ); ?>><?php _e( 'Do NOT Display Poll (Disable)', 'wp-polls' ); ?></option>
-					<option value="-2"<?php selected( -2, $poll_id ); ?>><?php _e( 'Display Random Poll', 'wp-polls' ); ?></option>
-					<option value="0"<?php selected( 0, $poll_id ); ?>><?php _e( 'Display Latest Poll', 'wp-polls' ); ?></option>
-					<optgroup>&nbsp;</optgroup>
-					<?php
-					$polls = $wpdb->get_results( "SELECT pollq_id, pollq_question FROM $wpdb->pollsq ORDER BY pollq_id DESC" );
-					if ( $polls ) {
-						foreach ( $polls as $poll ) {
-							$pollq_question = wp_kses_post( removeslashes( $poll->pollq_question ) );
-							$pollq_id       = (int) $poll->pollq_id;
-							if ( $pollq_id === $poll_id ) {
-								echo "<option value=\"$pollq_id\" selected=\"selected\">$pollq_question</option>\n";
-							} else {
-								echo "<option value=\"$pollq_id\">$pollq_question</option>\n";
-							}
-						}
-					}
-					?>
-				</select>
-			</label>
-		</p>
-		<input type="hidden" id="<?php echo $this->get_field_id( 'submit' ); ?>" name="<?php echo $this->get_field_name( 'submit' ); ?>" value="1" />
-		<?php
-	}
-}
-
-
 // Function: Init WP-Polls Widget
 add_action( 'widgets_init', 'widget_polls_init' );
 function widget_polls_init() {
 	polls_textdomain();
-	register_widget( 'WP_Widget_Polls' );
+	register_widget( 'Polls_Widget' );
 }
 
 if ( ! function_exists( 'removeslashes' ) ) {
@@ -1949,282 +1862,4 @@ function _polls_sanitize_hex_color( $color ) {
 	}
 
 	return $color;
-}
-
-// Function: Activate Plugin
-register_activation_hook( __FILE__, 'polls_activation' );
-function polls_activation( $network_wide ) {
-	if ( is_multisite() && $network_wide ) {
-		$ms_sites = wp_get_sites();
-
-		if ( 0 < count( $ms_sites ) ) {
-			foreach ( $ms_sites as $ms_site ) {
-				switch_to_blog( $ms_site['blog_id'] );
-				polls_activate();
-				restore_current_blog();
-			}
-		}
-	} else {
-		polls_activate();
-	}
-}
-
-// Function: Run Version Specific Upgrades
-// Plugin updates do not fire the activation hook, so the stored version is
-// checked on every admin request and the outstanding upgrades are run once.
-add_action( 'admin_init', 'polls_upgrade' );
-function polls_upgrade() {
-	$installed_version = get_option( 'poll_version' );
-
-	if ( WP_POLLS_VERSION === $installed_version ) {
-		return;
-	}
-
-	// Version 4.0.0: fold the ~30 scattered option rows into a single one.
-	// Must run before anything else that touches templates, so there is only
-	// one place they live by the time the later steps read them.
-	if ( empty( $installed_version ) || version_compare( $installed_version, '4.0.0', '<' ) ) {
-		Polls_Options::migrate_from_legacy_rows();
-	}
-
-	// Version 3.0.0: Inline onclick handlers were replaced by data-poll-* attributes.
-	if ( empty( $installed_version ) || version_compare( $installed_version, '3.0.0', '<' ) ) {
-		polls_upgrade_templates_onclick();
-	}
-
-	update_option( 'poll_version', WP_POLLS_VERSION );
-}
-
-
-// Function: Convert Inline onclick Handlers In The Footer Templates To data-poll-* Attributes
-// 'onclick' is no longer an allowed attribute in polls-templates.php, so a stored
-// template that still relies on it would lose its handler the next time the poll
-// templates are saved, leaving the vote button and the result/booth links dead.
-function polls_upgrade_templates_onclick() {
-	foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
-		$template = Polls_Options::get( 'templates.' . $key );
-
-		if ( ! is_string( $template ) || stripos( $template, 'onclick' ) === false ) {
-			continue;
-		}
-
-		// onclick="poll_result(%POLL_ID%); return false;" => data-poll-id="%POLL_ID%" data-poll-action="result"
-		$migrated = preg_replace(
-			'/onclick\s*=\s*\\\\?(["\'])\s*poll_(vote|result|booth)\s*\(\s*%POLL_ID%\s*\)\s*;?\s*(?:return\s+false\s*;?\s*)?\\\\?\1/i',
-			'data-poll-id="%POLL_ID%" data-poll-action="$2"',
-			$template
-		);
-
-		if ( null !== $migrated && $migrated !== $template ) {
-			Polls_Options::set( 'templates.' . $key, $migrated );
-		}
-	}
-}
-
-
-// Function: Warn When A Poll Template Still Relies On An Inline onclick Handler
-// Since 3.0.0 the scripts export nothing, so an onclick left behind by a
-// customised template no longer calls anything at all. The upgrade converts
-// the stock templates automatically; this covers the ones too customised to
-// convert, which would otherwise fail silently on the front end.
-add_action( 'admin_notices', 'polls_onclick_notice' );
-function polls_onclick_notice() {
-	global $hook_suffix;
-
-	$poll_admin_pages = array( 'wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php' );
-	if ( ! in_array( $hook_suffix, $poll_admin_pages, true ) ) {
-		return;
-	}
-
-	if ( ! current_user_can( 'manage_polls' ) || ! polls_templates_have_onclick() ) {
-		return;
-	}
-
-	echo '<div class="notice notice-warning"><p>';
-	echo wp_kses_post( __( '<strong>WP-Polls:</strong> one of your poll templates still uses an inline <code>onclick</code> handler. Inline handlers are no longer used, so the vote button or the result/vote links in that template will not do anything.', 'wp-polls' ) );
-	echo '</p><p>';
-	printf(
-		wp_kses_post( __( 'Open <a href="%s">Poll Templates</a> and press <strong>Restore Default Template</strong> on the Voting Form Footer and Result Footer, or replace the handler yourself with <code>data-poll-id="%%POLL_ID%%"</code> and <code>data-poll-action="vote"</code> (or <code>result</code> / <code>booth</code>).', 'wp-polls' ) ),
-		esc_url( admin_url( 'admin.php?page=wp-polls/polls-templates.php' ) )
-	);
-	echo '</p></div>';
-}
-
-
-// Function: Check Whether Any Poll Template Still Contains An Inline onclick Handler
-function polls_templates_have_onclick() {
-	foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
-		$template = Polls_Options::get( 'templates.' . $key );
-
-		if ( is_string( $template ) && stripos( $template, 'onclick' ) !== false ) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
-function polls_activate() {
-	global $wpdb;
-
-	if ( @is_file( ABSPATH . '/wp-admin/includes/upgrade.php' ) ) {
-		include_once ABSPATH . '/wp-admin/includes/upgrade.php';
-	} elseif ( @is_file( ABSPATH . '/wp-admin/upgrade-functions.php' ) ) {
-		include_once ABSPATH . '/wp-admin/upgrade-functions.php';
-	} else {
-		die( 'We have problem finding your \'/wp-admin/upgrade-functions.php\' and \'/wp-admin/includes/upgrade.php\'' );
-	}
-
-	// Create Poll Tables (3 Tables)
-	$charset_collate = $wpdb->get_charset_collate();
-
-	$create_table            = array();
-	$create_table['pollsq']  = "CREATE TABLE $wpdb->pollsq (" .
-								'pollq_id int(10) NOT NULL auto_increment,' .
-								"pollq_question varchar(200) character set utf8 NOT NULL default ''," .
-								"pollq_timestamp varchar(20) NOT NULL default ''," .
-								"pollq_totalvotes int(10) NOT NULL default '0'," .
-								"pollq_active tinyint(1) NOT NULL default '1'," .
-								"pollq_expiry int(10) NOT NULL default '0'," .
-								"pollq_multiple tinyint(3) NOT NULL default '0'," .
-								"pollq_totalvoters int(10) NOT NULL default '0'," .
-								'PRIMARY KEY  (pollq_id)' .
-								") $charset_collate;";
-	$create_table['pollsa']  = "CREATE TABLE $wpdb->pollsa (" .
-								'polla_aid int(10) NOT NULL auto_increment,' .
-								"polla_qid int(10) NOT NULL default '0'," .
-								"polla_answers varchar(200) character set utf8 NOT NULL default ''," .
-								"polla_votes int(10) NOT NULL default '0'," .
-								'PRIMARY KEY  (polla_aid)' .
-								") $charset_collate;";
-	$create_table['pollsip'] = "CREATE TABLE $wpdb->pollsip (" .
-								'pollip_id int(10) NOT NULL auto_increment,' .
-								"pollip_qid int(10) NOT NULL default '0'," .
-								"pollip_aid int(10) NOT NULL default '0'," .
-								"pollip_ip varchar(100) NOT NULL default ''," .
-								"pollip_host VARCHAR(200) NOT NULL default ''," .
-								"pollip_timestamp int(10) NOT NULL default '0'," .
-								'pollip_user tinytext NOT NULL,' .
-								"pollip_userid int(10) NOT NULL default '0'," .
-								'PRIMARY KEY  (pollip_id),' .
-								'KEY pollip_ip (pollip_ip),' .
-								'KEY pollip_qid (pollip_qid),' .
-								'KEY pollip_ip_qid (pollip_ip, pollip_qid)' .
-								") $charset_collate;";
-	dbDelta( $create_table['pollsq'] );
-	dbDelta( $create_table['pollsa'] );
-	dbDelta( $create_table['pollsip'] );
-	// Check Whether It is Install Or Upgrade
-	$first_poll = $wpdb->get_var( "SELECT pollq_id FROM $wpdb->pollsq LIMIT 1" );
-	// If Install, Insert 1st Poll Question With 5 Poll Answers
-	if ( empty( $first_poll ) ) {
-		// Insert Poll Question (1 Record)
-		$insert_pollq = $wpdb->insert(
-			$wpdb->pollsq,
-			array(
-				'pollq_question'  => __( 'How Is My Site?', 'wp-polls' ),
-				'pollq_timestamp' => current_time( 'timestamp' ),
-			),
-			array( '%s', '%s' )
-		);
-		if ( $insert_pollq ) {
-			// Insert Poll Answers  (5 Records)
-			$wpdb->insert(
-				$wpdb->pollsa,
-				array(
-					'polla_qid'     => $insert_pollq,
-					'polla_answers' => __( 'Good', 'wp-polls' ),
-				),
-				array( '%d', '%s' )
-			);
-			$wpdb->insert(
-				$wpdb->pollsa,
-				array(
-					'polla_qid'     => $insert_pollq,
-					'polla_answers' => __( 'Excellent', 'wp-polls' ),
-				),
-				array( '%d', '%s' )
-			);
-			$wpdb->insert(
-				$wpdb->pollsa,
-				array(
-					'polla_qid'     => $insert_pollq,
-					'polla_answers' => __( 'Bad', 'wp-polls' ),
-				),
-				array( '%d', '%s' )
-			);
-			$wpdb->insert(
-				$wpdb->pollsa,
-				array(
-					'polla_qid'     => $insert_pollq,
-					'polla_answers' => __( 'Can Be Improved', 'wp-polls' ),
-				),
-				array( '%d', '%s' )
-			);
-			$wpdb->insert(
-				$wpdb->pollsa,
-				array(
-					'polla_qid'     => $insert_pollq,
-					'polla_answers' => __( 'No Comments', 'wp-polls' ),
-				),
-				array( '%d', '%s' )
-			);
-		}
-	}
-	// Options live in one row from 4.0.0 onward. Defaults come from
-	// Polls_Options so activation and the settings screen cannot drift.
-	add_option( Polls_Options::OPTION, Polls_Options::defaults() );
-	Polls_Options::flush();
-
-	// Backfill pollq_totalvoters for installs that predate the column being
-	// populated: before 2.74 only pollq_totalvotes was maintained.
-	$pollq_totalvoters = (int) $wpdb->get_var( "SELECT SUM(pollq_totalvoters) FROM $wpdb->pollsq" );
-	if ( 0 === $pollq_totalvoters ) {
-		$wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvoters = pollq_totalvotes" );
-	}
-
-	// Index
-	$index    = $wpdb->get_results( "SHOW INDEX FROM $wpdb->pollsip;" );
-	$key_name = array();
-	if ( count( $index ) > 0 ) {
-		foreach ( $index as $i ) {
-			$key_name[] = $i->Key_name;
-		}
-	}
-	if ( ! in_array( 'pollip_ip', $key_name, true ) ) {
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip (pollip_ip);" );
-	}
-	if ( ! in_array( 'pollip_qid', $key_name, true ) ) {
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_qid (pollip_qid);" );
-	}
-	if ( ! in_array( 'pollip_ip_qid_aid', $key_name, true ) ) {
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid_aid (pollip_ip, pollip_qid, pollip_aid);" );
-	}
-	// No longer needed index
-	if ( in_array( 'pollip_ip_qid', $key_name, true ) ) {
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip DROP INDEX pollip_ip_qid;" );
-	}
-
-	// Change column datatype for wp_pollsip
-	$col_pollip_qid = $wpdb->get_row( "DESCRIBE $wpdb->pollsip pollip_qid" );
-	if ( 'varchar(10)' === $col_pollip_qid->Type ) {
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_qid int(10) NOT NULL default '0';" );
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_aid int(10) NOT NULL default '0';" );
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_timestamp int(10) NOT NULL default '0';" );
-		$wpdb->query( "ALTER TABLE $wpdb->pollsq MODIFY COLUMN pollq_expiry int(10) NOT NULL default '0';" );
-	}
-
-	// Set 'manage_polls' Capabilities To Administrator
-	$role = get_role( 'administrator' );
-	if ( ! $role->has_cap( 'manage_polls' ) ) {
-		$role->add_cap( 'manage_polls' );
-	}
-
-	// Run any outstanding version upgrades and record the current version.
-	// Called here as well as on 'admin_init' so that network activation
-	// upgrades every site while it is switched to.
-	polls_upgrade();
-
-	cron_polls_place();
 }
