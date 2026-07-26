@@ -321,3 +321,184 @@ describe( 'toggles', () => {
 		expect( expiry.style.display ).toBe( '' );
 	} );
 } );
+
+describe( 'deleting an answer', () => {
+	it( 'posts the answer id and subtracts its votes from the total', async () => {
+		document.body.innerHTML = `
+			<div id="message"></div>
+			<span id="poll_total_votes">10</span>
+			<input type="text" id="pollq_totalvotes" value="10" />
+			<select id="pollq_multiple"><option value="1">1</option></select>
+			<table><tbody id="poll_answers">
+				<tr id="poll-answer-4"><th>Answer 1</th><td><input type="text" size="4" value="3" /></td></tr>
+				<tr id="poll-answer-5"><th>Answer 2</th><td><input type="text" size="4" value="7" /></td></tr>
+			</tbody></table>
+			<input type="button" data-poll-action="delete-answer" data-poll-id="2"
+			       data-poll-aid="4" data-poll-votes="3"
+			       data-poll-confirm="Delete answer?" data-poll-nonce="NONCEANS" />
+		`;
+		const spy = stubFetch( 'Answer deleted.' );
+
+		await clickAndSettle(
+			document.querySelector( '[data-poll-action="delete-answer"]' ),
+		);
+
+		const fields = sentFields( spy );
+		expect( fields.do ).toBe( L10N.text_delete_poll_ans );
+		expect( fields.pollq_id ).toBe( '2' );
+		expect( fields.polla_aid ).toBe( '4' );
+		expect( fields._ajax_nonce ).toBe( 'NONCEANS' );
+
+		expect( document.getElementById( 'poll-answer-4' ) ).toBeNull();
+		expect( document.getElementById( 'poll_total_votes' ).textContent ).toBe( '7' );
+	} );
+
+	it( 'does nothing when the confirm is cancelled', async () => {
+		window.confirm = vi.fn( () => false );
+		document.body.innerHTML = `
+			<table><tbody id="poll_answers">
+				<tr id="poll-answer-4"><th>Answer 1</th><td></td></tr>
+			</tbody></table>
+			<input type="button" data-poll-action="delete-answer" data-poll-id="2"
+			       data-poll-aid="4" data-poll-votes="3"
+			       data-poll-confirm="Delete answer?" data-poll-nonce="NONCEANS" />
+		`;
+		const spy = stubFetch();
+
+		await clickAndSettle(
+			document.querySelector( '[data-poll-action="delete-answer"]' ),
+		);
+
+		expect( spy ).not.toHaveBeenCalled();
+		expect( document.getElementById( 'poll-answer-4' ) ).not.toBeNull();
+	} );
+} );
+
+describe( "deleting one poll's logs", () => {
+	it( 'requires the confirmation checkbox', async () => {
+		document.body.innerHTML = `
+			<input type="checkbox" id="delete_logs_yes" />
+			<input type="button" data-poll-action="delete-poll-logs" data-poll-id="3"
+			       data-poll-confirm="Delete?" data-poll-nonce="NONCEONE" />
+		`;
+		const spy = stubFetch();
+
+		await clickAndSettle(
+			document.querySelector( '[data-poll-action="delete-poll-logs"]' ),
+		);
+
+		expect( spy ).not.toHaveBeenCalled();
+		expect( window.alert ).toHaveBeenCalledWith(
+			L10N.text_checkbox_delete_poll_logs,
+		);
+	} );
+
+	it( 'swaps the logs panel for the empty message once ticked', async () => {
+		document.body.innerHTML = `
+			<div id="message"></div>
+			<input type="checkbox" id="delete_logs_yes" checked />
+			<div id="poll_logs">logs</div>
+			<div id="poll_logs_display">rows</div>
+			<div id="poll_logs_display_none" style="display: none;">none</div>
+			<input type="button" data-poll-action="delete-poll-logs" data-poll-id="3"
+			       data-poll-confirm="Delete?" data-poll-nonce="NONCEONE" />
+		`;
+		const spy = stubFetch( 'Logs deleted.' );
+
+		await clickAndSettle(
+			document.querySelector( '[data-poll-action="delete-poll-logs"]' ),
+		);
+
+		const fields = sentFields( spy );
+		expect( fields.do ).toBe( L10N.text_delete_poll_logs );
+		expect( fields.pollq_id ).toBe( '3' );
+
+		expect( document.getElementById( 'poll_logs_display' ).style.display ).toBe(
+			'none',
+		);
+		expect(
+			document.getElementById( 'poll_logs_display_none' ).style.display,
+		).toBe( '' );
+	} );
+} );
+
+describe( 'opening a poll', () => {
+	it( 'swaps the buttons the other way round', async () => {
+		document.body.innerHTML = `
+			<div id="message"></div>
+			<input type="button" id="open_poll" data-poll-action="open-poll" data-poll-id="3"
+			       data-poll-confirm="Open?" data-poll-nonce="NONCEOPEN" />
+			<input type="button" id="close_poll" style="display: none;" />
+		`;
+		const spy = stubFetch( 'Poll opened.' );
+
+		await clickAndSettle( document.getElementById( 'open_poll' ) );
+
+		expect( sentFields( spy ).do ).toBe( L10N.text_open_poll );
+		expect( document.getElementById( 'open_poll' ).style.display ).toBe( 'none' );
+		expect( document.getElementById( 'close_poll' ).style.display ).toBe( '' );
+	} );
+} );
+
+describe( 'the statically rendered Remove button', () => {
+	it( 'removes the row named by data-poll-answer', async () => {
+		document.body.innerHTML = `
+			<select id="pollq_multiple"><option value="1">1</option></select>
+			<table><tbody id="poll_answers">
+				<tr id="poll-answer-0"><th>Answer 1</th><td>
+					<input type="button" data-poll-action="remove-answer" data-poll-answer="0" />
+				</td></tr>
+				<tr id="poll-answer-1"><th>Answer 2</th><td>
+					<input type="button" data-poll-action="remove-answer" data-poll-answer="1" />
+				</td></tr>
+			</tbody></table>
+		`;
+
+		await clickAndSettle(
+			document.querySelector( '[data-poll-answer="0"]' ),
+		);
+
+		expect( document.getElementById( 'poll-answer-0' ) ).toBeNull();
+		expect( document.getElementById( 'poll-answer-1' ) ).not.toBeNull();
+		expect(
+			document.querySelector( '#poll_answers tr > th' ).textContent,
+		).toBe( 'Answer 1' );
+	} );
+} );
+
+describe( 'the timestamp toggle', () => {
+	it( 'shows the timestamp fields only while the box is ticked', () => {
+		document.body.innerHTML = `
+			<input type="checkbox" id="edit_polltimestamp" data-poll-action="toggle-timestamp" />
+			<div id="pollq_timestamp" style="display: none;"></div>
+		`;
+		const toggle = document.getElementById( 'edit_polltimestamp' );
+		const fields = document.getElementById( 'pollq_timestamp' );
+
+		toggle.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
+		expect( toggle.checked ).toBe( true );
+		expect( fields.style.display ).toBe( '' );
+
+		toggle.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
+		expect( toggle.checked ).toBe( false );
+		expect( fields.style.display ).toBe( 'none' );
+	} );
+} );
+
+describe( 'go back', () => {
+	it( 'steps the history back and does not follow the link', async () => {
+		document.body.innerHTML = `<a href="#nope" data-poll-action="go-back">Go Back</a>`;
+		const back = vi.spyOn( window.history, 'go' ).mockImplementation( () => {} );
+
+		const link = document.querySelector( '[data-poll-action="go-back"]' );
+		const event = new window.MouseEvent( 'click', {
+			bubbles: true,
+			cancelable: true,
+		} );
+		link.dispatchEvent( event );
+
+		expect( back ).toHaveBeenCalledWith( -1 );
+		expect( event.defaultPrevented ).toBe( true );
+	} );
+} );
+
