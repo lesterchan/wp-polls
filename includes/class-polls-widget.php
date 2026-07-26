@@ -58,22 +58,22 @@ class Polls_Widget extends WP_Widget {
 		$display_pollarchive = (int) $instance['display_pollarchive'];
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'wp-polls' ); ?> <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" /></label>
+			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'wp-polls' ); ?> <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" /></label>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'display_pollarchive' ); ?>"><?php _e( 'Display Polls Archive Link Below Poll?', 'wp-polls' ); ?>
+			<label for="<?php echo $this->get_field_id( 'display_pollarchive' ); ?>"><?php esc_html_e( 'Display Polls Archive Link Below Poll?', 'wp-polls' ); ?>
 				<select name="<?php echo $this->get_field_name( 'display_pollarchive' ); ?>" id="<?php echo $this->get_field_id( 'display_pollarchive' ); ?>" class="widefat">
-					<option value="0"<?php selected( 0, $display_pollarchive ); ?>><?php _e( 'No', 'wp-polls' ); ?></option>
-					<option value="1"<?php selected( 1, $display_pollarchive ); ?>><?php _e( 'Yes', 'wp-polls' ); ?></option>
+					<option value="0"<?php selected( 0, $display_pollarchive ); ?>><?php esc_html_e( 'No', 'wp-polls' ); ?></option>
+					<option value="1"<?php selected( 1, $display_pollarchive ); ?>><?php esc_html_e( 'Yes', 'wp-polls' ); ?></option>
 				</select>
 			</label>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'poll_id' ); ?>"><?php _e( 'Poll To Display:', 'wp-polls' ); ?>
+			<label for="<?php echo $this->get_field_id( 'poll_id' ); ?>"><?php esc_html_e( 'Poll To Display:', 'wp-polls' ); ?>
 				<select name="<?php echo $this->get_field_name( 'poll_id' ); ?>" id="<?php echo $this->get_field_id( 'poll_id' ); ?>" class="widefat">
-					<option value="-1"<?php selected( -1, $poll_id ); ?>><?php _e( 'Do NOT Display Poll (Disable)', 'wp-polls' ); ?></option>
-					<option value="-2"<?php selected( -2, $poll_id ); ?>><?php _e( 'Display Random Poll', 'wp-polls' ); ?></option>
-					<option value="0"<?php selected( 0, $poll_id ); ?>><?php _e( 'Display Latest Poll', 'wp-polls' ); ?></option>
+					<option value="-1"<?php selected( -1, $poll_id ); ?>><?php esc_html_e( 'Do NOT Display Poll (Disable)', 'wp-polls' ); ?></option>
+					<option value="-2"<?php selected( -2, $poll_id ); ?>><?php esc_html_e( 'Display Random Poll', 'wp-polls' ); ?></option>
+					<option value="0"<?php selected( 0, $poll_id ); ?>><?php esc_html_e( 'Display Latest Poll', 'wp-polls' ); ?></option>
 					<optgroup>&nbsp;</optgroup>
 					<?php
 					$polls = $wpdb->get_results( "SELECT pollq_id, pollq_question FROM $wpdb->pollsq ORDER BY pollq_id DESC" );

@@ -13,6 +13,24 @@ defined( 'ABSPATH' ) || exit;
 class Polls_Install {
 
 	/**
+	 * Schema version.
+	 *
+	 * Bump this whenever the CREATE TABLE statements or the indexes change.
+	 * Nothing else needs to change: the schema work then runs once on the next
+	 * load and records the new version.
+	 *
+	 * @var string
+	 */
+	const DB_VERSION = '1.0';
+
+	/**
+	 * Option holding the installed schema version.
+	 *
+	 * @var string
+	 */
+	const DB_VERSION_OPTION = 'poll_db_version';
+
+	/**
 	 * Hook registration.
 	 *
 	 * @return void
@@ -191,9 +209,23 @@ class Polls_Install {
 									'KEY pollip_qid (pollip_qid),' .
 									'KEY pollip_ip_qid (pollip_ip, pollip_qid)' .
 									") $charset_collate;";
-		dbDelta( $create_table['pollsq'] );
-		dbDelta( $create_table['pollsa'] );
-		dbDelta( $create_table['pollsip'] );
+		// Only create tables that are missing. dbDelta against a table that
+		// already exists re-diffs every column, and for pollq_id - int NOT NULL
+		// auto_increment - it decides the column needs a default and emits
+		// ALTER TABLE wp_pollsq ALTER COLUMN `pollq_id` SET DEFAULT ''
+		// which MySQL rejects with "Invalid default value for 'pollq_id'". That
+		// landed in the error log on every single activation. Schema changes
+		// after the initial create are handled by the explicit index and column
+		// work below, so nothing is lost by not re-diffing.
+		if ( self::DB_VERSION !== get_option( self::DB_VERSION_OPTION ) ) {
+			foreach ( $create_table as $table => $sql ) {
+				$table_name = $wpdb->$table;
+				if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) ) {
+					dbDelta( $sql );
+				}
+			}
+			update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
+		}
 		// Check Whether It is Install Or Upgrade
 		$first_poll = $wpdb->get_var( "SELECT pollq_id FROM $wpdb->pollsq LIMIT 1" );
 		// If Install, Insert 1st Poll Question With 5 Poll Answers

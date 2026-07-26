@@ -338,13 +338,13 @@ class Polls_Vote {
 
 			// Ensure Poll ID Is Valid
 			if ( $poll_id === 0 ) {
-				_e( 'Invalid Poll ID', 'wp-polls' );
+				esc_html_e( 'Invalid Poll ID', 'wp-polls' );
 				exit();
 			}
 
 			// Verify Referer
 			if ( ! check_ajax_referer( 'poll_' . $poll_id . '-nonce', 'poll_' . $poll_id . '_nonce', false ) ) {
-				_e( 'Failed To Verify Referrer', 'wp-polls' );
+				esc_html_e( 'Failed To Verify Referrer', 'wp-polls' );
 				exit();
 			}
 

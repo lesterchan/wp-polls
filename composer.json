@@ -2,13 +2,31 @@
     "name": "lesterchan/wp-polls",
     "description": "Adds an AJAX poll system to your WordPress blog.",
     "type": "wordpress-plugin",
-    "keywords": ["wordpress", "plugin", "poll"],
-    "license": ["GPL-2.0-only"],
-    "minimum-stability": "dev",
+    "keywords": [
+        "wordpress",
+        "plugin",
+        "poll"
+    ],
+    "license": [
+        "GPL-2.0-only"
+    ],
     "authors": [
         {
             "name": "Lester Chan",
             "email": "lesterchan@gmail.com"
         }
-    ]
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "yoast/phpunit-polyfills": "^2.0"
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "allow-plugins": false
+    }
 }

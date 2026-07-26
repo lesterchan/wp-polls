@@ -8,6 +8,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 require_once __DIR__ . '/includes/class-polls-templates.php';
 require_once __DIR__ . '/includes/class-polls-options.php';
+require_once __DIR__ . '/includes/class-polls-install.php';
 
 // From 3.0.0 the settings are a single row. The pre-3.0.0 names are still
 // listed because an install that was never loaded after upgrading - deleted
@@ -15,7 +16,7 @@ require_once __DIR__ . '/includes/class-polls-options.php';
 // be orphaned forever. The list is taken from Polls_Options so it cannot
 // drift from the migration's idea of which rows belong to the plugin.
 $option_names = array_merge(
-	array( Polls_Options::OPTION, 'poll_version' ),
+	array( Polls_Options::OPTION, 'poll_version', Polls_Install::DB_VERSION_OPTION ),
 	array_keys( Polls_Options::legacy_map() ),
 	Polls_Options::legacy_extra_rows(),
 	array( 'widget_polls', 'widget_polls-widget' )

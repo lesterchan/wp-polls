@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<ruleset name="WP-Polls">
+	<description>WordPress Coding Standards for WP-Polls.</description>
+
+	<file>.</file>
+
+	<!-- Scanning these makes the CI runner run out of memory. -->
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="ps"/>
+
+	<rule ref="WordPress">
+		<!-- The plugin owns three tables. There is no core API to use and
+		     nothing to cache, so these two are noise here. -->
+		<exclude name="WordPress.DB.DirectDatabaseQuery.DirectQuery"/>
+		<exclude name="WordPress.DB.DirectDatabaseQuery.NoCaching"/>
+		<!-- Table identifiers cannot be bound, and %i needs WP 6.2. -->
+		<exclude name="WordPress.DB.PreparedSQL.InterpolatedNotPrepared"/>
+	</rule>
+
+	<!-- The public voting endpoint is nonce-checked by check_ajax_referer()
+	     inside the handler, which the sniff cannot see. Scoped to that one
+	     file rather than silenced repo-wide. -->
+	<rule ref="WordPress.Security.NonceVerification">
+		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="wp-polls"/>
+		</properties>
+	</rule>
+
+	<!-- Tests assemble their own markup and assert on it. -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+</ruleset>

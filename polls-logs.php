@@ -116,7 +116,7 @@ if ( ! empty( $text ) ) {
 	echo '<div id="message" class="updated" style="display: none;"></div>'; }
 ?>
 <div class="wrap">
-	<h2><?php _e( 'Poll\'s Logs', 'wp-polls' ); ?></h2>
+	<h2><?php esc_html_e( 'Poll\'s Logs', 'wp-polls' ); ?></h2>
 	<h3><?php echo $poll_question; ?></h3>
 	<p>
 		<?php printf( _n( 'There are a total of <strong>%s</strong> recorded vote for this poll.', 'There are a total of <strong>%s</strong> recorded votes for this poll.', $poll_totalrecorded, 'wp-polls' ), number_format_i18n( $poll_totalrecorded ) ); ?><br />
@@ -127,7 +127,7 @@ if ( ! empty( $text ) ) {
 </div>
 <?php if ( $poll_totalrecorded > 0 && apply_filters( 'wp_polls_log_show_log_filter', true ) ) { ?>
 <div class="wrap">
-	<h3><?php _e( 'Filter Poll\'s Logs', 'wp-polls' ); ?></h3>
+	<h3><?php esc_html_e( 'Filter Poll\'s Logs', 'wp-polls' ); ?></h3>
 	<table width="100%" cellspacing="0" cellpadding="0">
 		<tr>
 			<td width="50%">
@@ -136,7 +136,7 @@ if ( ! empty( $text ) ) {
 				<p style="display: none;"><input type="hidden" name="filter" value="1" /></p>
 				<table class="form-table">
 					<tr>
-						<th scope="row" valign="top"><?php _e( 'Display All Users That Voted For', 'wp-polls' ); ?></th>
+						<th scope="row" valign="top"><?php esc_html_e( 'Display All Users That Voted For', 'wp-polls' ); ?></th>
 						<td>
 							<select name="users_voted_for" size="1">
 								<?php
@@ -157,15 +157,15 @@ if ( ! empty( $text ) ) {
 						</td>
 					</tr>
 					<tr>
-						<th scope="row" valign="top"><?php _e( 'Voters To EXCLUDE', 'wp-polls' ); ?></th>
+						<th scope="row" valign="top"><?php esc_html_e( 'Voters To EXCLUDE', 'wp-polls' ); ?></th>
 						<td>
-							<input type="checkbox" id="exclude_registered_1" name="exclude_registered" value="1" <?php checked( '1', $exclude_registered ); ?> />&nbsp;<label for="exclude_registered_1"><?php _e( 'Registered Users', 'wp-polls' ); ?></label><br />
-							<input type="checkbox" id="exclude_comment_1" name="exclude_comment" value="1" <?php checked( '1', $exclude_comment ); ?> />&nbsp;<label for="exclude_comment_1"><?php _e( 'Comment Authors', 'wp-polls' ); ?></label><br />
-							<input type="checkbox" id="exclude_guest_1" name="exclude_guest" value="1" <?php checked( '1', $exclude_guest ); ?> />&nbsp;<label for="exclude_guest_1"><?php _e( 'Guests', 'wp-polls' ); ?></label>
+							<input type="checkbox" id="exclude_registered_1" name="exclude_registered" value="1" <?php checked( '1', $exclude_registered ); ?> />&nbsp;<label for="exclude_registered_1"><?php esc_html_e( 'Registered Users', 'wp-polls' ); ?></label><br />
+							<input type="checkbox" id="exclude_comment_1" name="exclude_comment" value="1" <?php checked( '1', $exclude_comment ); ?> />&nbsp;<label for="exclude_comment_1"><?php esc_html_e( 'Comment Authors', 'wp-polls' ); ?></label><br />
+							<input type="checkbox" id="exclude_guest_1" name="exclude_guest" value="1" <?php checked( '1', $exclude_guest ); ?> />&nbsp;<label for="exclude_guest_1"><?php esc_html_e( 'Guests', 'wp-polls' ); ?></label>
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php _e( 'Filter', 'wp-polls' ); ?>" class="button" /></td>
+						<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php esc_attr_e( 'Filter', 'wp-polls' ); ?>" class="button" /></td>
 					</tr>
 				</table>
 				</form>
@@ -177,14 +177,14 @@ if ( ! empty( $text ) ) {
 					<p style="display: none;"><input type="hidden" name="filter" value="2" /></p>
 					<table class="form-table">
 						<tr>
-							<th scope="row" valign="top"><?php _e( 'Display Users That Voted For', 'wp-polls' ); ?></th>
+							<th scope="row" valign="top"><?php esc_html_e( 'Display Users That Voted For', 'wp-polls' ); ?></th>
 							<td>
 								<select name="num_choices_sign" size="1">
-									<option value="more" <?php selected( 'more', $num_choices_sign ); ?>><?php _e( 'More Than', 'wp-polls' ); ?></option>
-									<option value="more_exactly" <?php selected( 'more_exactly', $num_choices_sign ); ?>><?php _e( 'More Than Or Exactly', 'wp-polls' ); ?></option>
-									<option value="exactly" <?php selected( 'exactly', $num_choices_sign ); ?>><?php _e( 'Exactly', 'wp-polls' ); ?></option>
-									<option value="less_exactly" <?php selected( 'less_exactly', $num_choices_sign ); ?>><?php _e( 'Less Than Or Exactly', 'wp-polls' ); ?></option>
-									<option value="less" <?php selected( 'less', $num_choices_sign ); ?>><?php _e( 'Less Than', 'wp-polls' ); ?></option>
+									<option value="more" <?php selected( 'more', $num_choices_sign ); ?>><?php esc_html_e( 'More Than', 'wp-polls' ); ?></option>
+									<option value="more_exactly" <?php selected( 'more_exactly', $num_choices_sign ); ?>><?php esc_html_e( 'More Than Or Exactly', 'wp-polls' ); ?></option>
+									<option value="exactly" <?php selected( 'exactly', $num_choices_sign ); ?>><?php esc_html_e( 'Exactly', 'wp-polls' ); ?></option>
+									<option value="less_exactly" <?php selected( 'less_exactly', $num_choices_sign ); ?>><?php esc_html_e( 'Less Than Or Exactly', 'wp-polls' ); ?></option>
+									<option value="less" <?php selected( 'less', $num_choices_sign ); ?>><?php esc_html_e( 'Less Than', 'wp-polls' ); ?></option>
 								</select>
 								&nbsp;&nbsp;
 								<select name="num_choices" size="1">
@@ -203,15 +203,15 @@ if ( ! empty( $text ) ) {
 							</td>
 						</tr>
 						<tr>
-							<th scope="row" valign="top"><?php _e( 'Voters To EXCLUDE', 'wp-polls' ); ?></th>
+							<th scope="row" valign="top"><?php esc_html_e( 'Voters To EXCLUDE', 'wp-polls' ); ?></th>
 							<td>
-								<input type="checkbox" id="exclude_registered_2" name="exclude_registered_2" value="1" <?php checked( '1', $exclude_registered_2 ); ?> />&nbsp;<label for="exclude_registered_2"><?php _e( 'Registered Users', 'wp-polls' ); ?></label><br />
-								<input type="checkbox" id="exclude_comment_2" name="exclude_comment_2" value="1" <?php checked( '1', $exclude_comment_2 ); ?> />&nbsp;<label for="exclude_comment_2"><?php _e( 'Comment Authors', 'wp-polls' ); ?></label><br />
-								<?php _e( 'Guests will automatically be excluded', 'wp-polls' ); ?>
+								<input type="checkbox" id="exclude_registered_2" name="exclude_registered_2" value="1" <?php checked( '1', $exclude_registered_2 ); ?> />&nbsp;<label for="exclude_registered_2"><?php esc_html_e( 'Registered Users', 'wp-polls' ); ?></label><br />
+								<input type="checkbox" id="exclude_comment_2" name="exclude_comment_2" value="1" <?php checked( '1', $exclude_comment_2 ); ?> />&nbsp;<label for="exclude_comment_2"><?php esc_html_e( 'Comment Authors', 'wp-polls' ); ?></label><br />
+								<?php esc_html_e( 'Guests will automatically be excluded', 'wp-polls' ); ?>
 							</td>
 						</tr>
 						<tr>
-							<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php _e( 'Filter', 'wp-polls' ); ?>" class="button" /></td>
+							<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php esc_attr_e( 'Filter', 'wp-polls' ); ?>" class="button" /></td>
 						</tr>
 					</table>
 					</form>
@@ -228,7 +228,7 @@ if ( ! empty( $text ) ) {
 				<p style="display: none;"><input type="hidden" name="filter" value="3" /></p>
 				<table class="form-table">
 					<tr>
-						<th scope="row" valign="top"><?php _e( 'Display What This User Has Voted', 'wp-polls' ); ?></th>
+						<th scope="row" valign="top"><?php esc_html_e( 'Display What This User Has Voted', 'wp-polls' ); ?></th>
 						<td>
 							<select name="what_user_voted" size="1">
 								<?php
@@ -246,7 +246,7 @@ if ( ! empty( $text ) ) {
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php _e( 'Filter', 'wp-polls' ); ?>" class="button" /></td>
+						<td colspan="2" style="text-align: center;"><input type="submit" name="do" value="<?php esc_attr_e( 'Filter', 'wp-polls' ); ?>" class="button" /></td>
 					</tr>
 				</table>
 				</form>
@@ -254,14 +254,14 @@ if ( ! empty( $text ) ) {
 					&nbsp;
 				<?php } // End if($poll_multiple > -1) ?>
 			</td>
-			<td style="text-align: center;"><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=' . $base_name . '&mode=logs&id=' . $poll_id ) ); ?>"><?php _e( 'Clear Filter', 'wp-polls' ); ?></a></td>
+			<td style="text-align: center;"><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=' . $base_name . '&mode=logs&id=' . $poll_id ) ); ?>"><?php esc_html_e( 'Clear Filter', 'wp-polls' ); ?></a></td>
 		</tr>
 	</table>
 </div>
 <p>&nbsp;</p>
 <?php } // End if($poll_totalrecorded > 0) ?>
 <div class="wrap">
-	<h3><?php _e( 'Poll Logs', 'wp-polls' ); ?></h3>
+	<h3><?php esc_html_e( 'Poll Logs', 'wp-polls' ); ?></h3>
 	<div id="poll_logs_display">
 		<?php
 		if ( $poll_ips ) {
@@ -362,7 +362,7 @@ if ( ! empty( $text ) ) {
 		} else {
 			echo 'none'; }
 		?>
-																								;" ><?php _e( 'No poll logs matches the filter.', 'wp-polls' ); ?></div>
+																								;" ><?php esc_html_e( 'No poll logs matches the filter.', 'wp-polls' ); ?></div>
 	<?php } else { ?>
 		<br class="clear" /><div id="poll_logs_display_none" style="text-align: center; display: 
 		<?php
@@ -371,25 +371,25 @@ if ( ! empty( $text ) ) {
 		} else {
 			echo 'none'; }
 		?>
-																								;" ><?php _e( 'No poll logs available for this poll.', 'wp-polls' ); ?></div>
+																								;" ><?php esc_html_e( 'No poll logs available for this poll.', 'wp-polls' ); ?></div>
 	<?php } ?>
 </div>
 <p>&nbsp;</p>
 
 <!-- Delete Poll Logs -->
 <div class="wrap">
-	<h3><?php _e( 'Delete Poll Logs', 'wp-polls' ); ?></h3>
+	<h3><?php esc_html_e( 'Delete Poll Logs', 'wp-polls' ); ?></h3>
 	<br class="clear" />
 	<div style="text-align: center;" id="poll_logs">
 		<?php if ( $poll_logs_count ) { ?>
-			<strong><?php _e( 'Are You Sure You Want To Delete Logs For This Poll Only?', 'wp-polls' ); ?></strong><br /><br />
-			<input type="checkbox" id="delete_logs_yes" name="delete_logs_yes" value="yes" />&nbsp;<label for="delete_logs_yes"><?php _e( 'Yes', 'wp-polls' ); ?></label><br /><br />
-			<input type="button" name="do" value="<?php _e( 'Delete Logs For This Poll Only', 'wp-polls' ); ?>" class="button" data-poll-action="delete-poll-logs" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php printf( esc_attr__( 'You are about to delete poll logs for this poll \'%s\' ONLY. This action is not reversible.', 'wp-polls' ), esc_attr( $poll_question ) ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_delete-poll-logs' ) ); ?>" />
+			<strong><?php esc_html_e( 'Are You Sure You Want To Delete Logs For This Poll Only?', 'wp-polls' ); ?></strong><br /><br />
+			<input type="checkbox" id="delete_logs_yes" name="delete_logs_yes" value="yes" />&nbsp;<label for="delete_logs_yes"><?php esc_html_e( 'Yes', 'wp-polls' ); ?></label><br /><br />
+			<input type="button" name="do" value="<?php esc_attr_e( 'Delete Logs For This Poll Only', 'wp-polls' ); ?>" class="button" data-poll-action="delete-poll-logs" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php printf( esc_attr__( 'You are about to delete poll logs for this poll \'%s\' ONLY. This action is not reversible.', 'wp-polls' ), esc_attr( $poll_question ) ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_delete-poll-logs' ) ); ?>" />
 			<?php
 		} else {
-			_e( 'No poll logs available for this poll.', 'wp-polls' );
+			esc_html_e( 'No poll logs available for this poll.', 'wp-polls' );
 		}
 		?>
 	</div>
-	<p><?php _e( 'Note: If your logging method is by IP and Cookie or by Cookie, users may still be unable to vote if they have voted before as the cookie is still stored in their computer.', 'wp-polls' ); ?></p>
+	<p><?php esc_html_e( 'Note: If your logging method is by IP and Cookie or by Cookie, users may still be unable to vote if they have voted before as the cookie is still stored in their computer.', 'wp-polls' ); ?></p>
 </div>
