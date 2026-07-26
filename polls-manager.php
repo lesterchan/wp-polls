@@ -322,7 +322,7 @@ switch ( $mode ) {
 					<td width="80%">
 						<?php echo mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_timestamp ) ); ?><br />
 						<input type="checkbox" name="edit_polltimestamp" id="edit_polltimestamp" value="1" data-poll-action="toggle-timestamp" />&nbsp;<label for="edit_polltimestamp"><?php _e( 'Edit Start Date/Time', 'wp-polls' ); ?></label><br />
-						<?php poll_timestamp( $poll_timestamp, 'pollq_timestamp', 'none' ); ?>
+						<?php Polls_Admin::poll_timestamp( $poll_timestamp, 'pollq_timestamp', 'none' ); ?>
 					</td>
 				</tr>
 					<tr>
@@ -345,9 +345,9 @@ switch ( $mode ) {
 						<label for="pollq_expiry_no"><?php _e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label><br />
 						<?php
 						if ( empty( $poll_expiry ) ) {
-							poll_timestamp( current_time( 'timestamp' ), 'pollq_expiry', 'none' );
+							Polls_Admin::poll_timestamp( current_time( 'timestamp' ), 'pollq_expiry', 'none' );
 						} else {
-							poll_timestamp( $poll_expiry, 'pollq_expiry' );
+							Polls_Admin::poll_timestamp( $poll_expiry, 'pollq_expiry' );
 						}
 						?>
 					</td>

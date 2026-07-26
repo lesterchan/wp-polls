@@ -23,9 +23,9 @@ class Polls_Widget extends WP_Widget {
 		if ( ! empty( $title ) ) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
-		get_poll( $poll_id );
+		Polls_Display::get_poll( $poll_id );
 		if ( $display_pollarchive ) {
-			display_polls_archive_link();
+			Polls_Display::display_polls_archive_link();
 		}
 		echo $args['after_widget'];
 	}

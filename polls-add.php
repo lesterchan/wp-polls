@@ -198,11 +198,11 @@ if ( ! empty( $text ) ) {
 	<table class="form-table">
 		<tr>
 			<th width="20%" scope="row" valign="top"><?php _e( 'Start Date/Time', 'wp-polls' ); ?></th>
-			<td width="80%"><?php poll_timestamp( current_time( 'timestamp' ) ); ?></td>
+			<td width="80%"><?php Polls_Admin::poll_timestamp( current_time( 'timestamp' ) ); ?></td>
 		</tr>
 		<tr>
 			<th width="20%" scope="row" valign="top"><?php _e( 'End Date/Time', 'wp-polls' ); ?></th>
-			<td width="80%"><input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" data-poll-action="toggle-expiry" />&nbsp;&nbsp;<label for="pollq_expiry_no"><?php _e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label><?php poll_timestamp( current_time( 'timestamp' ), 'pollq_expiry', 'none' ); ?></td>
+			<td width="80%"><input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" data-poll-action="toggle-expiry" />&nbsp;&nbsp;<label for="pollq_expiry_no"><?php _e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label><?php Polls_Admin::poll_timestamp( current_time( 'timestamp' ), 'pollq_expiry', 'none' ); ?></td>
 		</tr>
 	</table>
 	<p style="text-align: center;"><input type="submit" name="do" value="<?php _e( 'Add Poll', 'wp-polls' ); ?>"  class="button-primary" />&nbsp;&nbsp;<input type="button" name="cancel" value="<?php _e( 'Cancel', 'wp-polls' ); ?>" class="button" data-poll-action="go-back" /></p>
