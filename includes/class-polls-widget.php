@@ -7,6 +7,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Renders a poll in a sidebar.
+ */
 class Polls_Widget extends WP_Widget {
 	/**
 	 * Constructor.
@@ -30,15 +33,15 @@ class Polls_Widget extends WP_Widget {
 		$title               = apply_filters( 'widget_title', esc_attr( $instance['title'] ) );
 		$poll_id             = (int) $instance['poll_id'];
 		$display_pollarchive = (int) $instance['display_pollarchive'];
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 		if ( ! empty( $title ) ) {
-			echo $args['before_title'] . $title . $args['after_title'];
+			echo wp_kses_post( $args['before_title'] . $title . $args['after_title'] );
 		}
 		Polls_Display::get_poll( $poll_id );
 		if ( $display_pollarchive ) {
 			Polls_Display::display_polls_archive_link();
 		}
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 
 	/**
@@ -54,7 +57,7 @@ class Polls_Widget extends WP_Widget {
 			return false;
 		}
 		$instance                        = $old_instance;
-		$instance['title']               = strip_tags( $new_instance['title'] );
+		$instance['title']               = wp_strip_all_tags( $new_instance['title'] );
 		$instance['poll_id']             = (int) $new_instance['poll_id'];
 		$instance['display_pollarchive'] = (int) $new_instance['display_pollarchive'];
 		return $instance;
@@ -82,19 +85,19 @@ class Polls_Widget extends WP_Widget {
 		$display_pollarchive = (int) $instance['display_pollarchive'];
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'wp-polls' ); ?> <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" /></label>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'wp-polls' ); ?> <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></label>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'display_pollarchive' ); ?>"><?php esc_html_e( 'Display Polls Archive Link Below Poll?', 'wp-polls' ); ?>
-				<select name="<?php echo $this->get_field_name( 'display_pollarchive' ); ?>" id="<?php echo $this->get_field_id( 'display_pollarchive' ); ?>" class="widefat">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'display_pollarchive' ) ); ?>"><?php esc_html_e( 'Display Polls Archive Link Below Poll?', 'wp-polls' ); ?>
+				<select name="<?php echo esc_attr( $this->get_field_name( 'display_pollarchive' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'display_pollarchive' ) ); ?>" class="widefat">
 					<option value="0"<?php selected( 0, $display_pollarchive ); ?>><?php esc_html_e( 'No', 'wp-polls' ); ?></option>
 					<option value="1"<?php selected( 1, $display_pollarchive ); ?>><?php esc_html_e( 'Yes', 'wp-polls' ); ?></option>
 				</select>
 			</label>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'poll_id' ); ?>"><?php esc_html_e( 'Poll To Display:', 'wp-polls' ); ?>
-				<select name="<?php echo $this->get_field_name( 'poll_id' ); ?>" id="<?php echo $this->get_field_id( 'poll_id' ); ?>" class="widefat">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'poll_id' ) ); ?>"><?php esc_html_e( 'Poll To Display:', 'wp-polls' ); ?>
+				<select name="<?php echo esc_attr( $this->get_field_name( 'poll_id' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'poll_id' ) ); ?>" class="widefat">
 					<option value="-1"<?php selected( -1, $poll_id ); ?>><?php esc_html_e( 'Do NOT Display Poll (Disable)', 'wp-polls' ); ?></option>
 					<option value="-2"<?php selected( -2, $poll_id ); ?>><?php esc_html_e( 'Display Random Poll', 'wp-polls' ); ?></option>
 					<option value="0"<?php selected( 0, $poll_id ); ?>><?php esc_html_e( 'Display Latest Poll', 'wp-polls' ); ?></option>
@@ -106,9 +109,9 @@ class Polls_Widget extends WP_Widget {
 							$pollq_question = wp_kses_post( removeslashes( $poll->pollq_question ) );
 							$pollq_id       = (int) $poll->pollq_id;
 							if ( $pollq_id === $poll_id ) {
-								echo "<option value=\"$pollq_id\" selected=\"selected\">$pollq_question</option>\n";
+								echo '<option value="' . esc_attr( $pollq_id ) . '" selected="selected">' . wp_kses_post( $pollq_question ) . "</option>\n";
 							} else {
-								echo "<option value=\"$pollq_id\">$pollq_question</option>\n";
+								echo '<option value="' . esc_attr( $pollq_id ) . '">' . wp_kses_post( $pollq_question ) . "</option>\n";
 							}
 						}
 					}
@@ -116,7 +119,7 @@ class Polls_Widget extends WP_Widget {
 				</select>
 			</label>
 		</p>
-		<input type="hidden" id="<?php echo $this->get_field_id( 'submit' ); ?>" name="<?php echo $this->get_field_name( 'submit' ); ?>" value="1" />
+		<input type="hidden" id="<?php echo esc_attr( $this->get_field_id( 'submit' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'submit' ) ); ?>" value="1" />
 		<?php
 	}
 }

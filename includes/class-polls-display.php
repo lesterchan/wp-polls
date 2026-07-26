@@ -87,13 +87,13 @@ class Polls_Display {
 		$template_question           = apply_filters( 'wp_polls_template_voteheader_markup', $template_question, $poll_question, $template_question_variables );
 
 		// Get Poll Answers Data.
-		list($order_by, $sort_order) = self::_polls_get_ans_sort();
+		list($order_by, $sort_order) = self::get_ans_sort();
 		$poll_answers                = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
 		// If There Is Poll Question With Answers.
 		if ( $poll_question && $poll_answers ) {
 			// Display Poll Voting Form.
 			$temp_pollvote .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
-			$temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"" . esc_url( $_SERVER['SCRIPT_NAME'] ) . "\" method=\"post\">\n";
+			$temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"" . ( isset( $_SERVER['SCRIPT_NAME'] ) ? esc_url( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '' ) . "\" method=\"post\">\n";
 			$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" id=\"poll_{$poll_question_id}_nonce\" name=\"wp-polls-nonce\" value=\"" . wp_create_nonce( 'poll_' . $poll_question_id . '-nonce' ) . "\" /></p>\n";
 			$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" name=\"poll_id\" value=\"$poll_question_id\" /></p>\n";
 			if ( $poll_multiple_ans > 0 ) {
@@ -127,7 +127,7 @@ class Polls_Display {
 				$temp_pollvote .= "\t\t$template_answer\n";
 			}
 			// Determine Poll Result URL.
-			$poll_result_url = esc_url_raw( $_SERVER['REQUEST_URI'] );
+			$poll_result_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 			$poll_result_url = preg_replace( '/pollresult=(\d+)/i', 'pollresult=' . $poll_question_id, $poll_result_url );
 			if ( isset( $_GET['pollresult'] ) && 0 === (int) $_GET['pollresult'] ) {
 				if ( strpos( $poll_result_url, '?' ) !== false ) {
@@ -239,7 +239,7 @@ class Polls_Display {
 		$template_question  = apply_filters( 'wp_polls_template_resultheader_markup', $template_question, $poll_question, $template_variables );
 
 		// Get Poll Answers Data.
-		list( $order_by, $sort_order ) = self::_polls_get_ans_result_sort();
+		list( $order_by, $sort_order ) = self::get_ans_result_sort();
 		$poll_answers                  = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
 		// If There Is Poll Question With Answers.
 		if ( $poll_question && $poll_answers ) {
@@ -403,7 +403,8 @@ class Polls_Display {
 		$template_pollarchivelink = removeslashes( Polls_Options::get( 'templates.pollarchivelink' ) );
 		$template_pollarchivelink = str_replace( '%POLL_ARCHIVE_URL%', esc_url( Polls_Options::get( 'archive.url' ) ), $template_pollarchivelink );
 		if ( $display ) {
-			echo $template_pollarchivelink;
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Stored template, filtered by Polls_Settings on save.
+		echo $template_pollarchivelink;
 		} else {
 			return $template_pollarchivelink;
 		}
@@ -504,7 +505,7 @@ class Polls_Display {
 		}
 
 		// Get Poll Answers.
-		list($order_by, $sort_order) = self::_polls_get_ans_result_sort();
+		list($order_by, $sort_order) = self::get_ans_result_sort();
 		$answers                     = $wpdb->get_results( "SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid IN ($poll_questions_ids) ORDER BY $order_by $sort_order" );
 		if ( $answers ) {
 			foreach ( $answers as $answer ) {
@@ -730,7 +731,7 @@ class Polls_Display {
 		if ( empty( $poll_archive_url ) ) {
 			$poll_archive_url = $poll_archive_url_array[ count( $poll_archive_url_array ) - 2 ];
 		}
-		$current_url = esc_url_raw( $_SERVER['REQUEST_URI'] );
+		$current_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 		if ( strpos( $current_url, strval( $poll_archive_url ) ) === false ) {
 			return false;
 		}
@@ -743,7 +744,7 @@ class Polls_Display {
 	 *
 	 * @return mixed
 	 */
-	public static function _polls_get_ans_sort() {
+	public static function get_ans_sort() {
 		$order_by = Polls_Options::get( 'sort.answers_by' );
 		switch ( $order_by ) {
 			case 'polla_votes':
@@ -764,7 +765,7 @@ class Polls_Display {
 	 *
 	 * @return mixed
 	 */
-	public static function _polls_get_ans_result_sort() {
+	public static function get_ans_result_sort() {
 		$order_by = Polls_Options::get( 'sort.results_by' );
 		switch ( $order_by ) {
 			case 'polla_votes':
@@ -800,7 +801,8 @@ class Polls_Display {
 		// Check Whether Poll Is Disabled.
 		if ( (int) Polls_Options::get( 'current_poll' ) === -1 ) {
 			if ( $display ) {
-				echo removeslashes( Polls_Options::get( 'templates.disable' ) );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Stored template, filtered by Polls_Settings on save.
+			echo removeslashes( Polls_Options::get( 'templates.disable' ) );
 				return '';
 			}
 
@@ -822,8 +824,8 @@ class Polls_Display {
 						$poll_id        = (int) $random_poll_id;
 						if ( $pollresult_id > 0 ) {
 							$poll_id = $pollresult_id;
-						} elseif ( (int) $_POST['poll_id'] > 0 ) {
-							$poll_id = (int) $_POST['poll_id'];
+						} elseif ( isset( $_POST['poll_id'] ) && (int) $_POST['poll_id'] > 0 ) {
+							$poll_id = isset( $_POST['poll_id'] ) ? (int) $_POST['poll_id'] : 0;
 						}
 						// Current Poll ID Is Not Specified.
 					} elseif ( (int) Polls_Options::get( 'current_poll' ) === 0 ) {
@@ -851,6 +853,7 @@ class Polls_Display {
 		// User Click on View Results Link.
 		if ( $pollresult_id === $poll_id ) {
 			if ( $display ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup, escaped while the template was assembled.
 				echo self::display_pollresult( $poll_id );
 			} else {
 				return self::display_pollresult( $poll_id );
@@ -873,7 +876,8 @@ class Polls_Display {
 			}
 			if ( 1 === $poll_close || (int) $check_voted > 0 || ( is_array( $check_voted ) && count( $check_voted ) > 0 ) ) {
 				if ( $display ) {
-					echo self::display_pollresult( $poll_id, $check_voted );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup, escaped while the template was assembled.
+				echo self::display_pollresult( $poll_id, $check_voted );
 				} else {
 					return self::display_pollresult( $poll_id, $check_voted );
 				}
@@ -881,13 +885,15 @@ class Polls_Display {
 				$disable_poll_form = '#polls_form_' . (int) $poll_id;
 				$disable_poll_js   = '<script type="text/javascript">document.querySelectorAll(\'' . $disable_poll_form . ' input, ' . $disable_poll_form . ' select, ' . $disable_poll_form . ' textarea, ' . $disable_poll_form . ' button\').forEach(function (field) { field.disabled = true; });</script>';
 				if ( $display ) {
-					echo self::display_pollvote( $poll_id ) . $disable_poll_js;
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup, escaped while the template was assembled.
+				echo self::display_pollvote( $poll_id ) . $disable_poll_js;
 				} else {
 					return self::display_pollvote( $poll_id ) . $disable_poll_js;
 				}
 			} elseif ( 1 === $poll_active ) {
 				if ( $display ) {
-					echo self::display_pollvote( $poll_id );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup, escaped while the template was assembled.
+				echo self::display_pollvote( $poll_id );
 				} else {
 					return self::display_pollvote( $poll_id );
 				}
