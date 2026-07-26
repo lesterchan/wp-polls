@@ -27,14 +27,16 @@ class Polls_Install {
 
 	public static function activation( $network_wide ) {
 		if ( is_multisite() && $network_wide ) {
-			$ms_sites = wp_get_sites();
+			// wp_get_sites() was removed in WP 5.1, so network activation has
+			// been a fatal error since then. get_sites() replaces it and
+			// returns WP_Site objects rather than arrays. 'number' => 0 lifts
+			// the default limit of 100 sites.
+			$ms_sites = get_sites( array( 'number' => 0 ) );
 
-			if ( 0 < count( $ms_sites ) ) {
-				foreach ( $ms_sites as $ms_site ) {
-					switch_to_blog( $ms_site['blog_id'] );
-					self::activate();
-					restore_current_blog();
-				}
+			foreach ( $ms_sites as $ms_site ) {
+				switch_to_blog( (int) $ms_site->blog_id );
+				self::activate();
+				restore_current_blog();
 			}
 		} else {
 			self::activate();
@@ -47,20 +49,29 @@ class Polls_Install {
 
 	public static function upgrade() {
 		$installed_version = get_option( 'poll_version' );
+		$is_pre_3          = empty( $installed_version ) || version_compare( $installed_version, '3.0.0', '<' );
+
+		// Version 3.0.0: fold the ~30 scattered option rows into a single one.
+		// Must run before anything else that touches templates, so there is only
+		// one place they live by the time the later steps read them.
+		//
+		// Gated on the stored shape as well as the version. 3.0.0 spent a while
+		// unreleased on the development branch, so an install can be stamped
+		// 3.0.0 and still hold the scattered rows; a version-only gate would
+		// skip it and quietly drop that site to defaults. Checking for the
+		// nested 'templates' key catches those, and the migration is a no-op
+		// when there is nothing left to fold in.
+		$stored = get_option( Polls_Options::OPTION, array() );
+		if ( $is_pre_3 || ! is_array( $stored ) || ! isset( $stored['templates'] ) ) {
+			Polls_Options::migrate_from_legacy_rows();
+		}
 
 		if ( WP_POLLS_VERSION === $installed_version ) {
 			return;
 		}
 
-		// Version 4.0.0: fold the ~30 scattered option rows into a single one.
-		// Must run before anything else that touches templates, so there is only
-		// one place they live by the time the later steps read them.
-		if ( empty( $installed_version ) || version_compare( $installed_version, '4.0.0', '<' ) ) {
-			Polls_Options::migrate_from_legacy_rows();
-		}
-
 		// Version 3.0.0: Inline onclick handlers were replaced by data-poll-* attributes.
-		if ( empty( $installed_version ) || version_compare( $installed_version, '3.0.0', '<' ) ) {
+		if ( $is_pre_3 ) {
 			self::upgrade_templates_onclick();
 		}
 
@@ -240,7 +251,7 @@ class Polls_Install {
 				);
 			}
 		}
-		// Options live in one row from 4.0.0 onward. Defaults come from
+		// Options live in one row from 3.0.0 onward. Defaults come from
 		// Polls_Options so activation and the settings screen cannot drift.
 		add_option( Polls_Options::OPTION, Polls_Options::defaults() );
 		Polls_Options::flush();

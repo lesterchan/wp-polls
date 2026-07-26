@@ -2,9 +2,12 @@
 Contributors: GamerZ  
 Donate link: https://lesterchan.net/site/donation/  
 Tags: poll, polls, polling, vote, booth, democracy, ajax, survey, post, widget  
-Requires at least: 4.9.6  
-Tested up to: 6.8  
+Requires at least: 6.0  
+Tested up to: 7.0  
 Stable tag: 3.0.0  
+Requires PHP: 7.4  
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Adds an AJAX poll system to your WordPress blog. You can also easily add a poll into your WordPress's blog post/page.
 
@@ -15,28 +18,37 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 [https://github.com/lesterchan/wp-polls](https://github.com/lesterchan/wp-polls "https://github.com/lesterchan/wp-polls")
 
 ### Credits
-* Plugin icon by [Freepik](http://www.freepik.com) from [Flaticon](http://www.flaticon.com)
+* Plugin icon by [Freepik](https://www.freepik.com) from [Flaticon](https://www.flaticon.com)
 
 ### Donations
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
 
 ## Changelog
 ### 3.0.0
+* BREAKING: Requires WordPress 6.0 and PHP 7.4.
 * BREAKING: The scripts no longer define any global JavaScript functions. `poll_vote()`, `poll_result()`, `poll_booth()` and the admin equivalents are now private, so custom templates or themes that called them directly must move to `data-poll-id` / `data-poll-action` attributes. WP-Polls converts the stock templates for you on upgrade and warns in wp-admin about any it could not convert.
+* CHANGED: Options, templates, settings, the widget and the install/upgrade routine moved into classes under `includes/`. The documented extension points are unchanged: every `wp_polls_*` filter and action, both the `[poll]` and `[page_polls]` shortcodes, and the template tags keep their exact names and signatures.
+* CHANGED: The thirty-odd separate `wp_options` rows are now a single `poll_options` row holding a nested array. Your settings are migrated automatically on upgrade; the old rows are removed once they have been folded in.
 * FIXED: XSS in polls-templates.php. Inline `onclick` handlers are replaced by `data-poll-action` / `data-poll-id` attributes and `onclick` is no longer an allowed attribute in poll templates.
-* ADDED: Upgrade routine that rewrites stored vote/result footer templates still using `onclick`, plus a warning on the Poll Templates page if any handler could not be converted automatically.
-* CHANGED: Removed every remaining inline `onclick`/`onblur`/`onchange` handler from the admin pages in favour of `data-poll-action` attributes and delegated listeners, so poll questions and answers no longer have to be escaped into a JavaScript context.
+* FIXED: Network activating on multisite was a fatal error. The activation routine called `wp_get_sites()`, which WordPress removed in 5.1.
+* FIXED: On multisite the three poll tables were not registered with `$wpdb`, so any query made inside `switch_to_blog()` read and wrote the wrong site's polls.
+* FIXED: Adding or removing a poll answer in wp-admin no longer breaks. It called jQuery's `.size()`, which was removed in jQuery 3.
+* FIXED: The poll bar tooltip showed a literal `&amp;` for any answer containing an ampersand.
+* FIXED: `$_SERVER['REMOTE_ADDR']` is no longer read unguarded, which warned under WP-CLI and cron on PHP 8.
 * FIXED: The result and vote links no longer follow their placeholder `href` when clicked.
 * FIXED: Removed the duplicated shortcode registration.
 * FIXED: Undefined array key warnings on missing stats_display options.
 * FIXED: Warnings when rendering a poll whose ID no longer exists.
+* CHANGED: Poll Options and Poll Templates now use the WordPress Settings API instead of hand-rolled form handling.
+* CHANGED: Removed every remaining inline `onclick`/`onblur`/`onchange` handler from the admin pages in favour of `data-poll-action` attributes and delegated listeners, so poll questions and answers no longer have to be escaped into a JavaScript context.
 * CHANGED: Dropped the jQuery dependency. Both scripts, the inline admin scripts and the TinyMCE plugin now use the browser's own APIs, so WP-Polls no longer forces jQuery to load on the front end.
-* FIXED: Adding or removing a poll answer in wp-admin no longer breaks. It called jQuery's `.size()`, which was removed in jQuery 3.
 * CHANGED: `polls-js.js` and `polls-admin-js.js` now ship as readable source, the `.dev.js` copies have been removed.
+* SECURITY: The `polls-admin` AJAX handler now checks the `manage_polls` capability instead of relying on its nonces for authorisation.
 * SECURITY: Escaped the poll bar colours, the voting form action and `%POLL_RESULT_URL%` on output, and validated the poll bar colours on save.
+* CHANGED: Reformatted to the WordPress Coding Standards. Fifteen translatable strings gained numbered placeholders (`%1$s`), which changes their msgid, so those strings need retranslating.
 
 #### Upgrade Notice
-If you customised the Voting Form Footer or Result Footer templates, WP-Polls converts the `onclick` handlers for you on upgrade. If your customisation was too far from the default to convert, the Poll Templates page tells you which handler to replace.
+Your settings move into a single `poll_options` row automatically the first time wp-admin is loaded after upgrading. If you customised the Voting Form Footer or Result Footer templates, the `onclick` handlers in them are converted too; anything too customised to convert is reported on the Poll Templates page.
 
 ### 2.77.3
 * FIXED: XSS In poll-logs.php.
@@ -208,7 +220,7 @@ If you customised the Voting Form Footer or Result Footer templates, WP-Polls co
 * Replace: `background-color: #ffffff;` (where #ffffff should be your background color for the poll.)
 
 ### How Do I Have Individual Colors For Each Poll's Bar?
-* Courtesy Of [TreedBox.com](http://treedbox.com "TreedBox.com")
+* Courtesy Of [TreedBox.com](https://treedbox.com "TreedBox.com")
 * Open poll-css.css
 * Add to the end of the file:
 

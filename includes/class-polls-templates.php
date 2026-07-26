@@ -2,7 +2,7 @@
 /**
  * Default poll templates.
  *
- * Single source of truth for the stock markup. Before 4.0.0 the same strings
+ * Single source of truth for the stock markup. Before 3.0.0 the same strings
  * were written out twice - once in the activation routine and once in the
  * JavaScript behind the "Restore Default Template" buttons - which is how the
  * two drifted apart and how the inline onclick handlers survived in one copy

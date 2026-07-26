@@ -4,7 +4,7 @@
  *
  * Everything the plugin configures lives in one wp_options row holding a
  * nested array, rather than the thirty separate rows used up to 3.0.0. It
- * reuses the existing poll_options name, which before 4.0.0 held only the
+ * reuses the existing poll_options name, which before 3.0.0 held only the
  * ip_header setting. The
  * value is a plain PHP array: update_option() serialises it and get_option()
  * unserialises it, so there is no encode/decode layer at the call sites and
@@ -122,7 +122,7 @@ class Polls_Options {
 	public static function defaults() {
 		return array(
 			'templates'      => Polls_Templates::defaults(),
-			// These mirror the pre-4.0.0 add_option() calls exactly. Changing any
+			// These mirror the pre-3.0.0 add_option() calls exactly. Changing any
 			// of them silently changes what a fresh install looks like.
 			'bar'            => array(
 				'style'      => 'default',
@@ -256,7 +256,7 @@ class Polls_Options {
 	}
 
 	/**
-	 * Fold the pre-4.0.0 option rows into the single row, then delete them.
+	 * Fold the pre-3.0.0 option rows into the single row, then delete them.
 	 *
 	 * Gated by the caller on the stored version rather than on "do the old rows
 	 * still exist" - an install that has already migrated has no old rows, and
@@ -291,7 +291,7 @@ class Polls_Options {
 			}
 		}
 
-		// Pre-4.0.0 the row held only { ip_header: ... }. No special case is
+		// Pre-3.0.0 the row held only { ip_header: ... }. No special case is
 		// needed: it is the same row, so all() above already merged that single
 		// key over the defaults.
 

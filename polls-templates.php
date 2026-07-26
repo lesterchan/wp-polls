@@ -14,7 +14,7 @@ $id        = ( isset( $_GET['id'] ) ? (int) sanitize_key( $_GET['id'] ) : 0 );
 /* <![CDATA[*/
 (function () {
 	// Defaults come from Polls_Templates so this screen and the activation
-	// routine cannot drift apart. Before 4.0.0 the markup was written out
+	// routine cannot drift apart. Before 3.0.0 the markup was written out
 	// twice, which is how one copy kept its inline onclick handlers after the
 	// other had them removed.
 	var pollDefaults = <?php echo wp_json_encode( Polls_Templates::defaults() ); ?>;
