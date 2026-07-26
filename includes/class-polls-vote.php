@@ -171,13 +171,93 @@ class Polls_Vote {
 	public static function poll_get_raw_ipaddress() {
 		// REMOTE_ADDR is absent under WP-CLI and cron, where this is still reached
 		// through the poll display path. Reading it unguarded warns on PHP 8.
-		$ip        = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$ip_header = Polls_Options::get( 'ip_header', '' );
-		if ( ! empty( $ip_header ) && ! empty( $_SERVER[ $ip_header ] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER[ $ip_header ] ) );
+		$ip = self::valid_ip( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
+
+		$header = (string) Polls_Options::get( 'ip_header', '' );
+
+		/**
+		 * Filters whether the usual proxy headers may be trusted.
+		 *
+		 * Lets the decision be made per request -- trusting the header only when
+		 * the request actually arrives from a known load balancer, say -- rather
+		 * than once in wp-config.php.
+		 *
+		 * @param bool $trust Defaults to the WP_POLLS_TRUST_PROXY constant.
+		 */
+		$trust_proxy = (bool) apply_filters(
+			'wp_polls_trust_proxy',
+			defined( 'WP_POLLS_TRUST_PROXY' ) && WP_POLLS_TRUST_PROXY
+		);
+
+		if ( '' !== $header && ! empty( $_SERVER[ $header ] ) ) {
+			$candidate = self::first_valid_ip( sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) ) );
+
+			if ( '' !== $candidate ) {
+				$ip = $candidate;
+			}
+		} elseif ( $trust_proxy ) {
+			$headers = array(
+				'HTTP_CF_CONNECTING_IP',
+				'HTTP_CLIENT_IP',
+				'HTTP_X_FORWARDED_FOR',
+				'HTTP_X_FORWARDED',
+				'HTTP_X_CLUSTER_CLIENT_IP',
+				'HTTP_FORWARDED_FOR',
+				'HTTP_FORWARDED',
+			);
+
+			foreach ( $headers as $name ) {
+				if ( empty( $_SERVER[ $name ] ) ) {
+					continue;
+				}
+
+				$candidate = self::first_valid_ip( sanitize_text_field( wp_unslash( $_SERVER[ $name ] ) ) );
+
+				if ( '' !== $candidate ) {
+					$ip = $candidate;
+					break;
+				}
+			}
 		}
 
 		return $ip;
+	}
+
+	/**
+	 * The first syntactically valid IP in a comma separated list.
+	 *
+	 * X-Forwarded-For is a chain, not an address: "client, proxy1, proxy2". The
+	 * client controls the left of it, so the whole string must never be used as
+	 * an identity -- appending one more hop yields a different value and a
+	 * different hash, which is enough to vote again.
+	 *
+	 * @param string $value Header value.
+	 *
+	 * @return string Validated IP, or an empty string.
+	 */
+	private static function first_valid_ip( $value ) {
+		foreach ( explode( ',', $value ) as $candidate ) {
+			$candidate = self::valid_ip( trim( $candidate ) );
+
+			if ( '' !== $candidate ) {
+				return $candidate;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * An address, or an empty string when it is not one.
+	 *
+	 * @param string $value Candidate address.
+	 *
+	 * @return string
+	 */
+	private static function valid_ip( $value ) {
+		$ip = filter_var( $value, FILTER_VALIDATE_IP );
+
+		return false === $ip ? '' : $ip;
 	}
 
 	/**

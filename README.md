@@ -51,12 +51,16 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * CHANGED: `polls-js.js` and `polls-admin-js.js` now ship as readable source, the `.dev.js` copies have been removed.
 * SECURITY: The `polls-admin` AJAX handler now checks the `manage_polls` capability instead of relying on its nonces for authorisation.
 * SECURITY: Escaped the poll bar colours, the voting form action and `%POLL_RESULT_URL%` on output, and validated the poll bar colours on save.
+* SECURITY: If you set "Header That Contains The IP", WP-Polls used the whole header as the voter's identity. `X-Forwarded-For` is a chain the visitor controls the left of, so appending one more hop produced a different identity and another vote. It now takes the first valid address in the header, and falls back to `REMOTE_ADDR` when the header holds no address at all. Sites that left the setting blank are unaffected and their existing vote logs still match.
+* CHANGED: Added the `WP_POLLS_TRUST_PROXY` constant and the `wp_polls_trust_proxy` filter, matching WP-Email and WP-UserOnline, so sites behind Cloudflare or a load balancer can opt in to the usual proxy headers without naming one on the settings screen. Proxy headers are still ignored unless you opt in.
 * CHANGED: Reformatted to the WordPress Coding Standards. Fifteen translatable strings gained numbered placeholders (`%1$s`), which changes their msgid, so those strings need retranslating.
 
 #### Upgrade Notice
 Your settings move into a single `poll_options` row automatically the first time wp-admin is loaded after upgrading. If you customised the Voting Form Footer or Result Footer templates, the `onclick` handlers in them are converted too; anything too customised to convert is reported on the Poll Templates page.
 
 If you renamed the plugin directory from `wp-polls`, its stylesheets, scripts and poll bar images were not loading. They will start working on upgrade with no action needed.
+
+If you set "Header That Contains The IP" to `X-Forwarded-For`, check it is a header your proxy always overwrites. WP-Polls now reads only the first address in it, so votes recorded against a forged chain no longer count as separate voters.
 
 ### 2.77.3
 * FIXED: XSS In poll-logs.php.

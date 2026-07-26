@@ -153,14 +153,144 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 
 	/**
 	 * A non-IP in the trusted header must not reach gethostbyaddr().
+	 *
+	 * It no longer yields an empty hostname, because a junk header now falls back
+	 * to REMOTE_ADDR instead of being used verbatim. What must stay true is that
+	 * the junk itself never gets looked up.
 	 */
-	public function test_non_ip_header_yields_empty_hostname() {
+	public function test_non_ip_header_never_reaches_the_resolver() {
+		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		Polls_Options::flush();
+		$_SERVER['REMOTE_ADDR']          = '203.0.113.10';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip';
+
+		$this->assertStringNotContainsString( 'not-an-ip', Polls_Vote::poll_get_hostname() );
+
+		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+	}
+
+	/**
+	 * With no usable address at all the hostname is empty.
+	 */
+	public function test_no_address_yields_empty_hostname() {
 		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
 		Polls_Options::flush();
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip';
+		unset( $_SERVER['REMOTE_ADDR'] );
 
 		$this->assertSame( '', Polls_Vote::poll_get_hostname() );
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+	}
+
+
+	/**
+	 * A forged extra hop must not change who the voter is.
+	 *
+	 * X-Forwarded-For is a chain the client controls the left of. Using the whole
+	 * string as the identity let anyone vote again by appending one more hop.
+	 *
+	 * @return void
+	 */
+	public function test_appending_a_hop_does_not_change_identity() {
+		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		$_SERVER['REMOTE_ADDR'] = '198.51.100.5';
+
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7';
+		$plain                           = Polls_Vote::poll_get_ipaddress();
+
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 10.0.0.1';
+		$appended                        = Polls_Vote::poll_get_ipaddress();
+
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 10.0.0.1, 172.16.0.9';
+		$appended_twice                  = Polls_Vote::poll_get_ipaddress();
+
+		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+
+		$this->assertSame( $plain, $appended );
+		$this->assertSame( $plain, $appended_twice );
+	}
+
+	/**
+	 * The configured header wins, but only when it holds an address.
+	 *
+	 * @return void
+	 */
+	public function test_configured_header_takes_the_first_address() {
+		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		$_SERVER['REMOTE_ADDR'] = '198.51.100.5';
+
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 70.41.3.18';
+		$this->assertSame( '203.0.113.7', Polls_Vote::poll_get_raw_ipaddress() );
+
+		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+	}
+
+	/**
+	 * A junk header falls back to REMOTE_ADDR rather than being used verbatim.
+	 *
+	 * @return void
+	 */
+	public function test_junk_header_falls_back_to_remote_addr() {
+		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		$_SERVER['REMOTE_ADDR'] = '198.51.100.5';
+
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip, still-not-an-ip';
+		$this->assertSame( '198.51.100.5', Polls_Vote::poll_get_raw_ipaddress() );
+
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '<script>alert(1)</script>';
+		$this->assertSame( '198.51.100.5', Polls_Vote::poll_get_raw_ipaddress() );
+
+		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+	}
+
+	/**
+	 * Proxy headers are ignored unless something opted in.
+	 *
+	 * @return void
+	 */
+	public function test_proxy_headers_are_ignored_by_default() {
+		Polls_Options::set( 'ip_header', '' );
+		$_SERVER['REMOTE_ADDR']          = '198.51.100.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7';
+
+		$this->assertSame( '198.51.100.5', Polls_Vote::poll_get_raw_ipaddress() );
+
+		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+	}
+
+	/**
+	 * The trust filter opts in without naming a header.
+	 *
+	 * @return void
+	 */
+	public function test_trust_proxy_filter_opts_in() {
+		Polls_Options::set( 'ip_header', '' );
+		$_SERVER['REMOTE_ADDR']          = '198.51.100.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 10.0.0.1';
+
+		add_filter( 'wp_polls_trust_proxy', '__return_true' );
+		$ip = Polls_Vote::poll_get_raw_ipaddress();
+		remove_filter( 'wp_polls_trust_proxy', '__return_true' );
+
+		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+
+		$this->assertSame( '203.0.113.7', $ip );
+	}
+
+	/**
+	 * The default configuration hashes exactly what it always did.
+	 *
+	 * REMOTE_ADDR is already a bare address, so validating it must not change the
+	 * value and orphan every pollsip row recorded before the upgrade.
+	 *
+	 * @return void
+	 */
+	public function test_remote_addr_identity_is_unchanged() {
+		Polls_Options::set( 'ip_header', '' );
+		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
+
+		$this->assertSame( '203.0.113.10', Polls_Vote::poll_get_raw_ipaddress() );
+		$this->assertSame( wp_hash( '203.0.113.10' ), Polls_Vote::poll_get_ipaddress() );
 	}
 }

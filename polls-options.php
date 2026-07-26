@@ -279,7 +279,21 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 		</tr>
 		<tr>
 			<th scope="row" valign="top"><?php esc_html_e( 'Header That Contains The IP:', 'wp-polls' ); ?></th>
-			<td><input type="text" name="poll_options[ip_header]" value="<?php echo esc_attr( $poll_options['ip_header'] ); ?>" size="30" /> <?php esc_html_e( 'You can leave it blank to use the default', 'wp-polls' ); ?><br /><?php esc_html_e( 'Example: REMOTE_ADDR', 'wp-polls' ); ?></td>
+			<td>
+				<input type="text" name="poll_options[ip_header]" value="<?php echo esc_attr( $poll_options['ip_header'] ); ?>" size="30" placeholder="REMOTE_ADDR" />
+				<p class="description">
+					<?php esc_html_e( 'Leave blank to use REMOTE_ADDR. Only set this if a proxy in front of WordPress always overwrites the header, because visitors can otherwise forge it and vote more than once.', 'wp-polls' ); ?>
+					<br />
+					<?php
+					printf(
+						/* translators: 1: The WP_POLLS_TRUST_PROXY constant, 2: the wp_polls_trust_proxy filter, both in code spans. */
+						esc_html__( 'Example: HTTP_X_FORWARDED_FOR. You can also opt in with the %1$s constant or the %2$s filter.', 'wp-polls' ),
+						'<code>WP_POLLS_TRUST_PROXY</code>',
+						'<code>wp_polls_trust_proxy</code>'
+					);
+					?>
+				</p>
+			</td>
 		</tr>
 	</table>
 
