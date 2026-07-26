@@ -63,7 +63,7 @@ class Polls_Core {
 		$pollbar_height     = (int) $pollbar['height'];
 		$pollbar_background = self::_polls_sanitize_hex_color( $pollbar['background'] );
 		$pollbar_border     = self::_polls_sanitize_hex_color( $pollbar['border'] );
-		if ( $pollbar['style'] === 'use_css' ) {
+		if ( 'use_css' === $pollbar['style'] ) {
 			$pollbar_css  = '.wp-polls .pollbar {' . "\n";
 			$pollbar_css .= "\t" . 'margin: 1px;' . "\n";
 			$pollbar_css .= "\t" . 'font-size: ' . ( $pollbar_height - 2 ) . 'px;' . "\n";
@@ -137,9 +137,9 @@ class Polls_Core {
 				$id = (int) trim( $atts[0], '="\'' );
 			}
 
-			if ( $attributes['type'] === 'vote' ) {
+			if ( 'vote' === $attributes['type'] ) {
 				return Polls_Display::get_poll( $id, false );
-			} elseif ( $attributes['type'] === 'result' ) {
+			} elseif ( 'result' === $attributes['type'] ) {
 				return Polls_Display::display_pollresult( $id );
 			}
 		} else {

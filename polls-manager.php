@@ -31,7 +31,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			// Poll Start Date.
 			$pollq_timestamp    = isset( $_POST['poll_timestamp_old'] ) ? $_POST['poll_timestamp_old'] : current_time( 'timestamp' );
 			$edit_polltimestamp = isset( $_POST['edit_polltimestamp'] ) && (int) sanitize_key( $_POST['edit_polltimestamp'] ) === 1 ? 1 : 0;
-			if ( $edit_polltimestamp === 1 ) {
+			if ( 1 === $edit_polltimestamp ) {
 				$pollq_timestamp_day    = (int) sanitize_key( $_POST['pollq_timestamp_day'] );
 				$pollq_timestamp_month  = (int) sanitize_key( $_POST['pollq_timestamp_month'] );
 				$pollq_timestamp_year   = (int) sanitize_key( $_POST['pollq_timestamp_year'] );
@@ -45,7 +45,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			}
 			// Poll End Date.
 			$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
-			if ( $pollq_expiry_no === 1 ) {
+			if ( 1 === $pollq_expiry_no ) {
 				$pollq_expiry = 0;
 			} else {
 				$pollq_expiry_day    = (int) sanitize_key( $_POST['pollq_expiry_day'] );
@@ -58,7 +58,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				if ( $pollq_expiry <= current_time( 'timestamp' ) ) {
 					$pollq_active = 0;
 				}
-				if ( $edit_polltimestamp === 1 ) {
+				if ( 1 === $edit_polltimestamp ) {
 					if ( $pollq_expiry < $pollq_timestamp ) {
 						$pollq_active = 0;
 					}
@@ -67,7 +67,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			// Mutilple Poll.
 			$pollq_multiple_yes = (int) sanitize_key( $_POST['pollq_multiple_yes'] );
 			$pollq_multiple     = 0;
-			if ( $pollq_multiple_yes == 1 ) {
+			if ( 1 === $pollq_multiple_yes ) {
 				$pollq_multiple = (int) sanitize_key( $_POST['pollq_multiple'] );
 			} else {
 				$pollq_multiple = 0;
@@ -306,7 +306,7 @@ switch ( $mode ) {
 					<td width="60%">
 						<select name="pollq_multiple" id="pollq_multiple" size="1" 
 						<?php
-						if ( $poll_multiple == 0 ) {
+						if ( 0 === $poll_multiple ) {
 							echo 'disabled="disabled"'; }
 						?>
 							>
@@ -367,7 +367,7 @@ switch ( $mode ) {
 			<p style="text-align: center;">
 				<input type="submit" name="do" value="<?php esc_attr_e( 'Edit Poll', 'wp-polls' ); ?>" class="button-primary" />&nbsp;&nbsp;
 			<?php
-			if ( $poll_active == 1 ) {
+			if ( 1 === $poll_active ) {
 				$poll_open_display  = 'none';
 				$poll_close_display = 'inline';
 			} else {
@@ -442,7 +442,7 @@ switch ( $mode ) {
 								if ( $current_poll === $poll_id ) {
 									$style = 'class="highlight"';
 								}
-							} elseif ( $current_poll === 0 ) {
+							} elseif ( 0 === $current_poll ) {
 								if ( $poll_id === $latest_poll ) {
 									$style = 'class="highlight"';
 								}
@@ -454,7 +454,7 @@ switch ( $mode ) {
 								if ( $current_poll === $poll_id ) {
 									echo '<strong>' . __( 'Displayed:', 'wp-polls' ) . '</strong> ';
 								}
-							} elseif ( $current_poll === 0 ) {
+							} elseif ( 0 === $current_poll ) {
 								if ( $poll_id === $latest_poll ) {
 									echo '<strong>' . __( 'Displayed:', 'wp-polls' ) . '</strong> ';
 								}
@@ -464,9 +464,9 @@ switch ( $mode ) {
 							echo "<td>$poll_date</td>\n";
 							echo "<td>$poll_expiry_text</td>\n";
 							echo '<td>';
-							if ( $poll_active === 1 ) {
+							if ( 1 === $poll_active ) {
 								esc_html_e( 'Open', 'wp-polls' );
-							} elseif ( $poll_active === -1 ) {
+							} elseif ( -1 === $poll_active ) {
 								esc_html_e( 'Future', 'wp-polls' );
 							} else {
 								esc_html_e( 'Closed', 'wp-polls' );

@@ -194,7 +194,7 @@ if ( ! empty( $text ) ) {
 								<select name="num_choices" size="1">
 									<?php
 									for ( $i = 1; $i <= $poll_multiple; $i++ ) {
-										if ( $i == 1 ) {
+										if ( 1 === $i ) {
 											echo '<option value="1">' . __( '1 Answer', 'wp-polls' ) . '</option>';
 										} elseif ( $i == $num_choices ) {
 												/* translators: %1$s: value, %2$s: value. */
@@ -325,7 +325,7 @@ if ( ! empty( $text ) ) {
 					/* translators: 1: value, 2: value. */
 					$pollip_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_ip->pollip_timestamp ) );
 					if ( $pollip_aid != $poll_last_aid ) {
-						if ( $pollip_aid === 0 ) {
+						if ( 0 === $pollip_aid ) {
 							echo '<tr class="highlight"><td colspan="4"><strong>' . esc_html( $pollip_answers[ $pollip_aid ] ) . '</strong></td></tr>';
 						} else {
 							$polla_answer = ! empty( $pollip_answers[ $pollip_aid ] ) ? $pollip_answers[ $pollip_aid ] : $poll_answers_data[ $k - 1 ]->polla_answers;

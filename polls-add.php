@@ -35,7 +35,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				}
 				// Poll End Date.
 				$pollq_expiry_no = isset( $_POST['pollq_expiry_no'] ) ? (int) sanitize_key( $_POST['pollq_expiry_no'] ) : 0;
-				if ( $pollq_expiry_no === 1 ) {
+				if ( 1 === $pollq_expiry_no ) {
 					$pollq_expiry = 0;
 				} else {
 					$pollq_expiry_day    = isset( $_POST['pollq_expiry_day'] ) ? (int) sanitize_key( $_POST['pollq_expiry_day'] ) : 0;
@@ -52,7 +52,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				// Mutilple Poll.
 				$pollq_multiple_yes = isset( $_POST['pollq_multiple_yes'] ) ? (int) sanitize_key( $_POST['pollq_multiple_yes'] ) : 0;
 				$pollq_multiple     = 0;
-				if ( $pollq_multiple_yes === 1 ) {
+				if ( 1 === $pollq_multiple_yes ) {
 					$pollq_multiple = isset( $_POST['pollq_multiple'] ) ? (int) sanitize_key( $_POST['pollq_multiple'] ) : 0;
 				} else {
 					$pollq_multiple = 0;

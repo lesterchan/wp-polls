@@ -41,7 +41,7 @@ class Polls_Vote {
 				break;
 			// Registered Users Only.
 			case 1:
-				if ( $user_ID === 0 ) {
+				if ( 0 === $user_ID ) {
 					return false;
 				}
 				return true;
@@ -295,7 +295,7 @@ class Polls_Vote {
 
 		// Acquire lock.
 		$fp_lock = self::polls_acquire_lock( $poll_id );
-		if ( $fp_lock === false ) {
+		if ( false === $fp_lock ) {
 			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'Unable to obtain lock for Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
@@ -318,14 +318,14 @@ class Polls_Vote {
 			throw new InvalidArgumentException( sprintf( __( 'No answers given for Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
-		if ( $poll_id === 0 ) {
+		if ( 0 === $poll_id ) {
 			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'Invalid Poll ID. Poll ID #%s', 'wp-polls' ), $poll_id ) );
 		}
 
 		$is_poll_open = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsq WHERE pollq_id = %d AND pollq_active = 1", $poll_id ) );
 
-		if ( $is_poll_open === 0 ) {
+		if ( 0 === $is_poll_open ) {
 			/* translators: %s: value. */
 			throw new InvalidArgumentException( sprintf( __( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id ) );
 		}
@@ -352,9 +352,9 @@ class Polls_Vote {
 		$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
 
 		// Only Create Cookie If User Choose Logging Method 1 Or 3.
-		if ( $poll_logging_method === 1 || $poll_logging_method === 3 ) {
+		if ( 1 === $poll_logging_method || 3 === $poll_logging_method ) {
 			$cookie_expiry = (int) Polls_Options::get( 'cookie_expiry' );
-			if ( $cookie_expiry === 0 ) {
+			if ( 0 === $cookie_expiry ) {
 				$cookie_expiry = YEAR_IN_SECONDS;
 			}
 			setcookie( 'voted_' . $poll_id, implode( ',', $poll_aid_array ), $pollip_timestamp + $cookie_expiry, apply_filters( 'wp_polls_cookiepath', SITECOOKIEPATH ) );
@@ -429,7 +429,7 @@ class Polls_Vote {
 			$poll_id = ( isset( $_REQUEST['poll_id'] ) ? (int) sanitize_key( $_REQUEST['poll_id'] ) : 0 );
 
 			// Ensure Poll ID Is Valid.
-			if ( $poll_id === 0 ) {
+			if ( 0 === $poll_id ) {
 				esc_html_e( 'Invalid Poll ID', 'wp-polls' );
 				exit();
 			}

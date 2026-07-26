@@ -28,6 +28,25 @@
 		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
 	</rule>
 
+	<!-- manage_polls is this plugin's own capability, granted to administrator
+	     on activation. The sniff only knows core's list. -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="manage_polls"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- current_time( 'timestamp' ) is deprecated in favour of time(), but the
+	     two are not interchangeable here: poll timestamps have always been
+	     stored as site-local time and are rendered back with gmdate(). Swapping
+	     in time() would shift every newly created poll by the GMT offset
+	     relative to the rows already in the table. Left alone deliberately. -->
+	<rule ref="WordPress.DateTime.CurrentTimeTimestamp">
+		<severity>0</severity>
+	</rule>
+
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array" value="wp-polls"/>

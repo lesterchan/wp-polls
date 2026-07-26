@@ -165,7 +165,7 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 					$pollbar_height     = (int) $pollbar['height'];
 					$pollbar_background = esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['background'] ) );
 					$pollbar_border     = esc_attr( Polls_Core::_polls_sanitize_hex_color( $pollbar['border'] ) );
-				if ( $pollbar['style'] == 'use_css' ) {
+				if ( 'use_css' === $pollbar['style'] ) {
 					echo '<div id="wp-polls-pollbar" style="width: 100px; height: ' . $pollbar_height . 'px; background-color: #' . $pollbar_background . '; border: 1px solid #' . $pollbar_border . '"></div>' . "\n";
 				} else {
 					echo '<div id="wp-polls-pollbar" style="width: 100px; height: ' . $pollbar_height . 'px; background-color: #' . $pollbar_background . '; border: 1px solid #' . $pollbar_border . '; background-image: url(\'' . esc_url( plugins_url( 'wp-polls/images/' . $pollbar['style'] . '/pollbg.gif' ) ) . '\');"></div>' . "\n";

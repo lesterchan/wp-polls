@@ -129,7 +129,7 @@ class Polls_Display {
 			// Determine Poll Result URL.
 			$poll_result_url = esc_url_raw( $_SERVER['REQUEST_URI'] );
 			$poll_result_url = preg_replace( '/pollresult=(\d+)/i', 'pollresult=' . $poll_question_id, $poll_result_url );
-			if ( isset( $_GET['pollresult'] ) && (int) $_GET['pollresult'] === 0 ) {
+			if ( isset( $_GET['pollresult'] ) && 0 === (int) $_GET['pollresult'] ) {
 				if ( strpos( $poll_result_url, '?' ) !== false ) {
 					$poll_result_url = "$poll_result_url&pollresult=$poll_question_id";
 				} else {
@@ -156,7 +156,7 @@ class Polls_Display {
 			$temp_pollvote .= "</div>\n";
 			if ( $display_loading ) {
 				$poll_ajax_style = Polls_Options::get( 'ajax' );
-				if ( (int) $poll_ajax_style['loading'] === 1 ) {
+				if ( 1 === (int) $poll_ajax_style['loading'] ) {
 					$temp_pollvote .= "<div id=\"polls-$poll_question_id-loading\" class=\"wp-polls-loading\"><img src=\"" . plugins_url( 'wp-polls/images/loading.gif' ) . '" width="16" height="16" alt="' . __( 'Loading', 'wp-polls' ) . ' ..." title="' . __( 'Loading', 'wp-polls' ) . ' ..." class="wp-polls-image" />&nbsp;' . __( 'Loading', 'wp-polls' ) . " ...</div>\n";
 				}
 			}
@@ -264,13 +264,13 @@ class Polls_Display {
 					$poll_answer_percentage          = round( ( $poll_answer_votes / $poll_question_totalvotes ) * 100 );
 					$poll_multiple_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 );
 					$poll_answer_imagewidth          = round( $poll_answer_percentage );
-					if ( $poll_answer_imagewidth === 100 ) {
+					if ( 100 === $poll_answer_imagewidth ) {
 						$poll_answer_imagewidth = 99;
 					}
 				}
 				// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer.
 				$round_percentage = apply_filters( 'wp_polls_round_percentage', false );
-				if ( $round_percentage && $poll_multiple_ans === 0 ) {
+				if ( $round_percentage && 0 === $poll_multiple_ans ) {
 					$poll_answer_percentage_array[] = $poll_answer_percentage;
 					if ( count( $poll_answer_percentage_array ) === count( $poll_answers ) ) {
 						$percentage_error_buffer = 100 - array_sum( $poll_answer_percentage_array );
@@ -318,7 +318,7 @@ class Polls_Display {
 					$poll_most_percentage = $poll_answer_percentage;
 				}
 				// Get Least Voted Data.
-				if ( $poll_least_votes === 0 ) {
+				if ( 0 === $poll_least_votes ) {
 					$poll_least_votes = $poll_answer_votes;
 				}
 				if ( $poll_answer_votes <= $poll_least_votes ) {
@@ -348,7 +348,7 @@ class Polls_Display {
 			}
 			$template_variables = apply_filters( 'wp_polls_template_resultfooter_variables', $template_variables );
 
-			if ( ! empty( $user_voted ) || $poll_question_active === 0 || ! Polls_Vote::check_allowtovote() ) {
+			if ( ! empty( $user_voted ) || 0 === $poll_question_active || ! Polls_Vote::check_allowtovote() ) {
 				$template_footer = removeslashes( Polls_Options::get( 'templates.resultfooter' ) );
 				$template_footer = apply_filters( 'wp_polls_template_resultfooter_markup', $template_footer, $poll_question, $template_variables );
 			} else {
@@ -362,7 +362,7 @@ class Polls_Display {
 			$temp_pollresult .= "</div>\n";
 			if ( $display_loading ) {
 				$poll_ajax_style = Polls_Options::get( 'ajax' );
-				if ( (int) $poll_ajax_style['loading'] === 1 ) {
+				if ( 1 === (int) $poll_ajax_style['loading'] ) {
 					$temp_pollresult .= "<div id=\"polls-$poll_question_id-loading\" class=\"wp-polls-loading\"><img src=\"" . plugins_url( 'wp-polls/images/loading.gif' ) . '" width="16" height="16" alt="' . __( 'Loading', 'wp-polls' ) . ' ..." title="' . __( 'Loading', 'wp-polls' ) . ' ..." class="wp-polls-image" />&nbsp;' . __( 'Loading', 'wp-polls' ) . " ...</div>\n";
 				}
 			}
@@ -450,7 +450,7 @@ class Polls_Display {
 		$numposts = $total_polls;
 		$perpage  = $polls_perpage;
 		$max_page = ceil( $numposts / $perpage );
-		if ( empty( $page ) || $page == 0 ) {
+		if ( empty( $page ) || 0 === $page ) {
 			$page = 1;
 		}
 		$offset                = ( $page - 1 ) * $perpage;
@@ -576,7 +576,7 @@ class Polls_Display {
 					$poll_answer_imagewidth          = round( $poll_answer_percentage * 0.9 );
 				}
 				// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer.
-				if ( $polls_question['multiple'] === 0 ) {
+				if ( 0 === $polls_question['multiple'] ) {
 					$poll_answer_percentage_array[] = $poll_answer_percentage;
 					if ( count( $poll_answer_percentage_array ) === count( $polls_answers[ $polls_question['id'] ] ) ) {
 						$percentage_error_buffer = 100 - array_sum( $poll_answer_percentage_array );
@@ -628,7 +628,7 @@ class Polls_Display {
 					$poll_most_percentage = $poll_answer_percentage;
 				}
 				// Get Least Voted Data.
-				if ( $poll_least_votes === 0 ) {
+				if ( 0 === $poll_least_votes ) {
 					$poll_least_votes = $polls_answer['votes'];
 				}
 				if ( $polls_answer['votes'] <= $poll_least_votes ) {
@@ -861,23 +861,23 @@ class Polls_Display {
 			$poll_active = (int) $poll_active;
 			$check_voted = Polls_Vote::check_voted( $poll_id );
 			$poll_close  = 0;
-			if ( $poll_active === 0 ) {
+			if ( 0 === $poll_active ) {
 				$poll_close = (int) Polls_Options::get( 'close' );
 			}
-			if ( $poll_close === 2 ) {
+			if ( 2 === $poll_close ) {
 				if ( $display ) {
 					echo '';
 				} else {
 					return '';
 				}
 			}
-			if ( $poll_close === 1 || (int) $check_voted > 0 || ( is_array( $check_voted ) && count( $check_voted ) > 0 ) ) {
+			if ( 1 === $poll_close || (int) $check_voted > 0 || ( is_array( $check_voted ) && count( $check_voted ) > 0 ) ) {
 				if ( $display ) {
 					echo self::display_pollresult( $poll_id, $check_voted );
 				} else {
 					return self::display_pollresult( $poll_id, $check_voted );
 				}
-			} elseif ( $poll_close === 3 || ! Polls_Vote::check_allowtovote() ) {
+			} elseif ( 3 === $poll_close || ! Polls_Vote::check_allowtovote() ) {
 				$disable_poll_form = '#polls_form_' . (int) $poll_id;
 				$disable_poll_js   = '<script type="text/javascript">document.querySelectorAll(\'' . $disable_poll_form . ' input, ' . $disable_poll_form . ' select, ' . $disable_poll_form . ' textarea, ' . $disable_poll_form . ' button\').forEach(function (field) { field.disabled = true; });</script>';
 				if ( $display ) {
@@ -885,7 +885,7 @@ class Polls_Display {
 				} else {
 					return self::display_pollvote( $poll_id ) . $disable_poll_js;
 				}
-			} elseif ( $poll_active === 1 ) {
+			} elseif ( 1 === $poll_active ) {
 				if ( $display ) {
 					echo self::display_pollvote( $poll_id );
 				} else {
