@@ -53,6 +53,9 @@ jobs:
       - name: Run ESLint
         run: npm run lint:js
 
+      - name: Run the script tests
+        run: npm run test:js
+
   phpunit:
     name: PHPUnit (WP ${{ matrix.wordpress }}, PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
