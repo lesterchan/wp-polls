@@ -1,4 +1,10 @@
 <?php
+/**
+ * Poll Logs admin screen.
+ *
+ * @package WP-Polls
+ */
+
 // Check Whether User Can Manage Polls.
 if ( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
@@ -65,7 +71,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			$exclude_registered_2 = isset( $_POST['exclude_registered_2'] ) ? (int) $_POST['exclude_registered_2'] : 0;
 			$exclude_comment_2    = isset( $_POST['exclude_comment_2'] ) ? (int) $_POST['exclude_comment_2'] : 0;
 			$num_choices          = isset( $_POST['num_choices'] ) ? (int) $_POST['num_choices'] : 0;
-			$num_choices_sign     = sanitize_key( $_POST['num_choices_sign'] );
+			$num_choices_sign     = isset( $_POST['num_choices_sign'] ) ? sanitize_key( wp_unslash( $_POST['num_choices_sign'] ) ) : '';
 			switch ( $num_choices_sign ) {
 				case 'more':
 					$num_choices_sign_sql = '>';
@@ -99,7 +105,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			$order_by          = 'pollip_user, pollip_ip';
 			break;
 		case 3:
-			$what_user_voted     = esc_sql( $_POST['what_user_voted'] );
+			$what_user_voted     = isset( $_POST['what_user_voted'] ) ? esc_sql( sanitize_text_field( wp_unslash( $_POST['what_user_voted'] ) ) ) : '';
 			$what_user_voted_sql = "AND pollip_user = '$what_user_voted'";
 			$order_by            = 'pollip_user, pollip_ip';
 			break;
@@ -111,22 +117,22 @@ if ( ! empty( $_POST['do'] ) ) {
 ?>
 <?php
 if ( ! empty( $text ) ) {
-	echo '<!-- Last Action --><div id="message" class="updated fade">' . removeslashes( $text ) . '</div>';
+	echo wp_kses_post( '<!-- Last Action --><div id="message" class="updated fade">' . removeslashes( $text ) . '</div>' );
 } else {
 	echo '<div id="message" class="updated" style="display: none;"></div>'; }
 ?>
 <div class="wrap">
 	<h2><?php esc_html_e( 'Poll\'s Logs', 'wp-polls' ); ?></h2>
-	<h3><?php echo $poll_question; ?></h3>
+	<h3><?php echo wp_kses_post( $poll_question ); ?></h3>
 	<p>
 		<?php /* translators: %1$s: value, %2$s: value. */ ?>
-		<?php printf( _n( 'There are a total of <strong>%s</strong> recorded vote for this poll.', 'There are a total of <strong>%s</strong> recorded votes for this poll.', $poll_totalrecorded, 'wp-polls' ), esc_html( number_format_i18n( $poll_totalrecorded ) ) ); ?><br />
+		<?php echo wp_kses_post( sprintf( _n( 'There are a total of <strong>%s</strong> recorded vote for this poll.', 'There are a total of <strong>%s</strong> recorded votes for this poll.', $poll_totalrecorded, 'wp-polls' ), esc_html( number_format_i18n( $poll_totalrecorded ) ) ) ); ?><br />
 		<?php /* translators: %1$s: value, %2$s: value. */ ?>
-		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by registered users', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by registered users', $poll_registered, 'wp-polls' ), esc_html( number_format_i18n( $poll_registered ) ) ); ?><br />
+		<?php echo wp_kses_post( sprintf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by registered users', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by registered users', $poll_registered, 'wp-polls' ), esc_html( number_format_i18n( $poll_registered ) ) ) ); ?><br />
 		<?php /* translators: %1$s: value, %2$s: value. */ ?>
-		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by comment authors', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by comment authors', $poll_comments, 'wp-polls' ), esc_html( number_format_i18n( $poll_comments ) ) ); ?><br />
+		<?php echo wp_kses_post( sprintf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by comment authors', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by comment authors', $poll_comments, 'wp-polls' ), esc_html( number_format_i18n( $poll_comments ) ) ) ); ?><br />
 		<?php /* translators: %1$s: value, %2$s: value. */ ?>
-		<?php printf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests', $poll_guest, 'wp-polls' ), esc_html( number_format_i18n( $poll_guest ) ) ); ?>
+		<?php echo wp_kses_post( sprintf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests', $poll_guest, 'wp-polls' ), esc_html( number_format_i18n( $poll_guest ) ) ) ); ?>
 	</p>
 </div>
 <?php if ( $poll_totalrecorded > 0 && apply_filters( 'wp_polls_log_show_log_filter', true ) ) { ?>
@@ -147,11 +153,11 @@ if ( ! empty( $text ) ) {
 								if ( $poll_answers_data ) {
 									foreach ( $poll_answers_data as $data ) {
 										$polla_id      = (int) $data->polla_aid;
-										$polla_answers = removeslashes( strip_tags( esc_attr( $data->polla_answers ) ) );
-										if ( $polla_id == $users_voted_for ) {
-											echo '<option value="' . $polla_id . '" selected="selected">' . $polla_answers . '</option>';
+										$polla_answers = wp_strip_all_tags( removeslashes( $data->polla_answers ) );
+										if ( (int) $polla_id === (int) $users_voted_for ) {
+											echo '<option value="' . esc_attr( $polla_id ) . '" selected="selected">' . esc_html( $polla_answers ) . '</option>';
 										} else {
-											echo '<option value="' . $polla_id . '">' . $polla_answers . '</option>';
+											echo '<option value="' . esc_attr( $polla_id ) . '">' . esc_html( $polla_answers ) . '</option>';
 										}
 										$pollip_answers[ $polla_id ] = $polla_answers;
 									}
@@ -195,13 +201,13 @@ if ( ! empty( $text ) ) {
 									<?php
 									for ( $i = 1; $i <= $poll_multiple; $i++ ) {
 										if ( 1 === $i ) {
-											echo '<option value="1">' . __( '1 Answer', 'wp-polls' ) . '</option>';
-										} elseif ( $i == $num_choices ) {
+											echo '<option value="1">' . esc_html__( '1 Answer', 'wp-polls' ) . '</option>';
+										} elseif ( (int) $i === (int) $num_choices ) {
 												/* translators: %1$s: value, %2$s: value. */
-												echo '<option value="' . $i . '" selected="selected">' . sprintf( _n( '%s Answer', '%s Answers', $i, 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . '</option>';
+												echo '<option value="' . esc_attr( $i ) . '" selected="selected">' . esc_html( sprintf( _n( '%s Answer', '%s Answers', $i, 'wp-polls' ), number_format_i18n( $i ) ) ) . '</option>';
 										} else {
 											/* translators: %1$s: value, %2$s: value. */
-											echo '<option value="' . $i . '">' . sprintf( _n( '%s Answer', '%s Answers', $i, 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . '</option>';
+											echo '<option value="' . esc_attr( $i ) . '">' . esc_html( sprintf( _n( '%s Answer', '%s Answers', $i, 'wp-polls' ), number_format_i18n( $i ) ) ) . '</option>';
 										}
 									}
 									?>
@@ -240,7 +246,7 @@ if ( ! empty( $text ) ) {
 								<?php
 								if ( $poll_voters ) {
 									foreach ( $poll_voters as $pollip_user ) {
-										if ( $pollip_user == $what_user_voted ) {
+										if ( (string) $pollip_user === (string) $what_user_voted ) {
 											echo '<option value="' . esc_attr( removeslashes( $pollip_user ) ) . '" selected="selected">' . esc_attr( removeslashes( $pollip_user ) ) . '</option>';
 										} else {
 											echo '<option value="' . esc_attr( removeslashes( $pollip_user ) ) . '">' . esc_attr( removeslashes( $pollip_user ) ) . '</option>';
@@ -265,7 +271,7 @@ if ( ! empty( $text ) ) {
 	</table>
 </div>
 <p>&nbsp;</p>
-<?php } // End if($poll_totalrecorded > 0) ?>
+<?php } ?>
 <div class="wrap">
 	<h3><?php esc_html_e( 'Poll Logs', 'wp-polls' ); ?></h3>
 	<div id="poll_logs_display">
@@ -273,19 +279,19 @@ if ( ! empty( $text ) ) {
 		if ( $poll_ips ) {
 			if ( empty( $_POST['do'] ) ) {
 				/* translators: %s: value. */
-				echo '<p>' . sprintf( __( 'This default filter is limited to display only <strong>%s</strong> records.', 'wp-polls' ), esc_html( number_format_i18n( $max_records ) ) ) . '</p>';
+				echo wp_kses_post( '<p>' . sprintf( __( 'This default filter is limited to display only <strong>%s</strong> records.', 'wp-polls' ), esc_html( number_format_i18n( $max_records ) ) ) . '</p>' );
 			}
 			echo '<table class="widefat">' . "\n";
-			echo '<tr class="highlight"><td colspan="4">' . $poll_question . '</td></tr>';
+			echo wp_kses_post( '<tr class="highlight"><td colspan="4">' . $poll_question . '</td></tr>' );
 			$k                = 1;
 			$j                = 0;
 			$poll_last_aid    = -1;
 			$temp_pollip_user = null;
 			if ( isset( $_POST['filter'] ) && (int) $_POST['filter'] > 1 ) {
 				echo "<tr class=\"thead\">\n";
-				echo '<th>' . __( 'Answer', 'wp-polls' ) . "</th>\n";
-				echo '<th>' . __( 'Hashed IP / Host', 'wp-polls' ) . "</th>\n";
-				echo '<th>' . __( 'Date', 'wp-polls' ) . "</th>\n";
+				echo '<th>' . esc_html__( 'Answer', 'wp-polls' ) . "</th>\n";
+				echo '<th>' . esc_html__( 'Hashed IP / Host', 'wp-polls' ) . "</th>\n";
+				echo '<th>' . esc_html__( 'Date', 'wp-polls' ) . "</th>\n";
 				echo "</tr>\n";
 				foreach ( $poll_ips as $poll_ip ) {
 					$pollip_aid  = (int) $poll_ip->pollip_aid;
@@ -296,18 +302,18 @@ if ( ! empty( $text ) ) {
 					$pollip_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_ip->pollip_timestamp ) );
 
 					$i = 0;
-					if ( $i % 2 === 0 ) {
-						$style = '';
+					if ( 0 === $i % 2 ) {
+						$style_class = '';
 					} else {
-						$style = 'class="alternate"';
+						$style_class = 'alternate';
 					}
 					if ( $pollip_user !== $temp_pollip_user ) {
 						echo '<tr class="highlight">';
-						echo '<td colspan="3"><strong>' . __( 'User', 'wp-polls' ) . ' ' . esc_html( number_format_i18n( $k ) ) . ': ' . esc_html( $pollip_user ) . '</strong></td>';
+						echo '<td colspan="3"><strong>' . esc_html__( 'User', 'wp-polls' ) . ' ' . esc_html( number_format_i18n( $k ) ) . ': ' . esc_html( $pollip_user ) . '</strong></td>';
 						echo '</tr>';
 						++$k;
 					}
-					echo "<tr $style>\n";
+					echo '<tr class="' . esc_attr( $style_class ) . '">' . "\n";
 					echo '<td>' . esc_html( $pollip_answers[ $pollip_aid ] ) . '</td>';
 					echo '<td>' . esc_html( $pollip_ip ) . ' / ' . esc_html( $pollip_host ) . '</td>';
 					echo '<td>' . esc_html( $pollip_date ) . '</td>';
@@ -324,28 +330,28 @@ if ( ! empty( $text ) ) {
 					$pollip_host = $poll_ip->pollip_host;
 					/* translators: 1: value, 2: value. */
 					$pollip_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_ip->pollip_timestamp ) );
-					if ( $pollip_aid != $poll_last_aid ) {
+					if ( (int) $pollip_aid !== (int) $poll_last_aid ) {
 						if ( 0 === $pollip_aid ) {
 							echo '<tr class="highlight"><td colspan="4"><strong>' . esc_html( $pollip_answers[ $pollip_aid ] ) . '</strong></td></tr>';
 						} else {
 							$polla_answer = ! empty( $pollip_answers[ $pollip_aid ] ) ? $pollip_answers[ $pollip_aid ] : $poll_answers_data[ $k - 1 ]->polla_answers;
-							echo '<tr class="highlight"><td colspan="4"><strong>' . __( 'Answer', 'wp-polls' ) . ' ' . esc_html( number_format_i18n( $k ) ) . ': ' . esc_html( $polla_answer ) . '</strong></td></tr>';
+							echo '<tr class="highlight"><td colspan="4"><strong>' . esc_html__( 'Answer', 'wp-polls' ) . ' ' . esc_html( number_format_i18n( $k ) ) . ': ' . esc_html( $polla_answer ) . '</strong></td></tr>';
 							++$k;
 						}
 						echo "<tr class=\"thead\">\n";
-						echo '<th>' . __( 'No.', 'wp-polls' ) . "</th>\n";
-						echo '<th>' . __( 'User', 'wp-polls' ) . "</th>\n";
-						echo '<th>' . __( 'Hashed IP / Host', 'wp-polls' ) . "</th>\n";
-						echo '<th>' . __( 'Date', 'wp-polls' ) . "</th>\n";
+						echo '<th>' . esc_html__( 'No.', 'wp-polls' ) . "</th>\n";
+						echo '<th>' . esc_html__( 'User', 'wp-polls' ) . "</th>\n";
+						echo '<th>' . esc_html__( 'Hashed IP / Host', 'wp-polls' ) . "</th>\n";
+						echo '<th>' . esc_html__( 'Date', 'wp-polls' ) . "</th>\n";
 						echo "</tr>\n";
 						$i = 1;
 					}
-					if ( $i % 2 == 0 ) {
-						$style = '';
+					if ( 0 === $i % 2 ) {
+						$style_class = '';
 					} else {
-						$style = 'class="alternate"';
+						$style_class = 'alternate';
 					}
-					echo "<tr $style>\n";
+					echo '<tr class="' . esc_attr( $style_class ) . '">' . "\n";
 					echo '<td>' . esc_html( number_format_i18n( $i ) ) . '</td>';
 					echo '<td>' . esc_html( $pollip_user ) . '</td>';
 					echo '<td>' . esc_html( $pollip_ip ) . ' / ' . esc_html( $pollip_host ) . '</td>';
@@ -358,7 +364,7 @@ if ( ! empty( $text ) ) {
 			}
 			echo "<tr class=\"highlight\">\n";
 			/* translators: %s: value. */
-			echo '<td colspan="4">' . sprintf( __( 'Total number of records that matches this filter: <strong>%s</strong>', 'wp-polls' ), esc_html( number_format_i18n( $j ) ) ) . '</td>';
+			echo wp_kses_post( '<td colspan="4">' . sprintf( __( 'Total number of records that matches this filter: <strong>%s</strong>', 'wp-polls' ), esc_html( number_format_i18n( $j ) ) ) . '</td>' );
 			echo "</tr>\n";
 			echo '</table>' . "\n";
 		}
