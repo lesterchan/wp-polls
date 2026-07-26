@@ -87,6 +87,104 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * PHP diagnostics raised by the last render_admin_page() call.
+	 *
+	 * @var array
+	 */
+	protected $admin_page_notices = array();
+
+	/**
+	 * Render one of the legacy admin pages and return its HTML.
+	 *
+	 * Those pages are procedural and run at global scope under wp-admin, so they
+	 * reach for $wpdb and $month without declaring them. Requiring them from
+	 * inside a method only works because this helper pulls the same globals in
+	 * first; without that they would silently render half a page.
+	 *
+	 * Every notice, warning and deprecation raised while the page runs is
+	 * collected into $admin_page_notices so a test can assert the page is clean
+	 * under PHP 8 rather than only that it produced some output.
+	 *
+	 * @param string $file  File name relative to the plugin root.
+	 * @param array  $get   $_GET for the request.
+	 * @param array  $post  $_POST for the request.
+	 * @return string
+	 */
+	protected function render_admin_page( $file, $get = array(), $post = array() ) {
+		global $wpdb, $month, $wp_locale, $hook_suffix;
+
+		$this->admin_page_notices = array();
+
+		$_GET     = $get;
+		$_POST    = $post;
+		$_REQUEST = array_merge( $get, $post );
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Collecting PHP diagnostics is the point of this helper.
+		set_error_handler(
+			function ( $errno, $errstr, $errfile, $errline ) {
+				$this->admin_page_notices[] = $errstr . ' in ' . basename( $errfile ) . ':' . $errline;
+				return true;
+			}
+		);
+
+		try {
+			ob_start();
+			require WP_POLLS_DIR . $file;
+			$html = ob_get_clean();
+		} finally {
+			restore_error_handler();
+			$_GET     = array();
+			$_POST    = array();
+			$_REQUEST = array();
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Give the current user the plugin's capability.
+	 *
+	 * The admin pages call die() when the check fails, which would take the test
+	 * runner with it, so every render test has to be an administrator.
+	 *
+	 * @return int User ID.
+	 */
+	protected function become_poll_admin() {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		return $user_id;
+	}
+
+	/**
+	 * Record a vote in the log table.
+	 *
+	 * The logs screen counts rows here, not polla_votes, so a poll can show
+	 * answer totals and still report no recorded votes.
+	 *
+	 * @param int    $poll_id   Poll ID.
+	 * @param int    $answer_id Answer ID.
+	 * @param string $user      Display name recorded against the vote.
+	 * @param int    $user_id   User ID, 0 for a guest or comment author.
+	 * @return void
+	 */
+	protected function make_vote_log( $poll_id, $answer_id, $user = 'Guest', $user_id = 0 ) {
+		global $wpdb;
+
+		$wpdb->insert(
+			$wpdb->pollsip,
+			array(
+				'pollip_qid'       => $poll_id,
+				'pollip_aid'       => $answer_id,
+				'pollip_ip'        => '127.0.0.1',
+				'pollip_host'      => 'localhost',
+				'pollip_timestamp' => 1000000000,
+				'pollip_user'      => $user,
+				'pollip_userid'    => $user_id,
+			)
+		);
+	}
+
+	/**
 	 * The answer IDs of a poll, in insertion order.
 	 *
 	 * @param int $poll_id Poll ID.
