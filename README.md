@@ -23,6 +23,38 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 ### Donations
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
 
+## Frequently Asked Questions
+
+### Everyone can vote as many times as they like
+Check **Poll Options → Header That Contains The IP**. If it names a header such as
+`HTTP_X_FORWARDED_FOR`, make sure the proxy in front of WordPress always overwrites
+that header. Anything a visitor can set themselves can be changed on every request,
+and WP-Polls has no way to tell a real proxy from a forged header.
+
+Before 3.0.0 WP-Polls also used the entire header value as the voter's identity.
+`X-Forwarded-For` is a list, `client, proxy1, proxy2`, so a visitor could append one
+more entry and count as somebody new. It now reads only the first address in the list.
+
+If you are not behind a proxy, leave the setting blank.
+
+### Every voter is logged with the same IP, or the wrong one
+WordPress is behind a proxy or a CDN and every request reaches it from the proxy's
+address. Name the header your proxy sets under **Poll Options → Header That Contains
+The IP** — `HTTP_CF_CONNECTING_IP` for Cloudflare — or, to trust the usual set of
+proxy headers without naming one, add this to `wp-config.php`:
+
+```php
+define( 'WP_POLLS_TRUST_PROXY', true );
+```
+
+Sites that need to decide per request can use the `wp_polls_trust_proxy` filter, which
+defaults to that constant.
+
+### Poll logs show a hashed IP rather than an address
+That is deliberate and unchanged: WP-Polls stores `wp_hash()` of the address, so the
+logs can tell two voters apart without keeping their IP addresses.
+
+
 ## Changelog
 ### 3.0.0
 * BREAKING: Requires WordPress 6.0 and PHP 7.4.
@@ -51,7 +83,7 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * CHANGED: `polls-js.js` and `polls-admin-js.js` now ship as readable source, the `.dev.js` copies have been removed.
 * SECURITY: The `polls-admin` AJAX handler now checks the `manage_polls` capability instead of relying on its nonces for authorisation.
 * SECURITY: Escaped the poll bar colours, the voting form action and `%POLL_RESULT_URL%` on output, and validated the poll bar colours on save.
-* SECURITY: If you set "Header That Contains The IP", WP-Polls used the whole header as the voter's identity. `X-Forwarded-For` is a chain the visitor controls the left of, so appending one more hop produced a different identity and another vote. It now takes the first valid address in the header, and falls back to `REMOTE_ADDR` when the header holds no address at all. Sites that left the setting blank are unaffected and their existing vote logs still match.
+* IMPORTANT: If you set "Header That Contains The IP", WP-Polls used the whole header as the voter's identity. `X-Forwarded-For` is a chain the visitor controls the left of, so appending one more hop produced a different identity and another vote. It now takes the first valid address in the header, and falls back to `REMOTE_ADDR` when the header holds no address at all. Sites that left the setting blank are unaffected and their existing vote logs still match. See the FAQ.
 * CHANGED: Added the `WP_POLLS_TRUST_PROXY` constant and the `wp_polls_trust_proxy` filter, matching WP-Email and WP-UserOnline, so sites behind Cloudflare or a load balancer can opt in to the usual proxy headers without naming one on the settings screen. Proxy headers are still ignored unless you opt in.
 * CHANGED: Reformatted to the WordPress Coding Standards. Fifteen translatable strings gained numbered placeholders (`%1$s`), which changes their msgid, so those strings need retranslating.
 
