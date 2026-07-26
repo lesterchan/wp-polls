@@ -29,23 +29,16 @@ class Polls_Vote {
 	 */
 	public static function check_allowtovote() {
 		global $user_ID;
-		$user_ID       = (int) $user_ID;
-		$allow_to_vote = (int) Polls_Options::get( 'allow_to_vote' );
+		// Read into a local rather than reassigning the WordPress global.
+		$current_user_id = (int) $user_ID;
+		$allow_to_vote   = (int) Polls_Options::get( 'allow_to_vote' );
 		switch ( $allow_to_vote ) {
 			// Guests Only.
 			case 0:
-				if ( $user_ID > 0 ) {
-					return false;
-				}
-				return true;
-				break;
+				return 0 === $current_user_id;
 			// Registered Users Only.
 			case 1:
-				if ( 0 === $user_ID ) {
-					return false;
-				}
-				return true;
-				break;
+				return $current_user_id > 0;
 			// Registered Users And Guests.
 			case 2:
 			default:
@@ -54,7 +47,7 @@ class Polls_Vote {
 	}
 
 	/**
-	 * Funcrion: Check Voted By Cookie Or IP.
+	 * Check voted by cookie or IP.
 	 *
 	 * @param mixed $poll_id Value.
 	 *
@@ -100,8 +93,8 @@ class Polls_Vote {
 	public static function check_voted_cookie( $poll_id ) {
 		$get_voted_aids = 0;
 		if ( ! empty( $_COOKIE[ 'voted_' . $poll_id ] ) ) {
-			$get_voted_aids = explode( ',', $_COOKIE[ 'voted_' . $poll_id ] );
-			$get_voted_aids = array_map( 'intval', array_map( 'sanitize_key', $get_voted_aids ) );
+			$get_voted_aids = explode( ',', sanitize_text_field( wp_unslash( $_COOKIE[ 'voted_' . $poll_id ] ) ) );
+			$get_voted_aids = array_map( 'intval', $get_voted_aids );
 		}
 		return $get_voted_aids;
 	}
@@ -167,7 +160,7 @@ class Polls_Vote {
 	 */
 	public static function check_voted_multiple( $poll_id, $polls_ips ) {
 		if ( ! empty( $_COOKIE[ "voted_$poll_id" ] ) ) {
-			return explode( ',', $_COOKIE[ "voted_$poll_id" ] );
+			return array_map( 'intval', explode( ',', sanitize_text_field( wp_unslash( $_COOKIE[ "voted_$poll_id" ] ) ) ) );
 		} elseif ( $polls_ips ) {
 				return $polls_ips;
 		} else {
@@ -447,6 +440,12 @@ class Polls_Vote {
 					try {
 						$poll_answer_ids = isset( $_POST[ "poll_$poll_id" ] ) ? $_POST[ "poll_$poll_id" ] : '';
 						$poll_aid_array  = array_unique( array_map( 'intval', array_map( 'sanitize_key', explode( ',', $poll_answer_ids ) ) ) );
+						// Poll markup, not data: the answer text went through
+						// wp_kses_post() and %POLL_ANSWER_TEXT% through esc_attr() while
+						// the template was assembled, and every id is int cast. Escaping
+						// again here would render the markup as text; wp_kses_post()
+						// would strip the radio and checkbox inputs the form needs.
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						echo self::vote_poll_process( $poll_id, $poll_aid_array );
 					} catch ( Exception $e ) {
 						// Escaped here rather than at each throw site, so the message
@@ -456,10 +455,12 @@ class Polls_Vote {
 					break;
 				// Poll Result.
 				case 'result':
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup assembled and escaped by Polls_Display.
 					echo Polls_Display::display_pollresult( $poll_id, 0, false );
 					break;
 				// Poll Booth Aka Poll Voting Form.
 				case 'booth':
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup assembled and escaped by Polls_Display.
 					echo Polls_Display::display_pollvote( $poll_id, false );
 					break;
 			} // End switch($_REQUEST['view'])

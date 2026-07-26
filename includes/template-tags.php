@@ -43,7 +43,7 @@ if ( ! function_exists( 'get_pollquestions' ) ) {
 		global $wpdb;
 		$totalpollq = (int) $wpdb->get_var( "SELECT COUNT(pollq_id) FROM $wpdb->pollsq" );
 		if ( $display ) {
-			echo $totalpollq;
+			echo esc_html( $totalpollq );
 		} else {
 			return $totalpollq;
 		}
@@ -63,7 +63,7 @@ if ( ! function_exists( 'get_pollanswers' ) ) {
 		global $wpdb;
 		$totalpolla = (int) $wpdb->get_var( "SELECT COUNT(polla_aid) FROM $wpdb->pollsa" );
 		if ( $display ) {
-			echo $totalpolla;
+			echo esc_html( $totalpolla );
 		} else {
 			return $totalpolla;
 		}
@@ -83,7 +83,7 @@ if ( ! function_exists( 'get_pollvotes' ) ) {
 		global $wpdb;
 		$totalvotes = (int) $wpdb->get_var( "SELECT SUM(pollq_totalvotes) FROM $wpdb->pollsq" );
 		if ( $display ) {
-			echo $totalvotes;
+			echo esc_html( $totalvotes );
 		} else {
 			return $totalvotes;
 		}
@@ -105,7 +105,7 @@ if ( ! function_exists( 'get_pollvotes_by_id' ) ) {
 		$poll_id    = (int) $poll_id;
 		$totalvotes = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 		if ( $display ) {
-			echo $totalvotes;
+			echo esc_html( $totalvotes );
 		} else {
 			return $totalvotes;
 		}
@@ -125,7 +125,7 @@ if ( ! function_exists( 'get_pollvoters' ) ) {
 		global $wpdb;
 		$totalvoters = (int) $wpdb->get_var( "SELECT SUM(pollq_totalvoters) FROM $wpdb->pollsq" );
 		if ( $display ) {
-			echo $totalvoters;
+			echo esc_html( $totalvoters );
 		} else {
 			return $totalvoters;
 		}
@@ -149,7 +149,7 @@ if ( ! function_exists( 'get_polltime' ) ) {
 		$timestamp      = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_timestamp FROM $wpdb->pollsq WHERE pollq_id = %d LIMIT 1", $poll_id ) );
 		$formatted_date = date( $date_format, $timestamp );
 		if ( $display ) {
-			echo $formatted_date;
+			echo esc_html( $formatted_date );
 		} else {
 			return $formatted_date;
 		}
