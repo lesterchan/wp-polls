@@ -6,7 +6,7 @@ Requires at least: 6.0
 Tested up to: 7.0  
 Stable tag: 3.0.0  
 Requires PHP: 7.4  
-License: GPLv2 or later
+License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Adds an AJAX poll system to your WordPress blog. You can also easily add a poll into your WordPress's blog post/page.
