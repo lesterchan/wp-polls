@@ -280,7 +280,7 @@ class Polls_Admin {
 		// only ever rendered on pages that already require 'manage_polls', but check
 		// the capability itself rather than relying on the nonce for authorisation.
 		if ( ! current_user_can( 'manage_polls' ) ) {
-			exit();
+			wp_die( '', '', array( 'response' => null ) );
 		}
 
 		// Form Processing.
@@ -290,7 +290,12 @@ class Polls_Admin {
 		if ( isset( $_POST['action'] ) && 'polls-admin' === sanitize_key( wp_unslash( $_POST['action'] ) ) ) {
 			if ( ! empty( $_POST['do'] ) ) {
 				// Set Header.
-				header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) . '' );
+				// Guarded: anything that has already emitted output - a stray newline
+				// in another plugin - would otherwise turn this into a PHP warning
+				// inside the response body.
+				if ( ! headers_sent() ) {
+					header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+				}
 
 				// Decide What To Do.
 				switch ( $_POST['do'] ) {
@@ -434,7 +439,7 @@ class Polls_Admin {
 						do_action( 'wp_polls_delete_poll', $pollq_id );
 						break;
 				}
-				exit();
+				wp_die( '', '', array( 'response' => null ) );
 			}
 		}
 	}

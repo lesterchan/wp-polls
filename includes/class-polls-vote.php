@@ -494,7 +494,12 @@ class Polls_Vote {
 
 		if ( isset( $_REQUEST['action'] ) && sanitize_key( $_REQUEST['action'] ) === 'polls' ) {
 			// Load Headers.
-			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) . '' );
+			// Guarded: anything that has already emitted output - a stray newline
+			// in another plugin - would otherwise turn this into a PHP warning
+			// inside the response body.
+			if ( ! headers_sent() ) {
+				header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+			}
 
 			// Get Poll ID.
 			$poll_id = ( isset( $_REQUEST['poll_id'] ) ? (int) $_REQUEST['poll_id'] : 0 );
@@ -502,13 +507,13 @@ class Polls_Vote {
 			// Ensure Poll ID Is Valid.
 			if ( 0 === $poll_id ) {
 				esc_html_e( 'Invalid Poll ID', 'wp-polls' );
-				exit();
+				wp_die( '', '', array( 'response' => null ) );
 			}
 
 			// Verify Referer.
 			if ( ! check_ajax_referer( 'poll_' . $poll_id . '-nonce', 'poll_' . $poll_id . '_nonce', false ) ) {
 				esc_html_e( 'Failed To Verify Referrer', 'wp-polls' );
-				exit();
+				wp_die( '', '', array( 'response' => null ) );
 			}
 
 			// Which View.
@@ -543,6 +548,6 @@ class Polls_Vote {
 					break;
 			} // End of the view switch.
 		} // End of the polls action guard.
-		exit();
+		wp_die( '', '', array( 'response' => null ) );
 	}
 }
