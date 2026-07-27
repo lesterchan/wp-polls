@@ -95,6 +95,9 @@ override these instead, which is the supported way now:
 * CHANGED: Options, templates, settings, the widget and the install/upgrade routine moved into classes under `includes/`. The documented extension points are unchanged: every `wp_polls_*` filter and action, both the `[poll]` and `[page_polls]` shortcodes, and the template tags keep their exact names and signatures.
 * CHANGED: The thirty-odd separate `wp_options` rows are now a single `poll_options` row holding a nested array. Your settings are migrated automatically on upgrade; the old rows are removed once they have been folded in.
 * FIXED: XSS in polls-templates.php. Inline `onclick` handlers are replaced by `data-poll-action` / `data-poll-id` attributes and `onclick` is no longer an allowed attribute in poll templates.
+* FIXED: On multisite, uninstall called `restore_current_blog()` once after the loop rather than once per site. `switch_to_blog()` pushes onto a stack, so the stack was left unwound by every site but the first.
+* FIXED: On uninstall the three poll tables were dropped from inside the loop over option rows, so the drop ran 36 times per site and issued three `DROP TABLE` statements each instead of three in total.
+* CHANGED: Uninstall asks `get_sites()` for IDs only rather than hydrating a `WP_Site` object per site, and its table-dropping helper is now prefixed `wp_polls_uninstall_site()` instead of occupying the unprefixed global name `plugin_uninstalled()`.
 * FIXED: Network activating on multisite was a fatal error. The activation routine called `wp_get_sites()`, which WordPress removed in 5.1.
 * FIXED: On multisite the three poll tables were not registered with `$wpdb`, so any query made inside `switch_to_blog()` read and wrote the wrong site's polls.
 * FIXED: Adding or removing a poll answer in wp-admin no longer breaks. It called jQuery's `.size()`, which was removed in jQuery 3.
