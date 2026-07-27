@@ -38,13 +38,6 @@ class Polls_Core {
 		} else {
 			wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'polls-css.css', false, WP_POLLS_VERSION, 'all' );
 		}
-		if ( is_rtl() ) {
-			if ( file_exists( get_stylesheet_directory() . '/polls-css-rtl.css' ) ) {
-				wp_enqueue_style( 'wp-polls-rtl', get_stylesheet_directory_uri() . '/polls-css-rtl.css', false, WP_POLLS_VERSION, 'all' );
-			} else {
-				wp_enqueue_style( 'wp-polls-rtl', WP_POLLS_URL . 'polls-css-rtl.css', false, WP_POLLS_VERSION, 'all' );
-			}
-		}
 		$pollbar = Polls_Options::get( 'bar' );
 		// This lands in an inline <style> block on every front end page, so never
 		// trust the stored values even though only 'manage_polls' can set them.

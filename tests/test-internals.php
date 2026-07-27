@@ -358,6 +358,31 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * One stylesheet serves both directions.
+	 *
+	 * The old polls-css-rtl.css existed only to flip text-align and swap a margin.
+	 * Logical properties do that on their own, so there is no second file and
+	 * no separate handle to enqueue.
+	 *
+	 * @return void
+	 */
+	public function test_one_stylesheet_serves_both_directions() {
+		Polls_Core::poll_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ) );
+		$this->assertFalse( wp_style_is( 'wp-polls-rtl', 'enqueued' ), 'the RTL handle is back' );
+		$this->assertFileDoesNotExist( WP_POLLS_DIR . 'polls-css-rtl.css' );
+
+		$css = file_get_contents( WP_POLLS_DIR . 'polls-css.css' );
+
+		// A physical direction here is what would need a second file again.
+		$this->assertStringNotContainsString( 'text-align: left', $css );
+		$this->assertStringNotContainsString( 'text-align: right', $css );
+		$this->assertStringContainsString( 'text-align: start', $css );
+		$this->assertStringContainsString( 'margin-inline:', $css );
+	}
+
+	/**
 	 * The script is enqueued with its strings and no jQuery dependency.
 	 *
 	 * @return void

@@ -23,12 +23,12 @@
 	/* background-color: #ffffff; */
 }
 .wp-polls ul li, .wp-polls-ul li, .wp-polls-ans ul li {
-	text-align: left;
+	text-align: start;
 	background-image: none;
 	display: block;
 }
 .wp-polls ul, .wp-polls-ul, .wp-polls-ans ul  {
-	text-align: left;
+	text-align: start;
 	list-style: none;
 	float: none;
 }
@@ -43,7 +43,8 @@
 }
 .wp-polls-ul {
 	padding: 0px;
-	margin: 0px 0px 10px 10px;
+	margin-block: 0px 10px;
+	margin-inline: 10px 0px;
 }
 .wp-polls-ans {
 	width:100%;
