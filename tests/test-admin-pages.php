@@ -357,6 +357,70 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * Neither settings screen writes its own form markup.
+	 *
+	 * Both are meant to be nothing but settings_fields(), do_settings_sections()
+	 * and submit_button(), with every row declared in Polls_Settings. A table or
+	 * an input appearing in either file means a field has been added outside the
+	 * Settings API, where the sanitiser and the section ordering cannot see it.
+	 *
+	 * @return void
+	 */
+	public function test_settings_screens_contain_no_hand_written_form_markup() {
+		foreach ( array( 'polls-options.php', 'polls-templates.php' ) as $file ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a file from the plugin under test, not a remote resource.
+			$source = file_get_contents( WP_POLLS_DIR . $file );
+
+			foreach ( array( '<table', '<tr', '<th', '<td', '<input', '<select', '<textarea' ) as $tag ) {
+				$this->assertStringNotContainsString( $tag, $source, $file . ' writes ' . $tag . ' by hand' );
+			}
+		}
+	}
+
+	/**
+	 * Every control on both screens posts into the plugin's own option.
+	 *
+	 * A field named anything else is either dropped on save or written to a row
+	 * nothing reads, and both failures are silent.
+	 *
+	 * @return void
+	 */
+	public function test_settings_screens_only_post_into_the_option() {
+		// settings_fields() and submit_button() contribute these.
+		$allowed = array( '_wpnonce', '_wp_http_referer', 'option_page', 'action', 'submit' );
+
+		foreach ( array( 'polls-options.php', 'polls-templates.php' ) as $file ) {
+			$html = $this->render_admin_page( $file );
+
+			preg_match_all( '/\sname="([^"]+)"/', $html, $matches );
+			$this->assertNotEmpty( $matches[1], $file . ' rendered no fields' );
+
+			foreach ( $matches[1] as $name ) {
+				if ( in_array( $name, $allowed, true ) ) {
+					continue;
+				}
+
+				$this->assertStringStartsWith( Polls_Options::OPTION . '[', $name, $file );
+			}
+		}
+	}
+
+	/**
+	 * The Poll Options screen renders every section it registers.
+	 *
+	 * @return void
+	 */
+	public function test_options_renders_every_registered_section() {
+		global $wp_settings_sections;
+
+		$html = $this->render_admin_page( 'polls-options.php' );
+
+		foreach ( $wp_settings_sections[ Polls_Settings::PAGE_OPTIONS ] as $section ) {
+			$this->assertStringContainsString( '<h2>' . $section['title'] . '</h2>', $html );
+		}
+	}
+
+	/**
 	 * The template editor shows the stored templates rather than the defaults.
 	 *
 	 * @return void

@@ -147,4 +147,83 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 		$registered = get_registered_settings();
 		$this->assertArrayHasKey( Polls_Options::OPTION, $registered );
 	}
+
+	/**
+	 * Writing the option reschedules the cron job.
+	 *
+	 * The expiry setting decides the schedule, and the save happens on
+	 * options.php. The callback used to be added while the Poll Options screen
+	 * rendered, so it was never registered on the request that did the saving.
+	 */
+	public function test_saving_the_option_reschedules_the_cron() {
+		wp_clear_scheduled_hook( 'polls_cron' );
+		$this->assertFalse( wp_next_scheduled( 'polls_cron' ) );
+
+		Polls_Options::set( 'cookie_expiry', 3600 );
+
+		$this->assertNotFalse( wp_next_scheduled( 'polls_cron' ) );
+	}
+
+	/**
+	 * Both screens exist as registered sections carrying registered fields.
+	 *
+	 * Nothing on either screen is written out as table markup, so an empty
+	 * bucket here is an empty screen there.
+	 */
+	public function test_both_screens_are_registered_as_sections_and_fields() {
+		Polls_Settings::register();
+
+		global $wp_settings_sections, $wp_settings_fields;
+
+		foreach ( array( Polls_Settings::PAGE_OPTIONS, Polls_Settings::PAGE_TEMPLATES ) as $page ) {
+			$this->assertArrayHasKey( $page, $wp_settings_sections, $page . ' registered no sections' );
+			$this->assertNotEmpty( $wp_settings_sections[ $page ], $page . ' registered no sections' );
+			$this->assertArrayHasKey( $page, $wp_settings_fields, $page . ' registered no fields' );
+			$this->assertNotEmpty( $wp_settings_fields[ $page ], $page . ' registered no fields' );
+		}
+	}
+
+	/**
+	 * Every template the plugin stores has a field of its own, and no more.
+	 *
+	 * The screen used to list the fifteen textareas by hand, so a template added
+	 * to Polls_Options::template_keys() could be saved by the sanitiser and
+	 * still have nowhere to edit it.
+	 */
+	public function test_every_template_key_has_exactly_one_field() {
+		Polls_Settings::register();
+
+		global $wp_settings_fields;
+
+		$ids = array();
+		foreach ( $wp_settings_fields[ Polls_Settings::PAGE_TEMPLATES ] as $section ) {
+			$ids = array_merge( $ids, array_keys( $section ) );
+		}
+
+		foreach ( Polls_Options::template_keys() as $key ) {
+			$this->assertContains( 'poll_template_' . $key, $ids, $key . ' has no field on the screen' );
+		}
+
+		$this->assertCount( count( Polls_Options::template_keys() ), $ids );
+	}
+
+	/**
+	 * Registering a second time replaces the rows rather than repeating them.
+	 *
+	 * Registration runs on admin_init, and the render helper calls it again the
+	 * way wp-admin does before including a screen.
+	 */
+	public function test_registering_twice_does_not_duplicate_rows() {
+		Polls_Settings::register();
+
+		global $wp_settings_sections, $wp_settings_fields;
+
+		$sections = count( $wp_settings_sections[ Polls_Settings::PAGE_OPTIONS ] );
+		$fields   = count( $wp_settings_fields[ Polls_Settings::PAGE_OPTIONS ]['wp_polls_bar'] );
+
+		Polls_Settings::register();
+
+		$this->assertCount( $sections, $wp_settings_sections[ Polls_Settings::PAGE_OPTIONS ] );
+		$this->assertCount( $fields, $wp_settings_fields[ Polls_Settings::PAGE_OPTIONS ]['wp_polls_bar'] );
+	}
 }

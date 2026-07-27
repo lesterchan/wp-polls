@@ -127,6 +127,12 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 			}
 		);
 
+		// wp-admin fires admin_init before it includes a plugin's page file, so by
+		// the time the Options and Templates screens run their sections and fields
+		// are registered. Requiring the file directly skips that, and
+		// do_settings_sections() would then render an empty screen.
+		Polls_Settings::register();
+
 		$depth = ob_get_level();
 		$html  = '';
 

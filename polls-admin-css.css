@@ -20,13 +20,19 @@
 .wp-polls-swatch .wp-polls-bar-fill {
 	display: block;
 }
-#wp-polls-pollbar-bg {
-	width: 25px;
-	height: 25px;
-	border: 1px solid #000000;
+/* Wide enough for the six hex digits the field holds; core's .small-text alone
+   cuts them off at four. Matched on the element too, because that is what core
+   does and the two rules would otherwise be tied. */
+input.wp-polls-hex {
+	width: 7em;
 }
-#wp-polls-pollbar-border {
+/* The swatch that follows each of the two colour fields. Inline-block because
+   both now sit in the same table cell as the field they preview, rather than in
+   a column of their own. */
+.wp-polls-color-preview {
+	display: inline-block;
 	width: 25px;
 	height: 25px;
+	vertical-align: middle;
 	border: 1px solid #000000;
 }

@@ -113,7 +113,8 @@ override these instead, which is the supported way now:
 * FIXED: Activation looked for `wp-admin/upgrade-functions.php`, which WordPress removed in 2.x, and stopped with an error message if it found neither that nor the current file.
 * FIXED: Poll Options could offer a poll bar style that saving then rejected, reverting it while still reporting "Settings saved." The screen and the sanitiser now build the list of available styles the same way.
 * FIXED: Every stylesheet, script and image URL was built from a hardcoded `wp-polls/` path, so renaming the plugin directory left WP-Polls loading none of its own assets. All paths now come from the plugin file itself.
-* CHANGED: Poll Options and Poll Templates now use the WordPress Settings API instead of hand-rolled form handling.
+* CHANGED: Poll Options and Poll Templates now use the WordPress Settings API instead of hand-rolled form handling. Every row on both screens is registered with `add_settings_section()` and `add_settings_field()` and rendered by `do_settings_sections()`, so the screens look and behave like the rest of wp-admin and neither one writes any table markup of its own.
+* FIXED: Changing "Expiry Time For Cookie And Log" did not reschedule the cron job. The callback that rebuilds the schedule was registered while the Poll Options screen rendered, but the save happens on `options.php`, which never loads that screen.
 * CHANGED: Removed every remaining inline `onclick`/`onblur`/`onchange` handler from the admin pages in favour of `data-poll-action` attributes and delegated listeners, so poll questions and answers no longer have to be escaped into a JavaScript context.
 * CHANGED: Dropped the jQuery dependency. Both scripts, the inline admin scripts and the TinyMCE plugin now use the browser's own APIs, so WP-Polls no longer forces jQuery to load on the front end.
 * CHANGED: `polls-js.js` and `polls-admin-js.js` now ship as readable source, the `.dev.js` copies have been removed.
