@@ -91,9 +91,8 @@ class Polls_Settings {
 			$current['bar']['border']     = isset( $bar['border'] ) ? Polls_Core::sanitize_bar_color( $bar['border'] ) : $current['bar']['border'];
 			$current['bar']['height']     = isset( $bar['height'] ) ? max( 1, (int) $bar['height'] ) : $current['bar']['height'];
 
-			// The style is a directory name under images/, or the CSS sentinel.
-			if ( 'use_css' !== $current['bar']['style'] && ! in_array( $current['bar']['style'], self::bar_styles(), true ) ) {
-				$current['bar']['style'] = 'default';
+			if ( ! in_array( $current['bar']['style'], self::bar_styles(), true ) ) {
+				$current['bar']['style'] = 'gradient';
 			}
 		}
 
@@ -148,24 +147,17 @@ class Polls_Settings {
 	}
 
 	/**
-	 * Directory names under images/ that can be used as a poll bar style.
+	 * The poll bar styles the Poll Options screen offers.
 	 *
-	 * Requires a pollbg.gif, so this accepts exactly the styles the Poll Options
-	 * screen offers rather than every directory that happens to be there.
+	 * Up to 3.0.0 this globbed images/ for directories holding a pollbg.gif, so
+	 * the list of styles was whatever happened to be on disk and every entry
+	 * shipped its own hardcoded colour. The shading is CSS now, so there are
+	 * exactly two: a flat fill, and the same fill under a translucent gradient.
 	 *
 	 * @return array
 	 */
 	public static function bar_styles() {
-		$styles = array();
-		$path   = WP_POLLS_DIR . 'images';
-
-		foreach ( (array) glob( $path . '/*', GLOB_ONLYDIR ) as $dir ) {
-			if ( is_readable( $dir . '/pollbg.gif' ) ) {
-				$styles[] = basename( $dir );
-			}
-		}
-
-		return $styles;
+		return array( 'flat', 'gradient' );
 	}
 
 	/**

@@ -76,6 +76,14 @@ class Polls_Admin {
 	public static function poll_scripts_admin( $hook_suffix ) {
 		if ( in_array( $hook_suffix, self::admin_pages(), true ) ) {
 			wp_enqueue_style( 'wp-polls-admin', WP_POLLS_URL . 'polls-admin-css.css', false, WP_POLLS_VERSION, 'all' );
+			// The Poll Options screen previews the bar using the real front end
+			// markup, so it loads the real front end rules rather than keeping a
+			// second copy of them in the admin stylesheet to drift out of sync.
+			// Always the plugin's own copy: a theme override of polls-css.css
+			// would make the preview show the theme's bar, not the setting.
+			if ( WP_POLLS_SLUG . '/polls-options.php' === $hook_suffix ) {
+				wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'polls-css.css', false, WP_POLLS_VERSION, 'all' );
+			}
 			wp_enqueue_script( 'wp-polls-admin', WP_POLLS_URL . 'polls-admin-js.js', array(), WP_POLLS_VERSION, true );
 			wp_localize_script(
 				'wp-polls-admin',

@@ -105,10 +105,7 @@ $base_page = 'admin.php?page=' . $base_name;
 				<strong>%POLL_MOST_VOTES%</strong><br />
 				<?php esc_html_e( 'Display the poll\'s answer votes for the most voted answer', 'wp-polls' ); ?>
 			</td>
-			<td>
-				<strong>%POLL_ANSWER_IMAGEWIDTH%</strong><br />
-				<?php esc_html_e( 'Display the poll\'s answer image width', 'wp-polls' ); ?>
-			</td>
+			<td></td>
 		</tr>
 		<tr>
 			<td>
@@ -259,7 +256,7 @@ $base_page = 'admin.php?page=' . $base_name;
 				<p style="margin: 2px 0">- %POLL_ANSWER_VOTES%</p>
 				<p style="margin: 2px 0">- %POLL_ANSWER_PERCENTAGE%</p>
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANSWER_PERCENTAGE%</p>
-				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
+				<br />
 				<input type="button" name="RestoreDefault" value="<?php esc_attr_e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="resultbody" class="button" />
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody" name="poll_options[templates][resultbody]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultbody' ) ) ); ?></textarea></td>
@@ -275,7 +272,7 @@ $base_page = 'admin.php?page=' . $base_name;
 				<p style="margin: 2px 0">- %POLL_ANSWER_VOTES%</p>
 				<p style="margin: 2px 0">- %POLL_ANSWER_PERCENTAGE%</p>
 				<p style="margin: 2px 0">- %POLL_MULTIPLE_ANSWER_PERCENTAGE%</p>
-				<p style="margin: 2px 0">- %POLL_ANSWER_IMAGEWIDTH%</p><br />
+				<br />
 				<input type="button" name="RestoreDefault" value="<?php esc_attr_e( 'Restore Default Template', 'wp-polls' ); ?>" data-poll-action="restore-template" data-poll-template="resultbody2" class="button" />
 			</td>
 			<td valign="top"><textarea cols="80" rows="15" id="poll_template_resultbody2" name="poll_options[templates][resultbody2]"><?php echo esc_textarea( removeslashes( Polls_Options::get( 'templates.resultbody2' ) ) ); ?></textarea></td>

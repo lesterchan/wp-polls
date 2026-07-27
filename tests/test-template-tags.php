@@ -88,7 +88,7 @@ class Test_Polls_Template_Tags extends WP_Polls_TestCase {
 		$html    = do_shortcode( '[poll id="' . $poll_id . '" type="result"]' );
 
 		$this->assertStringNotContainsString( 'data-poll-action="vote"', $html );
-		$this->assertStringContainsString( 'pollbar', $html );
+		$this->assertStringContainsString( 'wp-polls-bar', $html );
 	}
 
 	/**

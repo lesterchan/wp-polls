@@ -68,10 +68,16 @@ class Test_Polls_Display extends WP_Polls_TestCase {
 	 * kses - rendered as a literal &amp; in the tooltip.
 	 */
 	public function test_answer_text_is_escaped_once() {
+		// The stock template no longer uses %POLL_ANSWER_TEXT%: it labelled the
+		// bar's tooltip, and the bar is decorative now. The variable is still
+		// substituted for templates that ask for it, so the escaping is pinned
+		// through one of those rather than dropped along with the tooltip.
+		Polls_Options::set( 'templates.resultbody', '<li title="%POLL_ANSWER_TEXT%">%POLL_ANSWER%</li>' );
+
 		$poll_id = $this->make_poll( array(), array( array( 'Emacs & "friends"', 1 ) ) );
 		$html    = Polls_Display::display_pollresult( $poll_id );
 
-		$this->assertStringContainsString( 'title="Emacs &amp; &quot;friends&quot;', $html );
+		$this->assertStringContainsString( 'title="Emacs &amp; &quot;friends&quot;"', $html );
 		$this->assertStringNotContainsString( '&amp;amp;', $html );
 	}
 
@@ -140,5 +146,157 @@ class Test_Polls_Display extends WP_Polls_TestCase {
 
 		$this->assertStringContainsString( 'type="checkbox"', $html );
 		$this->assertStringContainsString( 'poll_multiple_ans_' . $poll_id, $html );
+	}
+
+	// --- the result bar ---------------------------------------------------
+
+	/**
+	 * The bar is a track holding a fill, and is hidden from screen readers.
+	 *
+	 * The percentage and the vote count are already in the text beside it, so an
+	 * ARIA-labelled bar would only make a screen reader read them twice.
+	 */
+	public function test_the_result_bar_is_a_track_and_a_fill() {
+		$poll_id = $this->make_poll( array(), array( array( 'A', 3 ), array( 'B', 1 ) ) );
+		$html    = Polls_Display::display_pollresult( $poll_id );
+
+		$this->assertStringContainsString( '<div class="wp-polls-bar" aria-hidden="true">', $html );
+		$this->assertStringContainsString( '<div class="wp-polls-bar-fill"', $html );
+		$this->assertStringNotContainsString( 'class="pollbar"', $html );
+	}
+
+	/**
+	 * An answer with every vote fills the bar completely.
+	 *
+	 * This was clamped to 99% because the border and margin on the old single
+	 * div pushed a full width bar past its container.
+	 */
+	public function test_a_unanimous_answer_fills_the_bar() {
+		$poll_id = $this->make_poll( array(), array( array( 'A', 5 ), array( 'B', 0 ) ) );
+		$html    = Polls_Display::display_pollresult( $poll_id );
+
+		$this->assertStringContainsString( 'width: 100%', $html );
+		$this->assertStringNotContainsString( 'width: 99%', $html );
+	}
+
+	/**
+	 * An answer with no votes renders an empty fill rather than a 1% sliver.
+	 */
+	public function test_an_unvoted_answer_has_an_empty_bar() {
+		$poll_id = $this->make_poll( array(), array( array( 'A', 5 ), array( 'B', 0 ) ) );
+		$html    = Polls_Display::display_pollresult( $poll_id );
+
+		$this->assertStringContainsString( 'width: 0%', $html );
+		$this->assertStringNotContainsString( 'width: 1%', $html );
+	}
+
+	/**
+	 * Every bar matches the percentage printed beside it.
+	 *
+	 * With wp_polls_round_percentage on, the last answer's printed percentage
+	 * gets a rounding buffer added so the column sums to 100. The bar width was
+	 * computed before that happened and never saw the buffer, so the last answer
+	 * printed one number and drew a different one.
+	 */
+	public function test_every_bar_matches_the_percentage_beside_it() {
+		add_filter( 'wp_polls_round_percentage', '__return_true' );
+
+		// Three answers at one vote each: 33 + 33 + 33 = 99, so the last is
+		// buffered up to 34.
+		$poll_id = $this->make_poll( array(), array( array( 'A', 1 ), array( 'B', 1 ), array( 'C', 1 ) ) );
+		$html    = Polls_Display::display_pollresult( $poll_id );
+
+		preg_match_all( '/\((\d+)%/', $html, $printed );
+		preg_match_all( '/width: (\d+)%/', $html, $drawn );
+
+		$this->assertNotEmpty( $printed[1] );
+		$this->assertSame( $printed[1], $drawn[1] );
+		// Proves the buffer actually fired, so the comparison above is not vacuous.
+		$this->assertContains( '34', $printed[1] );
+	}
+
+	/**
+	 * %POLL_ANSWER_IMAGEWIDTH% is gone from the stock result templates.
+	 *
+	 * It is no longer substituted either, so a template still holding it would
+	 * emit the literal token into a style attribute. The upgrade replaces both
+	 * result templates outright, which is what makes that unreachable - this
+	 * pins the half of that guarantee which lives in the defaults.
+	 */
+	public function test_the_stock_result_templates_use_the_percentage() {
+		foreach ( array( 'resultbody', 'resultbody2' ) as $key ) {
+			$template = Polls_Templates::get_default( $key );
+
+			$this->assertStringNotContainsString( '%POLL_ANSWER_IMAGEWIDTH%', $template, $key );
+			$this->assertStringContainsString( 'width: %POLL_ANSWER_PERCENTAGE%%', $template, $key );
+		}
+	}
+
+	/**
+	 * The archive reports the same percentages as the poll itself.
+	 *
+	 * The rounding buffer used to be unconditional in the archive while the poll
+	 * only applied it when wp_polls_round_percentage was filtered on, so the two
+	 * disagreed on every default install.
+	 */
+	public function test_the_archive_percentages_match_the_poll() {
+		$poll_id = $this->make_poll( array(), array( array( 'A', 1 ), array( 'B', 1 ), array( 'C', 1 ) ) );
+
+		preg_match_all( '/\((\d+)%/', Polls_Display::display_pollresult( $poll_id ), $poll );
+		preg_match_all( '/\((\d+)%/', Polls_Display::polls_archive(), $archive );
+
+		$this->assertNotEmpty( $poll[1] );
+		$this->assertSame( $poll[1], $archive[1] );
+		// Unbuffered by default: three answers at one vote each stay at 33.
+		$this->assertNotContains( '34', $archive[1] );
+	}
+
+	/**
+	 * Turning the filter on buffers the archive as well as the poll.
+	 */
+	public function test_the_archive_buffers_when_the_filter_is_on() {
+		add_filter( 'wp_polls_round_percentage', '__return_true' );
+
+		$poll_id = $this->make_poll( array(), array( array( 'A', 1 ), array( 'B', 1 ), array( 'C', 1 ) ) );
+
+		preg_match_all( '/\((\d+)%/', Polls_Display::display_pollresult( $poll_id ), $poll );
+		preg_match_all( '/\((\d+)%/', Polls_Display::polls_archive(), $archive );
+
+		$this->assertSame( $poll[1], $archive[1] );
+		$this->assertContains( '34', $archive[1] );
+	}
+
+	/**
+	 * The archive escapes %POLL_ANSWER_TEXT% once, like the poll does.
+	 *
+	 * 3.0.0 fixed the double encoding on the poll and missed the archive, which
+	 * kept its own htmlspecialchars() call.
+	 */
+	public function test_the_archive_escapes_answer_text_once() {
+		Polls_Options::set( 'templates.resultbody', '<li title="%POLL_ANSWER_TEXT%">%POLL_ANSWER%</li>' );
+		$this->make_poll( array(), array( array( 'Emacs & "friends"', 1 ) ) );
+
+		$archive = Polls_Display::polls_archive();
+
+		$this->assertStringContainsString( 'title="Emacs &amp; &quot;friends&quot;"', $archive );
+		$this->assertStringNotContainsString( '&amp;amp;', $archive );
+	}
+
+	/**
+	 * The archive draws the same width as the poll itself.
+	 *
+	 * The two paths computed the bar width differently - the poll clamped 100 to
+	 * 99, the archive scaled every width to 90% of the percentage - so the same
+	 * answer drew a visibly shorter bar in the archive than on the poll.
+	 */
+	public function test_the_archive_bar_matches_the_poll_bar() {
+		$poll_id = $this->make_poll( array(), array( array( 'A', 5 ), array( 'B', 5 ) ) );
+
+		$poll    = Polls_Display::display_pollresult( $poll_id );
+		$archive = Polls_Display::polls_archive();
+
+		$this->assertStringContainsString( 'width: 50%', $poll );
+		$this->assertStringContainsString( 'width: 50%', $archive );
+		$this->assertStringNotContainsString( 'width: 45%', $archive );
 	}
 }

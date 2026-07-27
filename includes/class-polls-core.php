@@ -44,25 +44,15 @@ class Polls_Core {
 		$pollbar_height     = (int) $pollbar['height'];
 		$pollbar_background = self::sanitize_bar_color( $pollbar['background'] );
 		$pollbar_border     = self::sanitize_bar_color( $pollbar['border'] );
-		if ( 'use_css' === $pollbar['style'] ) {
-			$pollbar_css  = '.wp-polls .pollbar {' . "\n";
-			$pollbar_css .= "\t" . 'margin: 1px;' . "\n";
-			$pollbar_css .= "\t" . 'font-size: ' . ( $pollbar_height - 2 ) . 'px;' . "\n";
-			$pollbar_css .= "\t" . 'line-height: ' . $pollbar_height . 'px;' . "\n";
-			$pollbar_css .= "\t" . 'height: ' . $pollbar_height . 'px;' . "\n";
-			$pollbar_css .= "\t" . 'background: #' . $pollbar_background . ';' . "\n";
-			$pollbar_css .= "\t" . 'border: 1px solid #' . $pollbar_border . ';' . "\n";
-			$pollbar_css .= '}' . "\n";
-		} else {
-			$pollbar_css  = '.wp-polls .pollbar {' . "\n";
-			$pollbar_css .= "\t" . 'margin: 1px;' . "\n";
-			$pollbar_css .= "\t" . 'font-size: ' . ( $pollbar_height - 2 ) . 'px;' . "\n";
-			$pollbar_css .= "\t" . 'line-height: ' . $pollbar_height . 'px;' . "\n";
-			$pollbar_css .= "\t" . 'height: ' . $pollbar_height . 'px;' . "\n";
-			$pollbar_css .= "\t" . 'background-image: url(\'' . esc_url( WP_POLLS_URL . 'images/' . $pollbar['style'] . '/pollbg.gif' ) . '\');' . "\n";
-			$pollbar_css .= "\t" . 'border: 1px solid #' . $pollbar_border . ';' . "\n";
-			$pollbar_css .= '}' . "\n";
-		}
+		// Only the configured values are emitted here. The rules that consume
+		// them live in polls-css.css, which is why this no longer branches on the
+		// bar style: every style is now a difference in these four values.
+		$pollbar_css  = '.wp-polls {' . "\n";
+		$pollbar_css .= "\t" . '--wp-polls-bar-height: ' . $pollbar_height . 'px;' . "\n";
+		$pollbar_css .= "\t" . '--wp-polls-bar-background: #' . $pollbar_background . ';' . "\n";
+		$pollbar_css .= "\t" . '--wp-polls-bar-border: #' . $pollbar_border . ';' . "\n";
+		$pollbar_css .= "\t" . '--wp-polls-bar-image: ' . self::bar_image( $pollbar['style'] ) . ';' . "\n";
+		$pollbar_css .= '}' . "\n";
 		wp_add_inline_style( 'wp-polls', $pollbar_css );
 		$poll_ajax_style = Polls_Options::get( 'ajax' );
 		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'polls-js.js', array(), WP_POLLS_VERSION, true );
@@ -201,5 +191,25 @@ class Polls_Core {
 		}
 
 		return $color;
+	}
+
+	/**
+	 * The background-image value for a poll bar style.
+	 *
+	 * Up to 3.0.0 the shaded styles were 1px wide GIF tiles under images/, which
+	 * carried their own colour - so picking one silently discarded the Poll Bar
+	 * Background setting. The gradient is a translucent overlay rather than a
+	 * fixed pair of colours, so it now shades whatever colour is configured.
+	 *
+	 * @param mixed $style Stored bar style.
+	 *
+	 * @return string A CSS background-image value.
+	 */
+	public static function bar_image( $style ) {
+		if ( 'gradient' === $style ) {
+			return 'linear-gradient(to bottom, rgba(255, 255, 255, 0.28), rgba(0, 0, 0, 0.07))';
+		}
+
+		return 'none';
 	}
 }

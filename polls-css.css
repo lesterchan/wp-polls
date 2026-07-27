@@ -62,6 +62,49 @@
 .wp-polls-image {
 	border: 0px;
 }
+/* Poll Result Bar */
+/* The four custom properties carry the Poll Options settings and are the
+   supported way to restyle the bar - set them in your own stylesheet rather
+   than copying this file into your theme. The fallbacks after each var() are
+   what the settings screen ships with, so the bar still renders if the inline
+   block is filtered out. */
+.wp-polls .wp-polls-bar {
+	box-sizing: border-box;
+	width: 100%;
+	height: var(--wp-polls-bar-height, 8px);
+	margin-block: 2px;
+	overflow: hidden;
+	border: 1px solid var(--wp-polls-bar-border, #c8c8c8);
+	border-radius: var(--wp-polls-bar-radius, 3px);
+}
+.wp-polls .wp-polls-bar-fill {
+	height: 100%;
+	border-radius: inherit;
+	background-color: var(--wp-polls-bar-background, #d8e1eb);
+	background-image: var(--wp-polls-bar-image, none);
+	/* The width arrives inline, so there is no state change for a transition to
+	   pick up. Scaling in from zero animates the same thing without needing to
+	   know the target width in the stylesheet. */
+	transform-origin: left center;
+	animation: wp-polls-bar-grow 0.45s ease-out;
+}
+/* transform has no logical-property equivalent, so the RTL origin is explicit. */
+[dir="rtl"] .wp-polls .wp-polls-bar-fill {
+	transform-origin: right center;
+}
+@keyframes wp-polls-bar-grow {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.wp-polls .wp-polls-bar-fill {
+		animation: none;
+	}
+}
 .wp-polls .Buttons {
 	border:1px solid #c8c8c8;
 	background-color: #f3f6f8;

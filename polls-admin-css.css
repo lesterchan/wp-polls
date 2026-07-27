@@ -1,3 +1,25 @@
+/* Poll Options poll bar swatches and preview. Both render the front end markup
+   under polls-css.css; these rules only size them and undo the inline display
+   the swatches are forced into by sitting inside a <label>, whose content model
+   allows phrasing content only. */
+#wp-polls-pollbar {
+	width: 200px;
+}
+.wp-polls-swatch {
+	display: inline-block;
+	width: 160px;
+	vertical-align: middle;
+	/* Deliberately not the configured height. These swatches exist to tell the
+	   two styles apart, and at the 8px default the gradient is a single band of
+	   shading nobody can see. The preview under the colour fields is the one
+	   that shows the real height. */
+	--wp-polls-bar-height: 24px;
+	--wp-polls-bar-radius: 4px;
+}
+.wp-polls-swatch .wp-polls-bar,
+.wp-polls-swatch .wp-polls-bar-fill {
+	display: block;
+}
 #wp-polls-pollbar-bg {
 	width: 25px;
 	height: 25px;

@@ -118,7 +118,10 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
-		$this->assertSame( 'default_gradient', Polls_Options::get( 'bar.style' ) );
+		// The fold carries poll_bar across intact and the bar upgrade then maps
+		// the style: images/default_gradient is gone, and it shaded light to
+		// dark, so it lands on the CSS gradient. The colours are untouched.
+		$this->assertSame( 'gradient', Polls_Options::get( 'bar.style' ) );
 		$this->assertSame( 'ff0000', Polls_Options::get( 'bar.background' ) );
 		$this->assertSame( '00ff00', Polls_Options::get( 'bar.border' ) );
 		$this->assertSame( 12, (int) Polls_Options::get( 'bar.height' ) );
@@ -309,5 +312,118 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		$this->run_upgrade();
 
 		$this->assertSame( $custom, Polls_Options::get( 'templates.votefooter' ) );
+	}
+
+	// --- the poll bar -----------------------------------------------------
+
+	/**
+	 * The result templates are replaced with the new bar markup on upgrade.
+	 *
+	 * @return void
+	 */
+	public function test_result_templates_are_moved_onto_the_new_bar() {
+		$this->make_legacy_install();
+		update_option(
+			'poll_template_resultbody',
+			'<li>%POLL_ANSWER%<div class="pollbar" style="width: %POLL_ANSWER_IMAGEWIDTH%%;"></div></li>'
+		);
+
+		$this->run_upgrade();
+
+		$body = Polls_Options::get( 'templates.resultbody' );
+
+		$this->assertStringNotContainsString( 'class="pollbar"', $body );
+		$this->assertStringContainsString( 'class="wp-polls-bar"', $body );
+		$this->assertStringContainsString( 'class="wp-polls-bar-fill"', $body );
+	}
+
+	/**
+	 * A customised result template is replaced too, not preserved.
+	 *
+	 * This is the deliberate breaking half of the change and the one users have
+	 * to act on, so it is pinned: the bar markup, its class names and the
+	 * stylesheet all moved together, and a customised copy of the old template
+	 * would render a bar with no rules left to match it.
+	 *
+	 * @return void
+	 */
+	public function test_a_customised_result_template_is_overwritten() {
+		$this->make_legacy_install();
+		update_option(
+			'poll_template_resultbody',
+			'<li>MY OWN MARKUP %POLL_ANSWER% <div class="pollbar"></div></li>'
+		);
+
+		$this->run_upgrade();
+
+		$body = Polls_Options::get( 'templates.resultbody' );
+
+		$this->assertStringNotContainsString( 'MY OWN MARKUP', $body );
+		$this->assertSame( Polls_Templates::get_default( 'resultbody' ), $body );
+	}
+
+	/**
+	 * Every retired bar style maps onto one of the two that are left.
+	 *
+	 * @dataProvider data_legacy_bar_styles
+	 *
+	 * @param string $stored   The style a pre-3.0.0 install holds.
+	 * @param string $expected What it should become.
+	 *
+	 * @return void
+	 */
+	public function test_legacy_bar_styles_are_mapped( $stored, $expected ) {
+		$this->make_legacy_install();
+		update_option(
+			'poll_bar',
+			array(
+				'style'      => $stored,
+				'background' => 'ff0000',
+				'border'     => '00ff00',
+				'height'     => 12,
+			)
+		);
+
+		$this->run_upgrade();
+
+		$this->assertSame( $expected, Polls_Options::get( 'bar.style' ) );
+	}
+
+	/**
+	 * The retired styles and what each becomes.
+	 *
+	 * @return array
+	 */
+	public function data_legacy_bar_styles() {
+		return array(
+			// 'use_css' was the flat fill with no image over it.
+			'the CSS sentinel'     => array( 'use_css', 'flat' ),
+			// Both shipped tiles shaded light to dark.
+			'the default tile'     => array( 'default', 'gradient' ),
+			'the gradient tile'    => array( 'default_gradient', 'gradient' ),
+			// A third-party images/ directory that no longer resolves.
+			'an unknown directory' => array( 'some_theme_bar', 'gradient' ),
+		);
+	}
+
+	/**
+	 * An install already on the new bar is left alone.
+	 *
+	 * The upgrade replaces the result templates outright, so it must not run a
+	 * second time on an install that has already been through it - that would
+	 * discard customisations made after upgrading, every time wp-admin loaded.
+	 *
+	 * @return void
+	 */
+	public function test_the_bar_upgrade_does_not_run_twice() {
+		$this->make_legacy_install();
+		$this->run_upgrade();
+
+		// Customise the result template the way a user would, post-upgrade.
+		Polls_Options::set( 'templates.resultbody', '<li>EDITED AFTERWARDS</li>' );
+
+		$this->run_upgrade();
+
+		$this->assertSame( '<li>EDITED AFTERWARDS</li>', Polls_Options::get( 'templates.resultbody' ) );
 	}
 }

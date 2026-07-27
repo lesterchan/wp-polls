@@ -96,6 +96,14 @@ class Polls_Install {
 			Polls_Options::migrate_from_legacy_rows();
 		}
 
+		// Version 3.0.0: the poll bar became a track holding a fill, styled from
+		// CSS custom properties. Gated on the stored shape as well as the version
+		// for the same reason the migration above is - a development install can
+		// be stamped 3.0.0 and still hold the old bar.
+		if ( $is_pre_3 || self::needs_poll_bar_upgrade( $stored ) ) {
+			self::upgrade_poll_bar();
+		}
+
 		if ( WP_POLLS_VERSION === $installed_version ) {
 			return;
 		}
@@ -106,6 +114,72 @@ class Polls_Install {
 		}
 
 		update_option( 'poll_version', WP_POLLS_VERSION );
+	}
+
+	/**
+	 * Whether the stored option still describes the pre-3.0.0 poll bar.
+	 *
+	 * @param mixed $stored The poll_options row as read from the database.
+	 *
+	 * @return bool
+	 */
+	public static function needs_poll_bar_upgrade( $stored ) {
+		if ( ! is_array( $stored ) ) {
+			return false;
+		}
+
+		// A bar style that is not one of the two CSS styles is either a leftover
+		// images/ directory name or the old 'use_css' sentinel.
+		if ( isset( $stored['bar']['style'] ) && ! in_array( $stored['bar']['style'], Polls_Settings::bar_styles(), true ) ) {
+			return true;
+		}
+
+		// Or the result template still carries the single div the bar used to be.
+		foreach ( array( 'resultbody', 'resultbody2' ) as $key ) {
+			if ( isset( $stored['templates'][ $key ] )
+				&& is_string( $stored['templates'][ $key ] )
+				&& false !== stripos( $stored['templates'][ $key ], 'pollbar' ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Function: Move The Stored Poll Bar Onto The 3.0.0 Markup And Styles.
+	 *
+	 * The two result templates are replaced outright rather than patched, and
+	 * customised copies are not spared. The markup, the class names and the
+	 * stylesheet all changed together, so a template still holding the old
+	 * single `div.pollbar` has no rules left to match and renders an invisible
+	 * bar - there is no version of the old markup that still works. Anyone who
+	 * had customised these gets the stock bar back and re-applies their changes;
+	 * the changelog and the upgrade notice both say so.
+	 *
+	 * @return mixed
+	 */
+	public static function upgrade_poll_bar() {
+		foreach ( array( 'resultbody', 'resultbody2' ) as $key ) {
+			Polls_Options::set( 'templates.' . $key, Polls_Templates::get_default( $key ) );
+		}
+
+		// images/default and images/default_gradient no longer exist. Both tiles
+		// shaded light to dark, so they become the gradient; 'use_css' was the
+		// flat fill. Anything else was a third-party directory that has nothing
+		// left to point at.
+		$map   = array(
+			'use_css'          => 'flat',
+			'default'          => 'gradient',
+			'default_gradient' => 'gradient',
+		);
+		$style = Polls_Options::get( 'bar.style' );
+
+		if ( isset( $map[ $style ] ) ) {
+			Polls_Options::set( 'bar.style', $map[ $style ] );
+		} elseif ( ! in_array( $style, Polls_Settings::bar_styles(), true ) ) {
+			Polls_Options::set( 'bar.style', 'gradient' );
+		}
 	}
 
 	/**

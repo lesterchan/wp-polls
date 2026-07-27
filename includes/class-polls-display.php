@@ -257,17 +257,12 @@ class Polls_Display {
 				$poll_answer_id    = (int) $poll_answer->polla_aid;
 				$poll_answer_text  = wp_kses_post( removeslashes( $poll_answer->polla_answers ) );
 				$poll_answer_votes = (int) $poll_answer->polla_votes;
-				// Calculate Percentage And Image Bar Width.
+				// Calculate Percentage.
 				$poll_answer_percentage          = 0;
 				$poll_multiple_answer_percentage = 0;
-				$poll_answer_imagewidth          = 1;
 				if ( ! $poll_totalvotes_zero && ! $poll_totalvoters_zero && $poll_answer_votes > 0 ) {
 					$poll_answer_percentage          = round( ( $poll_answer_votes / $poll_question_totalvotes ) * 100 );
 					$poll_multiple_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 );
-					$poll_answer_imagewidth          = round( $poll_answer_percentage );
-					if ( 100 === $poll_answer_imagewidth ) {
-						$poll_answer_imagewidth = 99;
-					}
 				}
 				// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer.
 				$round_percentage = apply_filters( 'wp_polls_round_percentage', false );
@@ -292,9 +287,16 @@ class Polls_Display {
 					// &amp;amp;, which renders as a literal &amp; in the tooltip.
 					'%POLL_ANSWER_TEXT%'                => esc_attr( wp_strip_all_tags( $poll_answer_text ) ),
 					'%POLL_ANSWER_VOTES%'               => esc_html( number_format_i18n( $poll_answer_votes ) ),
+					// %POLL_ANSWER_IMAGEWIDTH% was removed in 3.0.0. It held the
+					// percentage with a fudge applied - clamped to 99 here, scaled to
+					// 90% in the archive - so the old bar's border did not overflow
+					// its container. The track absorbs the border now, so the fudges
+					// are gone and the variable had nothing left to say that
+					// %POLL_ANSWER_PERCENTAGE% does not. It is not substituted: the
+					// upgrade replaces both result templates outright, so the only
+					// way to still be holding the token is to have typed it back in.
 					'%POLL_ANSWER_PERCENTAGE%'          => $poll_answer_percentage,
 					'%POLL_MULTIPLE_ANSWER_PERCENTAGE%' => $poll_multiple_answer_percentage,
-					'%POLL_ANSWER_IMAGEWIDTH%'          => $poll_answer_imagewidth,
 				);
 				$template_variables = apply_filters( 'wp_polls_template_resultbody_variables', $template_variables );
 
@@ -568,17 +570,20 @@ class Polls_Display {
 			// Store The Percentage Of The Poll.
 			$poll_answer_percentage_array = array();
 			foreach ( $polls_answers[ $polls_question['id'] ] as $polls_answer ) {
-				// Calculate Percentage And Image Bar Width.
+				// Calculate Percentage.
 				$poll_answer_percentage          = 0;
 				$poll_multiple_answer_percentage = 0;
-				$poll_answer_imagewidth          = 1;
 				if ( ! $poll_totalvotes_zero && ! $poll_totalvoters_zero && $polls_answer['votes'] > 0 ) {
 					$poll_answer_percentage          = round( ( $polls_answer['votes'] / $polls_question['totalvotes'] ) * 100 );
 					$poll_multiple_answer_percentage = round( ( $polls_answer['votes'] / $polls_question['totalvoters'] ) * 100 );
-					$poll_answer_imagewidth          = round( $poll_answer_percentage * 0.9 );
 				}
 				// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer.
-				if ( 0 === $polls_question['multiple'] ) {
+				// Gated on wp_polls_round_percentage, the same as display_pollresult().
+				// The archive used to apply the buffer unconditionally while the poll
+				// only applied it on request, so on a default install the same poll
+				// reported one set of percentages on the page and another here.
+				$round_percentage = apply_filters( 'wp_polls_round_percentage', false );
+				if ( $round_percentage && 0 === $polls_question['multiple'] ) {
 					$poll_answer_percentage_array[] = $poll_answer_percentage;
 					if ( count( $poll_answer_percentage_array ) === count( $polls_answers[ $polls_question['id'] ] ) ) {
 						$percentage_error_buffer = 100 - array_sum( $poll_answer_percentage_array );
@@ -604,18 +609,24 @@ class Polls_Display {
 						'%POLL_ANSWER_TEXT%',
 						'%POLL_ANSWER_VOTES%',
 						'%POLL_ANSWER_PERCENTAGE%',
+						// %POLL_ANSWER_IMAGEWIDTH% was removed in 3.0.0. See
+						// display_pollresult() for why.
 						'%POLL_MULTIPLE_ANSWER_PERCENTAGE%',
-						'%POLL_ANSWER_IMAGEWIDTH%',
 					),
 					array(
 						$polls_question['id'],
 						$polls_answer['aid'],
 						$polls_answer['answers'],
-						htmlspecialchars( wp_strip_all_tags( $polls_answer['answers'] ) ),
+						// esc_attr() rather than htmlspecialchars(), for the same
+						// reason as display_pollresult(): the answer has already been
+						// through wp_kses_post() above, so & is &amp; and
+						// htmlspecialchars()'s default $double_encode = true turns
+						// that into &amp;amp;. 3.0.0 fixed this on the poll and
+						// missed the archive.
+						esc_attr( wp_strip_all_tags( $polls_answer['answers'] ) ),
 						esc_html( number_format_i18n( $polls_answer['votes'] ) ),
 						$poll_answer_percentage,
 						$poll_multiple_answer_percentage,
-						$poll_answer_imagewidth,
 					),
 					$template_answer
 				);

@@ -299,12 +299,16 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	// --- front end assets -------------------------------------------------
 
 	/**
-	 * The bar settings become an inline stylesheet.
+	 * The bar settings become custom properties, not rules.
+	 *
+	 * The rules that consume them live in polls-css.css. Only the configured
+	 * values are inline, which is what makes the bar restyleable from a theme
+	 * stylesheet rather than by copying polls-css.css into the theme.
 	 *
 	 * @return void
 	 */
-	public function test_poll_scripts_emits_the_bar_css() {
-		Polls_Options::set( 'bar.style', 'use_css' );
+	public function test_poll_scripts_emits_the_bar_custom_properties() {
+		Polls_Options::set( 'bar.style', 'flat' );
 		Polls_Options::set( 'bar.height', 12 );
 		Polls_Options::set( 'bar.background', 'ff0000' );
 		Polls_Options::set( 'bar.border', '00ff00' );
@@ -313,26 +317,47 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
-		$this->assertStringContainsString( 'height: 12px;', $css );
-		$this->assertStringContainsString( 'font-size: 10px;', $css );
-		$this->assertStringContainsString( 'background: #ff0000;', $css );
-		$this->assertStringContainsString( 'border: 1px solid #00ff00;', $css );
-		$this->assertStringNotContainsString( 'background-image', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-height: 12px;', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-background: #ff0000;', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-border: #00ff00;', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-image: none;', $css );
+		$this->assertStringNotContainsString( '.pollbar', $css );
 	}
 
 	/**
-	 * An image bar style becomes a background image instead.
+	 * The gradient style is CSS rather than a GIF tile.
 	 *
 	 * @return void
 	 */
-	public function test_poll_scripts_emits_the_bar_image() {
-		Polls_Options::set( 'bar.style', 'default_gradient' );
+	public function test_poll_scripts_emits_the_gradient_without_an_image() {
+		Polls_Options::set( 'bar.style', 'gradient' );
 
 		Polls_Core::poll_scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
-		$this->assertStringContainsString( 'images/default_gradient/pollbg.gif', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-image: linear-gradient(', $css );
+		$this->assertStringNotContainsString( 'pollbg.gif', $css );
+	}
+
+	/**
+	 * The gradient shades whatever colour is configured.
+	 *
+	 * The GIF tiles carried their own colours, so selecting one silently
+	 * discarded the Poll Bar Background setting. The overlay is translucent, so
+	 * the configured colour still shows through.
+	 *
+	 * @return void
+	 */
+	public function test_the_gradient_keeps_the_configured_colour() {
+		Polls_Options::set( 'bar.style', 'gradient' );
+		Polls_Options::set( 'bar.background', 'ff0000' );
+
+		Polls_Core::poll_scripts();
+
+		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
+
+		$this->assertStringContainsString( '--wp-polls-bar-background: #ff0000;', $css );
 	}
 
 	/**
@@ -345,7 +370,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_poll_scripts_sanitises_the_bar_colours() {
-		Polls_Options::set( 'bar.style', 'use_css' );
+		Polls_Options::set( 'bar.style', 'flat' );
 		Polls_Options::set( 'bar.background', 'red; } body { display: none; } .x {' );
 		Polls_Options::set( 'bar.height', 8 );
 
@@ -354,7 +379,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
 		$this->assertStringNotContainsString( 'display: none', $css );
-		$this->assertStringContainsString( 'background: #000000;', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-background: #000000;', $css );
 	}
 
 	/**

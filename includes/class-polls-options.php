@@ -124,8 +124,11 @@ class Polls_Options {
 			'templates'      => Polls_Templates::defaults(),
 			// These mirror the pre-3.0.0 add_option() calls exactly. Changing any
 			// of them silently changes what a fresh install looks like.
+			// 'gradient' rather than the pre-3.0.0 'default': that default was the
+			// images/default/pollbg.gif tile, a light-to-dark shade, so gradient is
+			// the value that leaves a fresh install looking the same.
 			'bar'            => array(
-				'style'      => 'default',
+				'style'      => 'gradient',
 				'background' => 'd8e1eb',
 				'border'     => 'c8c8c8',
 				'height'     => 8,

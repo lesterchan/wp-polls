@@ -40,9 +40,17 @@ class Polls_Templates {
 				'<div id="polls-%POLL_ID%-ans" class="wp-polls-ans">' .
 				'<ul class="wp-polls-ul">',
 
-			'resultbody'              => '<li>%POLL_ANSWER% <small>(%POLL_ANSWER_PERCENTAGE%%' . __( ',', 'wp-polls' ) . ' %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')</small><div class="pollbar" style="width: %POLL_ANSWER_IMAGEWIDTH%%;" title="%POLL_ANSWER_TEXT% (%POLL_ANSWER_PERCENTAGE%% | %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')"></div></li>',
+			// The bar is a track holding a fill rather than one div sized by width,
+			// so the border no longer eats into the measurement and a unanimous
+			// answer can render at a true 100%. It carries aria-hidden because the
+			// percentage and the vote count are already in the <small> beside it -
+			// an ARIA-labelled bar would only make a screen reader read the same
+			// numbers a second time.
+			'resultbody'              => '<li>%POLL_ANSWER% <small>(%POLL_ANSWER_PERCENTAGE%%' . __( ',', 'wp-polls' ) . ' %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')</small><div class="wp-polls-bar" aria-hidden="true"><div class="wp-polls-bar-fill" style="width: %POLL_ANSWER_PERCENTAGE%%;"></div></div></li>',
 
-			'resultbody2'             => '<li><strong><i>%POLL_ANSWER% <small>(%POLL_ANSWER_PERCENTAGE%%' . __( ',', 'wp-polls' ) . ' %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')</small></i></strong><div class="pollbar" style="width: %POLL_ANSWER_IMAGEWIDTH%%;" title="' . __( 'You Have Voted For This Choice', 'wp-polls' ) . ' - %POLL_ANSWER_TEXT% (%POLL_ANSWER_PERCENTAGE%% | %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')"></div></li>',
+			// The "you voted for this" tooltip moves onto the <strong> that already
+			// marks the choice visually, because the bar itself is now decorative.
+			'resultbody2'             => '<li><strong title="' . __( 'You Have Voted For This Choice', 'wp-polls' ) . '"><i>%POLL_ANSWER% <small>(%POLL_ANSWER_PERCENTAGE%%' . __( ',', 'wp-polls' ) . ' %POLL_ANSWER_VOTES% ' . __( 'Votes', 'wp-polls' ) . ')</small></i></strong><div class="wp-polls-bar" aria-hidden="true"><div class="wp-polls-bar-fill" style="width: %POLL_ANSWER_PERCENTAGE%%;"></div></div></li>',
 
 			'resultfooter'            => '</ul>' .
 				'<p style="text-align: center;">' . __( 'Total Voters', 'wp-polls' ) . ': <strong>%POLL_TOTALVOTERS%</strong></p>' .

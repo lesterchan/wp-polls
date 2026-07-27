@@ -95,7 +95,7 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 'default', $result['bar']['style'] );
+		$this->assertSame( 'gradient', $result['bar']['style'] );
 		$this->assertSame( '000000', $result['bar']['background'] );
 		$this->assertGreaterThanOrEqual( 1, (int) $result['bar']['height'] );
 		$this->assertSame( 'polla_aid', $result['sort']['answers_by'] );

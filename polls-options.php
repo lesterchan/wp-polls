@@ -12,15 +12,15 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 	die( 'Access Denied' );
 }
 
-// Get Poll Bar Images. Each bar is a directory under images/ holding a pollbg.gif.
-$pollbar_path = WP_POLLS_DIR . 'images';
-$poll_bars    = array();
-foreach ( (array) glob( $pollbar_path . '/*', GLOB_ONLYDIR ) as $pollbar_dir ) {
-	$pollbar_bg = $pollbar_dir . '/pollbg.gif';
-	if ( is_readable( $pollbar_bg ) ) {
-		$poll_bars[ basename( $pollbar_dir ) ] = getimagesize( $pollbar_bg );
-	}
-}
+// The poll bar styles are a fixed pair now that the shading is CSS rather than
+// a pollbg.gif tile per directory under images/. Polls_Settings owns the list so
+// that the screen cannot offer a style the sanitiser would reject.
+$poll_bars = Polls_Settings::bar_styles();
+
+$poll_bar_labels = array(
+	'flat'     => __( 'Flat', 'wp-polls' ),
+	'gradient' => __( 'Gradient', 'wp-polls' ),
+);
 
 // Saving is handled by the Settings API: the form posts to options.php,
 // which validates the nonce and hands the input to Polls_Settings::sanitize().
@@ -42,12 +42,9 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 		var field = document.getElementById(id);
 		return field ? field.value : "";
 	}
-	function set_pollbar_height(height) {
-		var field = document.getElementById("poll_bar_height");
-		if(field) {
-			field.value = height;
-		}
-	}
+	// The background-image for each style comes from the same helper the front
+	// end uses, so the preview cannot drift from what actually renders.
+	var pollbar_images = <?php echo wp_json_encode( array_combine( $poll_bars, array_map( array( 'Polls_Core', 'bar_image' ), $poll_bars ) ) ); ?>;
 	function update_pollbar(where) {
 		var pollbar_background = "#" + poll_field_value("poll_bar_bg");
 		var pollbar_border = "#" + poll_field_value("poll_bar_border");
@@ -63,21 +60,24 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 			if(border_preview) {
 				border_preview.style.backgroundColor = pollbar_border;
 			}
-		} else if(where == "style") {
+		}
+		// The preview is the real front end markup under the real front end
+		// stylesheet, so setting the four custom properties is the whole job.
+		if(preview) {
 			var checked_style = document.querySelector("input[name='poll_options[bar][style]']:checked");
 			var pollbar_style = checked_style ? checked_style.value : "";
-			if(preview) {
-				if(pollbar_style == "use_css") {
-					preview.style.backgroundImage = "none";
-				} else {
-					preview.style.backgroundImage = "url('<?php echo esc_url( WP_POLLS_URL . 'images/' ); ?>" + pollbar_style + "/pollbg.gif')";
-				}
-			}
+			preview.style.setProperty("--wp-polls-bar-background", pollbar_background);
+			preview.style.setProperty("--wp-polls-bar-border", pollbar_border);
+			preview.style.setProperty("--wp-polls-bar-height", pollbar_height);
+			preview.style.setProperty("--wp-polls-bar-image", pollbar_images[pollbar_style] || "none");
 		}
-		if(preview) {
-			preview.style.backgroundColor = pollbar_background;
-			preview.style.border = "1px solid " + pollbar_border;
-			preview.style.height = pollbar_height;
+		// The swatches follow the colours too, so the two styles stay comparable
+		// while the fields are being edited. Their height stays fixed: it is set
+		// in polls-admin-css.css so the gradient is visible at any bar height.
+		var swatches = document.querySelectorAll(".wp-polls-swatch");
+		for(var i = 0; i < swatches.length; i++) {
+			swatches[i].style.setProperty("--wp-polls-bar-background", pollbar_background);
+			swatches[i].style.setProperty("--wp-polls-bar-border", pollbar_border);
 		}
 	}
 	document.addEventListener("click", function (event) {
@@ -85,12 +85,9 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 		if(!target || typeof target.closest !== "function") {
 			return;
 		}
-		var radio = target.closest('[data-poll-action="pollbar-style"]');
-		if(radio) {
-			var height = radio.getAttribute("data-poll-height");
-			if(height) {
-				set_pollbar_height(height);
-			}
+		// Picking a style no longer touches the height field: it used to be set
+		// from the height of that style's pollbg.gif, and there is no image now.
+		if(target.closest('[data-poll-action="pollbar-style"]')) {
 			update_pollbar("style");
 		}
 	});
@@ -119,23 +116,30 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 			<th scope="row" valign="top"><?php esc_html_e( 'Poll Bar Style', 'wp-polls' ); ?></th>
 			<td colspan="2">
 				<?php
-					$pollbar     = Polls_Options::get( 'bar' );
-					$pollbar_url = WP_POLLS_URL . 'images';
-				if ( count( $poll_bars ) > 0 ) {
-					foreach ( $poll_bars as $filename => $pollbar_info ) {
-						$pollbar_img_h = (int) $pollbar_info[1];
-						echo '<p>' . "\n";
-						echo '<input type="radio" id="poll_bar_style-' . esc_attr( $filename ) . '" name="poll_options[bar][style]" value="' . esc_attr( $filename ) . '"';
-						checked( $filename, $pollbar['style'] );
-						echo ' data-poll-action="pollbar-style" data-poll-height="' . esc_attr( $pollbar_img_h ) . '" />';
-						echo '<label for="poll_bar_style-' . esc_attr( $filename ) . '">&nbsp;&nbsp;&nbsp;';
-						echo '<img src="' . esc_url( $pollbar_url . '/' . $filename . '/pollbg.gif' ) . '" height="' . esc_attr( $pollbar_img_h ) . '" width="100" alt="pollbg.gif" />';
-						echo '&nbsp;&nbsp;&nbsp;(' . esc_html( $filename ) . ')</label>';
-						echo '</p>' . "\n";
-					}
+					$pollbar = Polls_Options::get( 'bar' );
+				foreach ( $poll_bars as $pollbar_style_name ) {
+					// Each swatch is the real bar markup with only the image
+					// property overridden, so what is offered is what is rendered.
+					// No height here: polls-admin-css.css fixes the swatches at a size
+					// the gradient is actually visible at.
+					$pollbar_swatch = sprintf(
+						'--wp-polls-bar-background: #%1$s; --wp-polls-bar-border: #%2$s; --wp-polls-bar-image: %3$s;',
+						Polls_Core::sanitize_bar_color( $pollbar['background'] ),
+						Polls_Core::sanitize_bar_color( $pollbar['border'] ),
+						Polls_Core::bar_image( $pollbar_style_name )
+					);
+					echo '<p>' . "\n";
+					echo '<input type="radio" id="poll_bar_style-' . esc_attr( $pollbar_style_name ) . '" name="poll_options[bar][style]" value="' . esc_attr( $pollbar_style_name ) . '"';
+					checked( $pollbar_style_name, $pollbar['style'] );
+					echo ' data-poll-action="pollbar-style" />';
+					echo '<label for="poll_bar_style-' . esc_attr( $pollbar_style_name ) . '">&nbsp;&nbsp;&nbsp;';
+					echo '<span class="wp-polls wp-polls-swatch" style="' . esc_attr( $pollbar_swatch ) . '">';
+					echo '<span class="wp-polls-bar"><span class="wp-polls-bar-fill" style="width: 100%;"></span></span>';
+					echo '</span>';
+					echo '&nbsp;&nbsp;&nbsp;' . esc_html( isset( $poll_bar_labels[ $pollbar_style_name ] ) ? $poll_bar_labels[ $pollbar_style_name ] : $pollbar_style_name ) . '</label>';
+					echo '</p>' . "\n";
 				}
 				?>
-				<input type="radio" id="poll_bar_style-use_css" name="poll_options[bar][style]" value="use_css"<?php checked( 'use_css', $pollbar['style'] ); ?> data-poll-action="pollbar-style" /><label for="poll_bar_style-use_css"> <?php esc_html_e( 'Use CSS Style', 'wp-polls' ); ?></label>
 			</td>
 		</tr>
 		<tr>
@@ -156,15 +160,20 @@ $poll_options = array( 'ip_header' => Polls_Options::get( 'ip_header', '' ) );
 			<th scope="row" valign="top"><?php esc_html_e( 'Your poll bar will look like this', 'wp-polls' ); ?></th>
 			<td colspan="2">
 				<?php
-					$pollbar_height     = (int) $pollbar['height'];
-					$pollbar_background = Polls_Core::sanitize_bar_color( $pollbar['background'] );
-					$pollbar_border     = Polls_Core::sanitize_bar_color( $pollbar['border'] );
-					$pollbar_style      = 'width: 100px; height: ' . $pollbar_height . 'px; background-color: #' . $pollbar_background . '; border: 1px solid #' . $pollbar_border . ';';
-				if ( 'use_css' !== $pollbar['style'] ) {
-					$pollbar_style .= ' background-image: url(\'' . esc_url( WP_POLLS_URL . 'images/' . $pollbar['style'] . '/pollbg.gif' ) . '\');';
-				}
-					echo '<div id="wp-polls-pollbar" style="' . esc_attr( $pollbar_style ) . '"></div>' . "\n";
-				?>
+					// Rendered with the front end classes under the front end
+					// stylesheet, so this is the bar itself rather than an
+					// approximation of it maintained separately.
+					$pollbar_preview = sprintf(
+						'--wp-polls-bar-height: %1$dpx; --wp-polls-bar-background: #%2$s; --wp-polls-bar-border: #%3$s; --wp-polls-bar-image: %4$s;',
+						(int) $pollbar['height'],
+						Polls_Core::sanitize_bar_color( $pollbar['background'] ),
+						Polls_Core::sanitize_bar_color( $pollbar['border'] ),
+						Polls_Core::bar_image( $pollbar['style'] )
+					);
+					echo '<div id="wp-polls-pollbar" class="wp-polls" style="' . esc_attr( $pollbar_preview ) . '">';
+					echo '<div class="wp-polls-bar"><div class="wp-polls-bar-fill" style="width: 100%;"></div></div>';
+					echo '</div>' . "\n";
+					?>
 			</td>
 		</tr>
 	</table>
