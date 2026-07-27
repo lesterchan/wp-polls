@@ -92,6 +92,19 @@
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
 
+	<!-- The lock tests open and flock() the lock file directly, which is the only
+	     way to simulate a second concurrent voter from one process, and one test
+	     reads a source file to prove a removed function is no longer called. -->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fopen">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fclose">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
 	<!-- The class-*.php file naming rule exempts test classes, which follow
 	     PHPUnit's own test-*.php convention. -->
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
