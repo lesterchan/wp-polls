@@ -30,7 +30,7 @@ class Test_Polls_Uninstall extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * get_sites() is not left on its default cap of 100.
+	 * The get_sites() call is not left on its default cap of 100.
 	 *
 	 * WP_Site_Query's query_var_defaults sets 'number' to 100, so a bare
 	 * get_sites() stops at the hundredth site and leaves the options and tables
@@ -53,9 +53,9 @@ class Test_Polls_Uninstall extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * restore_current_blog() runs inside the loop, not once after it.
+	 * Each restore_current_blog() runs inside the loop, not once after it.
 	 *
-	 * switch_to_blog() pushes onto a stack, so switching once per site and
+	 * Switching pushes onto a stack, so switching once per site and
 	 * restoring once afterwards leaves the stack unwound by every site but the
 	 * first. The regex allows no brace between the two calls, which is what
 	 * fails if the restore is moved back outside the loop body.

@@ -622,7 +622,13 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$html = $this->render_admin_page( 'polls-options.php' );
 
 		foreach ( $wp_settings_sections[ Polls_Settings::PAGE_OPTIONS ] as $section ) {
-			$this->assertStringContainsString( '<h2>' . $section['title'] . '</h2>', $html );
+			// Matched loosely on purpose: do_settings_sections() gained an id
+			// attribute on the heading in WP 6.6, so a literal <h2> only holds on
+			// the older end of the versions this plugin supports.
+			$this->assertMatchesRegularExpression(
+				'/<h2[^>]*>' . preg_quote( $section['title'], '/' ) . '<\/h2>/',
+				$html
+			);
 		}
 	}
 
