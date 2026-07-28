@@ -300,6 +300,35 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * The two bar colours are picked, not typed.
+	 *
+	 * A colour input only accepts a full six digit value with its '#', so the
+	 * setting - stored without one - has to be prefixed on the way out.
+	 *
+	 * @return void
+	 */
+	public function test_options_renders_the_bar_colours_as_colour_inputs() {
+		Polls_Options::set( 'bar.background', 'aabbcc' );
+		Polls_Options::set( 'bar.border', 'ddeeff' );
+
+		$html = $this->render_admin_page( 'polls-options.php' );
+
+		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_bg"[^>]*value="#aabbcc"/', $html );
+		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_border"[^>]*value="#ddeeff"/', $html );
+	}
+
+	/**
+	 * What the colour input posts is stored, without its '#'.
+	 *
+	 * @return void
+	 */
+	public function test_options_stores_what_the_colour_input_posts() {
+		$saved = Polls_Settings::sanitize( array( 'bar' => array( 'background' => '#123456' ) ) );
+
+		$this->assertSame( '123456', $saved['bar']['background'] );
+	}
+
+	/**
 	 * The saved bar style comes back checked.
 	 *
 	 * @return void

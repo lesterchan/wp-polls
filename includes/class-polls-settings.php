@@ -136,7 +136,6 @@ class Polls_Settings {
 				'label_for' => 'poll_bar_bg',
 				'path'      => 'bar.background',
 				'field'     => 'background',
-				'preview'   => 'wp-polls-pollbar-bg',
 			)
 		);
 
@@ -150,7 +149,6 @@ class Polls_Settings {
 				'label_for' => 'poll_bar_border',
 				'path'      => 'bar.border',
 				'field'     => 'border',
-				'preview'   => 'wp-polls-pollbar-border',
 			)
 		);
 
@@ -741,32 +739,23 @@ class Polls_Settings {
 	}
 
 	/**
-	 * The six digit hex fields, each with the swatch that tracks it.
+	 * One of the two poll bar colours.
 	 *
-	 * @param array $args Field args: path, field, preview, label_for.
+	 * The browser's own colour input, the same control WP-Postratings uses for
+	 * its rated and unrated colours. Up to 3.0.0 this was a six character text
+	 * field with a '#' printed beside it and a swatch that JavaScript kept in
+	 * step; the input is the swatch now, and it cannot be typed into wrong.
+	 *
+	 * @param array $args Field args: path, field, label_for.
 	 * @return void
 	 */
 	public static function field_bar_color( $args ) {
-		self::field_text(
-			array_merge(
-				$args,
-				array(
-					'class_name' => 'small-text wp-polls-hex',
-					'maxlength'  => 6,
-					'dir'        => 'ltr',
-					'before'     => '#',
-					'attributes' => array(
-						'data-poll-action' => 'pollbar-update',
-						'data-poll-field'  => $args['field'],
-					),
-				)
-			)
-		);
-
 		printf(
-			'<div id="%1$s" class="wp-polls-color-preview" style="background-color: #%2$s;"></div>',
-			esc_attr( $args['preview'] ),
-			esc_attr( Polls_Core::sanitize_bar_color( Polls_Options::get( $args['path'] ) ) )
+			'<input type="color" id="%1$s" name="%2$s" value="#%3$s" data-poll-action="pollbar-update" data-poll-field="%4$s" />',
+			esc_attr( $args['label_for'] ),
+			esc_attr( self::field_name( $args['path'] ) ),
+			esc_attr( Polls_Core::sanitize_bar_color( Polls_Options::get( $args['path'] ) ) ),
+			esc_attr( $args['field'] )
 		);
 	}
 

@@ -299,6 +299,27 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	// --- front end assets -------------------------------------------------
 
 	/**
+	 * What the colour fields can post, and what comes back out.
+	 *
+	 * The Poll Options colour fields are colour inputs, which post '#rrggbb';
+	 * the setting is stored as the six digits alone, and every caller adds the
+	 * '#' back. Three digit values predate 3.0.0 and have to be expanded,
+	 * because CSS understands '#abc' but a colour input will not show it.
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_bar_color_normalises_what_the_picker_posts() {
+		$this->assertSame( 'aabbcc', Polls_Core::sanitize_bar_color( '#aabbcc' ) );
+		$this->assertSame( 'aabbcc', Polls_Core::sanitize_bar_color( 'aabbcc' ) );
+		$this->assertSame( 'aabbcc', Polls_Core::sanitize_bar_color( '  #AABBCC  ' ) );
+		$this->assertSame( 'aabbcc', Polls_Core::sanitize_bar_color( '#abc' ) );
+		$this->assertSame( 'ffffff', Polls_Core::sanitize_bar_color( 'fff' ) );
+		$this->assertSame( '000000', Polls_Core::sanitize_bar_color( 'zzzzzz' ) );
+		$this->assertSame( '000000', Polls_Core::sanitize_bar_color( 'red; } body { display: none; } .x {' ) );
+		$this->assertSame( '000000', Polls_Core::sanitize_bar_color( '' ) );
+	}
+
+	/**
 	 * The bar settings become custom properties, not rules.
 	 *
 	 * The rules that consume them live in polls-css.css. Only the configured

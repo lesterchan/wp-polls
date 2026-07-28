@@ -28,22 +28,14 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 	// The background-image for each style comes from the same helper the front
 	// end uses, so the preview cannot drift from what actually renders.
 	var pollbar_images = <?php echo wp_json_encode( array_combine( Polls_Settings::bar_styles(), array_map( array( 'Polls_Core', 'bar_image' ), Polls_Settings::bar_styles() ) ) ); ?>;
-	function update_pollbar(where) {
-		var pollbar_background = "#" + poll_field_value("poll_bar_bg");
-		var pollbar_border = "#" + poll_field_value("poll_bar_border");
+	// The two colour fields are colour inputs, so their value is already the
+	// "#rrggbb" CSS wants and they show the colour themselves - there is no
+	// separate swatch beside them to keep in step any more.
+	function update_pollbar() {
+		var pollbar_background = poll_field_value("poll_bar_bg");
+		var pollbar_border = poll_field_value("poll_bar_border");
 		var pollbar_height = poll_field_value("poll_bar_height") + "px";
 		var preview = document.getElementById("wp-polls-pollbar");
-		if(where == "background") {
-			var background_preview = document.getElementById("wp-polls-pollbar-bg");
-			if(background_preview) {
-				background_preview.style.backgroundColor = pollbar_background;
-			}
-		} else if(where == "border") {
-			var border_preview = document.getElementById("wp-polls-pollbar-border");
-			if(border_preview) {
-				border_preview.style.backgroundColor = pollbar_border;
-			}
-		}
 		// The preview is the real front end markup under the real front end
 		// stylesheet, so setting the four custom properties is the whole job.
 		if(preview) {
@@ -71,17 +63,19 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 		// Picking a style no longer touches the height field: it used to be set
 		// from the height of that style's pollbg.gif, and there is no image now.
 		if(target.closest('[data-poll-action="pollbar-style"]')) {
-			update_pollbar("style");
+			update_pollbar();
 		}
 	});
-	document.addEventListener("focusout", function (event) {
+	// "input" rather than "focusout": a colour input reports every change while
+	// the picker is open, so the bar follows the colour being chosen instead of
+	// waiting for the field to be left.
+	document.addEventListener("input", function (event) {
 		var target = event.target;
 		if(!target || typeof target.closest !== "function") {
 			return;
 		}
-		var field = target.closest('[data-poll-action="pollbar-update"]');
-		if(field) {
-			update_pollbar(field.getAttribute("data-poll-field") || "");
+		if(target.closest('[data-poll-action="pollbar-update"]')) {
+			update_pollbar();
 		}
 	});
 })();

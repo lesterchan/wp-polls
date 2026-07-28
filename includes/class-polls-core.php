@@ -177,16 +177,29 @@ class Polls_Core {
 	}
 
 	/**
-	 * Sanitize a 3 or 6 digit hex colour for the poll bar, stored without its leading '#'.
+	 * Sanitize a hex colour for the poll bar, stored without its leading '#'.
+	 *
+	 * Accepts the '#rrggbb' the colour input on Poll Options posts as well as
+	 * the bare three or six digits the setting has always been stored as, and
+	 * always answers six digits: '#abc' is a colour CSS understands but not one
+	 * <input type="color"> will show, so a value carried over from 2.x has to be
+	 * expanded before the field can display it.
 	 *
 	 * @param mixed $color Value.
 	 *
-	 * @return mixed
+	 * @return string Six hex digits, without a leading '#'.
 	 */
 	public static function sanitize_bar_color( $color ) {
-		$color = substr( trim( (string) $color ), 0, 6 );
+		// Lowercased so the stored value is the same string whichever way it was
+		// set: the colour input always posts lowercase, hand typed values and
+		// 2.x settings did not have to be.
+		$color = strtolower( ltrim( trim( (string) $color ), '#' ) );
 
-		if ( ! preg_match( '/^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $color ) ) {
+		if ( preg_match( '/^[0-9a-fA-F]{3}$/', $color ) ) {
+			$color = $color[0] . $color[0] . $color[1] . $color[1] . $color[2] . $color[2];
+		}
+
+		if ( ! preg_match( '/^[0-9a-fA-F]{6}$/', $color ) ) {
 			return '000000';
 		}
 
