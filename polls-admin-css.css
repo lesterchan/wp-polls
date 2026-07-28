@@ -20,6 +20,39 @@
 .wp-polls-swatch .wp-polls-bar-fill {
 	display: block;
 }
+/* Add Poll and Edit Poll. The answers are a real table - a numbered row per
+   answer - so they keep a widefat table rather than moving into the form-table
+   the rest of both screens uses. Sizing lives here rather than in width and
+   align attributes on every cell, which is also what lets the vote column
+   follow the text direction on its own. */
+.wp-polls-answers th {
+	width: 20%;
+}
+/* The answer field and its Delete button share a row: the field takes what is
+   left after the button rather than the full width .large-text would give it. */
+.wp-polls-answers .wp-polls-answer-text {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+.wp-polls-answers .wp-polls-answer-text input[type="text"] {
+	flex: 1;
+}
+.wp-polls-answers .wp-polls-answer-votes {
+	width: 20%;
+	text-align: start;
+}
+input.wp-polls-votes {
+	width: 5em;
+}
+
+/* The poll the site is currently showing, highlighted in the Manage Polls
+   list the way the active row is elsewhere in wp-admin. */
+.wp-list-table tr.wp-polls-displayed td,
+.wp-list-table tr.wp-polls-displayed th {
+	background-color: #f0f6fc;
+}
+
 /* Wide enough for the six hex digits the field holds; core's .small-text alone
    cuts them off at four. Matched on the element too, because that is what core
    does and the two rules would otherwise be tied. */

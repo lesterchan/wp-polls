@@ -139,86 +139,95 @@ if ( ! empty( $_POST['do'] ) ) {
 
 // Add Poll Form.
 $poll_noquestion = 2;
-$count           = 0;
 ?>
-<?php
-if ( ! empty( $text ) ) {
-	echo wp_kses_post( '<!-- Last Action --><div id="message" class="updated fade">' . removeslashes( $text ) . '</div>' ); }
-?>
-<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . plugin_basename( __FILE__ ) ) ); ?>">
-<?php wp_nonce_field( 'wp-polls_add-poll' ); ?>
 <div class="wrap">
-	<h2><?php esc_html_e( 'Add Poll', 'wp-polls' ); ?></h2>
-	<!-- Poll Question -->
-	<h3><?php esc_html_e( 'Poll Question', 'wp-polls' ); ?></h3>
-	<table class="form-table">
-		<tr>
-			<th width="20%" scope="row" valign="top"><?php esc_html_e( 'Question', 'wp-polls' ); ?></th>
-			<td width="80%"><input type="text" size="70" name="pollq_question" value="" /></td>
-		</tr>
-	</table>
-	<!-- Poll Answers -->
-	<h3><?php esc_html_e( 'Poll Answers', 'wp-polls' ); ?></h3>
-	<table class="form-table">
-		<tfoot>
+	<h1><?php esc_html_e( 'Add Poll', 'wp-polls' ); ?></h1>
+	<?php
+	if ( ! empty( $text ) ) {
+		echo wp_kses_post( '<div id="message" class="notice notice-success is-dismissible">' . removeslashes( $text ) . '</div>' );
+	}
+	?>
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . WP_POLLS_SLUG . '/polls-add.php' ) ); ?>">
+		<?php wp_nonce_field( 'wp-polls_add-poll' ); ?>
+
+		<h2><?php esc_html_e( 'Poll Question', 'wp-polls' ); ?></h2>
+		<table class="form-table" role="presentation">
 			<tr>
-				<td width="20%">&nbsp;</td>
-				<td width="80%"><input type="button" value="<?php esc_attr_e( 'Add Answer', 'wp-polls' ); ?>" data-poll-action="add-answer" class="button" /></td>
+				<th scope="row"><label for="pollq_question"><?php esc_html_e( 'Question', 'wp-polls' ); ?></label></th>
+				<td><input type="text" class="large-text" id="pollq_question" name="pollq_question" value="" /></td>
 			</tr>
-		</tfoot>
-		<tbody id="poll_answers">
-		<?php
-		for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
-			echo '<tr id="poll-answer-' . esc_attr( $i ) . '">' . "\n";
-			/* translators: %s: answer number. */
-			echo wp_kses_post( '<th width="20%" scope="row" valign="top">' . sprintf( __( 'Answer %s', 'wp-polls' ), esc_html( number_format_i18n( $i ) ) ) . '</th>' ) . "\n";
-			// wp_kses_post() would strip both <input> elements this row is made
-			// of. The markup is a literal; the only interpolation is esc_attr'd.
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo '<td width="80%"><input type="text" size="50" maxlength="200" name="polla_answers[]" />&nbsp;&nbsp;&nbsp;<input type="button" value="' . esc_attr__( 'Remove', 'wp-polls' ) . '" data-poll-action="remove-answer" data-poll-answer="' . $i . "\" class=\"button\" /></td>\n";
-			echo "</tr>\n";
-			++$count;
-		}
-		?>
-		</tbody>
-	</table>
-	<!-- Poll Multiple Answers -->
-	<h3><?php esc_html_e( 'Poll Multiple Answers', 'wp-polls' ); ?></h3>
-	<table class="form-table">
-		<tr>
-			<th width="40%" scope="row" valign="top"><?php esc_html_e( 'Allows Users To Select More Than One Answer?', 'wp-polls' ); ?></th>
-			<td width="60%">
-				<select name="pollq_multiple_yes" id="pollq_multiple_yes" size="1" data-poll-action="toggle-multiple">
-					<option value="0"><?php esc_html_e( 'No', 'wp-polls' ); ?></option>
-					<option value="1"><?php esc_html_e( 'Yes', 'wp-polls' ); ?></option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<th width="40%" scope="row" valign="top"><?php esc_html_e( 'Maximum Number Of Selected Answers Allowed?', 'wp-polls' ); ?></th>
-			<td width="60%">
-				<select name="pollq_multiple" id="pollq_multiple" size="1" disabled="disabled">
-					<?php
-					for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
-						echo '<option value="' . esc_attr( $i ) . '">' . esc_html( number_format_i18n( $i ) ) . "</option>\n";
-					}
-					?>
-				</select>
-			</td>
-		</tr>
-	</table>
-	<!-- Poll Start/End Date -->
-	<h3><?php esc_html_e( 'Poll Start/End Date', 'wp-polls' ); ?></h3>
-	<table class="form-table">
-		<tr>
-			<th width="20%" scope="row" valign="top"><?php esc_html_e( 'Start Date/Time', 'wp-polls' ); ?></th>
-			<td width="80%"><?php Polls_Admin::poll_timestamp( current_time( 'timestamp' ) ); ?></td>
-		</tr>
-		<tr>
-			<th width="20%" scope="row" valign="top"><?php esc_html_e( 'End Date/Time', 'wp-polls' ); ?></th>
-			<td width="80%"><input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" data-poll-action="toggle-expiry" />&nbsp;&nbsp;<label for="pollq_expiry_no"><?php esc_html_e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label><?php Polls_Admin::poll_timestamp( current_time( 'timestamp' ), 'pollq_expiry', 'none' ); ?></td>
-		</tr>
-	</table>
-	<p style="text-align: center;"><input type="submit" name="do" value="<?php esc_attr_e( 'Add Poll', 'wp-polls' ); ?>"  class="button-primary" />&nbsp;&nbsp;<input type="button" name="cancel" value="<?php esc_attr_e( 'Cancel', 'wp-polls' ); ?>" class="button" data-poll-action="go-back" /></p>
+		</table>
+
+		<h2><?php esc_html_e( 'Poll Answers', 'wp-polls' ); ?></h2>
+		<table class="widefat striped wp-polls-answers">
+			<tbody id="poll_answers">
+			<?php
+			for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
+				/* translators: %s: The answer's position in the poll. */
+				$answer_label = sprintf( __( 'Answer %s', 'wp-polls' ), number_format_i18n( $i ) );
+				?>
+				<tr id="poll-answer-<?php echo esc_attr( $i ); ?>">
+					<th scope="row"><?php echo esc_html( $answer_label ); ?></th>
+					<td class="wp-polls-answer-text">
+						<input type="text" class="large-text" maxlength="200" name="polla_answers[]" />
+						<button type="button" class="button" data-poll-action="remove-answer" data-poll-answer="<?php echo esc_attr( $i ); ?>"><?php esc_html_e( 'Remove', 'wp-polls' ); ?></button>
+					</td>
+				</tr>
+				<?php
+			}
+			?>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td></td>
+					<td><button type="button" class="button" data-poll-action="add-answer"><?php esc_html_e( 'Add Answer', 'wp-polls' ); ?></button></td>
+				</tr>
+			</tfoot>
+		</table>
+
+		<h2><?php esc_html_e( 'Poll Multiple Answers', 'wp-polls' ); ?></h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><label for="pollq_multiple_yes"><?php esc_html_e( 'Allows Users To Select More Than One Answer?', 'wp-polls' ); ?></label></th>
+				<td>
+					<select name="pollq_multiple_yes" id="pollq_multiple_yes" data-poll-action="toggle-multiple">
+						<option value="0"><?php esc_html_e( 'No', 'wp-polls' ); ?></option>
+						<option value="1"><?php esc_html_e( 'Yes', 'wp-polls' ); ?></option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="pollq_multiple"><?php esc_html_e( 'Maximum Number Of Selected Answers Allowed?', 'wp-polls' ); ?></label></th>
+				<td>
+					<select name="pollq_multiple" id="pollq_multiple" disabled="disabled">
+						<?php
+						for ( $i = 1; $i <= $poll_noquestion; $i++ ) {
+							echo '<option value="' . esc_attr( $i ) . '">' . esc_html( number_format_i18n( $i ) ) . '</option>';
+						}
+						?>
+					</select>
+				</td>
+			</tr>
+		</table>
+
+		<h2><?php esc_html_e( 'Poll Start/End Date', 'wp-polls' ); ?></h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Start Date/Time', 'wp-polls' ); ?></th>
+				<td><?php Polls_Admin::poll_timestamp( current_time( 'timestamp' ) ); ?></td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'End Date/Time', 'wp-polls' ); ?></th>
+				<td>
+					<input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" data-poll-action="toggle-expiry" />&nbsp;<label for="pollq_expiry_no"><?php esc_html_e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label>
+					<?php Polls_Admin::poll_timestamp( current_time( 'timestamp' ), 'pollq_expiry', 'none' ); ?>
+				</td>
+			</tr>
+		</table>
+
+		<p class="submit">
+			<?php submit_button( __( 'Add Poll', 'wp-polls' ), 'primary', 'do', false ); ?>
+			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=' . WP_POLLS_SLUG . '/polls-manager.php' ) ); ?>"><?php esc_html_e( 'Cancel', 'wp-polls' ); ?></a>
+		</p>
+	</form>
 </div>
-</form>

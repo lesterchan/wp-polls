@@ -357,6 +357,183 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * Manage Polls renders through WP_List_Table.
+	 *
+	 * @return void
+	 */
+	public function test_manage_renders_a_list_table_with_row_actions() {
+		$poll_id = $this->make_poll( array( 'pollq_question' => 'Listed poll' ) );
+
+		$html = $this->render_admin_page( 'polls-manager.php' );
+
+		$this->assertStringContainsString( 'class="wp-list-table', $html );
+		$this->assertStringContainsString( '<tr id="poll-' . $poll_id . '"', $html );
+		$this->assertStringContainsString( 'class="row-actions"', $html );
+		$this->assertStringContainsString( 'data-poll-action="delete-poll"', $html );
+	}
+
+	/**
+	 * The list is paginated, and the second page holds the remainder.
+	 *
+	 * The screen used to select every poll in one query and print them all.
+	 *
+	 * @return void
+	 */
+	public function test_manage_paginates_the_polls() {
+		for ( $i = 1; $i <= Polls_List_Table::PER_PAGE + 3; $i++ ) {
+			$this->make_poll(
+				array(
+					'pollq_question'  => 'Poll ' . $i,
+					'pollq_timestamp' => 1000000000 + $i,
+				)
+			);
+		}
+
+		$first  = $this->render_admin_page( 'polls-manager.php' );
+		$second = $this->render_admin_page( 'polls-manager.php', array( 'paged' => '2' ) );
+
+		$this->assertSame( Polls_List_Table::PER_PAGE, substr_count( $first, '<tr id="poll-' ) );
+		$this->assertSame( 3, substr_count( $second, '<tr id="poll-' ) );
+	}
+
+	/**
+	 * The stats under the list count every poll, not just the page shown.
+	 *
+	 * They were accumulated while printing rows, which stops being the whole
+	 * table the moment the list is paginated.
+	 *
+	 * @return void
+	 */
+	public function test_manage_stats_cover_every_page() {
+		for ( $i = 1; $i <= Polls_List_Table::PER_PAGE + 2; $i++ ) {
+			$this->make_poll(
+				array( 'pollq_question' => 'Poll ' . $i ),
+				array( array( 'Yes', 2 ), array( 'No', 1 ) )
+			);
+		}
+
+		$stats = Polls_List_Table::stats();
+
+		$this->assertSame( Polls_List_Table::PER_PAGE + 2, $stats['polls'] );
+		$this->assertSame( ( Polls_List_Table::PER_PAGE + 2 ) * 2, $stats['answers'] );
+		$this->assertSame( ( Polls_List_Table::PER_PAGE + 2 ) * 3, $stats['votes'] );
+	}
+
+	/**
+	 * The vote fields carry the class the admin script totals them by.
+	 *
+	 * The script used to find them with input[size="4"], which tied the running
+	 * total to a presentational attribute.
+	 *
+	 * @return void
+	 */
+	public function test_edit_answers_carry_the_votes_class() {
+		$poll_id = $this->make_poll(
+			array( 'pollq_question' => 'Counted poll' ),
+			array( array( 'Alpha', 2 ), array( 'Beta', 5 ) )
+		);
+		$answers = $this->answer_ids( $poll_id );
+
+		$html = $this->render_admin_page(
+			'polls-manager.php',
+			array(
+				'mode' => 'edit',
+				'id'   => (string) $poll_id,
+			)
+		);
+
+		foreach ( $answers as $answer_id ) {
+			$this->assertMatchesRegularExpression(
+				'/<input[^>]*class="wp-polls-votes"[^>]*name="polla_votes-' . $answer_id . '"/',
+				$html
+			);
+		}
+	}
+
+	/**
+	 * The logs of a multiple answer poll render clean.
+	 *
+	 * Its two extra filters were initialised inside the branch that handles
+	 * their own submission, so opening the screen warned about each of them.
+	 *
+	 * @return void
+	 */
+	public function test_logs_view_of_a_multiple_answer_poll_is_clean() {
+		$poll_id = $this->make_poll(
+			array(
+				'pollq_question' => 'Pick two',
+				'pollq_multiple' => 2,
+			),
+			array( array( 'Alpha', 1 ), array( 'Beta', 1 ) )
+		);
+		$answers = $this->answer_ids( $poll_id );
+		$this->make_vote_log( $poll_id, $answers[0], 'Registered Voter', 7 );
+
+		$html = $this->render_admin_page(
+			'polls-manager.php',
+			array(
+				'mode' => 'logs',
+				'id'   => (string) $poll_id,
+			)
+		);
+
+		$this->assertSame( array(), $this->admin_page_notices, implode( ' | ', $this->admin_page_notices ) );
+		$this->assertStringContainsString( 'name="num_choices_sign"', $html );
+	}
+
+	/**
+	 * The log names its answers even when the filter panel is turned off.
+	 *
+	 * The answer id to answer text map was built while printing the filter
+	 * dropdown, so hiding the filters left every group header blank.
+	 *
+	 * @return void
+	 */
+	public function test_logs_view_names_answers_without_the_filter_panel() {
+		$poll_id = $this->make_poll(
+			array( 'pollq_question' => 'Hidden filters' ),
+			array( array( 'Distinctive answer', 1 ) )
+		);
+		$answers = $this->answer_ids( $poll_id );
+		$this->make_vote_log( $poll_id, $answers[0], 'Guest' );
+
+		add_filter( 'wp_polls_log_show_log_filter', '__return_false' );
+		$html = $this->render_admin_page(
+			'polls-manager.php',
+			array(
+				'mode' => 'logs',
+				'id'   => (string) $poll_id,
+			)
+		);
+		remove_filter( 'wp_polls_log_show_log_filter', '__return_false' );
+
+		$this->assertSame( array(), $this->admin_page_notices, implode( ' | ', $this->admin_page_notices ) );
+		$this->assertStringNotContainsString( 'name="users_voted_for"', $html );
+		$this->assertStringContainsString( 'Distinctive answer', $html );
+	}
+
+	/**
+	 * A vote logged against no answer at all is labelled, not warned about.
+	 *
+	 * @return void
+	 */
+	public function test_logs_view_labels_a_null_vote() {
+		$poll_id = $this->make_poll( array( 'pollq_question' => 'Null vote poll' ) );
+		$this->make_vote_log( $poll_id, 0, 'Guest' );
+
+		$html = $this->render_admin_page(
+			'polls-manager.php',
+			array(
+				'mode' => 'logs',
+				'id'   => (string) $poll_id,
+			)
+		);
+
+		$this->assertSame( array(), $this->admin_page_notices, implode( ' | ', $this->admin_page_notices ) );
+		$this->assertStringContainsString( 'Null Votes', $html );
+	}
+
+	/**
 	 * Neither settings screen writes its own form markup.
 	 *
 	 * Both are meant to be nothing but settings_fields(), do_settings_sections()

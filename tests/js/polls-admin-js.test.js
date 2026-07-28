@@ -10,7 +10,6 @@ import { clickAndSettle, loadScript, sentFields, stubFetch } from './helpers.js'
 
 const L10N = {
 	admin_ajax_url: '/wp-admin/admin-ajax.php',
-	text_direction: 'left',
 	text_delete_poll: 'Delete Poll',
 	text_no_poll_logs: 'No poll logs available.',
 	text_delete_all_logs: 'Delete All Logs',
@@ -191,7 +190,7 @@ describe( 'answer rows', () => {
 		expect( document.querySelectorAll( '#poll_answers tr' ) ).toHaveLength( 3 );
 
 		const added = document.querySelector( '#poll_answers tr:last-child' );
-		await clickAndSettle( added.querySelector( 'input[type="button"]' ) );
+		await clickAndSettle( added.querySelector( 'button' ) );
 
 		expect( document.querySelectorAll( '#poll_answers tr' ) ).toHaveLength( 2 );
 	} );
@@ -231,8 +230,8 @@ describe( 'total votes', () => {
 	it( 'sums the vote fields on focusout', () => {
 		document.body.innerHTML = `
 			<table><tbody id="poll_answers">
-				<tr><th>Answer 1</th><td><input type="text" size="4" value="3" data-poll-action="total-votes" /></td></tr>
-				<tr><th>Answer 2</th><td><input type="text" size="4" value="4" data-poll-action="total-votes" /></td></tr>
+				<tr><th>Answer 1</th><td><input type="text" class="wp-polls-votes" value="3" data-poll-action="total-votes" /></td></tr>
+				<tr><th>Answer 2</th><td><input type="text" class="wp-polls-votes" value="4" data-poll-action="total-votes" /></td></tr>
 			</tbody></table>
 			<input type="text" id="pollq_totalvotes" value="0" />
 		`;
@@ -247,8 +246,8 @@ describe( 'total votes', () => {
 	it( 'ignores fields that are not numbers', () => {
 		document.body.innerHTML = `
 			<table><tbody id="poll_answers">
-				<tr><th>Answer 1</th><td><input type="text" size="4" value="5" data-poll-action="total-votes" /></td></tr>
-				<tr><th>Answer 2</th><td><input type="text" size="4" value="" data-poll-action="total-votes" /></td></tr>
+				<tr><th>Answer 1</th><td><input type="text" class="wp-polls-votes" value="5" data-poll-action="total-votes" /></td></tr>
+				<tr><th>Answer 2</th><td><input type="text" class="wp-polls-votes" value="" data-poll-action="total-votes" /></td></tr>
 			</tbody></table>
 			<input type="text" id="pollq_totalvotes" value="0" />
 		`;
@@ -330,8 +329,8 @@ describe( 'deleting an answer', () => {
 			<input type="text" id="pollq_totalvotes" value="10" />
 			<select id="pollq_multiple"><option value="1">1</option></select>
 			<table><tbody id="poll_answers">
-				<tr id="poll-answer-4"><th>Answer 1</th><td><input type="text" size="4" value="3" /></td></tr>
-				<tr id="poll-answer-5"><th>Answer 2</th><td><input type="text" size="4" value="7" /></td></tr>
+				<tr id="poll-answer-4"><th>Answer 1</th><td><input type="text" class="wp-polls-votes" value="3" /></td></tr>
+				<tr id="poll-answer-5"><th>Answer 2</th><td><input type="text" class="wp-polls-votes" value="7" /></td></tr>
 			</tbody></table>
 			<input type="button" data-poll-action="delete-answer" data-poll-id="2"
 			       data-poll-aid="4" data-poll-votes="3"
@@ -482,23 +481,6 @@ describe( 'the timestamp toggle', () => {
 		toggle.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
 		expect( toggle.checked ).toBe( false );
 		expect( fields.style.display ).toBe( 'none' );
-	} );
-} );
-
-describe( 'go back', () => {
-	it( 'steps the history back and does not follow the link', async () => {
-		document.body.innerHTML = `<a href="#nope" data-poll-action="go-back">Go Back</a>`;
-		const back = vi.spyOn( window.history, 'go' ).mockImplementation( () => {} );
-
-		const link = document.querySelector( '[data-poll-action="go-back"]' );
-		const event = new window.MouseEvent( 'click', {
-			bubbles: true,
-			cancelable: true,
-		} );
-		link.dispatchEvent( event );
-
-		expect( back ).toHaveBeenCalledWith( -1 );
-		expect( event.defaultPrevented ).toBe( true );
 	} );
 } );
 

@@ -90,7 +90,6 @@ class Polls_Admin {
 				'pollsAdminL10n',
 				array(
 					'admin_ajax_url'                 => admin_url( 'admin-ajax.php' ),
-					'text_direction'                 => is_rtl() ? 'right' : 'left',
 					'text_delete_poll'               => __( 'Delete Poll', 'wp-polls' ),
 					'text_no_poll_logs'              => __( 'No poll logs available.', 'wp-polls' ),
 					'text_delete_all_logs'           => __( 'Delete All Logs', 'wp-polls' ),

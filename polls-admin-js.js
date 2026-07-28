@@ -257,7 +257,7 @@
 		tempVoteCount = 0;
 
 		const voteFields = document.querySelectorAll(
-			'#poll_answers tr td input[size="4"]',
+			'#poll_answers input.wp-polls-votes',
 		);
 		Array.prototype.forEach.call( voteFields, function( voteField ) {
 			const votes = parseInt( voteField.value );
@@ -280,39 +280,35 @@
 		row.id = rowId;
 
 		const heading = document.createElement( 'th' );
-		heading.width = '20%';
 		heading.scope = 'row';
-		heading.setAttribute( 'valign', 'top' );
 		row.appendChild( heading );
 
 		const answerCell = document.createElement( 'td' );
-		answerCell.width = votesName ? '60%' : '80%';
+		answerCell.className = 'wp-polls-answer-text';
 
 		const answerField = document.createElement( 'input' );
 		answerField.type = 'text';
-		answerField.size = 50;
+		answerField.className = 'large-text';
 		answerField.maxLength = 200;
 		answerField.name = inputName;
 		answerCell.appendChild( answerField );
 		answerCell.appendChild( document.createTextNode( '   ' ) );
 
-		const removeButton = document.createElement( 'input' );
+		const removeButton = document.createElement( 'button' );
 		removeButton.type = 'button';
 		removeButton.className = 'button';
-		removeButton.value = pollsAdminL10n.text_remove_poll_answer;
+		removeButton.textContent = pollsAdminL10n.text_remove_poll_answer;
 		removeButton.addEventListener( 'click', onRemove );
 		answerCell.appendChild( removeButton );
 		row.appendChild( answerCell );
 
 		if ( votesName ) {
 			const votesCell = document.createElement( 'td' );
-			votesCell.width = '20%';
-			votesCell.align = pollsAdminL10n.text_direction;
-			votesCell.appendChild( document.createTextNode( '0 ' ) );
+			votesCell.className = 'wp-polls-answer-votes';
 
 			const votesField = document.createElement( 'input' );
 			votesField.type = 'text';
-			votesField.size = 4;
+			votesField.className = 'wp-polls-votes';
 			votesField.name = votesName;
 			votesField.value = '0';
 			votesField.addEventListener( 'blur', checkTotalvotes );
@@ -515,12 +511,6 @@
 			on: 'focusout',
 			run() {
 				checkTotalvotes();
-			},
-		},
-		'go-back': {
-			on: 'click',
-			run() {
-				history.go( -1 );
 			},
 		},
 	};
