@@ -33,7 +33,6 @@ class WP_Polls_Screen_Manage {
 		// the screen. Declared here because only some branches set it.
 		$text = '';
 
-		// Variables Variables Variables.
 		// Which view, and which poll it is about. Both only choose what to show;
 		// every write path below verifies its own nonce first.
 		$poll_mode = isset( $_GET['mode'] ) ? sanitize_key( wp_unslash( $_GET['mode'] ) ) : '';
