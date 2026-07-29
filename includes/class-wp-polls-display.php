@@ -110,7 +110,8 @@ class WP_Polls_Display {
 
 		// Get Poll Answers Data.
 		list($order_by, $sort_order) = self::get_ans_sort();
-		$poll_answers                = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_by and $sort_order come from a fixed whitelist; an ORDER BY column and direction cannot be bound.
+		$poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
 		// If There Is Poll Question With Answers.
 		if ( $poll_question && $poll_answers ) {
 			// Display Poll Voting Form.
@@ -168,6 +169,7 @@ class WP_Polls_Display {
 			// Determine Poll Result URL.
 			$poll_result_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 			$poll_result_url = preg_replace( '/pollresult=(\d+)/i', 'pollresult=' . $poll_question_id, $poll_result_url );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reads ?pollresult= and ?poll_page= to decide which poll and which page to show; nothing is written.
 			if ( isset( $_GET['pollresult'] ) && 0 === (int) $_GET['pollresult'] ) {
 				if ( strpos( $poll_result_url, '?' ) !== false ) {
 					$poll_result_url = "$poll_result_url&pollresult=$poll_question_id";
@@ -343,7 +345,8 @@ class WP_Polls_Display {
 
 		// Get Poll Answers Data.
 		list( $order_by, $sort_order ) = self::get_ans_result_sort();
-		$poll_answers                  = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_by and $sort_order come from a fixed whitelist; an ORDER BY column and direction cannot be bound.
+		$poll_answers = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_question_id ) );
 		// If There Is Poll Question With Answers.
 		if ( $poll_question && $poll_answers ) {
 			// Store The Percentage Of The Poll.
@@ -596,7 +599,8 @@ class WP_Polls_Display {
 		do_action( 'wp_polls_polls_archive' );
 		global $wpdb, $in_pollsarchive;
 		// Polls Variables.
-		$in_pollsarchive             = true;
+		$in_pollsarchive = true;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reads ?pollresult= and ?poll_page= to decide which poll and which page to show; nothing is written.
 		$page                        = isset( $_GET['poll_page'] ) ? (int) $_GET['poll_page'] : 0;
 		$polls_questions             = array();
 		$polls_answers               = array();
@@ -622,6 +626,7 @@ class WP_Polls_Display {
 				break;
 		}
 		// Get Total Polls.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_by and $sort_order come from the whitelist in self::get_ans_result_sort(); ORDER BY direction cannot be bound.
 		$total_polls = $wpdb->get_var( "SELECT COUNT(pollq_id) FROM $wpdb->pollsq WHERE $polls_type_sql AND pollq_active != -1" );
 
 		// Calculate Paging.
@@ -663,6 +668,7 @@ class WP_Polls_Display {
 		}
 
 		// Get Poll Questions.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $polls_type_sql is one of three literals chosen by a switch above, and the two LIMIT values are integers derived from the paging maths.
 		$questions = $wpdb->get_results( "SELECT * FROM $wpdb->pollsq WHERE $polls_type_sql ORDER BY pollq_id DESC LIMIT $offset, $polls_perpage" );
 		if ( $questions ) {
 			foreach ( $questions as $question ) {
@@ -683,7 +689,8 @@ class WP_Polls_Display {
 
 		// Get Poll Answers.
 		list($order_by, $sort_order) = self::get_ans_result_sort();
-		$answers                     = $wpdb->get_results( "SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid IN ($poll_questions_ids) ORDER BY $order_by $sort_order" );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $poll_questions_ids is a comma separated list of int-cast ids built above, and the sort comes from a fixed whitelist.
+		$answers = $wpdb->get_results( "SELECT polla_aid, polla_qid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid IN ($poll_questions_ids) ORDER BY $order_by $sort_order" );
 		if ( $answers ) {
 			foreach ( $answers as $answer ) {
 				$polls_answers[ (int) $answer->polla_qid ][] = array(
@@ -696,6 +703,7 @@ class WP_Polls_Display {
 		}
 
 		// Get Poll IPs.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $poll_questions_ids is a comma separated list of int-cast ids built above; the address itself is bound.
 		$ips = $wpdb->get_results( $wpdb->prepare( "SELECT pollip_qid, pollip_aid FROM $wpdb->pollsip WHERE pollip_qid IN ($poll_questions_ids) AND pollip_ip = %s ORDER BY pollip_qid ASC", WP_Polls_Vote::poll_get_ipaddress() ) );
 		if ( $ips ) {
 			foreach ( $ips as $ip ) {
@@ -995,7 +1003,9 @@ class WP_Polls_Display {
 	public static function get_poll( $temp_poll_id = 0, $display = true ) {
 		global $wpdb, $polls_loaded;
 		// Poll Result Link.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reads ?pollresult= and ?poll_page= to decide which poll and which page to show; nothing is written.
 		if ( isset( $_GET['pollresult'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reads ?pollresult= and ?poll_page= to decide which poll and which page to show; nothing is written.
 			$pollresult_id = (int) $_GET['pollresult'];
 		} else {
 			$pollresult_id = 0;
@@ -1032,7 +1042,9 @@ class WP_Polls_Display {
 						$poll_id        = (int) $random_poll_id;
 						if ( $pollresult_id > 0 ) {
 							$poll_id = $pollresult_id;
+						// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reads the poll id a visitor posted so the right poll is rendered; the vote itself is nonce-checked in WP_Polls_Vote.
 						} elseif ( isset( $_POST['poll_id'] ) && (int) $_POST['poll_id'] > 0 ) {
+							// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reads the poll id a visitor posted so the right poll is rendered; the vote itself is nonce-checked in WP_Polls_Vote.
 							$poll_id = (int) $_POST['poll_id'];
 						}
 						// Current Poll ID Is Not Specified.

@@ -8,15 +8,15 @@
 /**
  * The uninstall routine.
  *
- * These are source-level guards rather than behavioural tests, deliberately.
- * The bugs they cover only appear on a multisite network larger than a hundred
- * sites, which a single-site suite cannot build; and uninstall.php drops the
- * three poll tables, which is DDL, so it cannot be rolled back by the
- * transaction the test case runs in - actually invoking it would take the rest
- * of the suite down with it.
+ * Mostly source-level guards, deliberately. The bugs they cover only appear on
+ * a multisite network larger than a hundred sites, which a single-site suite
+ * cannot build. That uninstall actually removes every row is covered
+ * behaviourally in test-metadata.php, which is also the only test that puts the
+ * three tables back afterwards - dropping them is DDL, so it survives the
+ * transaction the rest of the suite relies on.
  *
- * Asserting on the source is what is left. Each assertion below stands in for a
- * failure that reports success while silently leaving data behind.
+ * Each assertion below stands in for a failure that reports success while
+ * silently leaving data behind.
  */
 class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 
@@ -27,6 +27,15 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 */
 	private function source() {
 		return (string) file_get_contents( WP_POLLS_DIR . 'uninstall.php' );
+	}
+
+	/**
+	 * The source of the class that does the per-site work.
+	 *
+	 * @return string
+	 */
+	private function install_source() {
+		return (string) file_get_contents( WP_POLLS_DIR . 'includes/class-wp-polls-install.php' );
 	}
 
 	/**
@@ -80,8 +89,8 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 */
 	public function test_the_tables_are_not_dropped_once_per_option() {
 		preg_match(
-			'/foreach \( \$option_names as \$option_name \) \{(.*?)\}/s',
-			$this->source(),
+			'/foreach \( self::option_names\(\) as \$option_name \) \{(.*?)\}/s',
+			$this->install_source(),
 			$matches
 		);
 
@@ -103,29 +112,41 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 * Every option row the plugin owns is on the uninstall list.
 	 *
 	 * The list is built from WP_Polls_Options so it cannot drift from the
-	 * migration's idea of which rows belong to the plugin, and the consolidated
-	 * row itself has to be on it.
+	 * migration's idea of which rows belong to the plugin, and both current rows
+	 * have to be on it.
 	 *
 	 * @return void
 	 */
-	public function test_the_consolidated_row_is_removed() {
-		$source = $this->source();
+	public function test_every_row_the_plugin_owns_is_on_the_uninstall_list() {
+		$names = WP_Polls_Install::option_names();
 
-		$this->assertStringContainsString( 'WP_Polls_Options::OPTION', $source );
-		$this->assertStringContainsString( 'WP_Polls_Options::VERSION', $source );
-		$this->assertStringContainsString( 'WP_Polls_Options::legacy_map()', $source );
-		$this->assertStringContainsString( 'WP_Polls_Options::legacy_extra_rows()', $source );
+		$this->assertContains( WP_Polls_Options::OPTION, $names, 'the settings row' );
+		$this->assertContains( WP_Polls_Options::VERSION, $names, 'the version markers' );
+
+		foreach ( array_keys( WP_Polls_Options::legacy_map() ) as $legacy ) {
+			$this->assertContains( $legacy, $names, $legacy . ' would be orphaned' );
+		}
+
+		foreach ( WP_Polls_Options::legacy_extra_rows() as $legacy ) {
+			$this->assertContains( $legacy, $names, $legacy . ' would be orphaned' );
+		}
+
+		$this->assertContains( 'widget_polls-widget', $names, 'the widget instance row' );
 	}
 
 	/**
-	 * The helper is prefixed, so it cannot collide during uninstall.
+	 * uninstall.php declares no global function, so it cannot collide.
+	 *
+	 * Every plugin's uninstall.php is loaded into the same request when several
+	 * are deleted at once, so an unprefixed global there is a fatal error
+	 * waiting for a second plugin to do the same thing. The work is a class
+	 * method now, and the entry point only loops.
 	 *
 	 * @return void
 	 */
-	public function test_the_helper_is_namespaced_to_the_plugin() {
-		$source = $this->source();
-
-		$this->assertStringContainsString( 'function wp_polls_uninstall_site(', $source );
-		$this->assertStringNotContainsString( 'function plugin_uninstalled(', $source );
+	public function test_uninstall_declares_no_global_function() {
+		$this->assertDoesNotMatchRegularExpression( '/^\s*function\s+/m', $this->source() );
+		$this->assertStringContainsString( 'WP_Polls_Install::uninstall_site()', $this->source() );
+		$this->assertStringContainsString( 'public static function uninstall_site()', $this->install_source() );
 	}
 }

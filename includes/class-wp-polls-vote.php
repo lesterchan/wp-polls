@@ -324,6 +324,7 @@ class WP_Polls_Vote {
 	 * @return mixed
 	 */
 	public static function polls_acquire_lock( $poll_id ) {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- An flock() advisory lock; WP_Filesystem abstracts over FTP and SSH and has no locking primitive.
 		$fp = fopen( self::polls_lock_file( $poll_id ), 'w+' );
 
 		if ( ! flock( $fp, LOCK_EX | LOCK_NB ) ) {
@@ -331,6 +332,7 @@ class WP_Polls_Vote {
 		}
 
 		ftruncate( $fp, 0 );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Writing the lock stamp through the handle flock() holds.
 		fwrite( $fp, microtime( true ) );
 
 		return $fp;
@@ -348,6 +350,7 @@ class WP_Polls_Vote {
 		if ( is_resource( $fp ) ) {
 			fflush( $fp );
 			flock( $fp, LOCK_UN );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Releasing the flock() handle; the file itself is removed with wp_delete_file().
 			fclose( $fp );
 			wp_delete_file( self::polls_lock_file( $poll_id ) );
 
@@ -476,14 +479,26 @@ class WP_Polls_Vote {
 
 		$i = 0;
 		foreach ( $poll_aid_array as $polla_aid ) {
-			$update_polla_votes = $wpdb->query( "UPDATE $wpdb->pollsa SET polla_votes = (polla_votes + 1) WHERE polla_qid = $poll_id AND polla_aid = $polla_aid" );
+			$update_polla_votes = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE $wpdb->pollsa SET polla_votes = ( polla_votes + 1 ) WHERE polla_qid = %d AND polla_aid = %d",
+					$poll_id,
+					$polla_aid
+				)
+			);
 			if ( ! $update_polla_votes ) {
 				unset( $poll_aid_array[ $i ] );
 			}
 			++$i;
 		}
 
-		$vote_q = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . count( $poll_aid_array ) . "), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = $poll_id AND pollq_active = 1" );
+		$vote_q = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE $wpdb->pollsq SET pollq_totalvotes = ( pollq_totalvotes + %d ), pollq_totalvoters = ( pollq_totalvoters + 1 ) WHERE pollq_id = %d AND pollq_active = 1",
+				count( $poll_aid_array ),
+				$poll_id
+			)
+		);
 		if ( ! $vote_q ) {
 			/* translators: %s: value. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
@@ -539,6 +554,7 @@ class WP_Polls_Vote {
 	public static function vote_poll() {
 		global $wpdb, $user_identity, $user_ID;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The endpoint calls check_ajax_referer() above before reaching this switch.
 		if ( isset( $_REQUEST['action'] ) && sanitize_key( $_REQUEST['action'] ) === 'polls' ) {
 			// Load Headers.
 			// Guarded: anything that has already emitted output - a stray newline
@@ -549,6 +565,7 @@ class WP_Polls_Vote {
 			}
 
 			// Get Poll ID.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The endpoint calls check_ajax_referer() above before reaching this switch.
 			$poll_id = ( isset( $_REQUEST['poll_id'] ) ? (int) $_REQUEST['poll_id'] : 0 );
 
 			// Ensure Poll ID Is Valid.

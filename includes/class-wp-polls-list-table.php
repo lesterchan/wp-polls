@@ -125,6 +125,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 		// interpolated here are never taken from the request.
 		$this->items = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_by is built from get_sortable_columns() in self::order_by(); ORDER BY direction cannot be bound.
 				"SELECT * FROM $wpdb->pollsq ORDER BY $order_by LIMIT %d OFFSET %d",
 				self::PER_PAGE,
 				$offset

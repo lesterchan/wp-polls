@@ -139,14 +139,18 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_a_contending_lock_fails_fast() {
 		$path = WP_Polls_Vote::polls_lock_file( 1 );
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Taking a second flock() on the lock file is the only way to simulate a concurrent voter from one process.
 		$holder = fopen( $path, 'w+' );
 		$this->assertTrue( flock( $holder, LOCK_EX | LOCK_NB ) );
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Taking a second flock() on the lock file is the only way to simulate a concurrent voter from one process.
 		$contender = fopen( $path, 'w+' );
 		$this->assertFalse( flock( $contender, LOCK_EX | LOCK_NB ), 'the lock was not exclusive' );
 
 		flock( $holder, LOCK_UN );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Releasing the flock() taken above.
 		fclose( $holder );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Releasing the flock() taken above.
 		fclose( $contender );
 	}
 
@@ -179,6 +183,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'allow_to_vote', 2 );
 		WP_Polls_Options::set( 'logging_method', 0 );
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Taking a second flock() on the lock file is the only way to simulate a concurrent voter from one process.
 		$holder = fopen( WP_Polls_Vote::polls_lock_file( $poll_id ), 'w+' );
 		flock( $holder, LOCK_EX | LOCK_NB );
 
@@ -189,6 +194,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 			$this->assertStringContainsString( (string) $poll_id, $e->getMessage() );
 		} finally {
 			flock( $holder, LOCK_UN );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Releasing the flock() taken above.
 			fclose( $holder );
 		}
 

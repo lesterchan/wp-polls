@@ -127,6 +127,7 @@ class WP_Polls_Settings {
 	public static function current_tab() {
 		// Reading which tab to render. Nothing is written on this request, and
 		// the value is checked against the fixed list below.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reads ?tab= to decide which tab to render, and the value is checked against self::tabs().
 		$requested = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
 
 		return isset( self::tabs()[ $requested ] ) ? $requested : self::TAB_OPTIONS;

@@ -42,9 +42,10 @@ class WP_Polls_Screen_Logs {
 		$poll_guest                    = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(pollip_user) FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_user = %s", $poll_id, __( 'Guest', 'wp-polls' ) ) );
 		$poll_totalrecorded            = ( $poll_registered + $poll_comments + $poll_guest );
 		list( $order_by, $sort_order ) = WP_Polls_Display::get_ans_sort();
-		$poll_answers_data             = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_id ) );
-		$poll_voters                   = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT pollip_user FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_user != %s ORDER BY pollip_user ASC", $poll_id, __( 'Guest', 'wp-polls' ) ) );
-		$poll_logs_count               = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(pollip_id) FROM $wpdb->pollsip WHERE pollip_qid = %d", $poll_id ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_by and $sort_order come from a fixed whitelist; an ORDER BY column and direction cannot be bound.
+		$poll_answers_data = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_id ) );
+		$poll_voters       = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT pollip_user FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_user != %s ORDER BY pollip_user ASC", $poll_id, __( 'Guest', 'wp-polls' ) ) );
+		$poll_logs_count   = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(pollip_id) FROM $wpdb->pollsip WHERE pollip_qid = %d", $poll_id ) );
 
 		// Every filter field, defaulted. The two multiple-answer filters used to be
 		// initialised inside the branch that handles their own submission, so a poll
@@ -148,7 +149,8 @@ class WP_Polls_Screen_Logs {
 							$comment_sql = 'AND pollip_user = \'' . __( 'Guest', 'wp-polls' ) . '\'';
 						}
 					}
-					$guest_sql         = 'AND pollip_user != \'' . __( 'Guest', 'wp-polls' ) . '\'';
+					$guest_sql = 'AND pollip_user != \'' . __( 'Guest', 'wp-polls' ) . '\'';
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $poll_id and $num_choices are int-cast and $num_choices_sign_sql is one of five literal operators chosen by the switch above.
 					$num_choices_query = $wpdb->get_col( "SELECT pollip_user, COUNT(pollip_ip) AS num_choices FROM $wpdb->pollsip WHERE pollip_qid = $poll_id GROUP BY pollip_ip, pollip_user HAVING num_choices $num_choices_sign_sql $num_choices" );
 					$num_choices_sql   = 'AND pollip_user IN (\'' . implode( '\',\'', array_map( 'esc_sql', $num_choices_query ) ) . '\')';
 					$order_by          = 'pollip_user, pollip_ip';
@@ -159,6 +161,7 @@ class WP_Polls_Screen_Logs {
 					$order_by            = 'pollip_user, pollip_ip';
 					break;
 			}
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Every fragment is built above from a fixed set of operators or esc_sql(); the nonce is checked before any of them is assembled.
 			$poll_ips = $wpdb->get_results( "SELECT $wpdb->pollsip.* FROM $wpdb->pollsip WHERE pollip_qid = $poll_id $users_voted_for_sql $registered_sql $comment_sql $guest_sql $what_user_voted_sql $num_choices_sql ORDER BY $order_by" );
 		} else {
 			$poll_ips = $wpdb->get_results( $wpdb->prepare( "SELECT pollip_aid, pollip_ip, pollip_host, pollip_timestamp, pollip_user FROM $wpdb->pollsip WHERE pollip_qid = %d ORDER BY pollip_aid ASC, pollip_user ASC LIMIT %d", $poll_id, $max_records ) );

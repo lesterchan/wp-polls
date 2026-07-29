@@ -246,6 +246,52 @@ class WP_Polls_Install {
 	}
 
 	/**
+	 * Every option row the plugin owns, current and legacy.
+	 *
+	 * The pre-3.0.0 names are still listed because an install that was never
+	 * loaded after upgrading - deleted straight from the plugins screen - still
+	 * has them, and they would otherwise be orphaned forever. The list comes
+	 * from WP_Polls_Options so it cannot drift from the migration's idea of
+	 * which rows belong to the plugin.
+	 *
+	 * @return array
+	 */
+	public static function option_names() {
+		return array_merge(
+			array( WP_Polls_Options::OPTION, WP_Polls_Options::VERSION ),
+			array_keys( WP_Polls_Options::legacy_map() ),
+			WP_Polls_Options::legacy_extra_rows(),
+			array( 'widget_polls', 'widget_polls-widget' )
+		);
+	}
+
+	/**
+	 * Remove every option row and drop the three tables for the current site.
+	 *
+	 * Before 3.0.0 the table drop was called from inside the loop over option
+	 * names, so it ran once per option rather than once per site - 36 times
+	 * over, issuing three DROP TABLE statements each.
+	 *
+	 * @return void
+	 */
+	public static function uninstall_site() {
+		global $wpdb;
+
+		foreach ( self::option_names() as $option_name ) {
+			delete_option( $option_name );
+		}
+
+		// $wpdb->prefix rather than the registered $wpdb->pollsq: uninstall.php
+		// does not load the main plugin file, so nothing has registered the
+		// table names. switch_to_blog() updates the prefix, so this stays
+		// correct per site on multisite. %i binds the identifier, which is what
+		// makes the statement preparable at all.
+		foreach ( array( 'pollsq', 'pollsa', 'pollsip' ) as $table_name ) {
+			$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . $table_name ) );
+		}
+	}
+
+	/**
 	 * Activate.
 	 *
 	 * @return mixed
@@ -413,6 +459,7 @@ class WP_Polls_Install {
 
 		// Set 'manage_polls' Capabilities To Administrator.
 		$role = get_role( 'administrator' );
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- manage_polls is this plugin's own capability, and these two lines are what create it.
 		if ( ! $role->has_cap( 'manage_polls' ) ) {
 			$role->add_cap( 'manage_polls' );
 		}

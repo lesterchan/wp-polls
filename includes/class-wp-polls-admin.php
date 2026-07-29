@@ -490,12 +490,12 @@ class WP_Polls_Admin {
 					// Delete Poll's Answer.
 					case __( 'Delete Poll Answer', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_delete-poll-answer' );
-						$pollq_id                = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
-						$polla_aid               = isset( $_POST['polla_aid'] ) ? (int) $_POST['polla_aid'] : 0;
-						$poll_answers            = $wpdb->get_row( $wpdb->prepare( "SELECT polla_votes, polla_answers FROM $wpdb->pollsa WHERE polla_aid = %d AND polla_qid = %d", $polla_aid, $pollq_id ) );
-						$polla_votes             = (int) $poll_answers->polla_votes;
-						$polla_answers           = wp_kses_post( removeslashes( trim( $poll_answers->polla_answers ) ) );
-						$delete_polla_answers    = $wpdb->delete(
+						$pollq_id             = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
+						$polla_aid            = isset( $_POST['polla_aid'] ) ? (int) $_POST['polla_aid'] : 0;
+						$poll_answers         = $wpdb->get_row( $wpdb->prepare( "SELECT polla_votes, polla_answers FROM $wpdb->pollsa WHERE polla_aid = %d AND polla_qid = %d", $polla_aid, $pollq_id ) );
+						$polla_votes          = (int) $poll_answers->polla_votes;
+						$polla_answers        = wp_kses_post( removeslashes( trim( $poll_answers->polla_answers ) ) );
+						$delete_polla_answers = $wpdb->delete(
 							$wpdb->pollsa,
 							array(
 								'polla_aid' => $polla_aid,
@@ -503,7 +503,7 @@ class WP_Polls_Admin {
 							),
 							array( '%d', '%d' )
 						);
-						$delete_pollip           = $wpdb->delete(
+						$delete_pollip        = $wpdb->delete(
 							$wpdb->pollsip,
 							array(
 								'pollip_qid' => $pollq_id,
@@ -511,7 +511,13 @@ class WP_Polls_Admin {
 							),
 							array( '%d', '%d' )
 						);
-						$update_pollq_totalvotes = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes - $polla_votes) WHERE pollq_id = $pollq_id" );
+						$wpdb->query(
+							$wpdb->prepare(
+								"UPDATE $wpdb->pollsq SET pollq_totalvotes = ( pollq_totalvotes - %d ) WHERE pollq_id = %d",
+								$polla_votes,
+								$pollq_id
+							)
+						);
 						if ( $delete_polla_answers ) {
 							/* translators: %s: value. */
 							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll Answer \'%s\' Deleted Successfully.', 'wp-polls' ), $polla_answers ) . '</p></div>' );
