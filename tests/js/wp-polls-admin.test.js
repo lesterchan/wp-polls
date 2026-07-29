@@ -21,6 +21,13 @@ const L10N = {
 	text_close_poll: 'Close Poll',
 	text_answer: 'Answer',
 	text_remove_poll_answer: 'Remove',
+	pollbar_images: {
+		flat: 'none',
+		gradient: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.28), rgba(0, 0, 0, 0.07))',
+	},
+	template_defaults: {
+		votefooter: '<ul>DEFAULT FOOTER</ul>',
+	},
 };
 
 beforeAll( () => {
@@ -494,3 +501,102 @@ describe( 'the timestamp toggle', () => {
 	} );
 } );
 
+describe( 'the poll bar preview', () => {
+	function barMarkup() {
+		return `
+			<input type="color" id="poll_bar_bg" value="#d8e1eb"
+			       data-poll-action="pollbar-update" data-poll-field="background" />
+			<input type="color" id="poll_bar_border" value="#c8c8c8"
+			       data-poll-action="pollbar-update" data-poll-field="border" />
+			<input type="text" id="poll_bar_height" value="8"
+			       data-poll-action="pollbar-update" data-poll-field="height" />
+			<input type="radio" name="wp_polls_options[bar][style]" value="flat"
+			       data-poll-action="pollbar-style" />
+			<input type="radio" name="wp_polls_options[bar][style]" value="gradient"
+			       data-poll-action="pollbar-style" checked />
+			<div id="wp-polls-pollbar" class="wp-polls"></div>
+			<span class="wp-polls-swatch" data-poll-style="flat"></span>
+			<span class="wp-polls-swatch" data-poll-style="gradient"></span>
+		`;
+	}
+
+	it( 'follows the colour and height fields as they are edited', () => {
+		document.body.innerHTML = barMarkup();
+		const background = document.getElementById( 'poll_bar_bg' );
+		background.value = '#ff0000';
+
+		background.dispatchEvent( new window.Event( 'input', { bubbles: true } ) );
+
+		const preview = document.getElementById( 'wp-polls-pollbar' );
+		expect(
+			preview.style.getPropertyValue( '--wp-polls-bar-background' ),
+		).toBe( '#ff0000' );
+		expect( preview.style.getPropertyValue( '--wp-polls-bar-height' ) ).toBe(
+			'8px',
+		);
+	} );
+
+	it( 'takes the background image from the style that is selected', () => {
+		document.body.innerHTML = barMarkup();
+		const flat = document.querySelector( 'input[value="flat"]' );
+		flat.checked = true;
+
+		flat.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
+
+		expect(
+			document
+				.getElementById( 'wp-polls-pollbar' )
+				.style.getPropertyValue( '--wp-polls-bar-image' ),
+		).toBe( 'none' );
+	} );
+
+	it( 'keeps the two swatches on the colours being chosen', () => {
+		document.body.innerHTML = barMarkup();
+		const border = document.getElementById( 'poll_bar_border' );
+		border.value = '#00ff00';
+
+		border.dispatchEvent( new window.Event( 'input', { bubbles: true } ) );
+
+		const swatches = document.querySelectorAll( '.wp-polls-swatch' );
+		expect( swatches ).toHaveLength( 2 );
+		Array.prototype.forEach.call( swatches, ( swatch ) => {
+			expect( swatch.style.getPropertyValue( '--wp-polls-bar-border' ) ).toBe(
+				'#00ff00',
+			);
+		} );
+	} );
+} );
+
+describe( 'the restore default template button', () => {
+	it( 'puts the shipped markup back into the field it names', () => {
+		document.body.innerHTML = `
+			<textarea id="poll_template_votefooter">CUSTOMISED</textarea>
+			<button type="button" data-poll-action="restore-template"
+			        data-poll-template="votefooter">Restore</button>
+		`;
+
+		document
+			.querySelector( '[data-poll-action="restore-template"]' )
+			.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
+
+		expect( document.getElementById( 'poll_template_votefooter' ).value ).toBe(
+			'<ul>DEFAULT FOOTER</ul>',
+		);
+	} );
+
+	it( 'leaves a field alone when there is no default for it', () => {
+		document.body.innerHTML = `
+			<textarea id="poll_template_unknown">CUSTOMISED</textarea>
+			<button type="button" data-poll-action="restore-template"
+			        data-poll-template="unknown">Restore</button>
+		`;
+
+		document
+			.querySelector( '[data-poll-action="restore-template"]' )
+			.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
+
+		expect( document.getElementById( 'poll_template_unknown' ).value ).toBe(
+			'CUSTOMISED',
+		);
+	} );
+} );
