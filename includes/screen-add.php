@@ -134,6 +134,13 @@ if ( ! empty( $_POST['do'] ) ) {
 						/* translators: 1: value, 2: value, 3: value, 4: value. */
 						$text .= '<p style="color: green;">' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
 				}
+					/**
+				 * Fires after a poll has been created.
+				 *
+				 * @since 2.70.0
+				 *
+				 * @param int $latest_pollid Poll that was created.
+				 */
 				do_action( 'wp_polls_add_poll', $latest_pollid );
 				WP_Polls::cron_polls_place();
 			} else {

@@ -45,6 +45,11 @@ class WP_Polls_Display {
 	 * @return mixed
 	 */
 	public static function display_pollvote( $poll_id, $display_loading = true ) {
+		/**
+		 * Fires before a voting form is assembled.
+		 *
+		 * @since 2.75.0
+		 */
 		do_action( 'wp_polls_display_pollvote' );
 		global $wpdb;
 		// Temp Poll Result.
@@ -83,8 +88,25 @@ class WP_Polls_Display {
 			'%POLL_END_DATE%'         => $poll_end_date,
 			'%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1,
 		);
+		/**
+		 * Filters the tokens substituted into the voting form header template.
+		 *
+		 * @since 2.75.6
+		 *
+		 * @param array $template_question_variables Token => replacement.
+		 */
 		$template_question_variables = apply_filters( 'wp_polls_template_voteheader_variables', $template_question_variables );
-		$template_question           = apply_filters( 'wp_polls_template_voteheader_markup', $template_question, $poll_question, $template_question_variables );
+
+		/**
+		 * Filters the voting form header markup.
+		 *
+		 * @since 2.75.5
+		 *
+		 * @param string $template_question           Stored template.
+		 * @param object $poll_question               Poll row.
+		 * @param array  $template_question_variables Token => replacement.
+		 */
+		$template_question = apply_filters( 'wp_polls_template_voteheader_markup', $template_question, $poll_question, $template_question_variables );
 
 		// Get Poll Answers Data.
 		list($order_by, $sort_order) = self::get_ans_sort();
@@ -120,8 +142,25 @@ class WP_Polls_Display {
 					'%POLL_CHECKBOX_RADIO%'             => $poll_multiple_ans > 0 ? 'checkbox' : 'radio',
 				);
 
+				/**
+				 * Filters the tokens substituted into the voting form body template.
+				 *
+				 * @since 2.75.6
+				 *
+				 * @param array $template_answer_variables Token => replacement.
+				 */
 				$template_answer_variables = apply_filters( 'wp_polls_template_votebody_variables', $template_answer_variables );
-				$template_answer           = apply_filters( 'wp_polls_template_votebody_markup', $template_answer, $poll_answer, $template_answer_variables );
+
+				/**
+				 * Filters one answer's voting form markup.
+				 *
+				 * @since 2.75.5
+				 *
+				 * @param string $template_answer           Stored template.
+				 * @param object $poll_answer               Answer row.
+				 * @param array  $template_answer_variables Token => replacement.
+				 */
+				$template_answer = apply_filters( 'wp_polls_template_votebody_markup', $template_answer, $poll_answer, $template_answer_variables );
 
 				// Print Out Voting Form Body Template.
 				$temp_pollvote .= "\t\t$template_answer\n";
@@ -147,8 +186,25 @@ class WP_Polls_Display {
 				'%POLL_MULTIPLE_ANS_MAX%' => $poll_multiple_ans > 0 ? $poll_multiple_ans : 1,
 			);
 
+			/**
+			 * Filters the tokens substituted into the voting form footer template.
+			 *
+			 * @since 2.75.6
+			 *
+			 * @param array $template_footer_variables Token => replacement.
+			 */
 			$template_footer_variables = apply_filters( 'wp_polls_template_votefooter_variables', $template_footer_variables );
-			$template_footer           = apply_filters( 'wp_polls_template_votefooter_markup', $template_footer, $poll_question, $template_footer_variables );
+
+			/**
+			 * Filters the voting form footer markup.
+			 *
+			 * @since 2.75.5
+			 *
+			 * @param string $template_footer           Stored template.
+			 * @param object $poll_question             Poll row.
+			 * @param array  $template_footer_variables Token => replacement.
+			 */
+			$template_footer = apply_filters( 'wp_polls_template_votefooter_markup', $template_footer, $poll_question, $template_footer_variables );
 
 			// Print Out Voting Form Footer Template.
 			$temp_pollvote .= "\t\t$template_footer\n";
@@ -178,6 +234,14 @@ class WP_Polls_Display {
 	 */
 	public static function display_pollresult( $poll_id, $user_voted = array(), $display_loading = true ) {
 		global $wpdb;
+		/**
+		 * Fires before a poll's results are assembled.
+		 *
+		 * @since 2.75.0
+		 *
+		 * @param int   $poll_id    Poll being rendered.
+		 * @param array $user_voted Answer ids this visitor chose, if any.
+		 */
 		do_action( 'wp_polls_display_pollresult', $poll_id, $user_voted );
 		$poll_id = (int) $poll_id;
 		// User Voted.
@@ -236,8 +300,25 @@ class WP_Polls_Display {
 			$template_variables['%POLL_MULTIPLE_ANS_MAX%'] = '1';
 		}
 
+		/**
+		 * Filters the tokens substituted into the result header template.
+		 *
+		 * @since 2.75.6
+		 *
+		 * @param array $template_variables Token => replacement.
+		 */
 		$template_variables = apply_filters( 'wp_polls_template_resultheader_variables', $template_variables );
-		$template_question  = apply_filters( 'wp_polls_template_resultheader_markup', $template_question, $poll_question, $template_variables );
+
+		/**
+		 * Filters the result header markup.
+		 *
+		 * @since 2.75.5
+		 *
+		 * @param string $template_question  Stored template.
+		 * @param object $poll_question      Poll row.
+		 * @param array  $template_variables Token => replacement.
+		 */
+		$template_question = apply_filters( 'wp_polls_template_resultheader_markup', $template_question, $poll_question, $template_variables );
 
 		// Get Poll Answers Data.
 		list( $order_by, $sort_order ) = self::get_ans_result_sort();
@@ -265,6 +346,16 @@ class WP_Polls_Display {
 					$poll_multiple_answer_percentage = round( ( $poll_answer_votes / $poll_question_totalvoters ) * 100 );
 				}
 				// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer.
+				/**
+					 * Filters whether the last answer absorbs the rounding remainder.
+					 *
+					 * Off by default: turning it on makes the printed percentages sum
+					 * to exactly 100 at the cost of the last one being slightly wrong.
+					 *
+					 * @since 2.75.0
+					 *
+					 * @param bool $round_percentage Whether to apply the buffer.
+					 */
 				$round_percentage = apply_filters( 'wp_polls_round_percentage', false );
 				if ( $round_percentage && 0 === $poll_multiple_ans ) {
 					$poll_answer_percentage_array[] = $poll_answer_percentage;
@@ -298,16 +389,41 @@ class WP_Polls_Display {
 					'%POLL_ANSWER_PERCENTAGE%'          => $poll_answer_percentage,
 					'%POLL_MULTIPLE_ANSWER_PERCENTAGE%' => $poll_multiple_answer_percentage,
 				);
+				/**
+				 * Filters the tokens substituted into both result body templates.
+				 *
+				 * @since 2.75.6
+				 *
+				 * @param array $template_variables Token => replacement.
+				 */
 				$template_variables = apply_filters( 'wp_polls_template_resultbody_variables', $template_variables );
 
 				// Let User See What Options They Voted.
 				if ( in_array( $poll_answer_id, $user_voted, true ) ) {
 					// Results Body Variables.
 					$template_answer = removeslashes( WP_Polls_Options::get( 'templates.resultbody2' ) );
+					/**
+					 * Filters the result body markup for an answer this visitor voted for.
+					 *
+					 * @since 2.75.5
+					 *
+					 * @param string $template_answer    Stored template.
+					 * @param object $poll_answer        Answer row.
+					 * @param array  $template_variables Token => replacement.
+					 */
 					$template_answer = apply_filters( 'wp_polls_template_resultbody2_markup', $template_answer, $poll_answer, $template_variables );
 				} else {
 					// Results Body Variables.
 					$template_answer = removeslashes( WP_Polls_Options::get( 'templates.resultbody' ) );
+					/**
+					 * Filters the result body markup for an answer this visitor did not vote for.
+					 *
+					 * @since 2.75.5
+					 *
+					 * @param string $template_answer    Stored template.
+					 * @param object $poll_answer        Answer row.
+					 * @param array  $template_variables Token => replacement.
+					 */
 					$template_answer = apply_filters( 'wp_polls_template_resultbody_markup', $template_answer, $poll_answer, $template_variables );
 				}
 
@@ -349,13 +465,38 @@ class WP_Polls_Display {
 			} else {
 				$template_variables['%POLL_MULTIPLE_ANS_MAX%'] = '1';
 			}
+			/**
+			 * Filters the tokens substituted into both result footer templates.
+			 *
+			 * @since 2.75.6
+			 *
+			 * @param array $template_variables Token => replacement.
+			 */
 			$template_variables = apply_filters( 'wp_polls_template_resultfooter_variables', $template_variables );
 
 			if ( ! empty( $user_voted ) || 0 === $poll_question_active || ! WP_Polls_Vote::check_allowtovote() ) {
 				$template_footer = removeslashes( WP_Polls_Options::get( 'templates.resultfooter' ) );
+				/**
+				 * Filters the result footer markup shown once the visitor has voted.
+				 *
+				 * @since 2.75.5
+				 *
+				 * @param string $template_footer    Stored template.
+				 * @param object $poll_question      Poll row.
+				 * @param array  $template_variables Token => replacement.
+				 */
 				$template_footer = apply_filters( 'wp_polls_template_resultfooter_markup', $template_footer, $poll_question, $template_variables );
 			} else {
 				$template_footer = removeslashes( WP_Polls_Options::get( 'templates.resultfooter2' ) );
+				/**
+				 * Filters the result footer markup shown before the visitor has voted.
+				 *
+				 * @since 2.75.5
+				 *
+				 * @param string $template_footer    Stored template.
+				 * @param object $poll_question      Poll row.
+				 * @param array  $template_variables Token => replacement.
+				 */
 				$template_footer = apply_filters( 'wp_polls_template_resultfooter2_markup', $template_footer, $poll_question, $template_variables );
 			}
 
@@ -373,6 +514,13 @@ class WP_Polls_Display {
 			$temp_pollresult .= removeslashes( WP_Polls_Options::get( 'templates.disable' ) );
 		}
 		// Return Poll Result.
+		/**
+		 * Filters the finished result markup for one poll.
+		 *
+		 * @since 2.75.0
+		 *
+		 * @param string $temp_pollresult Assembled markup.
+		 */
 		return apply_filters( 'wp_polls_result_markup', $temp_pollresult );
 	}
 
@@ -419,6 +567,11 @@ class WP_Polls_Display {
 	 * @return mixed
 	 */
 	public static function polls_archive() {
+		/**
+		 * Fires before the polls archive is assembled.
+		 *
+		 * @since 2.75.0
+		 */
 		do_action( 'wp_polls_polls_archive' );
 		global $wpdb, $in_pollsarchive;
 		// Polls Variables.
@@ -582,6 +735,16 @@ class WP_Polls_Display {
 				// The archive used to apply the buffer unconditionally while the poll
 				// only applied it on request, so on a default install the same poll
 				// reported one set of percentages on the page and another here.
+				/**
+					 * Filters whether the last answer absorbs the rounding remainder.
+					 *
+					 * Off by default: turning it on makes the printed percentages sum
+					 * to exactly 100 at the cost of the last one being slightly wrong.
+					 *
+					 * @since 2.75.0
+					 *
+					 * @param bool $round_percentage Whether to apply the buffer.
+					 */
 				$round_percentage = apply_filters( 'wp_polls_round_percentage', false );
 				if ( $round_percentage && 0 === $polls_question['multiple'] ) {
 					$poll_answer_percentage_array[] = $poll_answer_percentage;
@@ -728,6 +891,13 @@ class WP_Polls_Display {
 		}
 
 		// Output Polls Archive Page.
+		/**
+		 * Filters the finished polls archive markup.
+		 *
+		 * @since 2.75.0
+		 *
+		 * @param string $pollsarchive_output_archive Assembled markup.
+		 */
 		return apply_filters( 'wp_polls_archive', $pollsarchive_output_archive );
 	}
 
@@ -821,6 +991,11 @@ class WP_Polls_Display {
 			return removeslashes( WP_Polls_Options::get( 'templates.disable' ) );
 			// Poll Is Enabled.
 		} else {
+			/**
+			 * Fires when a poll is asked for and polls are not disabled.
+			 *
+			 * @since 2.75.0
+			 */
 			do_action( 'wp_polls_get_poll' );
 			// Hardcoded Poll ID Is Not Specified.
 			switch ( $temp_poll_id ) {

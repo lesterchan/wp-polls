@@ -182,6 +182,8 @@ class WP_Polls_Vote {
 		 * the request actually arrives from a known load balancer, say -- rather
 		 * than once in wp-config.php.
 		 *
+		 * @since 3.0.0
+		 *
 		 * @param bool $trust Defaults to the WP_POLLS_TRUST_PROXY constant.
 		 */
 		$trust_proxy = (bool) apply_filters(
@@ -266,6 +268,16 @@ class WP_Polls_Vote {
 	 * @return mixed
 	 */
 	public static function poll_get_ipaddress() {
+		/**
+		 * Filters the voter identity recorded against a vote.
+		 *
+		 * A hash of the address rather than the address itself, so two voters
+		 * can be told apart without their IPs being stored.
+		 *
+		 * @since 2.75.0
+		 *
+		 * @param string $ipaddress Hashed address.
+		 */
 		return apply_filters( 'wp_polls_ipaddress', wp_hash( self::poll_get_raw_ipaddress() ) );
 	}
 
@@ -281,6 +293,7 @@ class WP_Polls_Vote {
 		// empty string when REMOTE_ADDR is absent and whatever a spoofable proxy
 		// header happens to contain.
 		if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+			/** This filter is documented in includes/class-wp-polls-vote.php */
 			return apply_filters( 'wp_polls_hostname', '' );
 		}
 
@@ -293,6 +306,13 @@ class WP_Polls_Vote {
 			$hostname = substr( $hostname, strpos( $hostname, '.' ) + 1 );
 		}
 
+		/**
+		 * Filters the host name recorded against a vote.
+		 *
+		 * @since 2.75.0
+		 *
+		 * @param string $hostname Anonymised host name, or an empty string.
+		 */
 		return apply_filters( 'wp_polls_hostname', $hostname );
 	}
 
@@ -345,6 +365,14 @@ class WP_Polls_Vote {
 	 * @return mixed
 	 */
 	public static function polls_lock_file( $poll_id ) {
+		/**
+		 * Filters the path of the advisory lock file guarding one poll's tally.
+		 *
+		 * @since 2.77.0
+		 *
+		 * @param string $path    Lock file path.
+		 * @param int    $poll_id Poll being voted on.
+		 */
 		return apply_filters( 'wp_polls_lock_file', get_temp_dir() . '/wp-blog-' . get_current_blog_id() . '-wp-polls-' . $poll_id . '.lock', $poll_id );
 	}
 
@@ -363,6 +391,11 @@ class WP_Polls_Vote {
 	public static function vote_poll_process( $poll_id, $poll_aid_array = array() ) {
 		global $wpdb, $user_identity, $user_ID;
 
+		/**
+		 * Fires when a vote is about to be recorded, before any guard has run.
+		 *
+		 * @since 2.75.0
+		 */
 		do_action( 'wp_polls_vote_poll' );
 
 		// Acquire lock.
@@ -429,7 +462,16 @@ class WP_Polls_Vote {
 			if ( 0 === $cookie_expiry ) {
 				$cookie_expiry = YEAR_IN_SECONDS;
 			}
-			setcookie( 'voted_' . $poll_id, implode( ',', $poll_aid_array ), $pollip_timestamp + $cookie_expiry, apply_filters( 'wp_polls_cookiepath', SITECOOKIEPATH ) );
+			/**
+			 * Filters the path the "already voted" cookie is set on.
+			 *
+			 * @since 2.75.0
+			 *
+			 * @param string $path Cookie path, SITECOOKIEPATH by default.
+			 */
+			$cookie_path = apply_filters( 'wp_polls_cookiepath', SITECOOKIEPATH );
+
+			setcookie( 'voted_' . $poll_id, implode( ',', $poll_aid_array ), $pollip_timestamp + $cookie_expiry, $cookie_path );
 		}
 
 		$i = 0;
@@ -477,6 +519,11 @@ class WP_Polls_Vote {
 		// Release lock.
 		self::polls_release_lock( $fp_lock, $poll_id );
 
+		/**
+		 * Fires once a vote has been recorded and the lock released.
+		 *
+		 * @since 2.70.0
+		 */
 		do_action( 'wp_polls_vote_poll_success' );
 
 		return WP_Polls_Display::display_pollresult( $poll_id, $poll_aid_array, false );

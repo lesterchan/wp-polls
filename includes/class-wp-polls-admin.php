@@ -118,6 +118,14 @@ class WP_Polls_Admin {
 	 * @return string
 	 */
 	public static function capability( $context = 'screen' ) {
+		/**
+		 * Filters the capability required to manage polls.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param string $capability Capability name.
+		 * @param string $context    What it is being checked for.
+		 */
 		return apply_filters( 'wp_polls_capability', self::CAPABILITY, $context );
 	}
 
@@ -536,6 +544,13 @@ class WP_Polls_Admin {
 
 						// Update Lastest Poll ID To Poll Options.
 						WP_Polls_Options::set( 'latest_poll', WP_Polls::polls_latest_id() );
+						/**
+					 * Fires after a poll and its answers and logs have been deleted.
+					 *
+					 * @since 2.70.0
+					 *
+					 * @param int $pollq_id Poll that was deleted.
+					 */
 						do_action( 'wp_polls_delete_poll', $pollq_id );
 						break;
 				}

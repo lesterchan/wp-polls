@@ -207,6 +207,13 @@ if ( ! empty( $_POST['do'] ) ) {
 			// Update Lastest Poll ID To Poll Options.
 			$latest_pollid     = WP_Polls::polls_latest_id();
 			$update_latestpoll = WP_Polls_Options::set( 'latest_poll', $latest_pollid );
+			/**
+			 * Fires after a poll's question, answers or dates have been edited.
+			 *
+			 * @since 2.70.0
+			 *
+			 * @param int $pollq_id Poll that was edited.
+			 */
 			do_action( 'wp_polls_update_poll', $pollq_id );
 			WP_Polls::cron_polls_place();
 			break;

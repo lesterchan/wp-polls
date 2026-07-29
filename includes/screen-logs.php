@@ -173,7 +173,17 @@ $poll_logs_url = WP_Polls_List_Table::page_url( array( 'mode' => 'logs' ), $poll
 		<?php echo wp_kses_post( sprintf( _n( '<strong>&raquo;</strong> <strong>%s</strong> vote is cast by guests', '<strong>&raquo;</strong> <strong>%s</strong> votes are cast by guests', $poll_guest, 'wp-polls' ), esc_html( number_format_i18n( $poll_guest ) ) ) ); ?>
 	</p>
 
-	<?php if ( $poll_totalrecorded > 0 && apply_filters( 'wp_polls_log_show_log_filter', true ) ) : ?>
+	<?php
+	/**
+	 * Filters whether the log filter forms are shown.
+	 *
+	 * @since 2.75.0
+	 *
+	 * @param bool $show Whether to render the filters.
+	 */
+	$poll_show_log_filter = apply_filters( 'wp_polls_log_show_log_filter', true );
+	?>
+	<?php if ( $poll_totalrecorded > 0 && $poll_show_log_filter ) : ?>
 		<h2><?php esc_html_e( 'Filter Poll\'s Logs', 'wp-polls' ); ?></h2>
 
 		<form method="post" action="<?php echo esc_url( $poll_logs_url ); ?>">
@@ -320,7 +330,16 @@ $poll_logs_url = WP_Polls_List_Table::page_url( array( 'mode' => 'logs' ), $poll
 				}
 			} else {
 				foreach ( $poll_ips as $poll_ip ) {
-					$pollip_aid  = (int) $poll_ip->pollip_aid;
+					$pollip_aid = (int) $poll_ip->pollip_aid;
+					/**
+					 * Filters the voter name printed in the poll log.
+					 *
+					 * Returning a fixed string here makes the log a secret ballot.
+					 *
+					 * @since 2.75.0
+					 *
+					 * @param string $pollip_user Voter name as recorded.
+					 */
 					$pollip_user = apply_filters( 'wp_polls_log_secret_ballot', removeslashes( $poll_ip->pollip_user ) );
 					$pollip_ip   = $poll_ip->pollip_ip;
 					$pollip_host = $poll_ip->pollip_host;
