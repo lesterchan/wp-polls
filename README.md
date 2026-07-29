@@ -1,11 +1,11 @@
 # WP-Polls
 Contributors: GamerZ  
 Donate link: https://lesterchan.net/site/donation/  
-Tags: poll, polls, polling, vote, booth, democracy, ajax, survey, post, widget  
-Requires at least: 6.0  
+Tags: poll, polls, vote, ajax, survey  
+Requires at least: 6.8  
 Tested up to: 7.0  
 Stable tag: 3.0.0  
-Requires PHP: 7.4  
+Requires PHP: 8.2  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,14 +14,135 @@ Adds an AJAX poll system to your WordPress blog. You can also easily add a poll 
 ## Description
 WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
 
-### Development
-[https://github.com/lesterchan/wp-polls](https://github.com/lesterchan/wp-polls "https://github.com/lesterchan/wp-polls")
-
-### Credits
-* Plugin icon by [Freepik](https://www.freepik.com) from [Flaticon](https://www.flaticon.com)
-
 ### Donations
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
+
+
+## Usage
+
+### Showing A Poll From A Theme
+
+```php
+<?php if ( function_exists( 'vote_poll' ) && ! in_pollarchive() ): ?>
+	<li>
+		<h2>Polls</h2>
+		<ul>
+			<li><?php get_poll();?></li>
+		</ul>
+		<?php display_polls_archive_link(); ?>
+	</li>
+<?php endif; ?>
+```
+
+* To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
+* To show random poll, use `<?php get_poll(-2); ?>`
+* To embed a specific poll in your post, use `[poll id="2"]` where 2 is your poll id.
+* To embed a random poll in your post, use `[poll id="-2"]`
+* To embed a specific poll's result in your post, use `[poll id="2" type="result"]` where 2 is your poll id.
+
+### Showing A Poll In A Widget
+1. Go to `WP-Admin -> Appearance -> Widgets`.
+2. Add the **Polls** widget to a widget area. On block themes the widget is under the *Legacy Widget* block, or in `Appearance -> Editor` if your theme has no widget areas at all.
+3. Set its title and which poll it shows, then save.
+4. Scroll down for instructions on how to create a Polls Archive.
+
+### How To Add A Polls Archive?
+1. Go to `WP-Admin -> Pages -> Add New`.
+2. Type any title you like in the post's title area.
+3. If you ARE  using nice permalinks,  after typing the title, WordPress will generate the permalink to the page. You will see an 'Edit' link just beside the permalink.
+4. Click 'Edit' and type in `pollsarchive` in the text field and click 'Save'.
+5. Type `[page_polls]` in the post's content area.
+6. Click 'Publish'.
+
+* If you ARE NOT using nice permalinks, you need to go to `WP-Admin -> Polls -> Settings -> Poll Options` and under `Poll Archive -> Polls Archive URL`, you need to fill in the URL to the Polls Archive Page you created above.
+
+### To Display Total Polls
+
+```php
+<?php if ( function_exists( 'get_pollquestions' ) ): ?>
+	<?php get_pollquestions(); ?>
+<?php endif; ?> 
+```
+ 
+### To Display Total Poll Answers
+
+```php
+<?php if ( function_exists( 'get_pollanswers' ) ): ?>
+	<?php get_pollanswers(); ?>
+<?php endif; ?> 
+```
+ 
+### To Display Total Poll Votes
+
+```php
+<?php if ( function_exists( 'get_pollvotes' ) ): ?>
+	<?php get_pollvotes(); ?>
+<?php endif; ?> 
+```
+ 
+### To Display Poll Votes by ID
+
+```php
+<?php if ( function_exists( 'get_pollvotes_by_id' ) ): ?>
+	<?php get_pollvotes_by_id($poll_id); ?>
+<?php endif; ?>
+```
+
+### To Display Total Poll Voters
+
+```php
+<?php if ( function_exists( 'get_pollvoters' ) ): ?>
+	<?php get_pollvoters(); ?>
+<?php endif; ?> 
+```
+
+### To Display Poll Time by ID and date format
+
+```php
+<?php if ( function_exists( 'get_polltime' ) ): ?>
+	<?php get_polltime( $poll_id, $date_format ); ?>
+<?php endif; ?>
+```
+
+### Translating the template
+
+The plugin templates can be translated via template variables.
+There are these filters for the custom template variables
+```
+wp_polls_template_voteheader_variables
+wp_polls_template_votebody_variables
+wp_polls_template_votefooter_variables
+wp_polls_template_resultheader_variables
+wp_polls_template_resultbody_variables
+wp_polls_template_resultfooter_variables
+```
+
+The Result Body (Voted) and Result Footer (Voted) templates are filtered by
+`wp_polls_template_resultbody_variables` and `wp_polls_template_resultfooter_variables`
+too - the variables are shared, only the markup filters are separate.
+
+Add filter to your theme and register custom variable where you will add your translation.
+Good practice is to name them for example with prefix `STR_` in the example `STR_TOTAL_VOTERS`.
+```php
+    /**
+     * Localize wp_polls_template_resultfooter_variables.
+     *
+     * @param array $variables An array of template variables.
+     * @return array $variables Modified template variables.
+     */
+    function wp_polls_template_resultfooter_variables( $variables ) {
+
+        // Add strings.
+        $variables['%STR_TOTAL_VOTERS%'] = __( 'Total voters', 'theme-textdomain' );
+
+        return $variables;
+    }
+
+// Trigger the filter
+add_filter( 'wp_polls_template_resultfooter_variables', 'wp_polls_template_resultfooter_variables' , 10, 1 );
+```
+In the admin side just call the custom variable like so and the variable has been translated in the front-end.
+`%STR_TOTAL_VOTERS%'`
 
 ## Frequently Asked Questions
 
@@ -58,7 +179,7 @@ logs can tell two voters apart without keeping their IP addresses.
 3.0.0 rebuilt the poll bar. It used to be one `<div class="pollbar">` sized by an
 inline width; it is now a track holding a fill:
 
-```html
+```
 <div class="wp-polls-bar" aria-hidden="true"><div class="wp-polls-bar-fill" style="width: 42%;"></div></div>
 ```
 
@@ -73,12 +194,12 @@ If you re-add a bar by hand, use `%POLL_ANSWER_PERCENTAGE%` for the width.
 template still containing it emits the literal token into the `style` attribute and
 the bar renders with no width at all.
 
-If your theme ships its own `polls-css.css`, the bar rules are not in it — they used to
+If your theme ships its own `wp-polls.css`, the bar rules are not in it — they used to
 be generated by PHP into an inline `<style>` block, and they now live in the plugin's
 stylesheet. Either copy the `.wp-polls-bar` rules across, or delete your copy and
 override these instead, which is the supported way now:
 
-```css
+```
 .wp-polls {
 	--wp-polls-bar-height: 8px;
 	--wp-polls-bar-background: #d8e1eb;
@@ -87,14 +208,57 @@ override these instead, which is the supported way now:
 }
 ```
 
+### Why doesn't my poll's answers add up to 100%?
+* It is because of rounding issues. To make it always round up to 100%, the last poll's answer will get the remainding percentage added to it. To enable this feature, add this to your theme's functions.php: `add_filter( 'wp_polls_round_percentage', '__return_true' );`
+
+### How Does WP-Polls Load CSS?
+* WP-Polls will load `wp-polls.css` from your theme's directory if it exists.
+* If it does not exist, it loads the `css/wp-polls.css` that ships with WP-Polls.
+* This will allow you to upgrade WP-Polls without worrying about overwriting your polls styles that you have created.
+* A theme copy made before 3.0.0 has no poll bar rules in it, because they used to be generated by PHP. See *My poll bars lost their styling* above.
+
+### How Do I Have Individual Colors For Each Poll's Bar?
+* Courtesy Of [TreedBox.com](https://treedbox.com "TreedBox.com")
+* Set `--wp-polls-bar-background` on the answer rather than styling the bar itself. The bar reads that custom property, so this works whichever poll bar style is configured, and it keeps working if the markup changes again.
+* Add to the end of your `wp-polls.css`:
+
+```
+.wp-polls-ul li:nth-child(01) { --wp-polls-bar-background: #8fa0c5; }
+.wp-polls-ul li:nth-child(02) { --wp-polls-bar-background: #ffff88; }
+.wp-polls-ul li:nth-child(03) { --wp-polls-bar-background: #ff8a3b; }
+.wp-polls-ul li:nth-child(04) { --wp-polls-bar-background: #a61e2a; }
+.wp-polls-ul li:nth-child(05) { --wp-polls-bar-background: #4ebbff; }
+.wp-polls-ul li:nth-child(06) { --wp-polls-bar-background: #fbca54; }
+.wp-polls-ul li:nth-child(07) { --wp-polls-bar-background: #aad34f; }
+.wp-polls-ul li:nth-child(08) { --wp-polls-bar-background: #66cc9a; }
+.wp-polls-ul li:nth-child(09) { --wp-polls-bar-background: #98cbcb; }
+.wp-polls-ul li:nth-child(10) { --wp-polls-bar-background: #a67c52; }
+.wp-polls-ul li:hover { --wp-polls-bar-background: #ff0000; }
+.wp-polls .wp-polls-bar-fill { transition: background-color 0.7s ease-in-out; }
+```
+
+Before 3.0.0 this was written against `.pollbar`, the single element the bar used to
+be. That class no longer exists, so the old snippet colours nothing.
+
+## Screenshots
+
+1. Admin - Add Poll
+2. Admin - Manage Polls
+3. Admin - Poll Options
+4. Admin - Poll Templates
+5. Admin - Poll Widget
+6. Poll - Single Poll Answer
+7. Poll - Mutiple Poll Answers
+8. Poll - Results
+9. Poll - Archive
 
 ## Changelog
 ### 3.0.0
-* BREAKING: Requires WordPress 6.0 and PHP 7.4.
+* BREAKING: Requires WordPress 6.8 and PHP 8.2, up from 6.0 and 7.4. A site on an older stack will not be offered the update at all.
 * BREAKING: The scripts no longer define any global JavaScript functions. `poll_vote()`, `poll_result()`, `poll_booth()` and the admin equivalents are now private, so custom templates or themes that called them directly must move to `data-poll-id` / `data-poll-action` attributes. WP-Polls converts the stock templates for you on upgrade and warns in wp-admin about any it could not convert.
 * CHANGED: Options, templates, settings, the widget and the install/upgrade routine moved into classes under `includes/`. The documented extension points are unchanged: every `wp_polls_*` filter and action, both the `[poll]` and `[page_polls]` shortcodes, and the template tags keep their exact names and signatures.
-* CHANGED: The thirty-odd separate `wp_options` rows are now a single `poll_options` row holding a nested array. Your settings are migrated automatically on upgrade; the old rows are removed once they have been folded in.
-* FIXED: XSS in polls-templates.php. Inline `onclick` handlers are replaced by `data-poll-action` / `data-poll-id` attributes and `onclick` is no longer an allowed attribute in poll templates.
+* CHANGED: The thirty-odd separate `wp_options` rows are now a single `wp_polls_options` row holding a nested array. Your settings are migrated automatically on upgrade; the old rows are removed once they have been folded in.
+* FIXED: XSS in the Poll Templates screen. Inline `onclick` handlers are replaced by `data-poll-action` / `data-poll-id` attributes and `onclick` is no longer an allowed attribute in poll templates.
 * FIXED: On multisite, uninstall called `restore_current_blog()` once after the loop rather than once per site. `switch_to_blog()` pushes onto a stack, so the stack was left unwound by every site but the first.
 * FIXED: On uninstall the three poll tables were dropped from inside the loop over option rows, so the drop ran 36 times per site and issued three `DROP TABLE` statements each instead of three in total.
 * CHANGED: Uninstall asks `get_sites()` for IDs only rather than hydrating a `WP_Site` object per site, and its table-dropping helper is now prefixed `wp_polls_uninstall_site()` instead of occupying the unprefixed global name `plugin_uninstalled()`.
@@ -124,11 +288,11 @@ override these instead, which is the supported way now:
 * FIXED: Changing "Expiry Time For Cookie And Log" did not reschedule the cron job. The callback that rebuilds the schedule was registered while the Poll Options screen rendered, but the save happens on `options.php`, which never loads that screen.
 * CHANGED: Removed every remaining inline `onclick`/`onblur`/`onchange` handler from the admin pages in favour of `data-poll-action` attributes and delegated listeners, so poll questions and answers no longer have to be escaped into a JavaScript context.
 * CHANGED: Dropped the jQuery dependency. Both scripts, the inline admin scripts and the TinyMCE plugin now use the browser's own APIs, so WP-Polls no longer forces jQuery to load on the front end.
-* CHANGED: `polls-js.js` and `polls-admin-js.js` now ship as readable source, the `.dev.js` copies have been removed.
-* SECURITY: The `polls-admin` AJAX handler now checks the `manage_polls` capability instead of relying on its nonces for authorisation.
-* SECURITY: Escaped the poll bar colours, the voting form action and `%POLL_RESULT_URL%` on output, and validated the poll bar colours on save.
-* IMPORTANT: The poll bar has been rebuilt and the change is applied on upgrade. It was one `<div class="pollbar">` sized by an inline width; it is now a `wp-polls-bar` track holding a `wp-polls-bar-fill`, which is what lets a 100% answer render at a true 100%. The Result Body and Result Body (Voted) templates are rewritten to the new markup on upgrade **even if you had customised them** - the class names and the stylesheet moved with the markup, so a customised copy of the old template has no rules left to match it. Re-apply your changes on Poll Templates. See the FAQ.
-* BREAKING: The poll bar rules moved out of the PHP-generated inline `<style>` block and into `polls-css.css`. Only four custom properties are emitted inline now - `--wp-polls-bar-height`, `--wp-polls-bar-background`, `--wp-polls-bar-border` and `--wp-polls-bar-image` - and overriding those is the supported way to restyle the bar. If your theme ships its own `polls-css.css`, the bar rules are not in it; see the FAQ.
+* CHANGED: The scripts ship as readable source; the `.dev.js` copies have been removed.
+* FIXED: The `polls-admin` AJAX handler now checks the `manage_polls` capability instead of relying on its nonces for authorisation.
+* FIXED: Escaped the poll bar colours, the voting form action and `%POLL_RESULT_URL%` on output, and validated the poll bar colours on save.
+* BREAKING: The poll bar has been rebuilt and the change is applied on upgrade. It was one `<div class="pollbar">` sized by an inline width; it is now a `wp-polls-bar` track holding a `wp-polls-bar-fill`, which is what lets a 100% answer render at a true 100%. The Result Body and Result Body (Voted) templates are rewritten to the new markup on upgrade **even if you had customised them** - the class names and the stylesheet moved with the markup, so a customised copy of the old template has no rules left to match it. Re-apply your changes on Poll Templates. See the FAQ.
+* BREAKING: The poll bar rules moved out of the PHP-generated inline `<style>` block and into `css/wp-polls.css`. Only four custom properties are emitted inline now - `--wp-polls-bar-height`, `--wp-polls-bar-background`, `--wp-polls-bar-border` and `--wp-polls-bar-image` - and overriding those is the supported way to restyle the bar. If your theme ships its own `wp-polls.css`, the bar rules are not in it; see the FAQ.
 * BREAKING: The `images/default` and `images/default_gradient` poll bar tiles are gone. The two shaded styles were 1px wide GIFs that carried their own colours, so picking one silently discarded the Poll Bar Background setting. Poll Bar Style is now Flat or Gradient, both drawn in CSS from the colour you configure. `default` and `default_gradient` become Gradient on upgrade, and the old "Use CSS Style" becomes Flat.
 * FIXED: A poll answer with every vote drew a 99% bar, and in the polls archive every bar drew at 90% of its real percentage, so the same answer was a visibly different length in the two places. Both fudges existed to stop the old bar's border overflowing its container and are no longer needed.
 * FIXED: An answer with no votes drew a 1% sliver of a bar rather than an empty one.
@@ -137,19 +301,23 @@ override these instead, which is the supported way now:
 * BREAKING: The `%POLL_ANSWER_IMAGEWIDTH%` template variable has been removed and is no longer substituted. It only ever held the percentage with a fudge applied so the old bar's border did not overflow, and with the fudges gone it said nothing `%POLL_ANSWER_PERCENTAGE%` does not. Use `%POLL_ANSWER_PERCENTAGE%` instead. The upgrade rewrites both result templates, so you only need to act if you re-customise them afterwards.
 * CHANGED: The poll bar no longer carries a `title` tooltip repeating the percentage and vote count that are already printed beside it, and is marked `aria-hidden` so screen readers do not read those numbers twice. On Result Body (Voted) the "You Have Voted For This Choice" tooltip moves onto the answer text itself.
 * CHANGED: The bar fill animates in, and honours `prefers-reduced-motion`.
-* CHANGED: `polls-css-rtl.css` has been removed. `polls-css.css` now uses CSS logical properties, so the one stylesheet lays out correctly in both directions and right-to-left sites load one file fewer. If your theme overrides `polls-css-rtl.css`, fold those rules into your `polls-css.css`.
-* IMPORTANT: If you set "Header That Contains The IP", WP-Polls used the whole header as the voter's identity. `X-Forwarded-For` is a chain the visitor controls the left of, so appending one more hop produced a different identity and another vote. It now takes the first valid address in the header, and falls back to `REMOTE_ADDR` when the header holds no address at all. Sites that left the setting blank are unaffected and their existing vote logs still match. See the FAQ.
+* CHANGED: `wp-polls-rtl.css` has been removed. `css/wp-polls.css` now uses CSS logical properties, so the one stylesheet lays out correctly in both directions and right-to-left sites load one file fewer. If your theme overrides `wp-polls-rtl.css`, fold those rules into your `wp-polls.css`.
+* BREAKING: If you set "Header That Contains The IP", WP-Polls used the whole header as the voter's identity. `X-Forwarded-For` is a chain the visitor controls the left of, so appending one more hop produced a different identity and another vote. It now takes the first valid address in the header, and falls back to `REMOTE_ADDR` when the header holds no address at all. Sites that left the setting blank are unaffected and their existing vote logs still match. See the FAQ.
 * CHANGED: Added the `WP_POLLS_TRUST_PROXY` constant and the `wp_polls_trust_proxy` filter, matching WP-Email and WP-UserOnline, so sites behind Cloudflare or a load balancer can opt in to the usual proxy headers without naming one on the settings screen. Proxy headers are still ignored unless you opt in.
 * CHANGED: Reformatted to the WordPress Coding Standards. Fifteen translatable strings gained numbered placeholders (`%1$s`), which changes their msgid, so those strings need retranslating.
-
-#### Upgrade Notice
-The poll bar is rebuilt on upgrade. If you customised the **Result Body** or **Result Body (Voted)** template, those two are replaced with the new markup and your changes are lost — the old markup cannot be carried forward, because the class names and the stylesheet changed with it. Re-apply them on Poll Templates. If your theme ships its own `polls-css.css`, add the `.wp-polls-bar` rules to it or override the `--wp-polls-bar-*` custom properties instead. See the FAQ.
-
-Your settings move into a single `poll_options` row automatically the first time wp-admin is loaded after upgrading. If you customised the Voting Form Footer or Result Footer templates, the `onclick` handlers in them are converted too; anything too customised to convert is reported on the Poll Templates page.
-
-If you renamed the plugin directory from `wp-polls`, its stylesheets, scripts and poll bar images were not loading. They will start working on upgrade with no action needed.
-
-If you set "Header That Contains The IP" to `X-Forwarded-For`, check it is a header your proxy always overwrites. WP-Polls now reads only the first address in it, so votes recorded against a forged chain no longer count as separate voters.
+* BREAKING: The settings row is named `wp_polls_options` rather than `poll_options`, and the two version markers `poll_version` and `poll_db_version` collapse into one `wp_polls_version` row holding `plugin` and `db`. All three old rows are folded in and removed on upgrade.
+* BREAKING: Poll Options and Poll Templates are two tabs of one **Polls → Settings** screen instead of two menu entries. Their URLs change from `admin.php?page=wp-polls/polls-options.php` and `…/polls-templates.php` to `admin.php?page=wp-polls-settings&tab=options` and `&tab=templates`, and Manage Polls and Add Poll move to `admin.php?page=wp-polls` and `?page=wp-polls-add`.
+* BREAKING: WP-Polls no longer reads or writes WP-Stats' shared `stats_display` row. Whether the polls block appears on the WP-Stats page is now a WP-Polls setting, under **Polls → Settings → WP-Stats**, and WP-Polls contributes its block through the `wp_stats_sections` filter. Update WP-Stats at the same time.
+* BREAKING: Every class is prefixed `WP_Polls_`: `Polls_Options` is `WP_Polls_Options`, `Polls_Display` is `WP_Polls_Display`, `Polls_Vote` is `WP_Polls_Vote`, `Polls_Settings` is `WP_Polls_Settings`, `Polls_Install` is `WP_Polls_Install`, `Polls_Widget` is `WP_Polls_Widget`, `Polls_List_Table` is `WP_Polls_List_Table`, `Polls_Templates` is `WP_Polls_Template` and `Polls_Core` is plain `WP_Polls`. The template tags, the shortcodes and every `wp_polls_*` hook are unchanged.
+* NEW: `WP_POLLS_DB_VERSION` alongside `WP_POLLS_VERSION`, and a `wp_polls_capability` filter over the `manage_polls` check.
+* CHANGED: The plugin files are laid out the way every other plugin here is: the five loose screens move into `includes/`, the stylesheets into `css/` and the scripts into `js/`, named after the plugin. A theme overriding `polls-css.css` should rename its copy `wp-polls.css`.
+* CHANGED: The localised script objects are `wpPollsL10n` and `wpPollsAdminL10n`, replacing `pollsL10n` and `pollsAdminL10n`.
+* CHANGED: The loading indicator is drawn in CSS instead of loading `images/loading.gif`, so it inherits the theme's colour, scales with the font size and stops animating for a visitor who has asked for reduced motion. `images/` is gone.
+* CHANGED: No wp-admin screen carries an inline `style` attribute any more: status messages use core's `notice` classes and anything that starts hidden uses core's `.hidden` class.
+* CHANGED: The front end stylesheet sets no font and no text colour, and its hardcoded blues, blacks and whites become `currentColor` plus the `--wp-polls-border` and `--wp-polls-surface` custom properties, so a poll is legible on a dark theme without a second stylesheet.
+* CHANGED: The two inline `<script>` blocks the settings screens carried - the poll bar preview and the Restore Default Template buttons - moved into `js/wp-polls-admin.js`.
+* FIXED: `current_time( 'timestamp' )`, which WordPress deprecated, is replaced by `WP_Polls::now()`. Poll times are still stored as site-local, so nothing shifts.
+* NOTE: Every filter and action WP-Polls fires now carries a docblock recording what it is passed and which release introduced it.
 
 ### 2.77.3
 * FIXED: XSS In poll-logs.php.
@@ -243,7 +411,7 @@ If you set "Header That Contains The IP" to `X-Forwarded-For`, check it is a hea
 * NEW: Use translate.wordpress.org to translate the plugin
 * FIXED: SQL Injection fixes. Props [Jay Dansand](https://github.com/jaydansand)
 * FIXED: Use $wpdb->insert(), $wpdb->update() and $wpdb->delete() as much as possible
-* FIXED Remove poll_archive_show option from UI
+* FIXED: Remove poll_archive_show option from UI
 
 ### 2.71
 * FIXED: Use wp_kses_post() to get filter always bad tags
@@ -255,172 +423,26 @@ If you set "Header That Contains The IP" to `X-Forwarded-For`, check it is a hea
 * FIXED: Removed not needed wp_print_scripts
 * FIXED: Use esc_attr() and esc_textarea() instead of htmlspecialchars(). Props [Govind Singh](https://in.linkedin.com/pub/govind-singh/21/1a9/bab)
 
-## Screenshots
+## Upgrade Notice
 
-1. Admin - Add Poll
-2. Admin - Manage Polls
-3. Admin - Poll Options
-4. Admin - Poll Templates
-5. Admin - Poll Widget
-6. Poll - Single Poll Answer
-7. Poll - Mutiple Poll Answers
-8. Poll - Results
-9. Poll - Archive
+### 3.0.0
 
-## Usage
+**Update WordPress and PHP first.** WP-Polls 3.0.0 requires WordPress 6.8 and PHP 8.2, up from 6.0 and 7.4. A site on an older stack is simply not offered the update, so if WP-Polls has stopped appearing in your updates list, that is why.
 
-### General Usage (Without Widget)
+**Update WP-Stats at the same time, and the other WP-Stats plugins with it.** Up to now seven plugins shared one `stats_display` row to record which blocks the WP-Stats page shows. Each of them now keeps its own copy and the shared row is deleted by whichever one you update first. WP-Polls treats a missing row as "on", so the worst that happens is a block you have to switch off again — but if a block you wanted is missing after updating, switch it back on from that plugin's own settings screen. For WP-Polls it is **Polls → Settings → WP-Stats**.
 
-```php
-<?php if ( function_exists( 'vote_poll' ) && ! in_pollarchive() ): ?>
-	<li>
-		<h2>Polls</h2>
-		<ul>
-			<li><?php get_poll();?></li>
-		</ul>
-		<?php display_polls_archive_link(); ?>
-	</li>
-<?php endif; ?>
-```
+**Your settings screens have moved.** Poll Options and Poll Templates are now two tabs of one **Polls → Settings** screen. Bookmarks and any links you have to `admin.php?page=wp-polls/polls-options.php` or `…/polls-templates.php` will not resolve; use `admin.php?page=wp-polls-settings`. Manage Polls is `admin.php?page=wp-polls` and Add Poll is `admin.php?page=wp-polls-add`.
 
-* To show specific poll, use `<?php get_poll(2); ?>` where 2 is your poll id.
-* To show random poll, use `<?php get_poll(-2); ?>`
-* To embed a specific poll in your post, use `[poll id="2"]` where 2 is your poll id.
-* To embed a random poll in your post, use `[poll id="-2"]`
-* To embed a specific poll's result in your post, use `[poll id="2" type="result"]` where 2 is your poll id.
+**Your settings move themselves.** The thirty-odd `poll_*` option rows, plus the older `poll_options` row and both version markers, are folded into `wp_polls_options` and `wp_polls_version` the first time wp-admin loads after the update. Nothing to do; the old rows are removed once they have been read.
 
-### General Usage (With Widget)
-1. Go to `WP-Admin -> Appearance -> Widgets`.
-2. Add the **Polls** widget to a widget area. On block themes the widget is under the *Legacy Widget* block, or in `Appearance -> Editor` if your theme has no widget areas at all.
-3. Set its title and which poll it shows, then save.
-4. Scroll down for instructions on how to create a Polls Archive.
+**The poll bar is rebuilt, and two templates are replaced.** If you customised **Result Body** or **Result Body (Voted)**, those two are overwritten with the new markup and your changes are lost. There was no way to carry them forward: the class names and the stylesheet changed with the markup, so a customised copy of the old template has no rules left to match it. Re-apply your changes on Poll Templates, keeping the two `wp-polls-bar` elements. `%POLL_ANSWER_IMAGEWIDTH%` no longer exists — use `%POLL_ANSWER_PERCENTAGE%`.
 
-### How To Add A Polls Archive?
-1. Go to `WP-Admin -> Pages -> Add New`.
-2. Type any title you like in the post's title area.
-3. If you ARE  using nice permalinks,  after typing the title, WordPress will generate the permalink to the page. You will see an 'Edit' link just beside the permalink.
-4. Click 'Edit' and type in `pollsarchive` in the text field and click 'Save'.
-5. Type `[page_polls]` in the post's content area.
-6. Click 'Publish'.
+**If your theme ships its own copy of the stylesheet,** rename it from `polls-css.css` to `wp-polls.css` or WP-Polls will stop using it. Delete `polls-css-rtl.css`; there is one stylesheet now. The poll bar rules are not in a copy made before 3.0.0, because they used to be generated by PHP — either copy the `.wp-polls-bar` rules across or override the `--wp-polls-bar-*` custom properties instead, which is the supported way.
 
-* If you ARE NOT using nice permalinks, you need to go to `WP-Admin -> Polls -> Poll Options` and under `Poll Archive -> Polls Archive URL`, you need to fill in the URL to the Polls Archive Page you created above.
+**If a custom template calls `poll_vote()`, `poll_result()` or `poll_booth()` from an inline `onclick`,** those functions no longer exist. WP-Polls converts the stock templates on upgrade and puts a warning in wp-admin naming any it could not convert; replace the handler with `data-poll-id="%POLL_ID%"` and `data-poll-action="vote"` (or `result` / `booth`).
 
-### Why doesn't my poll's answers add up to 100%?
-* It is because of rounding issues. To make it always round up to 100%, the last poll's answer will get the remainding percentage added to it. To enable this feature, add this to your theme's functions.php: `add_filter( 'wp_polls_round_percentage', '__return_true' );`
+**If your own code names a WP-Polls class,** every one is prefixed `WP_Polls_` now, and `Polls_Core` is plain `WP_Polls`. The template tags (`get_poll()`, `vote_poll()`, `display_polls_archive_link()`, `in_pollarchive()` and the `get_poll*` counters), both shortcodes and all thirty-odd `wp_polls_*` filters and actions are unchanged, so a theme that only uses those needs no edits.
 
-### How Does WP-Polls Load CSS?
-* WP-Polls will load `polls-css.css` from your theme's directory if it exists.
-* If it doesn't exists, it will just load the default `polls-css.css` that comes with WP-Polls.
-* This will allow you to upgrade WP-Polls without worrying about overwriting your polls styles that you have created.
-* A theme copy made before 3.0.0 has no poll bar rules in it, because they used to be generated by PHP. See *My poll bars lost their styling* above.
+**If you set "Header That Contains The IP",** check it is a header your proxy always overwrites. WP-Polls now reads only the first address in it, so votes recorded against a forged chain no longer count as separate voters. Sites that left it blank are unaffected and their vote logs still match.
 
-### How Do I Have Individual Colors For Each Poll's Bar?
-* Courtesy Of [TreedBox.com](https://treedbox.com "TreedBox.com")
-* Set `--wp-polls-bar-background` on the answer rather than styling the bar itself. The bar reads that custom property, so this works whichever poll bar style is configured, and it keeps working if the markup changes again.
-* Add to the end of your `polls-css.css`:
-
-```css
-.wp-polls-ul li:nth-child(01) { --wp-polls-bar-background: #8fa0c5; }
-.wp-polls-ul li:nth-child(02) { --wp-polls-bar-background: #ffff88; }
-.wp-polls-ul li:nth-child(03) { --wp-polls-bar-background: #ff8a3b; }
-.wp-polls-ul li:nth-child(04) { --wp-polls-bar-background: #a61e2a; }
-.wp-polls-ul li:nth-child(05) { --wp-polls-bar-background: #4ebbff; }
-.wp-polls-ul li:nth-child(06) { --wp-polls-bar-background: #fbca54; }
-.wp-polls-ul li:nth-child(07) { --wp-polls-bar-background: #aad34f; }
-.wp-polls-ul li:nth-child(08) { --wp-polls-bar-background: #66cc9a; }
-.wp-polls-ul li:nth-child(09) { --wp-polls-bar-background: #98cbcb; }
-.wp-polls-ul li:nth-child(10) { --wp-polls-bar-background: #a67c52; }
-.wp-polls-ul li:hover { --wp-polls-bar-background: #ff0000; }
-.wp-polls .wp-polls-bar-fill { transition: background-color 0.7s ease-in-out; }
-```
-
-Before 3.0.0 this was written against `.pollbar`, the single element the bar used to
-be. That class no longer exists, so the old snippet colours nothing.
-
-### To Display Total Polls
-
-```php
-<?php if ( function_exists( 'get_pollquestions' ) ): ?>
-	<?php get_pollquestions(); ?>
-<?php endif; ?> 
-```
- 
-### To Display Total Poll Answers
-
-```php
-<?php if ( function_exists( 'get_pollanswers' ) ): ?>
-	<?php get_pollanswers(); ?>
-<?php endif; ?> 
-```
- 
-### To Display Total Poll Votes
-
-```php
-<?php if ( function_exists( 'get_pollvotes' ) ): ?>
-	<?php get_pollvotes(); ?>
-<?php endif; ?> 
-```
- 
-### To Display Poll Votes by ID
-
-```php
-<?php if ( function_exists( 'get_pollvotes_by_id' ) ): ?>
-	<?php get_pollvotes_by_id($poll_id); ?>
-<?php endif; ?>
-```
-
-### To Display Total Poll Voters
-
-```php
-<?php if ( function_exists( 'get_pollvoters' ) ): ?>
-	<?php get_pollvoters(); ?>
-<?php endif; ?> 
-```
-
-### To Display Poll Time by ID and date format
-
-```php
-<?php if ( function_exists( 'get_polltime' ) ): ?>
-	<?php get_polltime( $poll_id, $date_format ); ?>
-<?php endif; ?>
-```
-
-### Translating the template
-
-The plugin templates can be translated via template variables.
-There are these filters for the custom template variables
-```
-wp_polls_template_voteheader_variables
-wp_polls_template_votebody_variables
-wp_polls_template_votefooter_variables
-wp_polls_template_resultheader_variables
-wp_polls_template_resultbody_variables
-wp_polls_template_resultfooter_variables
-```
-
-The Result Body (Voted) and Result Footer (Voted) templates are filtered by
-`wp_polls_template_resultbody_variables` and `wp_polls_template_resultfooter_variables`
-too - the variables are shared, only the markup filters are separate.
-
-Add filter to your theme and register custom variable where you will add your translation.
-Good practice is to name them for example with prefix `STR_` in the example `STR_TOTAL_VOTERS`.
-```php
-    /**
-     * Localize wp_polls_template_resultfooter_variables.
-     *
-     * @param array $variables An array of template variables.
-     * @return array $variables Modified template variables.
-     */
-    function wp_polls_template_resultfooter_variables( $variables ) {
-
-        // Add strings.
-        $variables['%STR_TOTAL_VOTERS%'] = __( 'Total voters', 'theme-textdomain' );
-
-        return $variables;
-    }
-
-// Trigger the filter
-add_filter( 'wp_polls_template_resultfooter_variables', 'wp_polls_template_resultfooter_variables' , 10, 1 );
-```
-In the admin side just call the custom variable like so and the variable has been translated in the front-end.
-`%STR_TOTAL_VOTERS%'`
+**If your scripts referenced `pollsL10n` or `pollsAdminL10n`,** they are `wpPollsL10n` and `wpPollsAdminL10n`.
