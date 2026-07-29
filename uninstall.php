@@ -77,6 +77,8 @@ function wp_polls_uninstall_site( $option_names ) {
 	// site on multisite.
 	foreach ( array( 'pollsq', 'pollsa', 'pollsip' ) as $table_name ) {
 		$table = $wpdb->prefix . $table_name;
-		$wpdb->query( "DROP TABLE IF EXISTS $table" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifiers cannot be bound, and the name is built from $wpdb->prefix and a literal.
+		// Table identifiers cannot be bound; the name is built from $wpdb->prefix
+		// and a literal.
+		$wpdb->query( "DROP TABLE IF EXISTS $table" );
 	}
 }

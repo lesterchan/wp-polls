@@ -65,7 +65,7 @@ class WP_Polls_Install {
 		// An install that has not run this yet has no marker row at all, so the
 		// pre-3.0.0 poll_version row is still the only record of what it last
 		// ran. Read through to it once; the migration deletes it.
-		$installed_version = '' !== $markers['plugin'] ? $markers['plugin'] : (string) get_option( 'poll_version', '' );
+		$installed_version = '' !== $markers['plugin'] ? $markers['plugin'] : (string) get_option( WP_Polls_Options::LEGACY_VERSION, '' );
 		$is_pre_3          = '' === $installed_version || version_compare( $installed_version, '3.0.0', '<' );
 
 		// Version 3.0.0: fold the ~30 scattered option rows into a single one.

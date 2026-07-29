@@ -3,7 +3,7 @@
  * Settings API registration for the Poll Options and Poll Templates tabs.
  *
  * Both tabs are built entirely out of add_settings_section() and
- * add_settings_field(): screen-settings.php draws the tabs, opens the form,
+ * add_settings_field(): WP_Polls_Screen_Settings draws the tabs, opens the form,
  * hands it to do_settings_sections() and closes it, so every row on both tabs
  * is declared here rather than written out as hand rolled table markup.
  *
@@ -845,7 +845,7 @@ class WP_Polls_Settings {
 
 		// $input is assembled from escaped parts above; before/after are literal
 		// markup or already translated text.
-		echo $wrapper_open . esc_html( $args['before'] ) . $input . ' ' . esc_html( $args['after'] ) . $wrapper_close; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $wrapper_open . esc_html( $args['before'] ) . $input . ' ' . esc_html( $args['after'] ) . $wrapper_close; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Assembled from the escaped parts above; before/after are literal markup or already translated text.
 
 		self::field_description( $args );
 	}
@@ -976,7 +976,7 @@ class WP_Polls_Settings {
 		}
 
 		// $tokens is either an escaped string or escaped tokens in code spans.
-		echo '<p class="description">' . esc_html__( 'Allowed Variables:', 'wp-polls' ) . ' ' . $tokens . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<p class="description">' . esc_html__( 'Allowed Variables:', 'wp-polls' ) . ' ' . $tokens . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The tokens are escaped above, either as a string or inside code spans.
 
 		printf(
 			'<p><button type="button" class="button" data-poll-action="restore-template" data-poll-template="%1$s">%2$s</button></p>',

@@ -44,8 +44,8 @@ class WP_Polls_Admin {
 	/**
 	 * The page slugs this plugin registers, in menu order.
 	 *
-	 * The logs screen is absent on purpose: screen-logs.php renders inside
-	 * screen-manage.php under mode=logs, so it has no slug of its own.
+	 * The logs screen is absent on purpose: WP_Polls_Screen_Logs renders inside
+	 * WP_Polls_Screen_Manage under mode=logs, so it has no slug of its own.
 	 *
 	 * @return array
 	 */
@@ -446,7 +446,7 @@ class WP_Polls_Admin {
 		// Form Processing.
 		// Each branch below calls check_ajax_referer() with its own action before
 		// touching anything; the dispatch itself only reads which branch to take.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reads which branch to take; each one calls check_ajax_referer() before touching anything.
 		if ( isset( $_POST['action'] ) && 'polls-admin' === sanitize_key( wp_unslash( $_POST['action'] ) ) ) {
 			if ( ! empty( $_POST['do'] ) ) {
 				// Set Header.

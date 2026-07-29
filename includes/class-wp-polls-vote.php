@@ -575,7 +575,7 @@ class WP_Polls_Vote {
 						// the template was assembled, and every id is int cast. Escaping
 						// again here would render the markup as text; wp_kses_post()
 						// would strip the radio and checkbox inputs the form needs.
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup assembled and escaped by WP_Polls_Display.
 						echo self::vote_poll_process( $poll_id, $poll_aid_array );
 					} catch ( Exception $e ) {
 						// Escaped at the throw site as well. Every message is plain

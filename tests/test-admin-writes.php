@@ -6,7 +6,7 @@
  */
 
 /**
- * The POST handlers in screen-add.php and screen-manage.php.
+ * The POST handlers in the Add Poll and Manage Polls screens.
  *
  * The existing admin page tests render these screens; nothing exercised the
  * branch at the top of each file that writes to the database. Those handlers

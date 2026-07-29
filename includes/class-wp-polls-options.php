@@ -21,7 +21,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Reads and writes the single poll_options row.
+ * Reads and writes the single wp_polls_options row.
  */
 class WP_Polls_Options {
 
@@ -38,6 +38,39 @@ class WP_Polls_Options {
 	 * @var string
 	 */
 	const VERSION = 'wp_polls_version';
+
+	/**
+	 * The pre-3.0.0 settings row, read once by the migration and then removed.
+	 *
+	 * The four legacy names below are constants rather than literals at their
+	 * call sites so that each one is written down exactly once - the migration
+	 * that reads it and the list that deletes it can never disagree about the
+	 * spelling.
+	 *
+	 * @var string
+	 */
+	const LEGACY_OPTION = 'poll_options';
+
+	/**
+	 * The pre-3.0.0 plugin version marker.
+	 *
+	 * @var string
+	 */
+	const LEGACY_VERSION = 'poll_version';
+
+	/**
+	 * The pre-3.0.0 schema version marker.
+	 *
+	 * @var string
+	 */
+	const LEGACY_DB_VERSION = 'poll_db_version';
+
+	/**
+	 * WP-Stats' shared, unprefixed toggle row, which seven plugins wrote into.
+	 *
+	 * @var string
+	 */
+	const LEGACY_STATS_DISPLAY = 'stats_display';
 
 	/**
 	 * Runtime cache so a page render does not re-read the row per lookup.
@@ -123,7 +156,13 @@ class WP_Polls_Options {
 	 * @return array
 	 */
 	public static function legacy_extra_rows() {
-		return array( 'poll_archive_show', 'poll_options', 'poll_version', 'poll_db_version', 'stats_display' );
+		return array(
+			'poll_archive_show',
+			self::LEGACY_OPTION,
+			self::LEGACY_VERSION,
+			self::LEGACY_DB_VERSION,
+			self::LEGACY_STATS_DISPLAY,
+		);
 	}
 
 	/**
@@ -367,7 +406,7 @@ class WP_Polls_Options {
 		// win where both exist. Two shapes reach this: the pre-3.0.0 one, which
 		// held only ip_header, and the unreleased 3.0.0 one, which held the
 		// whole nested array.
-		$legacy_row = get_option( 'poll_options', array() );
+		$legacy_row = get_option( self::LEGACY_OPTION, array() );
 		if ( is_array( $legacy_row ) ) {
 			$values = self::merge( $values, $legacy_row );
 		}
@@ -397,7 +436,7 @@ class WP_Polls_Options {
 		// would make the polls block vanish from WP-Stats with no error on any
 		// site that updated WP-Stats before WP-Polls. Absent therefore leaves
 		// the default, which is on.
-		$legacy_stats = get_option( 'stats_display', null );
+		$legacy_stats = get_option( self::LEGACY_STATS_DISPLAY, null );
 		if ( null !== $legacy_stats && false !== $legacy_stats ) {
 			$values['stats_display'] = self::legacy_stats_display( $legacy_stats );
 		}

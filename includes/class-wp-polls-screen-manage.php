@@ -34,10 +34,8 @@ class WP_Polls_Screen_Manage {
 
 		// Variables Variables Variables.
 		$poll_mode = isset( $_GET['mode'] ) ? sanitize_key( wp_unslash( $_GET['mode'] ) ) : '';
-// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Selects which poll to display; the write paths below verify their own nonces.
-		$poll_id  = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
-		$poll_aid = isset( $_GET['aid'] ) ? (int) $_GET['aid'] : 0;
-// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		$poll_id   = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+		$poll_aid  = isset( $_GET['aid'] ) ? (int) $_GET['aid'] : 0;
 
 		// Form Processing.
 		if ( ! empty( $_POST['do'] ) ) {

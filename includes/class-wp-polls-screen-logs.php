@@ -73,10 +73,8 @@ class WP_Polls_Screen_Logs {
 		// Which of the three filter forms was submitted, if any. Read before the nonce
 		// check only to decide that; check_admin_referer() below still runs before
 		// anything is queried.
-// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$poll_filtered  = ! empty( $_POST['do'] );
 		$poll_filter_id = isset( $_POST['filter'] ) ? (int) $_POST['filter'] : 0;
-// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		// Filters 2 and 3 list one voter's rows under their name; filter 1 and the
 		// unfiltered view list the voters under each answer.

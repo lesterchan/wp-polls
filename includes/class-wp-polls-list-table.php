@@ -125,7 +125,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 		// interpolated here are never taken from the request.
 		$this->items = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM $wpdb->pollsq ORDER BY $order_by LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT * FROM $wpdb->pollsq ORDER BY $order_by LIMIT %d OFFSET %d",
 				self::PER_PAGE,
 				$offset
 			)
@@ -161,10 +161,8 @@ class WP_Polls_List_Table extends WP_List_Table {
 	protected function order_by() {
 		// Reading which column to sort on. Nothing is written on this request,
 		// and both values are checked against a whitelist below.
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$requested = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '';
 		$direction = isset( $_GET['order'] ) && 'asc' === strtolower( sanitize_key( wp_unslash( $_GET['order'] ) ) ) ? 'ASC' : 'DESC';
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$sortable = $this->get_sortable_columns();
 		if ( ! isset( $sortable[ $requested ] ) ) {
