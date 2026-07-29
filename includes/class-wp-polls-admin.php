@@ -134,7 +134,12 @@ class WP_Polls_Admin {
 	 * @return void
 	 */
 	public static function render_manage() {
-		require WP_POLLS_DIR . 'includes/screen-manage.php';
+		// Loaded here rather than from the plugin bootstrap: the list table
+		// extends WP_List_Table, which only exists inside wp-admin.
+		require_once WP_POLLS_DIR . 'includes/class-wp-polls-list-table.php';
+		require_once WP_POLLS_DIR . 'includes/class-wp-polls-screen-logs.php';
+		require_once WP_POLLS_DIR . 'includes/class-wp-polls-screen-manage.php';
+		WP_Polls_Screen_Manage::render();
 	}
 
 	/**
@@ -143,7 +148,8 @@ class WP_Polls_Admin {
 	 * @return void
 	 */
 	public static function render_add() {
-		require WP_POLLS_DIR . 'includes/screen-add.php';
+		require_once WP_POLLS_DIR . 'includes/class-wp-polls-screen-add.php';
+		WP_Polls_Screen_Add::render();
 	}
 
 	/**
@@ -152,7 +158,8 @@ class WP_Polls_Admin {
 	 * @return void
 	 */
 	public static function render_settings() {
-		require WP_POLLS_DIR . 'includes/screen-settings.php';
+		require_once WP_POLLS_DIR . 'includes/class-wp-polls-screen-settings.php';
+		WP_Polls_Screen_Settings::render();
 	}
 
 	// Function: Enqueue Polls Stylesheets/JavaScripts In WP-Admin.

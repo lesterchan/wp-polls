@@ -44,25 +44,25 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 */
 	public function admin_page_provider() {
 		return array(
-			'manage polls' => array( 'includes/screen-manage.php', array() ),
+			'manage polls' => array( 'manage', array() ),
 			'edit poll'    => array(
-				'includes/screen-manage.php',
+				'manage',
 				array(
 					'mode' => 'edit',
 					'id'   => '%POLL_ID%',
 				),
 			),
 			'poll logs'    => array(
-				'includes/screen-manage.php',
+				'manage',
 				array(
 					'mode' => 'logs',
 					'id'   => '%POLL_ID%',
 				),
 			),
-			'add poll'     => array( 'includes/screen-add.php', array() ),
-			'settings'     => array( 'includes/screen-settings.php', array() ),
+			'add poll'     => array( 'add', array() ),
+			'settings'     => array( 'settings', array() ),
 			'templates'    => array(
-				'includes/screen-settings.php',
+				'settings',
 				array( 'tab' => 'templates' ),
 			),
 		);
@@ -170,7 +170,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_question_is_not_double_escaped() {
 		$this->make_poll( array( 'pollq_question' => 'Tabs & "spaces"?' ) );
 
-		foreach ( array( 'includes/screen-manage.php', 'includes/screen-settings.php' ) as $file ) {
+		foreach ( array( 'manage', 'settings' ) as $file ) {
 			$html = $this->render_admin_page( $file );
 
 			$this->assertStringNotContainsString( '&amp;amp;', $html, $file );
@@ -188,7 +188,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$this->make_poll( array( 'pollq_question' => 'First poll' ) );
 		$this->make_poll( array( 'pollq_question' => 'Second poll' ) );
 
-		$html = $this->render_admin_page( 'includes/screen-manage.php' );
+		$html = $this->render_admin_page( 'manage' );
 
 		$this->assertStringContainsString( 'First poll', $html );
 		$this->assertStringContainsString( 'Second poll', $html );
@@ -213,7 +213,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$this->make_vote_log( $poll_id, $answers[1], 'Guest' );
 
 		$html = $this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -242,7 +242,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$this->make_vote_log( $poll_id, $answers[0], "O'Brien" );
 
 		$html = $this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -265,7 +265,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		);
 
 		$html = $this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'edit',
 				'id'   => (string) $poll_id,
@@ -288,7 +288,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_offers_only_saveable_bar_styles() {
-		$html = $this->render_admin_page( 'includes/screen-settings.php' );
+		$html = $this->render_admin_page( 'settings' );
 
 		$styles = WP_Polls_Settings::bar_styles();
 		$this->assertNotEmpty( $styles, 'no bar styles found on disk' );
@@ -314,7 +314,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'bar.background', 'aabbcc' );
 		WP_Polls_Options::set( 'bar.border', 'ddeeff' );
 
-		$html = $this->render_admin_page( 'includes/screen-settings.php' );
+		$html = $this->render_admin_page( 'settings' );
 
 		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_bg"[^>]*value="#aabbcc"/', $html );
 		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_border"[^>]*value="#ddeeff"/', $html );
@@ -341,7 +341,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$style  = end( $styles );
 		WP_Polls_Options::set( 'bar.style', $style );
 
-		$html = $this->render_admin_page( 'includes/screen-settings.php' );
+		$html = $this->render_admin_page( 'settings' );
 
 		$this->assertMatchesRegularExpression(
 			'/id="poll_bar_style-' . preg_quote( $style, '/' ) . '"[^>]*\schecked/',
@@ -355,7 +355,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_add_renders_answer_fields() {
-		$html = $this->render_admin_page( 'includes/screen-add.php' );
+		$html = $this->render_admin_page( 'add' );
 
 		$this->assertStringContainsString( 'name="polla_answers[]"', $html );
 		$this->assertStringContainsString( 'name="pollq_question"', $html );
@@ -370,7 +370,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_templates_posts_to_the_right_settings_group() {
-		$html = $this->render_admin_page( 'includes/screen-settings.php', array( 'tab' => 'templates' ) );
+		$html = $this->render_admin_page( 'settings', array( 'tab' => 'templates' ) );
 
 		$this->assertStringContainsString( 'action="options.php"', $html );
 		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html );
@@ -382,7 +382,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_posts_to_the_right_settings_group() {
-		$html = $this->render_admin_page( 'includes/screen-settings.php' );
+		$html = $this->render_admin_page( 'settings' );
 
 		$this->assertStringContainsString( 'action="options.php"', $html );
 		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html );
@@ -396,7 +396,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_manage_renders_a_list_table_with_row_actions() {
 		$poll_id = $this->make_poll( array( 'pollq_question' => 'Listed poll' ) );
 
-		$html = $this->render_admin_page( 'includes/screen-manage.php' );
+		$html = $this->render_admin_page( 'manage' );
 
 		$this->assertStringContainsString( 'class="wp-list-table', $html );
 		$this->assertStringContainsString( '<tr id="poll-' . $poll_id . '"', $html );
@@ -421,8 +421,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 			);
 		}
 
-		$first  = $this->render_admin_page( 'includes/screen-manage.php' );
-		$second = $this->render_admin_page( 'includes/screen-manage.php', array( 'paged' => '2' ) );
+		$first  = $this->render_admin_page( 'manage' );
+		$second = $this->render_admin_page( 'manage', array( 'paged' => '2' ) );
 
 		$this->assertSame( WP_Polls_List_Table::PER_PAGE, substr_count( $first, '<tr id="poll-' ) );
 		$this->assertSame( 3, substr_count( $second, '<tr id="poll-' ) );
@@ -467,7 +467,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$answers = $this->answer_ids( $poll_id );
 
 		$html = $this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'edit',
 				'id'   => (string) $poll_id,
@@ -502,7 +502,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$this->make_vote_log( $poll_id, $answers[0], 'Registered Voter', 7 );
 
 		$html = $this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -531,7 +531,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 		add_filter( 'wp_polls_log_show_log_filter', '__return_false' );
 		$html = $this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -554,7 +554,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$this->make_vote_log( $poll_id, 0, 'Guest' );
 
 		$html = $this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -578,10 +578,10 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 */
 	public function test_the_settings_screen_contains_no_hand_written_form_markup() {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a file from the plugin under test, not a remote resource.
-		$source = file_get_contents( WP_POLLS_DIR . 'includes/screen-settings.php' );
+		$source = file_get_contents( WP_POLLS_DIR . 'includes/class-wp-polls-screen-settings.php' );
 
 		foreach ( array( '<table', '<tr', '<th', '<td', '<input', '<select', '<textarea' ) as $tag ) {
-			$this->assertStringNotContainsString( $tag, $source, 'screen-settings.php writes ' . $tag . ' by hand' );
+			$this->assertStringNotContainsString( $tag, $source, 'the settings screen writes ' . $tag . ' by hand' );
 		}
 	}
 
@@ -591,7 +591,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_the_settings_screen_renders_a_tab_for_each_group() {
-		$html = $this->render_admin_page( 'includes/screen-settings.php', array( 'tab' => 'templates' ) );
+		$html = $this->render_admin_page( 'settings', array( 'tab' => 'templates' ) );
 
 		$this->assertStringContainsString( 'nav-tab-wrapper', $html, 'The tab strip is core markup.' );
 
@@ -616,7 +616,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$allowed = array( '_wpnonce', '_wp_http_referer', 'option_page', 'action', 'submit' );
 
 		foreach ( array_keys( WP_Polls_Settings::tabs() ) as $tab ) {
-			$html = $this->render_admin_page( 'includes/screen-settings.php', array( 'tab' => $tab ) );
+			$html = $this->render_admin_page( 'settings', array( 'tab' => $tab ) );
 
 			preg_match_all( '/\sname="([^"]+)"/', $html, $matches );
 			$this->assertNotEmpty( $matches[1], $tab . ' rendered no fields' );
@@ -639,7 +639,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_options_renders_every_registered_section() {
 		global $wp_settings_sections;
 
-		$html = $this->render_admin_page( 'includes/screen-settings.php' );
+		$html = $this->render_admin_page( 'settings' );
 
 		foreach ( $wp_settings_sections[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ] as $section ) {
 			// Matched loosely on purpose: do_settings_sections() gained an id
@@ -660,7 +660,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_templates_renders_stored_template() {
 		WP_Polls_Options::set( 'templates.voteheader', '<p>CUSTOM HEADER</p>' );
 
-		$html = $this->render_admin_page( 'includes/screen-settings.php', array( 'tab' => 'templates' ) );
+		$html = $this->render_admin_page( 'settings', array( 'tab' => 'templates' ) );
 
 		$this->assertStringContainsString( 'CUSTOM HEADER', $html );
 	}

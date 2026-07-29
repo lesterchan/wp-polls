@@ -106,7 +106,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 	 */
 	public function test_add_poll_inserts_question_and_answers() {
 		$this->render_admin_page(
-			'includes/screen-add.php',
+			'add',
 			array(),
 			$this->add_poll_post( 'Which editor?', array( 'vim', 'emacs', 'nano' ) )
 		);
@@ -127,7 +127,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		global $wpdb;
 
 		$this->render_admin_page(
-			'includes/screen-add.php',
+			'add',
 			array(),
 			$this->add_poll_post( '   ', array( 'Yes', 'No' ) )
 		);
@@ -147,7 +147,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$post['_wpnonce'] = 'not-a-nonce';
 
 		try {
-			$this->render_admin_page( 'includes/screen-add.php', array(), $post );
+			$this->render_admin_page( 'add', array(), $post );
 			$this->fail( 'the request was not refused' );
 		} catch ( WPDieException $e ) {
 			unset( $e );
@@ -163,7 +163,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 	 */
 	public function test_add_poll_filters_markup_in_the_question() {
 		$this->render_admin_page(
-			'includes/screen-add.php',
+			'add',
 			array(),
 			$this->add_poll_post( 'Tags <em>ok</em> <script>alert(1)</script>' )
 		);
@@ -182,7 +182,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 	 */
 	public function test_add_poll_in_the_future_is_not_active_yet() {
 		$this->render_admin_page(
-			'includes/screen-add.php',
+			'add',
 			array(),
 			$this->add_poll_post( 'Future poll', array( 'Yes', 'No' ), $this->date_fields( 'pollq_timestamp', DAY_IN_SECONDS ) )
 		);
@@ -203,7 +203,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		unset( $post['pollq_expiry_no'] );
 		$post = array_merge( $post, $this->date_fields( 'pollq_expiry', -DAY_IN_SECONDS ) );
 
-		$this->render_admin_page( 'includes/screen-add.php', array(), $post );
+		$this->render_admin_page( 'add', array(), $post );
 
 		$poll = $this->find_poll( 'Expired poll' );
 
@@ -218,7 +218,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 	 */
 	public function test_add_poll_stores_the_multiple_answer_limit() {
 		$this->render_admin_page(
-			'includes/screen-add.php',
+			'add',
 			array(),
 			$this->add_poll_post(
 				'Multi poll',
@@ -232,7 +232,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$this->assertSame( 2, (int) $this->find_poll( 'Multi poll' )->pollq_multiple );
 
 		$this->render_admin_page(
-			'includes/screen-add.php',
+			'add',
 			array(),
 			$this->add_poll_post(
 				'Single poll',
@@ -281,7 +281,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll( array( 'pollq_question' => 'Original question' ) );
 
 		$this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'edit',
 				'id'   => (string) $poll_id,
@@ -308,7 +308,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$answers = $this->answer_ids( $poll_id );
 
 		$this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'edit',
 				'id'   => (string) $poll_id,
@@ -340,7 +340,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$answers = $this->answer_ids( $poll_id );
 
 		$this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'edit',
 				'id'   => (string) $poll_id,
@@ -372,7 +372,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 
 		try {
 			$this->render_admin_page(
-				'includes/screen-manage.php',
+				'manage',
 				array(
 					'mode' => 'edit',
 					'id'   => (string) $poll_id,
@@ -399,7 +399,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll( array( 'pollq_question' => 'Before' ) );
 
 		$this->render_admin_page(
-			'includes/screen-manage.php',
+			'manage',
 			array(
 				'mode' => 'edit',
 				'id'   => (string) $poll_id,

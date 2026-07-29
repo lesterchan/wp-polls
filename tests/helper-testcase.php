@@ -98,23 +98,22 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 	protected $admin_page_notices = array();
 
 	/**
-	 * Render one of the legacy admin pages and return its HTML.
+	 * Render one of the plugin's admin screens and return its HTML.
 	 *
-	 * Those pages are procedural and run at global scope under wp-admin, so they
-	 * reach for $wpdb and $month without declaring them. Requiring them from
-	 * inside a method only works because this helper pulls the same globals in
-	 * first; without that they would silently render half a page.
+	 * The screens read $month and $wp_locale, which wp-admin has in scope by the
+	 * time a page callback runs, so this helper pulls the same globals in first;
+	 * without that they would silently render half a page.
 	 *
-	 * Every notice, warning and deprecation raised while the page runs is
+	 * Every notice, warning and deprecation raised while the screen runs is
 	 * collected into $admin_page_notices so a test can assert the page is clean
 	 * under PHP 8 rather than only that it produced some output.
 	 *
-	 * @param string $file  File name relative to the plugin root.
-	 * @param array  $get   $_GET for the request.
-	 * @param array  $post  $_POST for the request.
+	 * @param string $screen Screen class suffix: 'manage', 'add' or 'settings'.
+	 * @param array  $get    $_GET for the request.
+	 * @param array  $post   $_POST for the request.
 	 * @return string
 	 */
-	protected function render_admin_page( $file, $get = array(), $post = array() ) {
+	protected function render_admin_page( $screen, $get = array(), $post = array() ) {
 		global $wpdb, $month, $wp_locale, $hook_suffix;
 
 		$this->admin_page_notices = array();
@@ -131,10 +130,10 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 			}
 		);
 
-		// wp-admin fires admin_init before it includes a plugin's page file, so by
-		// the time the Options and Templates screens run their sections and fields
-		// are registered. Requiring the file directly skips that, and
-		// do_settings_sections() would then render an empty screen.
+		// wp-admin fires admin_init before it reaches a plugin's page callback, so
+		// by the time either tab runs its sections and fields are registered.
+		// Calling the screen directly skips that, and do_settings_sections()
+		// would then render an empty screen.
 		WP_Polls_Settings::register();
 
 		$depth = ob_get_level();
@@ -142,7 +141,7 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 
 		try {
 			ob_start();
-			require WP_POLLS_DIR . $file;
+			call_user_func( array( 'WP_Polls_Admin', 'render_' . $screen ) );
 		} finally {
 			// check_admin_referer() calls wp_die(), which throws out of the
 			// require, so the buffer has to be closed here or it leaks into the
