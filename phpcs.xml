@@ -92,6 +92,7 @@
 		<exclude-pattern>/includes/class-wp-polls-vote.php</exclude-pattern>
 		<exclude-pattern>/includes/class-wp-polls-display.php</exclude-pattern>
 		<exclude-pattern>/includes/class-wp-polls-list-table.php</exclude-pattern>
+		<exclude-pattern>/includes/class-wp-polls-settings.php</exclude-pattern>
 		<exclude-pattern>/includes/screen-*.php</exclude-pattern>
 	</rule>
 

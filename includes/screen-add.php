@@ -93,7 +93,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				);
 				if ( ! $add_poll_question ) {
 					/* translators: %s: value. */
-					$text .= '<p style="color: red;">' . sprintf( __( 'Error In Adding Poll \'%s\'.', 'wp-polls' ), $pollq_question ) . '</p>';
+					$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll \'%s\'.', 'wp-polls' ), $pollq_question ) . '</p></div>';
 				}
 				// Add Poll Answers.
 				$polla_answers = isset( $_POST['polla_answers'] ) ? array_map( 'trim', array_map( 'wp_kses_post', wp_unslash( (array) $_POST['polla_answers'] ) ) ) : array();
@@ -116,10 +116,10 @@ if ( ! empty( $_POST['do'] ) ) {
 						);
 						if ( ! $add_poll_answers ) {
 							/* translators: %s: value. */
-							$text .= '<p style="color: red;">' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer ) . '</p>';
+							$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer ) . '</p></div>';
 						}
 					} else {
-						$text .= '<p style="color: red;">' . __( 'Poll\'s Answer is empty.', 'wp-polls' ) . '</p>';
+						$text .= '<div class="notice notice-error inline"><p>' . __( 'Poll\'s Answer is empty.', 'wp-polls' ) . '</p></div>';
 					}
 				}
 				// Update Lastest Poll ID To Poll Options.
@@ -129,10 +129,10 @@ if ( ! empty( $_POST['do'] ) ) {
 				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 				if ( empty( $text ) ) {
 					/* translators: 1: value, 2: value, 3: value, 4: value. */
-					$text = '<p style="color: green;">' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
+					$text = '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p></div>';
 				} elseif ( $add_poll_question ) {
 						/* translators: 1: value, 2: value, 3: value, 4: value. */
-						$text .= '<p style="color: green;">' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
+						$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p></div>';
 				}
 					/**
 				 * Fires after a poll has been created.
@@ -144,7 +144,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				do_action( 'wp_polls_add_poll', $latest_pollid );
 				WP_Polls::cron_polls_place();
 			} else {
-				$text .= '<p style="color: red;">' . __( 'Poll Question is empty.', 'wp-polls' ) . '</p>';
+				$text .= '<div class="notice notice-error inline"><p>' . __( 'Poll Question is empty.', 'wp-polls' ) . '</p></div>';
 			}
 			break;
 	}
@@ -233,7 +233,7 @@ $poll_noquestion = 2;
 				<th scope="row"><?php esc_html_e( 'End Date/Time', 'wp-polls' ); ?></th>
 				<td>
 					<input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" data-poll-action="toggle-expiry" />&nbsp;<label for="pollq_expiry_no"><?php esc_html_e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label>
-					<?php WP_Polls_Admin::poll_timestamp( WP_Polls::now(), 'pollq_expiry', 'none' ); ?>
+					<?php WP_Polls_Admin::poll_timestamp( WP_Polls::now(), 'pollq_expiry', true ); ?>
 				</td>
 			</tr>
 		</table>

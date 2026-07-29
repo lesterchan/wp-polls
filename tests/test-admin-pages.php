@@ -60,8 +60,11 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 				),
 			),
 			'add poll'     => array( 'includes/screen-add.php', array() ),
-			'poll options' => array( 'includes/screen-options.php', array() ),
-			'templates'    => array( 'includes/screen-templates.php', array() ),
+			'settings'     => array( 'includes/screen-settings.php', array() ),
+			'templates'    => array(
+				'includes/screen-settings.php',
+				array( 'tab' => 'templates' ),
+			),
 		);
 	}
 
@@ -167,7 +170,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_question_is_not_double_escaped() {
 		$this->make_poll( array( 'pollq_question' => 'Tabs & "spaces"?' ) );
 
-		foreach ( array( 'includes/screen-manage.php', 'includes/screen-options.php' ) as $file ) {
+		foreach ( array( 'includes/screen-manage.php', 'includes/screen-settings.php' ) as $file ) {
 			$html = $this->render_admin_page( $file );
 
 			$this->assertStringNotContainsString( '&amp;amp;', $html, $file );
@@ -285,7 +288,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_offers_only_saveable_bar_styles() {
-		$html = $this->render_admin_page( 'includes/screen-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-settings.php' );
 
 		$styles = WP_Polls_Settings::bar_styles();
 		$this->assertNotEmpty( $styles, 'no bar styles found on disk' );
@@ -311,7 +314,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'bar.background', 'aabbcc' );
 		WP_Polls_Options::set( 'bar.border', 'ddeeff' );
 
-		$html = $this->render_admin_page( 'includes/screen-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-settings.php' );
 
 		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_bg"[^>]*value="#aabbcc"/', $html );
 		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_border"[^>]*value="#ddeeff"/', $html );
@@ -338,7 +341,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$style  = end( $styles );
 		WP_Polls_Options::set( 'bar.style', $style );
 
-		$html = $this->render_admin_page( 'includes/screen-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-settings.php' );
 
 		$this->assertMatchesRegularExpression(
 			'/id="poll_bar_style-' . preg_quote( $style, '/' ) . '"[^>]*\schecked/',
@@ -367,7 +370,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_templates_posts_to_the_right_settings_group() {
-		$html = $this->render_admin_page( 'includes/screen-templates.php' );
+		$html = $this->render_admin_page( 'includes/screen-settings.php', array( 'tab' => 'templates' ) );
 
 		$this->assertStringContainsString( 'action="options.php"', $html );
 		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html );
@@ -379,7 +382,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_posts_to_the_right_settings_group() {
-		$html = $this->render_admin_page( 'includes/screen-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-settings.php' );
 
 		$this->assertStringContainsString( 'action="options.php"', $html );
 		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html );
@@ -563,65 +566,82 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * Neither settings screen writes its own form markup.
+	 * The settings screen writes no form markup of its own.
 	 *
-	 * Both are meant to be nothing but settings_fields(), do_settings_sections()
-	 * and submit_button(), with every row declared in WP_Polls_Settings. A table or
-	 * an input appearing in either file means a field has been added outside the
-	 * Settings API, where the sanitiser and the section ordering cannot see it.
+	 * It is meant to be nothing but the tab strip, settings_fields(),
+	 * do_settings_sections() and submit_button(), with every row declared in
+	 * WP_Polls_Settings. A table or an input appearing in the file means a field
+	 * has been added outside the Settings API, where the sanitiser and the
+	 * section ordering cannot see it.
 	 *
 	 * @return void
 	 */
-	public function test_settings_screens_contain_no_hand_written_form_markup() {
-		foreach ( array( 'includes/screen-options.php', 'includes/screen-templates.php' ) as $file ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a file from the plugin under test, not a remote resource.
-			$source = file_get_contents( WP_POLLS_DIR . $file );
+	public function test_the_settings_screen_contains_no_hand_written_form_markup() {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a file from the plugin under test, not a remote resource.
+		$source = file_get_contents( WP_POLLS_DIR . 'includes/screen-settings.php' );
 
-			foreach ( array( '<table', '<tr', '<th', '<td', '<input', '<select', '<textarea' ) as $tag ) {
-				$this->assertStringNotContainsString( $tag, $source, $file . ' writes ' . $tag . ' by hand' );
-			}
+		foreach ( array( '<table', '<tr', '<th', '<td', '<input', '<select', '<textarea' ) as $tag ) {
+			$this->assertStringNotContainsString( $tag, $source, 'screen-settings.php writes ' . $tag . ' by hand' );
 		}
 	}
 
 	/**
-	 * Every control on both screens posts into the plugin's own option.
+	 * The two settings groups are tabs of one page, not two menu entries.
+	 *
+	 * @return void
+	 */
+	public function test_the_settings_screen_renders_a_tab_for_each_group() {
+		$html = $this->render_admin_page( 'includes/screen-settings.php', array( 'tab' => 'templates' ) );
+
+		$this->assertStringContainsString( 'nav-tab-wrapper', $html, 'The tab strip is core markup.' );
+
+		foreach ( WP_Polls_Settings::tabs() as $tab => $label ) {
+			$this->assertStringContainsString( esc_html( $label ), $html, $tab . ' has no tab' );
+			$this->assertStringContainsString( 'tab=' . $tab, $html, $tab . ' has no link' );
+		}
+
+		$this->assertStringContainsString( 'nav-tab-active', $html, 'The current tab is marked active.' );
+	}
+
+	/**
+	 * Every control on both tabs posts into the plugin's own option.
 	 *
 	 * A field named anything else is either dropped on save or written to a row
 	 * nothing reads, and both failures are silent.
 	 *
 	 * @return void
 	 */
-	public function test_settings_screens_only_post_into_the_option() {
+	public function test_both_tabs_only_post_into_the_option() {
 		// settings_fields() and submit_button() contribute these.
 		$allowed = array( '_wpnonce', '_wp_http_referer', 'option_page', 'action', 'submit' );
 
-		foreach ( array( 'includes/screen-options.php', 'includes/screen-templates.php' ) as $file ) {
-			$html = $this->render_admin_page( $file );
+		foreach ( array_keys( WP_Polls_Settings::tabs() ) as $tab ) {
+			$html = $this->render_admin_page( 'includes/screen-settings.php', array( 'tab' => $tab ) );
 
 			preg_match_all( '/\sname="([^"]+)"/', $html, $matches );
-			$this->assertNotEmpty( $matches[1], $file . ' rendered no fields' );
+			$this->assertNotEmpty( $matches[1], $tab . ' rendered no fields' );
 
 			foreach ( $matches[1] as $name ) {
 				if ( in_array( $name, $allowed, true ) ) {
 					continue;
 				}
 
-				$this->assertStringStartsWith( WP_Polls_Options::OPTION . '[', $name, $file );
+				$this->assertStringStartsWith( WP_Polls_Options::OPTION . '[', $name, $tab );
 			}
 		}
 	}
 
 	/**
-	 * The Poll Options screen renders every section it registers.
+	 * The Options tab renders every section it registers.
 	 *
 	 * @return void
 	 */
 	public function test_options_renders_every_registered_section() {
 		global $wp_settings_sections;
 
-		$html = $this->render_admin_page( 'includes/screen-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-settings.php' );
 
-		foreach ( $wp_settings_sections[ WP_Polls_Settings::PAGE_OPTIONS ] as $section ) {
+		foreach ( $wp_settings_sections[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ] as $section ) {
 			// Matched loosely on purpose: do_settings_sections() gained an id
 			// attribute on the heading in WP 6.6, so a literal <h2> only holds on
 			// the older end of the versions this plugin supports.
@@ -640,7 +660,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_templates_renders_stored_template() {
 		WP_Polls_Options::set( 'templates.voteheader', '<p>CUSTOM HEADER</p>' );
 
-		$html = $this->render_admin_page( 'includes/screen-templates.php' );
+		$html = $this->render_admin_page( 'includes/screen-settings.php', array( 'tab' => 'templates' ) );
 
 		$this->assertStringContainsString( 'CUSTOM HEADER', $html );
 	}

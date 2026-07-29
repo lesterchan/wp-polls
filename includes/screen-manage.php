@@ -124,7 +124,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			);
 			if ( ! $edit_poll_question ) {
 				/* translators: %s: value. */
-				$text = '<p style="color: blue">' . sprintf( __( 'No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p>';
+				$text = '<div class="notice notice-info inline"><p>' . sprintf( __( 'No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 			}
 			// Update Polls' Answers.
 			$polla_aids     = array();
@@ -157,15 +157,15 @@ if ( ! empty( $_POST['do'] ) ) {
 					);
 					if ( ! $edit_poll_answer ) {
 						/* translators: %s: value. */
-						$text .= '<p style="color: blue">' . sprintf( __( 'No Changes Had Been Made To Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p>';
+						$text .= '<div class="notice notice-info inline"><p>' . sprintf( __( 'No Changes Had Been Made To Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p></div>';
 					} else {
 						/* translators: %s: value. */
-						$text .= '<p style="color: green">' . sprintf( __( 'Poll\'s Answer \'%s\' Edited Successfully.', 'wp-polls' ), $polla_answers ) . '</p>';
+						$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll\'s Answer \'%s\' Edited Successfully.', 'wp-polls' ), $polla_answers ) . '</p></div>';
 					}
 				}
 			} else {
 				/* translators: %s: value. */
-				$text .= '<p style="color: red">' . sprintf( __( 'Invalid Poll \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p>';
+				$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Invalid Poll \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 			}
 			// Add Poll Answers (If Needed).
 			$polla_answers_new = isset( $_POST['polla_answers_new'] ) ? array_map( 'trim', array_map( 'wp_kses_post', wp_unslash( (array) $_POST['polla_answers_new'] ) ) ) : array();
@@ -191,10 +191,10 @@ if ( ! empty( $_POST['do'] ) ) {
 						);
 						if ( ! $add_poll_answers ) {
 							/* translators: %s: value. */
-							$text .= '<p style="color: red;">' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer_new ) . '</p>';
+							$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer_new ) . '</p></div>';
 						} else {
 							/* translators: %s: value. */
-							$text .= '<p style="color: green;">' . sprintf( __( 'Poll\'s Answer \'%s\' Added Successfully.', 'wp-polls' ), $polla_answer_new ) . '</p>';
+							$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll\'s Answer \'%s\' Added Successfully.', 'wp-polls' ), $polla_answer_new ) . '</p></div>';
 						}
 					}
 					++$i;
@@ -202,7 +202,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			}
 			if ( empty( $text ) ) {
 				/* translators: %s: value. */
-				$text = '<p style="color: green">' . sprintf( __( 'Poll \'%s\' Edited Successfully.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p>';
+				$text = '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Edited Successfully.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 			}
 			// Update Lastest Poll ID To Poll Options.
 			$latest_pollid     = WP_Polls::polls_latest_id();
@@ -245,7 +245,7 @@ switch ( $poll_mode ) {
 			if ( ! empty( $text ) ) {
 				echo wp_kses_post( '<div id="message" class="notice notice-success is-dismissible">' . removeslashes( $text ) . '</div>' );
 			} else {
-				echo '<div id="message" class="notice notice-success" style="display: none;"></div>';
+				echo '<div id="message" class="notice notice-success hidden"></div>';
 			}
 			?>
 			<form method="post" action="<?php echo esc_url( WP_Polls_List_Table::page_url( array( 'mode' => 'edit' ), $poll_id ) ); ?>">
@@ -357,7 +357,7 @@ switch ( $poll_mode ) {
 						<td>
 							<?php echo esc_html( WP_Polls_List_Table::format_date( $poll_timestamp ) ); ?><br />
 							<input type="checkbox" name="edit_polltimestamp" id="edit_polltimestamp" value="1" data-poll-action="toggle-timestamp" />&nbsp;<label for="edit_polltimestamp"><?php esc_html_e( 'Edit Start Date/Time', 'wp-polls' ); ?></label><br />
-							<?php WP_Polls_Admin::poll_timestamp( $poll_timestamp, 'pollq_timestamp', 'none' ); ?>
+							<?php WP_Polls_Admin::poll_timestamp( $poll_timestamp, 'pollq_timestamp', true ); ?>
 						</td>
 					</tr>
 					<tr>
@@ -375,7 +375,7 @@ switch ( $poll_mode ) {
 							<label for="pollq_expiry_no"><?php esc_html_e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label><br />
 							<?php
 							if ( empty( $poll_expiry ) ) {
-								WP_Polls_Admin::poll_timestamp( WP_Polls::now(), 'pollq_expiry', 'none' );
+								WP_Polls_Admin::poll_timestamp( WP_Polls::now(), 'pollq_expiry', true );
 							} else {
 								WP_Polls_Admin::poll_timestamp( $poll_expiry, 'pollq_expiry' );
 							}
@@ -390,15 +390,15 @@ switch ( $poll_mode ) {
 
 					// Only one of the two is ever the action that makes sense, but
 					// which one changes without a reload once the button is used.
-					$poll_open_display  = 1 === $poll_active ? 'none' : '';
-					$poll_close_display = 1 === $poll_active ? '' : 'none';
+					$poll_open_class  = 1 === $poll_active ? ' hidden' : '';
+					$poll_close_class = 1 === $poll_active ? '' : ' hidden';
 					/* translators: %s: The poll question. */
 					$close_confirm = sprintf( __( 'You are about to CLOSE this poll \'%s\'.', 'wp-polls' ), $poll_question_text );
 					/* translators: %s: The poll question. */
 					$open_confirm = sprintf( __( 'You are about to OPEN this poll \'%s\'.', 'wp-polls' ), $poll_question_text );
 					?>
-					<button type="button" class="button" id="close_poll" data-poll-action="close-poll" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php echo esc_attr( $close_confirm ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_close-poll' ) ); ?>" style="display: <?php echo esc_attr( $poll_close_display ); ?>;"><?php esc_html_e( 'Close Poll', 'wp-polls' ); ?></button>
-					<button type="button" class="button" id="open_poll" data-poll-action="open-poll" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php echo esc_attr( $open_confirm ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_open-poll' ) ); ?>" style="display: <?php echo esc_attr( $poll_open_display ); ?>;"><?php esc_html_e( 'Open Poll', 'wp-polls' ); ?></button>
+					<button type="button" class="button<?php echo esc_attr( $poll_close_class ); ?>" id="close_poll" data-poll-action="close-poll" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php echo esc_attr( $close_confirm ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_close-poll' ) ); ?>" ><?php esc_html_e( 'Close Poll', 'wp-polls' ); ?></button>
+					<button type="button" class="button<?php echo esc_attr( $poll_open_class ); ?>" id="open_poll" data-poll-action="open-poll" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php echo esc_attr( $open_confirm ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_open-poll' ) ); ?>" ><?php esc_html_e( 'Open Poll', 'wp-polls' ); ?></button>
 					<a class="button" href="<?php echo esc_url( WP_Polls_List_Table::page_url() ); ?>"><?php esc_html_e( 'Cancel', 'wp-polls' ); ?></a>
 				</p>
 			</form>
@@ -418,7 +418,7 @@ switch ( $poll_mode ) {
 			<hr class="wp-header-end" />
 
 			<!-- Where the AJAX actions report what they did. -->
-			<div id="message" class="notice notice-success" style="display: none;"></div>
+			<div id="message" class="notice notice-success hidden"></div>
 
 			<?php $poll_list->display(); ?>
 

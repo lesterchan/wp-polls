@@ -11,7 +11,7 @@
  */
 
 /**
- * Settings API registration and the sanitize callback both screens share.
+ * Settings API registration and the sanitize callback both tabs share.
  *
  * @covers WP_Polls_Settings
  */
@@ -139,7 +139,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * The setting is registered under the group both screens post to.
+	 * The setting is registered under the group both tabs post to.
 	 */
 	public function test_setting_is_registered() {
 		WP_Polls_Settings::register();
@@ -152,7 +152,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 	 * Writing the option reschedules the cron job.
 	 *
 	 * The expiry setting decides the schedule, and the save happens on
-	 * options.php. The callback used to be added while the Poll Options screen
+	 * options.php. The callback used to be added while the Poll Options tab
 	 * rendered, so it was never registered on the request that did the saving.
 	 */
 	public function test_saving_the_option_reschedules_the_cron() {
@@ -175,7 +175,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 
 		global $wp_settings_sections, $wp_settings_fields;
 
-		foreach ( array( WP_Polls_Settings::PAGE_OPTIONS, WP_Polls_Settings::PAGE_TEMPLATES ) as $page ) {
+		foreach ( array( WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ), WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_TEMPLATES ) ) as $page ) {
 			$this->assertArrayHasKey( $page, $wp_settings_sections, $page . ' registered no sections' );
 			$this->assertNotEmpty( $wp_settings_sections[ $page ], $page . ' registered no sections' );
 			$this->assertArrayHasKey( $page, $wp_settings_fields, $page . ' registered no fields' );
@@ -196,7 +196,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 		global $wp_settings_fields;
 
 		$ids = array();
-		foreach ( $wp_settings_fields[ WP_Polls_Settings::PAGE_TEMPLATES ] as $section ) {
+		foreach ( $wp_settings_fields[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_TEMPLATES ) ] as $section ) {
 			$ids = array_merge( $ids, array_keys( $section ) );
 		}
 
@@ -218,12 +218,12 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 
 		global $wp_settings_sections, $wp_settings_fields;
 
-		$sections = count( $wp_settings_sections[ WP_Polls_Settings::PAGE_OPTIONS ] );
-		$fields   = count( $wp_settings_fields[ WP_Polls_Settings::PAGE_OPTIONS ]['wp_polls_bar'] );
+		$sections = count( $wp_settings_sections[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ] );
+		$fields   = count( $wp_settings_fields[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ]['wp_polls_bar'] );
 
 		WP_Polls_Settings::register();
 
-		$this->assertCount( $sections, $wp_settings_sections[ WP_Polls_Settings::PAGE_OPTIONS ] );
-		$this->assertCount( $fields, $wp_settings_fields[ WP_Polls_Settings::PAGE_OPTIONS ]['wp_polls_bar'] );
+		$this->assertCount( $sections, $wp_settings_sections[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ] );
+		$this->assertCount( $fields, $wp_settings_fields[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ]['wp_polls_bar'] );
 	}
 }

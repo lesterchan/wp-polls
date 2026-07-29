@@ -1,18 +1,18 @@
 <?php
 /**
- * Settings API registration for the Poll Options and Poll Templates screens.
+ * Settings API registration for the Poll Options and Poll Templates tabs.
  *
- * Both screens are built entirely out of add_settings_section() and
- * add_settings_field(): screen-options.php and screen-templates.php open the
- * form, call do_settings_sections() and close it, so every row on both screens
+ * Both tabs are built entirely out of add_settings_section() and
+ * add_settings_field(): screen-settings.php draws the tabs, opens the form,
+ * hands it to do_settings_sections() and closes it, so every row on both tabs
  * is declared here rather than written out as hand rolled table markup.
  *
- * Both screens write into the same poll_options row. That matters: the Settings
- * API hands sanitize_callback only the fields the submitting form rendered,
- * and update_option() then replaces the entire row - so a naive callback that
- * returns its input would erase whichever half of the settings the other
- * screen owns. self::sanitize() therefore merges the submitted subset into the
- * stored value instead of replacing it.
+ * Both tabs write into the same wp_polls_options row. That matters: the
+ * Settings API hands sanitize_callback only the fields the submitting form
+ * rendered, and update_option() then replaces the entire row - so a naive
+ * callback that returns its input would erase whichever half of the settings
+ * the other tab owns. self::sanitize() therefore merges the submitted subset
+ * into the stored value instead of replacing it.
  *
  * @package WP-Polls
  */
@@ -25,28 +25,61 @@ defined( 'ABSPATH' ) || exit;
 class WP_Polls_Settings {
 
 	/**
-	 * Settings group both screens post under.
+	 * Settings group both tabs post under.
 	 *
 	 * @var string
 	 */
 	const GROUP = 'wp_polls_options';
 
 	/**
-	 * Page slug the Poll Options sections and fields are registered under.
-	 *
-	 * Not the menu slug: the menu still points at the plugin file, and this only
-	 * has to name the bucket do_settings_sections() reads back.
+	 * Slug of the single settings screen the two tabs live on.
 	 *
 	 * @var string
 	 */
-	const PAGE_OPTIONS = 'wp-polls-options';
+	const PAGE = 'wp-polls-settings';
 
 	/**
-	 * Page slug the Poll Templates sections and fields are registered under.
+	 * The Options tab, and the bucket its sections are registered under.
+	 *
+	 * A tab is not a screen: both tabs are one page posting one setting, and
+	 * these only name the buckets do_settings_sections() reads back.
 	 *
 	 * @var string
 	 */
-	const PAGE_TEMPLATES = 'wp-polls-templates';
+	const TAB_OPTIONS = 'options';
+
+	/**
+	 * The Templates tab, and the bucket its sections are registered under.
+	 *
+	 * @var string
+	 */
+	const TAB_TEMPLATES = 'templates';
+
+	/**
+	 * Section ids on the Options tab.
+	 *
+	 * @var string
+	 */
+	const SECTION_BAR          = 'wp_polls_bar';
+	const SECTION_AJAX         = 'wp_polls_ajax';
+	const SECTION_ANSWERS_SORT = 'wp_polls_answers_sort';
+	const SECTION_RESULTS_SORT = 'wp_polls_results_sort';
+	const SECTION_VOTE         = 'wp_polls_vote';
+	const SECTION_LOGGING      = 'wp_polls_logging';
+	const SECTION_ARCHIVE      = 'wp_polls_archive';
+	const SECTION_STATS        = 'wp_polls_stats';
+	const SECTION_CURRENT      = 'wp_polls_current';
+
+	/**
+	 * Section ids on the Templates tab.
+	 *
+	 * @var string
+	 */
+	const SECTION_TEMPLATE_VARIABLES = 'wp_polls_template_variables';
+	const SECTION_TEMPLATES_VOTE     = 'wp_polls_templates_vote';
+	const SECTION_TEMPLATES_RESULT   = 'wp_polls_templates_result';
+	const SECTION_TEMPLATES_ARCHIVE  = 'wp_polls_templates_archive';
+	const SECTION_TEMPLATES_MISC     = 'wp_polls_templates_misc';
 
 	/**
 	 * Hook registration.
@@ -62,6 +95,57 @@ class WP_Polls_Settings {
 		// loads that screen - a callback added while the screen renders would only
 		// ever run on a request that is not saving anything.
 		add_action( 'update_option_' . WP_Polls_Options::OPTION, array( 'WP_Polls', 'cron_polls_place' ) );
+	}
+
+	/**
+	 * The tabs of the settings screen, in order, as slug => label.
+	 *
+	 * @return array
+	 */
+	public static function tabs() {
+		return array(
+			self::TAB_OPTIONS   => __( 'Poll Options', 'wp-polls' ),
+			self::TAB_TEMPLATES => __( 'Poll Templates', 'wp-polls' ),
+		);
+	}
+
+	/**
+	 * The bucket a tab's sections and fields are registered under.
+	 *
+	 * @param string $tab Tab slug.
+	 * @return string
+	 */
+	public static function tab_bucket( $tab ) {
+		return self::PAGE . '-' . $tab;
+	}
+
+	/**
+	 * The tab the request asked for, defaulting to the first one.
+	 *
+	 * @return string
+	 */
+	public static function current_tab() {
+		// Reading which tab to render. Nothing is written on this request, and
+		// the value is checked against the fixed list below.
+		$requested = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+
+		return isset( self::tabs()[ $requested ] ) ? $requested : self::TAB_OPTIONS;
+	}
+
+	/**
+	 * The URL of one tab of the settings screen.
+	 *
+	 * @param string $tab Tab slug.
+	 * @return string
+	 */
+	public static function tab_url( $tab ) {
+		return add_query_arg(
+			array(
+				'page' => self::PAGE,
+				'tab'  => $tab,
+			),
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**
@@ -96,7 +180,7 @@ class WP_Polls_Settings {
 	 * @return void
 	 */
 	protected static function register_options_fields() {
-		$page = self::PAGE_OPTIONS;
+		$page = self::tab_bucket( self::TAB_OPTIONS );
 
 		$yes_no = array(
 			0 => __( 'No', 'wp-polls' ),
@@ -116,14 +200,14 @@ class WP_Polls_Settings {
 		);
 
 		// --- Poll Bar Style ---------------------------------------------------
-		add_settings_section( 'wp_polls_bar', __( 'Poll Bar Style', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_BAR, __( 'Poll Bar Style', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_bar_style',
 			__( 'Poll Bar Style', 'wp-polls' ),
 			array( __CLASS__, 'field_bar_style' ),
 			$page,
-			'wp_polls_bar'
+			self::SECTION_BAR
 		);
 
 		add_settings_field(
@@ -131,7 +215,7 @@ class WP_Polls_Settings {
 			__( 'Poll Bar Background', 'wp-polls' ),
 			array( __CLASS__, 'field_bar_color' ),
 			$page,
-			'wp_polls_bar',
+			self::SECTION_BAR,
 			array(
 				'label_for' => 'poll_bar_bg',
 				'path'      => 'bar.background',
@@ -144,7 +228,7 @@ class WP_Polls_Settings {
 			__( 'Poll Bar Border', 'wp-polls' ),
 			array( __CLASS__, 'field_bar_color' ),
 			$page,
-			'wp_polls_bar',
+			self::SECTION_BAR,
 			array(
 				'label_for' => 'poll_bar_border',
 				'path'      => 'bar.border',
@@ -157,7 +241,7 @@ class WP_Polls_Settings {
 			__( 'Poll Bar Height', 'wp-polls' ),
 			array( __CLASS__, 'field_text' ),
 			$page,
-			'wp_polls_bar',
+			self::SECTION_BAR,
 			array(
 				'label_for'  => 'poll_bar_height',
 				'path'       => 'bar.height',
@@ -177,18 +261,18 @@ class WP_Polls_Settings {
 			__( 'Your poll bar will look like this', 'wp-polls' ),
 			array( __CLASS__, 'field_bar_preview' ),
 			$page,
-			'wp_polls_bar'
+			self::SECTION_BAR
 		);
 
 		// --- Polls AJAX Style -------------------------------------------------
-		add_settings_section( 'wp_polls_ajax', __( 'Polls AJAX Style', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_AJAX, __( 'Polls AJAX Style', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_ajax_loading',
 			__( 'Show Loading Image With Text', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_ajax',
+			self::SECTION_AJAX,
 			array(
 				'label_for' => 'poll_ajax_loading',
 				'path'      => 'ajax.loading',
@@ -201,7 +285,7 @@ class WP_Polls_Settings {
 			__( 'Show Fading In And Fading Out Of Poll', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_ajax',
+			self::SECTION_AJAX,
 			array(
 				'label_for' => 'poll_ajax_fading',
 				'path'      => 'ajax.fading',
@@ -210,14 +294,14 @@ class WP_Polls_Settings {
 		);
 
 		// --- Sorting Of Poll Answers -----------------------------------------
-		add_settings_section( 'wp_polls_answers_sort', __( 'Sorting Of Poll Answers', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_ANSWERS_SORT, __( 'Sorting Of Poll Answers', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_ans_sortby',
 			__( 'Sort Poll Answers By:', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_answers_sort',
+			self::SECTION_ANSWERS_SORT,
 			array(
 				'label_for' => 'poll_ans_sortby',
 				'path'      => 'sort.answers_by',
@@ -230,7 +314,7 @@ class WP_Polls_Settings {
 			__( 'Sort Order Of Poll Answers:', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_answers_sort',
+			self::SECTION_ANSWERS_SORT,
 			array(
 				'label_for' => 'poll_ans_sortorder',
 				'path'      => 'sort.answers_order',
@@ -239,14 +323,14 @@ class WP_Polls_Settings {
 		);
 
 		// --- Sorting Of Poll Results -----------------------------------------
-		add_settings_section( 'wp_polls_results_sort', __( 'Sorting Of Poll Results', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_RESULTS_SORT, __( 'Sorting Of Poll Results', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_result_sortby',
 			__( 'Sort Poll Results By:', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_results_sort',
+			self::SECTION_RESULTS_SORT,
 			array(
 				'label_for' => 'poll_result_sortby',
 				'path'      => 'sort.results_by',
@@ -259,7 +343,7 @@ class WP_Polls_Settings {
 			__( 'Sort Order Of Poll Results:', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_results_sort',
+			self::SECTION_RESULTS_SORT,
 			array(
 				'label_for' => 'poll_result_sortorder',
 				'path'      => 'sort.results_order',
@@ -268,14 +352,14 @@ class WP_Polls_Settings {
 		);
 
 		// --- Allow To Vote ----------------------------------------------------
-		add_settings_section( 'wp_polls_vote', __( 'Allow To Vote', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_VOTE, __( 'Allow To Vote', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_allowtovote',
 			__( 'Who Is Allowed To Vote?', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_vote',
+			self::SECTION_VOTE,
 			array(
 				'label_for' => 'poll_allowtovote',
 				'path'      => 'allow_to_vote',
@@ -288,14 +372,14 @@ class WP_Polls_Settings {
 		);
 
 		// --- Logging Method ---------------------------------------------------
-		add_settings_section( 'wp_polls_logging', __( 'Logging Method', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_LOGGING, __( 'Logging Method', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_logging_method',
 			__( 'Poll Logging Method:', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_logging',
+			self::SECTION_LOGGING,
 			array(
 				'label_for' => 'poll_logging_method',
 				'path'      => 'logging_method',
@@ -314,7 +398,7 @@ class WP_Polls_Settings {
 			__( 'Expiry Time For Cookie And Log:', 'wp-polls' ),
 			array( __CLASS__, 'field_text' ),
 			$page,
-			'wp_polls_logging',
+			self::SECTION_LOGGING,
 			array(
 				'label_for'  => 'poll_cookielog_expiry',
 				'path'       => 'cookie_expiry',
@@ -328,7 +412,7 @@ class WP_Polls_Settings {
 			__( 'Header That Contains The IP:', 'wp-polls' ),
 			array( __CLASS__, 'field_text' ),
 			$page,
-			'wp_polls_logging',
+			self::SECTION_LOGGING,
 			array(
 				'label_for'   => 'poll_ip_header',
 				'path'        => 'ip_header',
@@ -338,14 +422,14 @@ class WP_Polls_Settings {
 		);
 
 		// --- Poll Archive -----------------------------------------------------
-		add_settings_section( 'wp_polls_archive', __( 'Poll Archive', 'wp-polls' ), array( __CLASS__, 'section_archive' ), $page );
+		add_settings_section( self::SECTION_ARCHIVE, __( 'Poll Archive', 'wp-polls' ), array( __CLASS__, 'section_archive' ), $page );
 
 		add_settings_field(
 			'poll_archive_perpage',
 			__( 'Number Of Polls Per Page:', 'wp-polls' ),
 			array( __CLASS__, 'field_text' ),
 			$page,
-			'wp_polls_archive',
+			self::SECTION_ARCHIVE,
 			array(
 				'label_for'  => 'poll_archive_perpage',
 				'path'       => 'archive.per_page',
@@ -358,7 +442,7 @@ class WP_Polls_Settings {
 			__( 'Type Of Polls To Display In Poll Archive:', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_archive',
+			self::SECTION_ARCHIVE,
 			array(
 				'label_for' => 'poll_archive_displaypoll',
 				'path'      => 'archive.display_poll',
@@ -375,7 +459,7 @@ class WP_Polls_Settings {
 			__( 'Poll Archive URL:', 'wp-polls' ),
 			array( __CLASS__, 'field_text' ),
 			$page,
-			'wp_polls_archive',
+			self::SECTION_ARCHIVE,
 			array(
 				'label_for'  => 'poll_archive_url',
 				'path'       => 'archive.url',
@@ -385,14 +469,14 @@ class WP_Polls_Settings {
 		);
 
 		// --- WP-Stats ---------------------------------------------------------
-		add_settings_section( 'wp_polls_stats', __( 'WP-Stats', 'wp-polls' ), array( __CLASS__, 'section_stats' ), $page );
+		add_settings_section( self::SECTION_STATS, __( 'WP-Stats', 'wp-polls' ), array( __CLASS__, 'section_stats' ), $page );
 
 		add_settings_field(
 			'poll_stats_display',
 			__( 'Show Poll Statistics In WP-Stats', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_stats',
+			self::SECTION_STATS,
 			array(
 				'label_for' => 'poll_stats_display',
 				'path'      => 'stats_display',
@@ -401,14 +485,14 @@ class WP_Polls_Settings {
 		);
 
 		// --- Current Active Poll ----------------------------------------------
-		add_settings_section( 'wp_polls_current', __( 'Current Active Poll', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_CURRENT, __( 'Current Active Poll', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_currentpoll',
 			__( 'Current Active Poll', 'wp-polls' ),
 			array( __CLASS__, 'field_current_poll' ),
 			$page,
-			'wp_polls_current',
+			self::SECTION_CURRENT,
 			array( 'label_for' => 'poll_currentpoll' )
 		);
 
@@ -417,7 +501,7 @@ class WP_Polls_Settings {
 			__( 'When Poll Is Closed', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
-			'wp_polls_current',
+			self::SECTION_CURRENT,
 			array(
 				'label_for' => 'poll_close',
 				'path'      => 'close',
@@ -440,10 +524,10 @@ class WP_Polls_Settings {
 	 * @return void
 	 */
 	protected static function register_template_fields() {
-		$page = self::PAGE_TEMPLATES;
+		$page = self::tab_bucket( self::TAB_TEMPLATES );
 
 		add_settings_section(
-			'wp_polls_template_variables',
+			self::SECTION_TEMPLATE_VARIABLES,
 			__( 'Template Variables', 'wp-polls' ),
 			array( __CLASS__, 'section_template_variables' ),
 			$page
@@ -489,7 +573,7 @@ class WP_Polls_Settings {
 		$archive_footer = array_values( array_diff( $result_footer, array( '%POLL_ID%' ) ) );
 
 		return array(
-			'wp_polls_templates_vote'    => array(
+			self::SECTION_TEMPLATES_VOTE    => array(
 				'title'  => __( 'Poll Voting Form Templates', 'wp-polls' ),
 				'fields' => array(
 					'voteheader' => array(
@@ -509,7 +593,7 @@ class WP_Polls_Settings {
 					),
 				),
 			),
-			'wp_polls_templates_result'  => array(
+			self::SECTION_TEMPLATES_RESULT  => array(
 				'title'  => __( 'Poll Result Templates', 'wp-polls' ),
 				'fields' => array(
 					'resultheader'  => array(
@@ -539,7 +623,7 @@ class WP_Polls_Settings {
 					),
 				),
 			),
-			'wp_polls_templates_archive' => array(
+			self::SECTION_TEMPLATES_ARCHIVE => array(
 				'title'  => __( 'Poll Archive Templates', 'wp-polls' ),
 				'fields' => array(
 					'pollarchivelink'         => array(
@@ -569,7 +653,7 @@ class WP_Polls_Settings {
 					),
 				),
 			),
-			'wp_polls_templates_misc'    => array(
+			self::SECTION_TEMPLATES_MISC    => array(
 				'title'  => __( 'Poll Misc Templates', 'wp-polls' ),
 				'fields' => array(
 					'disable' => array(
@@ -800,17 +884,11 @@ class WP_Polls_Settings {
 		);
 
 		foreach ( self::bar_styles() as $style ) {
-			// Each swatch is the real bar markup with only the image property
-			// overridden, so what is offered is what is rendered. No height here:
-			// css/wp-polls-admin.css fixes the swatches at a size the gradient is
-			// actually visible at.
-			$swatch = sprintf(
-				'--wp-polls-bar-background: #%1$s; --wp-polls-bar-border: #%2$s; --wp-polls-bar-image: %3$s;',
-				WP_Polls::sanitize_bar_color( $bar['background'] ),
-				WP_Polls::sanitize_bar_color( $bar['border'] ),
-				WP_Polls::bar_image( $style )
-			);
-
+			// Each swatch is the real bar markup carrying the style it offers,
+			// so what is offered is what is rendered. The colours and the
+			// background image come from the stylesheet
+			// WP_Polls_Admin::pollbar_css() generates, rather than from a style
+			// attribute per swatch.
 			echo '<p>';
 			echo '<input type="radio" id="poll_bar_style-' . esc_attr( $style ) . '"';
 			echo ' name="' . esc_attr( self::field_name( 'bar.style' ) ) . '"';
@@ -818,8 +896,8 @@ class WP_Polls_Settings {
 			checked( $style, $bar['style'] );
 			echo ' data-poll-action="pollbar-style" />';
 			echo '<label for="poll_bar_style-' . esc_attr( $style ) . '">&nbsp;&nbsp;&nbsp;';
-			echo '<span class="wp-polls wp-polls-swatch" style="' . esc_attr( $swatch ) . '">';
-			echo '<span class="wp-polls-bar"><span class="wp-polls-bar-fill" style="width: 100%;"></span></span>';
+			echo '<span class="wp-polls wp-polls-swatch" data-poll-style="' . esc_attr( $style ) . '">';
+			echo '<span class="wp-polls-bar"><span class="wp-polls-bar-fill"></span></span>';
 			echo '</span>';
 			echo '&nbsp;&nbsp;&nbsp;' . esc_html( isset( $labels[ $style ] ) ? $labels[ $style ] : $style ) . '</label>';
 			echo '</p>';
@@ -836,18 +914,8 @@ class WP_Polls_Settings {
 	 * @return void
 	 */
 	public static function field_bar_preview() {
-		$bar = WP_Polls_Options::get( 'bar' );
-
-		$style = sprintf(
-			'--wp-polls-bar-height: %1$dpx; --wp-polls-bar-background: #%2$s; --wp-polls-bar-border: #%3$s; --wp-polls-bar-image: %4$s;',
-			(int) $bar['height'],
-			WP_Polls::sanitize_bar_color( $bar['background'] ),
-			WP_Polls::sanitize_bar_color( $bar['border'] ),
-			WP_Polls::bar_image( $bar['style'] )
-		);
-
-		echo '<div id="wp-polls-pollbar" class="wp-polls" style="' . esc_attr( $style ) . '">';
-		echo '<div class="wp-polls-bar"><div class="wp-polls-bar-fill" style="width: 100%;"></div></div>';
+		echo '<div id="wp-polls-pollbar" class="wp-polls">';
+		echo '<div class="wp-polls-bar"><div class="wp-polls-bar-fill"></div></div>';
 		echo '</div>';
 	}
 

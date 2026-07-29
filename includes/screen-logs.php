@@ -158,7 +158,7 @@ $poll_logs_url = WP_Polls_List_Table::page_url( array( 'mode' => 'logs' ), $poll
 	if ( ! empty( $text ) ) {
 		echo wp_kses_post( '<div id="message" class="notice notice-success is-dismissible">' . removeslashes( $text ) . '</div>' );
 	} else {
-		echo '<div id="message" class="notice notice-success" style="display: none;"></div>';
+		echo '<div id="message" class="notice notice-success hidden"></div>';
 	}
 	?>
 	<h2><?php echo wp_kses_post( $poll_question ); ?></h2>
@@ -389,7 +389,7 @@ $poll_logs_url = WP_Polls_List_Table::page_url( array( 'mode' => 'logs' ), $poll
 		$poll_logs_empty_text = __( 'No poll logs available for this poll.', 'wp-polls' );
 	}
 	?>
-	<p id="poll_logs_display_none" style="display: <?php echo $poll_logs_empty ? 'block' : 'none'; ?>;"><?php echo esc_html( $poll_logs_empty_text ); ?></p>
+	<p id="poll_logs_display_none" class="<?php echo $poll_logs_empty ? '' : 'hidden'; ?>"><?php echo esc_html( $poll_logs_empty_text ); ?></p>
 
 	<h2><?php esc_html_e( 'Delete Poll Logs', 'wp-polls' ); ?></h2>
 	<div id="poll_logs">

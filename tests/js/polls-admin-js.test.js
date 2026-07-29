@@ -102,7 +102,7 @@ describe( 'deleting a poll', () => {
 
 	it( 'shows the server response in the message box', async () => {
 		document.body.innerHTML = `
-			<div id="message" style="display: none;"></div>
+			<div id="message" class="hidden"></div>
 			<input type="button" data-poll-action="delete-poll" data-poll-id="7"
 			       data-poll-confirm="Delete?" data-poll-nonce="NONCE7" />
 		`;
@@ -114,7 +114,7 @@ describe( 'deleting a poll', () => {
 
 		const message = document.getElementById( 'message' );
 		expect( message.innerHTML ).toBe( '<p>Poll deleted.</p>' );
-		expect( message.style.display ).toBe( '' );
+		expect( message.classList.contains( 'hidden' ) ).toBe( false );
 	} );
 } );
 
@@ -264,7 +264,7 @@ describe( 'opening and closing a poll', () => {
 	it( 'swaps the buttons after closing', async () => {
 		document.body.innerHTML = `
 			<div id="message"></div>
-			<input type="button" id="open_poll" style="display: none;" />
+			<input type="button" id="open_poll" class="hidden" />
 			<input type="button" id="close_poll" data-poll-action="close-poll" data-poll-id="3"
 			       data-poll-confirm="Close?" data-poll-nonce="NONCE3" />
 		`;
@@ -273,10 +273,12 @@ describe( 'opening and closing a poll', () => {
 		await clickAndSettle( document.getElementById( 'close_poll' ) );
 
 		expect( sentFields( spy ).do ).toBe( L10N.text_close_poll );
-		expect( document.getElementById( 'open_poll' ).style.display ).toBe( '' );
-		expect( document.getElementById( 'close_poll' ).style.display ).toBe(
-			'none',
-		);
+		expect(
+			document.getElementById( 'open_poll' ).classList.contains( 'hidden' ),
+		).toBe( false );
+		expect(
+			document.getElementById( 'close_poll' ).classList.contains( 'hidden' ),
+		).toBe( true );
 	} );
 } );
 
@@ -313,11 +315,11 @@ describe( 'toggles', () => {
 		toggle.checked = false;
 		toggle.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
 		expect( toggle.checked ).toBe( true );
-		expect( expiry.style.display ).toBe( 'none' );
+		expect( expiry.classList.contains( 'hidden' ) ).toBe( true );
 
 		toggle.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
 		expect( toggle.checked ).toBe( false );
-		expect( expiry.style.display ).toBe( '' );
+		expect( expiry.classList.contains( 'hidden' ) ).toBe( false );
 	} );
 } );
 
@@ -412,12 +414,16 @@ describe( "deleting one poll's logs", () => {
 		expect( fields.do ).toBe( L10N.text_delete_poll_logs );
 		expect( fields.pollq_id ).toBe( '3' );
 
-		expect( document.getElementById( 'poll_logs_display' ).style.display ).toBe(
-			'none',
-		);
 		expect(
-			document.getElementById( 'poll_logs_display_none' ).style.display,
-		).toBe( '' );
+			document
+				.getElementById( 'poll_logs_display' )
+				.classList.contains( 'hidden' ),
+		).toBe( true );
+		expect(
+			document
+				.getElementById( 'poll_logs_display_none' )
+				.classList.contains( 'hidden' ),
+		).toBe( false );
 	} );
 } );
 
@@ -427,15 +433,19 @@ describe( 'opening a poll', () => {
 			<div id="message"></div>
 			<input type="button" id="open_poll" data-poll-action="open-poll" data-poll-id="3"
 			       data-poll-confirm="Open?" data-poll-nonce="NONCEOPEN" />
-			<input type="button" id="close_poll" style="display: none;" />
+			<input type="button" id="close_poll" class="hidden" />
 		`;
 		const spy = stubFetch( 'Poll opened.' );
 
 		await clickAndSettle( document.getElementById( 'open_poll' ) );
 
 		expect( sentFields( spy ).do ).toBe( L10N.text_open_poll );
-		expect( document.getElementById( 'open_poll' ).style.display ).toBe( 'none' );
-		expect( document.getElementById( 'close_poll' ).style.display ).toBe( '' );
+		expect(
+			document.getElementById( 'open_poll' ).classList.contains( 'hidden' ),
+		).toBe( true );
+		expect(
+			document.getElementById( 'close_poll' ).classList.contains( 'hidden' ),
+		).toBe( false );
 	} );
 } );
 
@@ -469,18 +479,18 @@ describe( 'the timestamp toggle', () => {
 	it( 'shows the timestamp fields only while the box is ticked', () => {
 		document.body.innerHTML = `
 			<input type="checkbox" id="edit_polltimestamp" data-poll-action="toggle-timestamp" />
-			<div id="pollq_timestamp" style="display: none;"></div>
+			<div id="pollq_timestamp" class="hidden"></div>
 		`;
 		const toggle = document.getElementById( 'edit_polltimestamp' );
 		const fields = document.getElementById( 'pollq_timestamp' );
 
 		toggle.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
 		expect( toggle.checked ).toBe( true );
-		expect( fields.style.display ).toBe( '' );
+		expect( fields.classList.contains( 'hidden' ) ).toBe( false );
 
 		toggle.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
 		expect( toggle.checked ).toBe( false );
-		expect( fields.style.display ).toBe( 'none' );
+		expect( fields.classList.contains( 'hidden' ) ).toBe( true );
 	} );
 } );
 

@@ -20,6 +20,13 @@
 .wp-polls-swatch .wp-polls-bar-fill {
 	display: block;
 }
+/* Both of these are showing a bar, not measuring one, so the fill is always
+   the full width. The front end sets it inline from the answer's percentage;
+   here it belongs in the stylesheet. */
+#wp-polls-pollbar .wp-polls-bar-fill,
+.wp-polls-swatch .wp-polls-bar-fill {
+	width: 100%;
+}
 /* Add Poll and Edit Poll. The answers are a real table - a numbered row per
    answer - so they keep a widefat table rather than moving into the form-table
    the rest of both screens uses. Sizing lives here rather than in width and

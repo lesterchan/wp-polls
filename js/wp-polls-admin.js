@@ -38,7 +38,7 @@
 				const message = document.getElementById( 'message' );
 				if ( message ) {
 					message.innerHTML = data;
-					message.style.display = '';
+					message.classList.remove( 'hidden' );
 				}
 				if ( onSuccess ) {
 					onSuccess();
@@ -127,12 +127,12 @@
 
 				const display = document.getElementById( 'poll_logs_display' );
 				if ( display ) {
-					display.style.display = 'none';
+					display.classList.add( 'hidden' );
 				}
 
 				const empty = document.getElementById( 'poll_logs_display_none' );
 				if ( empty ) {
-					empty.style.display = '';
+					empty.classList.remove( 'hidden' );
 				}
 			},
 		);
@@ -178,10 +178,10 @@
 		const openButton = document.getElementById( 'open_poll' );
 		const closeButton = document.getElementById( 'close_poll' );
 		if ( openButton ) {
-			openButton.style.display = showOpen ? '' : 'none';
+			openButton.classList.toggle( 'hidden', ! showOpen );
 		}
 		if ( closeButton ) {
-			closeButton.style.display = showOpen ? 'none' : '';
+			closeButton.classList.toggle( 'hidden', showOpen );
 		}
 	}
 
@@ -390,7 +390,7 @@
 		const editTimestamp = document.getElementById( 'edit_polltimestamp' );
 		const timestamp = document.getElementById( 'pollq_timestamp' );
 		if ( editTimestamp && timestamp ) {
-			timestamp.style.display = editTimestamp.checked ? '' : 'none';
+			timestamp.classList.toggle( 'hidden', ! editTimestamp.checked );
 		}
 	}
 
@@ -399,7 +399,59 @@
 		const expiryNo = document.getElementById( 'pollq_expiry_no' );
 		const expiry = document.getElementById( 'pollq_expiry' );
 		if ( expiryNo && expiry ) {
-			expiry.style.display = expiryNo.checked ? 'none' : '';
+			expiry.classList.toggle( 'hidden', expiryNo.checked );
+		}
+	}
+
+	// The Value Of A Field, Or An Empty String When It Is Not On This Screen
+	function pollFieldValue( id ) {
+		const field = document.getElementById( id );
+		return field ? field.value : '';
+	}
+
+	// Redraw The Poll Bar Preview And The Two Style Swatches
+	// The preview is the real front end markup under the real front end
+	// stylesheet, so setting the four custom properties is the whole job. The
+	// swatches follow the colours too, which keeps the two styles comparable
+	// while the fields are being edited; their height stays fixed, because at
+	// the 8px default the gradient is a band nobody can see.
+	function updatePollBar() {
+		const background = pollFieldValue( 'poll_bar_bg' );
+		const border = pollFieldValue( 'poll_bar_border' );
+		const height = pollFieldValue( 'poll_bar_height' ) + 'px';
+
+		const preview = document.getElementById( 'wp-polls-pollbar' );
+		if ( preview ) {
+			const checked = document.querySelector(
+				'input[name="wp_polls_options[bar][style]"]:checked',
+			);
+			const images = l10n.pollbar_images || {};
+			preview.style.setProperty( '--wp-polls-bar-background', background );
+			preview.style.setProperty( '--wp-polls-bar-border', border );
+			preview.style.setProperty( '--wp-polls-bar-height', height );
+			preview.style.setProperty(
+				'--wp-polls-bar-image',
+				( checked && images[ checked.value ] ) || 'none',
+			);
+		}
+
+		const swatches = document.querySelectorAll( '.wp-polls-swatch' );
+		Array.prototype.forEach.call( swatches, function( swatch ) {
+			swatch.style.setProperty( '--wp-polls-bar-background', background );
+			swatch.style.setProperty( '--wp-polls-bar-border', border );
+		} );
+	}
+
+	// Put One Template Field Back To Its Shipped Default
+	// The defaults are localised from WP_Polls_Template, the same place the
+	// activation routine reads them from, so the button and the install can
+	// never disagree about what the stock markup is.
+	function restoreTemplate( key ) {
+		const defaults = l10n.template_defaults || {};
+		const field = document.getElementById( 'poll_template_' + key );
+
+		if ( field && Object.prototype.hasOwnProperty.call( defaults, key ) ) {
+			field.value = defaults[ key ];
 		}
 	}
 
@@ -513,6 +565,29 @@
 				checkTotalvotes();
 			},
 		},
+		// Picking a style no longer touches the height field: it used to be set
+		// from the height of that style's pollbg.gif, and there is no image now.
+		'pollbar-style': {
+			on: 'click',
+			run() {
+				updatePollBar();
+			},
+		},
+		// "input" rather than "focusout": a colour input reports every change
+		// while the picker is open, so the bar follows the colour being chosen
+		// instead of waiting for the field to be left.
+		'pollbar-update': {
+			on: 'input',
+			run() {
+				updatePollBar();
+			},
+		},
+		'restore-template': {
+			on: 'click',
+			run( el ) {
+				restoreTemplate( pollAttr( el, 'template' ) );
+			},
+		},
 	};
 
 	// Route An Event To Its data-poll-action Handler
@@ -542,4 +617,5 @@
 	document.addEventListener( 'click', pollAdminDispatch );
 	document.addEventListener( 'change', pollAdminDispatch );
 	document.addEventListener( 'focusout', pollAdminDispatch );
+	document.addEventListener( 'input', pollAdminDispatch );
 }() );

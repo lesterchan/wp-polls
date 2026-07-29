@@ -223,7 +223,7 @@ class WP_Polls_Install {
 		printf(
 			/* translators: %s: value. */
 			wp_kses_post( __( 'Open <a href="%s">Poll Templates</a> and press <strong>Restore Default Template</strong> on the Voting Form Footer and Result Footer, or replace the handler yourself with <code>data-poll-id="%%POLL_ID%%"</code> and <code>data-poll-action="vote"</code> (or <code>result</code> / <code>booth</code>).', 'wp-polls' ) ),
-			esc_url( admin_url( 'admin.php?page=wp-polls-templates' ) )
+			esc_url( WP_Polls_Settings::tab_url( WP_Polls_Settings::TAB_TEMPLATES ) )
 		);
 		echo '</p></div>';
 	}

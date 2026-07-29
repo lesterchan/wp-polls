@@ -50,7 +50,7 @@ class WP_Polls_Admin {
 	 * @return array
 	 */
 	public static function page_slugs() {
-		return array( self::PAGE, self::PAGE . '-add', self::PAGE . '-options', self::PAGE . '-templates' );
+		return array( self::PAGE, self::PAGE . '-add', WP_Polls_Settings::PAGE );
 	}
 
 	/**
@@ -107,8 +107,7 @@ class WP_Polls_Admin {
 
 		add_submenu_page( self::PAGE, __( 'Manage Polls', 'wp-polls' ), __( 'Manage Polls', 'wp-polls' ), $capability, self::PAGE, array( __CLASS__, 'render_manage' ) );
 		add_submenu_page( self::PAGE, __( 'Add Poll', 'wp-polls' ), __( 'Add Poll', 'wp-polls' ), $capability, self::PAGE . '-add', array( __CLASS__, 'render_add' ) );
-		add_submenu_page( self::PAGE, __( 'Poll Options', 'wp-polls' ), __( 'Poll Options', 'wp-polls' ), $capability, self::PAGE . '-options', array( __CLASS__, 'render_options' ) );
-		add_submenu_page( self::PAGE, __( 'Poll Templates', 'wp-polls' ), __( 'Poll Templates', 'wp-polls' ), $capability, self::PAGE . '-templates', array( __CLASS__, 'render_templates' ) );
+		add_submenu_page( self::PAGE, __( 'Poll Settings', 'wp-polls' ), __( 'Settings', 'wp-polls' ), $capability, WP_Polls_Settings::PAGE, array( __CLASS__, 'render_settings' ) );
 	}
 
 	/**
@@ -148,21 +147,12 @@ class WP_Polls_Admin {
 	}
 
 	/**
-	 * Render the Poll Options screen.
+	 * Render the settings screen, whichever tab was asked for.
 	 *
 	 * @return void
 	 */
-	public static function render_options() {
-		require WP_POLLS_DIR . 'includes/screen-options.php';
-	}
-
-	/**
-	 * Render the Poll Templates screen.
-	 *
-	 * @return void
-	 */
-	public static function render_templates() {
-		require WP_POLLS_DIR . 'includes/screen-templates.php';
+	public static function render_settings() {
+		require WP_POLLS_DIR . 'includes/screen-settings.php';
 	}
 
 	// Function: Enqueue Polls Stylesheets/JavaScripts In WP-Admin.
@@ -182,8 +172,9 @@ class WP_Polls_Admin {
 			// second copy of them in the admin stylesheet to drift out of sync.
 			// Always the plugin's own copy: a theme override of wp-polls.css
 			// would make the preview show the theme's bar, not the setting.
-			if ( self::hook_suffix( 'wp-polls-options' ) === $hook_suffix ) {
+			if ( self::hook_suffix( WP_Polls_Settings::PAGE ) === $hook_suffix ) {
 				wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'css/wp-polls.css', array(), WP_POLLS_VERSION );
+				wp_add_inline_style( 'wp-polls-admin', self::pollbar_css() );
 			}
 			wp_enqueue_script( 'wp-polls-admin', WP_POLLS_URL . 'js/wp-polls-admin.js', array(), WP_POLLS_VERSION, true );
 			wp_localize_script(
@@ -202,9 +193,60 @@ class WP_Polls_Admin {
 					'text_close_poll'                => __( 'Close Poll', 'wp-polls' ),
 					'text_answer'                    => __( 'Answer', 'wp-polls' ),
 					'text_remove_poll_answer'        => __( 'Remove', 'wp-polls' ),
+					// The settings screen previews the poll bar and restores
+					// default templates from these, so both come from the same
+					// place the front end and the activation routine read them
+					// from rather than being written out a second time.
+					'pollbar_images'                 => array_combine(
+						WP_Polls_Settings::bar_styles(),
+						array_map( array( 'WP_Polls', 'bar_image' ), WP_Polls_Settings::bar_styles() )
+					),
+					'template_defaults'              => WP_Polls_Template::defaults(),
 				)
 			);
 		}
+	}
+
+	/**
+	 * The configured poll bar, as rules rather than as style attributes.
+	 *
+	 * The preview and the two style swatches are the real front end markup, so
+	 * all they need is the four custom properties the front end stylesheet
+	 * reads. Emitted as a stylesheet because a screen in wp-admin carries no
+	 * inline style attributes, and because the swatches differ only by which
+	 * background image their style produces - one rule per style says that once
+	 * instead of once per swatch.
+	 *
+	 * @return string
+	 */
+	public static function pollbar_css() {
+		$bar        = WP_Polls_Options::get( 'bar' );
+		$background = WP_Polls::sanitize_bar_color( $bar['background'] );
+		$border     = WP_Polls::sanitize_bar_color( $bar['border'] );
+
+		$css = sprintf(
+			'#wp-polls-pollbar { --wp-polls-bar-height: %1$dpx; --wp-polls-bar-background: #%2$s; --wp-polls-bar-border: #%3$s; --wp-polls-bar-image: %4$s; }' . "\n",
+			(int) $bar['height'],
+			$background,
+			$border,
+			WP_Polls::bar_image( $bar['style'] )
+		);
+
+		$css .= sprintf(
+			'.wp-polls-swatch { --wp-polls-bar-background: #%1$s; --wp-polls-bar-border: #%2$s; }' . "\n",
+			$background,
+			$border
+		);
+
+		foreach ( WP_Polls_Settings::bar_styles() as $style ) {
+			$css .= sprintf(
+				'.wp-polls-swatch[data-poll-style="%1$s"] { --wp-polls-bar-image: %2$s; }' . "\n",
+				$style,
+				WP_Polls::bar_image( $style )
+			);
+		}
+
+		return $css;
 	}
 
 	// Function: Displays Polls Footer In WP-Admin.
@@ -294,15 +336,18 @@ class WP_Polls_Admin {
 	/**
 	 * Edit Timestamp Options.
 	 *
-	 * @param mixed $poll_timestamp Value.
-	 * @param mixed $fieldname      Optional.
-	 * @param mixed $display        Optional.
+	 * @param mixed  $poll_timestamp Value.
+	 * @param string $fieldname      Optional. Name prefix for the six selects.
+	 * @param bool   $hidden         Optional. Whether the group starts hidden,
+	 *                               which the checkbox beside it then toggles.
 	 *
 	 * @return mixed
 	 */
-	public static function poll_timestamp( $poll_timestamp, $fieldname = 'pollq_timestamp', $display = 'block' ) {
+	public static function poll_timestamp( $poll_timestamp, $fieldname = 'pollq_timestamp', $hidden = false ) {
 		global $month;
-		echo '<div id="' . esc_attr( $fieldname ) . '" style="display: ' . esc_attr( $display ) . '">' . "\n";
+		// core's own utility class rather than a style attribute, so wp-admin
+		// keeps one way of hiding something.
+		echo '<div id="' . esc_attr( $fieldname ) . '" class="' . esc_attr( $hidden ? 'hidden' : '' ) . '">' . "\n";
 		$day = (int) gmdate( 'j', $poll_timestamp );
 		echo '<select name="' . esc_attr( $fieldname ) . '_day" size="1">' . "\n";
 		for ( $i = 1; $i <= 31; $i++ ) {
@@ -413,9 +458,9 @@ class WP_Polls_Admin {
 						if ( isset( $_POST['delete_logs_yes'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['delete_logs_yes'] ) ) ) {
 							$delete_logs = $wpdb->query( "DELETE FROM $wpdb->pollsip" );
 							if ( $delete_logs ) {
-								echo wp_kses_post( '<p style="color: green;">' . __( 'All Polls Logs Have Been Deleted.', 'wp-polls' ) . '</p>' );
+								echo wp_kses_post( '<div class="notice notice-success inline"><p>' . __( 'All Polls Logs Have Been Deleted.', 'wp-polls' ) . '</p></div>' );
 							} else {
-								echo wp_kses_post( '<p style="color: red;">' . __( 'An Error Has Occurred While Deleting All Polls Logs.', 'wp-polls' ) . '</p>' );
+								echo wp_kses_post( '<div class="notice notice-error inline"><p>' . __( 'An Error Has Occurred While Deleting All Polls Logs.', 'wp-polls' ) . '</p></div>' );
 							}
 						}
 						break;
@@ -428,10 +473,10 @@ class WP_Polls_Admin {
 							$delete_logs = $wpdb->delete( $wpdb->pollsip, array( 'pollip_qid' => $pollq_id ), array( '%d' ) );
 							if ( $delete_logs ) {
 								/* translators: %s: value. */
-								echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'All Logs For \'%s\' Has Been Deleted.', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
+								echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'All Logs For \'%s\' Has Been Deleted.', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 							} else {
 								/* translators: %s: value. */
-								echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'An Error Has Occurred While Deleting All Logs For \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
+								echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'An Error Has Occurred While Deleting All Logs For \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 							}
 						}
 						break;
@@ -462,10 +507,10 @@ class WP_Polls_Admin {
 						$update_pollq_totalvotes = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes - $polla_votes) WHERE pollq_id = $pollq_id" );
 						if ( $delete_polla_answers ) {
 							/* translators: %s: value. */
-							echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'Poll Answer \'%s\' Deleted Successfully.', 'wp-polls' ), $polla_answers ) . '</p>' );
+							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll Answer \'%s\' Deleted Successfully.', 'wp-polls' ), $polla_answers ) . '</p></div>' );
 						} else {
 							/* translators: %s: value. */
-							echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'Error In Deleting Poll Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p>' );
+							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Deleting Poll Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p></div>' );
 						}
 						break;
 					// Open Poll.
@@ -490,10 +535,10 @@ class WP_Polls_Admin {
 						);
 						if ( $open_poll ) {
 							/* translators: %s: value. */
-							echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Is Now Opened', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
+							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Is Now Opened', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						} else {
 							/* translators: %s: value. */
-							echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'Error Opening Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
+							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error Opening Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
 						break;
 					// Close Poll.
@@ -518,10 +563,10 @@ class WP_Polls_Admin {
 						);
 						if ( $close_poll ) {
 							/* translators: %s: value. */
-							echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Is Now Closed', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
+							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Is Now Closed', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						} else {
 							/* translators: %s: value. */
-							echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'Error Closing Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
+							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error Closing Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
 						break;
 					// Delete Poll.
@@ -535,11 +580,11 @@ class WP_Polls_Admin {
 						$poll_option_lastestpoll = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'poll_latestpoll'" );
 						if ( ! $delete_poll_question ) {
 							/* translators: %s: value. */
-							echo wp_kses_post( '<p style="color: red;">' . sprintf( __( 'Error In Deleting Poll \'%s\' Question', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
+							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Deleting Poll \'%s\' Question', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
 						if ( empty( $text ) ) {
 							/* translators: %s: value. */
-							echo wp_kses_post( '<p style="color: green;">' . sprintf( __( 'Poll \'%s\' Deleted Successfully', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p>' );
+							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Deleted Successfully', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
 
 						// Update Lastest Poll ID To Poll Options.
