@@ -187,7 +187,7 @@ if ( ! function_exists( 'get_poll' ) ) {
 	 * @return mixed
 	 */
 	function get_poll( $poll_id = 0, $display = true ) {
-		return Polls_Display::get_poll( $poll_id, $display );
+		return WP_Polls_Display::get_poll( $poll_id, $display );
 	}
 }
 
@@ -206,7 +206,7 @@ if ( ! function_exists( 'display_polls_archive_link' ) ) {
 	 * @return mixed
 	 */
 	function display_polls_archive_link( $display = true ) {
-		return Polls_Display::display_polls_archive_link( $display );
+		return WP_Polls_Display::display_polls_archive_link( $display );
 	}
 }
 
@@ -222,7 +222,7 @@ if ( ! function_exists( 'in_pollarchive' ) ) {
 	 * @return mixed
 	 */
 	function in_pollarchive() {
-		return Polls_Display::in_pollarchive();
+		return WP_Polls_Display::in_pollarchive();
 	}
 }
 
@@ -242,6 +242,6 @@ if ( ! function_exists( 'vote_poll' ) ) {
 	 * @return mixed
 	 */
 	function vote_poll() {
-		Polls_Vote::vote_poll();
+		WP_Polls_Vote::vote_poll();
 	}
 }

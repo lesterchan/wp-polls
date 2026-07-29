@@ -13,9 +13,9 @@
  * are the ones that read a dozen superglobals apiece, and they are in the files
  * where every bulk-regex accident of this release landed.
  *
- * @covers Polls_Admin
+ * @covers WP_Polls_Admin
  */
-class Test_Polls_Admin_Writes extends WP_Polls_TestCase {
+class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Set up.
@@ -35,7 +35,7 @@ class Test_Polls_Admin_Writes extends WP_Polls_TestCase {
 	 * @return array
 	 */
 	private function date_fields( $prefix, $offset = 0 ) {
-		$time = Polls_Core::now() + $offset;
+		$time = WP_Polls::now() + $offset;
 
 		return array(
 			$prefix . '_day'    => gmdate( 'j', $time ),

@@ -10,21 +10,13 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Creates the tables, seeds the options and runs version gated upgrades.
  */
-class Polls_Install {
+class WP_Polls_Install {
 
 	/**
-	 * Schema version.
+	 * Option holding the installed schema version, up to 3.0.0.
 	 *
-	 * Bump this whenever the CREATE TABLE statements or the indexes change.
-	 * Nothing else needs to change: the schema work then runs once on the next
-	 * load and records the new version.
-	 *
-	 * @var string
-	 */
-	const DB_VERSION = '1.0';
-
-	/**
-	 * Option holding the installed schema version.
+	 * Kept only so the migration and uninstall.php know which row to remove;
+	 * the schema counter itself is the WP_POLLS_DB_VERSION constant.
 	 *
 	 * @var string
 	 */
@@ -91,9 +83,9 @@ class Polls_Install {
 		// skip it and quietly drop that site to defaults. Checking for the
 		// nested 'templates' key catches those, and the migration is a no-op
 		// when there is nothing left to fold in.
-		$stored = get_option( Polls_Options::OPTION, array() );
+		$stored = get_option( WP_Polls_Options::OPTION, array() );
 		if ( $is_pre_3 || ! is_array( $stored ) || ! isset( $stored['templates'] ) ) {
-			Polls_Options::migrate_from_legacy_rows();
+			WP_Polls_Options::migrate_from_legacy_rows();
 		}
 
 		// Version 3.0.0: the poll bar became a track holding a fill, styled from
@@ -130,7 +122,7 @@ class Polls_Install {
 
 		// A bar style that is not one of the two CSS styles is either a leftover
 		// images/ directory name or the old 'use_css' sentinel.
-		if ( isset( $stored['bar']['style'] ) && ! in_array( $stored['bar']['style'], Polls_Settings::bar_styles(), true ) ) {
+		if ( isset( $stored['bar']['style'] ) && ! in_array( $stored['bar']['style'], WP_Polls_Settings::bar_styles(), true ) ) {
 			return true;
 		}
 
@@ -161,7 +153,7 @@ class Polls_Install {
 	 */
 	public static function upgrade_poll_bar() {
 		foreach ( array( 'resultbody', 'resultbody2' ) as $key ) {
-			Polls_Options::set( 'templates.' . $key, Polls_Templates::get_default( $key ) );
+			WP_Polls_Options::set( 'templates.' . $key, WP_Polls_Template::get_default( $key ) );
 		}
 
 		// images/default and images/default_gradient no longer exist. Both tiles
@@ -173,12 +165,12 @@ class Polls_Install {
 			'default'          => 'gradient',
 			'default_gradient' => 'gradient',
 		);
-		$style = Polls_Options::get( 'bar.style' );
+		$style = WP_Polls_Options::get( 'bar.style' );
 
 		if ( isset( $map[ $style ] ) ) {
-			Polls_Options::set( 'bar.style', $map[ $style ] );
-		} elseif ( ! in_array( $style, Polls_Settings::bar_styles(), true ) ) {
-			Polls_Options::set( 'bar.style', 'gradient' );
+			WP_Polls_Options::set( 'bar.style', $map[ $style ] );
+		} elseif ( ! in_array( $style, WP_Polls_Settings::bar_styles(), true ) ) {
+			WP_Polls_Options::set( 'bar.style', 'gradient' );
 		}
 	}
 
@@ -189,7 +181,7 @@ class Polls_Install {
 	 */
 	public static function upgrade_templates_onclick() {
 		foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
-			$template = Polls_Options::get( 'templates.' . $key );
+			$template = WP_Polls_Options::get( 'templates.' . $key );
 
 			if ( ! is_string( $template ) || stripos( $template, 'onclick' ) === false ) {
 				continue;
@@ -203,7 +195,7 @@ class Polls_Install {
 			);
 
 			if ( null !== $migrated && $migrated !== $template ) {
-				Polls_Options::set( 'templates.' . $key, $migrated );
+				WP_Polls_Options::set( 'templates.' . $key, $migrated );
 			}
 		}
 	}
@@ -222,11 +214,11 @@ class Polls_Install {
 	public static function onclick_notice() {
 		global $hook_suffix;
 
-		if ( ! in_array( $hook_suffix, Polls_Admin::admin_pages(), true ) ) {
+		if ( ! in_array( $hook_suffix, WP_Polls_Admin::admin_pages(), true ) ) {
 			return;
 		}
 
-		if ( ! current_user_can( Polls_Admin::capability() ) || ! self::templates_have_onclick() ) {
+		if ( ! current_user_can( WP_Polls_Admin::capability() ) || ! self::templates_have_onclick() ) {
 			return;
 		}
 
@@ -248,7 +240,7 @@ class Polls_Install {
 	 */
 	public static function templates_have_onclick() {
 		foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
-			$template = Polls_Options::get( 'templates.' . $key );
+			$template = WP_Polls_Options::get( 'templates.' . $key );
 
 			if ( is_string( $template ) && stripos( $template, 'onclick' ) !== false ) {
 				return true;
@@ -312,14 +304,14 @@ class Polls_Install {
 		// landed in the error log on every single activation. Schema changes
 		// after the initial create are handled by the explicit index and column
 		// work below, so nothing is lost by not re-diffing.
-		if ( self::DB_VERSION !== get_option( self::DB_VERSION_OPTION ) ) {
+		if ( WP_POLLS_DB_VERSION !== get_option( self::DB_VERSION_OPTION ) ) {
 			foreach ( $create_table as $table => $sql ) {
 				$table_name = $wpdb->$table;
 				if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) ) {
 					dbDelta( $sql );
 				}
 			}
-			update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
+			update_option( self::DB_VERSION_OPTION, WP_POLLS_DB_VERSION );
 		}
 		// Check Whether It is Install Or Upgrade.
 		$first_poll = $wpdb->get_var( "SELECT pollq_id FROM $wpdb->pollsq LIMIT 1" );
@@ -330,7 +322,7 @@ class Polls_Install {
 				$wpdb->pollsq,
 				array(
 					'pollq_question'  => __( 'How Is My Site?', 'wp-polls' ),
-					'pollq_timestamp' => Polls_Core::now(),
+					'pollq_timestamp' => WP_Polls::now(),
 				),
 				array( '%s', '%s' )
 			);
@@ -379,9 +371,9 @@ class Polls_Install {
 			}
 		}
 		// Options live in one row from 3.0.0 onward. Defaults come from
-		// Polls_Options so activation and the settings screen cannot drift.
-		add_option( Polls_Options::OPTION, Polls_Options::defaults() );
-		Polls_Options::flush();
+		// WP_Polls_Options so activation and the settings screen cannot drift.
+		add_option( WP_Polls_Options::OPTION, WP_Polls_Options::defaults() );
+		WP_Polls_Options::flush();
 
 		// Backfill pollq_totalvoters for installs that predate the column being
 		// populated: before 2.74 only pollq_totalvotes was maintained.
@@ -432,6 +424,6 @@ class Polls_Install {
 		// upgrades every site while it is switched to.
 		self::upgrade();
 
-		Polls_Core::cron_polls_place();
+		WP_Polls::cron_polls_place();
 	}
 }

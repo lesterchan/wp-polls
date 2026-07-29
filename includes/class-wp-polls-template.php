@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Supplies the default template markup.
  */
-class Polls_Templates {
+class WP_Polls_Template {
 
 	/**
 	 * Every default template, keyed by slug.

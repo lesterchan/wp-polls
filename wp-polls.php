@@ -4,8 +4,8 @@
  * Plugin URI: https://lesterchan.net/portfolio/programming/php/
  * Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
  * Version: 3.0.0
- * Requires at least: 6.0
- * Requires PHP: 7.4
+ * Requires at least: 6.8
+ * Requires PHP: 8.2
  * Author: Lester 'GaMerZ' Chan
  * Author URI: https://lesterchan.net
  * License: GPLv2 or later
@@ -17,7 +17,7 @@
  */
 
 /*
-	Copyright 2026 Lester Chan  (email : lesterchan@gmail.com)
+	Copyright 2026  Lester Chan  (email : lesterchan@gmail.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -41,36 +41,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 
-// Version.
+// Versions. WP_POLLS_VERSION is the plugin's own; WP_POLLS_DB_VERSION is the
+// schema counter, bumped whenever the CREATE TABLE statements or the indexes
+// change so the schema work runs once on the next load.
 define( 'WP_POLLS_VERSION', '3.0.0' );
-define( 'WP_POLLS_MAIN_FILE', __FILE__ );
+define( 'WP_POLLS_DB_VERSION', '1' );
 
-// Paths. Derived from this file so the plugin keeps working if its directory is
-// renamed. WP_POLLS_SLUG is that directory name on its own: the admin menu uses
-// the legacy "plugin file as menu slug" form, so the slug ends up inside page
-// URLs and in the hook suffix WordPress hands back.
+// Identity and paths. The paths are derived from this file so the plugin keeps
+// working if its directory is renamed; nothing user visible depends on that
+// name any more, because every admin page slug is a literal.
+define( 'WP_POLLS_SLUG', 'wp-polls' );
+define( 'WP_POLLS_MAIN_FILE', __FILE__ );
 define( 'WP_POLLS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WP_POLLS_URL', plugin_dir_url( __FILE__ ) );
-define( 'WP_POLLS_SLUG', dirname( plugin_basename( __FILE__ ) ) );
 
 // Classes. Required at file load because the activation hook and the option
 // accessor are both reached before any action fires.
-require_once __DIR__ . '/includes/class-polls-templates.php';
-require_once __DIR__ . '/includes/class-polls-options.php';
-require_once __DIR__ . '/includes/class-polls-settings.php';
-require_once __DIR__ . '/includes/class-polls-widget.php';
-require_once __DIR__ . '/includes/class-polls-install.php';
-require_once __DIR__ . '/includes/class-polls-vote.php';
-require_once __DIR__ . '/includes/class-polls-display.php';
-require_once __DIR__ . '/includes/class-polls-admin.php';
-require_once __DIR__ . '/includes/class-polls-core.php';
+require_once __DIR__ . '/includes/class-wp-polls-template.php';
+require_once __DIR__ . '/includes/class-wp-polls-options.php';
+require_once __DIR__ . '/includes/class-wp-polls-settings.php';
+require_once __DIR__ . '/includes/class-wp-polls-widget.php';
+require_once __DIR__ . '/includes/class-wp-polls-install.php';
+require_once __DIR__ . '/includes/class-wp-polls-vote.php';
+require_once __DIR__ . '/includes/class-wp-polls-display.php';
+require_once __DIR__ . '/includes/class-wp-polls-admin.php';
+require_once __DIR__ . '/includes/class-wp-polls.php';
 require_once __DIR__ . '/includes/template-tags.php';
-Polls_Install::init();
-Polls_Vote::init();
-Polls_Display::init();
-Polls_Admin::init();
-Polls_Core::init();
-Polls_Settings::init();
+WP_Polls_Install::init();
+WP_Polls_Vote::init();
+WP_Polls_Display::init();
+WP_Polls_Admin::init();
+WP_Polls::init();
+WP_Polls_Settings::init();
 
 
 // Polls Table Name

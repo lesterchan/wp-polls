@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 global $wpdb;
 
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( Polls_Admin::capability() ) ) {
+if ( ! current_user_can( WP_Polls_Admin::capability() ) ) {
 	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 
@@ -40,7 +40,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				$pollq_timestamp_minute = isset( $_POST['pollq_timestamp_minute'] ) ? (int) $_POST['pollq_timestamp_minute'] : 0;
 				$pollq_timestamp_second = isset( $_POST['pollq_timestamp_second'] ) ? (int) $_POST['pollq_timestamp_second'] : 0;
 				$pollq_timestamp        = gmmktime( $pollq_timestamp_hour, $pollq_timestamp_minute, $pollq_timestamp_second, $pollq_timestamp_month, $pollq_timestamp_day, $pollq_timestamp_year );
-				if ( $pollq_timestamp > Polls_Core::now() ) {
+				if ( $pollq_timestamp > WP_Polls::now() ) {
 					$pollq_active = -1;
 				} else {
 					$pollq_active = 1;
@@ -57,7 +57,7 @@ if ( ! empty( $_POST['do'] ) ) {
 					$pollq_expiry_minute = isset( $_POST['pollq_expiry_minute'] ) ? (int) $_POST['pollq_expiry_minute'] : 0;
 					$pollq_expiry_second = isset( $_POST['pollq_expiry_second'] ) ? (int) $_POST['pollq_expiry_second'] : 0;
 					$pollq_expiry        = gmmktime( $pollq_expiry_hour, $pollq_expiry_minute, $pollq_expiry_second, $pollq_expiry_month, $pollq_expiry_day, $pollq_expiry_year );
-					if ( $pollq_expiry <= Polls_Core::now() ) {
+					if ( $pollq_expiry <= WP_Polls::now() ) {
 						$pollq_active = 0;
 					}
 				}
@@ -123,8 +123,8 @@ if ( ! empty( $_POST['do'] ) ) {
 					}
 				}
 				// Update Lastest Poll ID To Poll Options.
-				$latest_pollid     = Polls_Core::polls_latest_id();
-				$update_latestpoll = Polls_Options::set( 'latest_poll', $latest_pollid );
+				$latest_pollid     = WP_Polls::polls_latest_id();
+				$update_latestpoll = WP_Polls_Options::set( 'latest_poll', $latest_pollid );
 				// If poll starts in the future use the correct poll ID.
 				$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 				if ( empty( $text ) ) {
@@ -135,7 +135,7 @@ if ( ! empty( $_POST['do'] ) ) {
 						$text .= '<p style="color: green;">' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p>';
 				}
 				do_action( 'wp_polls_add_poll', $latest_pollid );
-				Polls_Core::cron_polls_place();
+				WP_Polls::cron_polls_place();
 			} else {
 				$text .= '<p style="color: red;">' . __( 'Poll Question is empty.', 'wp-polls' ) . '</p>';
 			}
@@ -220,13 +220,13 @@ $poll_noquestion = 2;
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><?php esc_html_e( 'Start Date/Time', 'wp-polls' ); ?></th>
-				<td><?php Polls_Admin::poll_timestamp( Polls_Core::now() ); ?></td>
+				<td><?php WP_Polls_Admin::poll_timestamp( WP_Polls::now() ); ?></td>
 			</tr>
 			<tr>
 				<th scope="row"><?php esc_html_e( 'End Date/Time', 'wp-polls' ); ?></th>
 				<td>
 					<input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" data-poll-action="toggle-expiry" />&nbsp;<label for="pollq_expiry_no"><?php esc_html_e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label>
-					<?php Polls_Admin::poll_timestamp( Polls_Core::now(), 'pollq_expiry', 'none' ); ?>
+					<?php WP_Polls_Admin::poll_timestamp( WP_Polls::now(), 'pollq_expiry', 'none' ); ?>
 				</td>
 			</tr>
 		</table>

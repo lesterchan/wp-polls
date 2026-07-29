@@ -12,37 +12,37 @@
 /**
  * The consolidated poll_options row: defaults, dot paths and migration.
  *
- * @covers Polls_Options
+ * @covers WP_Polls_Options
  */
-class Test_Polls_Options extends WP_Polls_TestCase {
+class WP_Polls_Options_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Dot paths resolve through the nested array.
 	 */
 	public function test_get_reads_nested_paths() {
-		$this->assertSame( 'polla_aid', Polls_Options::get( 'sort.answers_by' ) );
-		$this->assertIsArray( Polls_Options::get( 'templates' ) );
-		$this->assertNotEmpty( Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( 'polla_aid', WP_Polls_Options::get( 'sort.answers_by' ) );
+		$this->assertIsArray( WP_Polls_Options::get( 'templates' ) );
+		$this->assertNotEmpty( WP_Polls_Options::get( 'templates.votefooter' ) );
 	}
 
 	/**
 	 * An absent path returns the supplied default rather than null.
 	 */
 	public function test_get_returns_default_for_missing_path() {
-		$this->assertSame( 'fallback', Polls_Options::get( 'nope.not.here', 'fallback' ) );
+		$this->assertSame( 'fallback', WP_Polls_Options::get( 'nope.not.here', 'fallback' ) );
 	}
 
 	/**
 	 * Writing one leaf with set() leaves its siblings alone.
 	 */
 	public function test_set_writes_one_leaf_only() {
-		$before = Polls_Options::get( 'templates.votebody' );
+		$before = WP_Polls_Options::get( 'templates.votebody' );
 
-		Polls_Options::set( 'templates.votefooter', 'CHANGED' );
-		Polls_Options::flush();
+		WP_Polls_Options::set( 'templates.votefooter', 'CHANGED' );
+		WP_Polls_Options::flush();
 
-		$this->assertSame( 'CHANGED', Polls_Options::get( 'templates.votefooter' ) );
-		$this->assertSame( $before, Polls_Options::get( 'templates.votebody' ) );
+		$this->assertSame( 'CHANGED', WP_Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( $before, WP_Polls_Options::get( 'templates.votebody' ) );
 	}
 
 	/**
@@ -56,7 +56,7 @@ class Test_Polls_Options extends WP_Polls_TestCase {
 	public function test_settings_occupy_a_single_option_row() {
 		global $wpdb;
 
-		Polls_Options::set( 'archive.per_page', 7 );
+		WP_Polls_Options::set( 'archive.per_page', 7 );
 
 		$rows = $wpdb->get_col(
 			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'poll\_%' ORDER BY option_name"
@@ -72,9 +72,9 @@ class Test_Polls_Options extends WP_Polls_TestCase {
 	 * The pre-3.0.0 rows are folded in, with their values intact.
 	 */
 	public function test_migration_carries_legacy_values_across() {
-		delete_option( Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::OPTION );
 		delete_option( 'poll_version' );
-		Polls_Options::flush();
+		WP_Polls_Options::flush();
 
 		update_option( 'poll_template_votefooter', '<ul>CUSTOM %POLL_ID%</ul>' );
 		update_option( 'poll_ans_sortby', 'polla_votes' );
@@ -91,35 +91,35 @@ class Test_Polls_Options extends WP_Polls_TestCase {
 		);
 		update_option( 'poll_options', array( 'ip_header' => 'HTTP_X_FORWARDED_FOR' ) );
 
-		Polls_Install::upgrade();
-		Polls_Options::flush();
+		WP_Polls_Install::upgrade();
+		WP_Polls_Options::flush();
 
-		$this->assertSame( '<ul>CUSTOM %POLL_ID%</ul>', Polls_Options::get( 'templates.votefooter' ) );
-		$this->assertSame( 'polla_votes', Polls_Options::get( 'sort.answers_by' ) );
-		$this->assertSame( 17, (int) Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( 2, (int) Polls_Options::get( 'logging_method' ) );
+		$this->assertSame( '<ul>CUSTOM %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.answers_by' ) );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 2, (int) WP_Polls_Options::get( 'logging_method' ) );
 		// 'aqua' was an images/ directory, and those are gone, so the bar upgrade
 		// maps it onto the gradient. The height beside it is carried across
 		// untouched, which is what this test is really about.
-		$this->assertSame( 'gradient', Polls_Options::get( 'bar.style' ) );
-		$this->assertSame( 12, (int) Polls_Options::get( 'bar.height' ) );
-		$this->assertSame( 'HTTP_X_FORWARDED_FOR', Polls_Options::get( 'ip_header' ) );
+		$this->assertSame( 'gradient', WP_Polls_Options::get( 'bar.style' ) );
+		$this->assertSame( 12, (int) WP_Polls_Options::get( 'bar.height' ) );
+		$this->assertSame( 'HTTP_X_FORWARDED_FOR', WP_Polls_Options::get( 'ip_header' ) );
 	}
 
 	/**
 	 * Keys the old install never set keep their defaults, not null.
 	 */
 	public function test_migration_leaves_untouched_keys_at_defaults() {
-		delete_option( Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::OPTION );
 		delete_option( 'poll_version' );
-		Polls_Options::flush();
+		WP_Polls_Options::flush();
 		update_option( 'poll_archive_perpage', 17 );
 
-		Polls_Install::upgrade();
-		Polls_Options::flush();
+		WP_Polls_Install::upgrade();
+		WP_Polls_Options::flush();
 
-		$this->assertSame( 'polla_votes', Polls_Options::get( 'sort.results_by' ) );
-		$this->assertNotEmpty( Polls_Options::get( 'templates.voteheader' ) );
+		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.results_by' ) );
+		$this->assertNotEmpty( WP_Polls_Options::get( 'templates.voteheader' ) );
 	}
 
 	/**
@@ -127,17 +127,17 @@ class Test_Polls_Options extends WP_Polls_TestCase {
 	 * the row they were folded into.
 	 */
 	public function test_migration_deletes_the_legacy_rows() {
-		delete_option( Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::OPTION );
 		delete_option( 'poll_version' );
-		Polls_Options::flush();
+		WP_Polls_Options::flush();
 		update_option( 'poll_archive_perpage', 17 );
 		update_option( 'poll_ans_sortby', 'polla_votes' );
 
-		Polls_Install::upgrade();
+		WP_Polls_Install::upgrade();
 
 		$this->assertFalse( get_option( 'poll_archive_perpage', false ) );
 		$this->assertFalse( get_option( 'poll_ans_sortby', false ) );
-		$this->assertNotFalse( get_option( Polls_Options::OPTION, false ) );
+		$this->assertNotFalse( get_option( WP_Polls_Options::OPTION, false ) );
 	}
 
 	/**
@@ -148,24 +148,24 @@ class Test_Polls_Options extends WP_Polls_TestCase {
 	 * over the migrated values.
 	 */
 	public function test_migration_is_idempotent() {
-		delete_option( Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::OPTION );
 		delete_option( 'poll_version' );
-		Polls_Options::flush();
+		WP_Polls_Options::flush();
 		update_option( 'poll_archive_perpage', 17 );
 
-		Polls_Install::upgrade();
-		Polls_Options::flush();
+		WP_Polls_Install::upgrade();
+		WP_Polls_Options::flush();
 
-		Polls_Install::upgrade();
-		Polls_Options::flush();
-		$this->assertSame( 17, (int) Polls_Options::get( 'archive.per_page' ) );
+		WP_Polls_Install::upgrade();
+		WP_Polls_Options::flush();
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
 
 		// And with the version row missing, which is what a partial restore or
 		// a downgrade-and-re-upgrade looks like.
 		delete_option( 'poll_version' );
-		Polls_Install::upgrade();
-		Polls_Options::flush();
-		$this->assertSame( 17, (int) Polls_Options::get( 'archive.per_page' ) );
+		WP_Polls_Install::upgrade();
+		WP_Polls_Options::flush();
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
 	}
 
 	/**
@@ -173,24 +173,24 @@ class Test_Polls_Options extends WP_Polls_TestCase {
 	 * scattered rows; a version-only gate would skip it.
 	 */
 	public function test_migration_handles_install_stamped_with_current_version() {
-		delete_option( Polls_Options::OPTION );
-		Polls_Options::flush();
+		delete_option( WP_Polls_Options::OPTION );
+		WP_Polls_Options::flush();
 		update_option( 'poll_version', WP_POLLS_VERSION );
 		update_option( 'poll_archive_perpage', 23 );
 
-		Polls_Install::upgrade();
-		Polls_Options::flush();
+		WP_Polls_Install::upgrade();
+		WP_Polls_Options::flush();
 
-		$this->assertSame( 23, (int) Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 23, (int) WP_Polls_Options::get( 'archive.per_page' ) );
 	}
 
 	/**
 	 * A corrupt row falls back to defaults rather than fataling.
 	 */
 	public function test_non_array_option_falls_back_to_defaults() {
-		update_option( Polls_Options::OPTION, 'not an array' );
-		Polls_Options::flush();
+		update_option( WP_Polls_Options::OPTION, 'not an array' );
+		WP_Polls_Options::flush();
 
-		$this->assertSame( 'polla_aid', Polls_Options::get( 'sort.answers_by' ) );
+		$this->assertSame( 'polla_aid', WP_Polls_Options::get( 'sort.answers_by' ) );
 	}
 }

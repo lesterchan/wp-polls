@@ -2,11 +2,11 @@
 /**
  * Poll Templates admin screen.
  *
- * Every template field is declared in Polls_Settings as a section and a field,
+ * Every template field is declared in WP_Polls_Settings as a section and a field,
  * so all this file does is open the form, hand it to do_settings_sections()
  * and close it. Saving is handled by the Settings API: the form posts to
  * options.php, which validates the nonce and hands the input to
- * Polls_Settings::sanitize().
+ * WP_Polls_Settings::sanitize().
  *
  * @package WP-Polls
  */
@@ -14,18 +14,18 @@
 defined( 'ABSPATH' ) || exit;
 
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( Polls_Admin::capability() ) ) {
+if ( ! current_user_can( WP_Polls_Admin::capability() ) ) {
 	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 ?>
 <script type="text/javascript">
 /* <![CDATA[*/
 (function () {
-	// Defaults come from Polls_Templates so this screen and the activation
+	// Defaults come from WP_Polls_Template so this screen and the activation
 	// routine cannot drift apart. Before 3.0.0 the markup was written out
 	// twice, which is how one copy kept its inline onclick handlers after the
 	// other had them removed.
-	var pollDefaults = <?php echo wp_json_encode( Polls_Templates::defaults() ); ?>;
+	var pollDefaults = <?php echo wp_json_encode( WP_Polls_Template::defaults() ); ?>;
 
 	document.addEventListener("click", function (event) {
 		var target = event.target;
@@ -50,8 +50,8 @@ if ( ! current_user_can( Polls_Admin::capability() ) ) {
 	<?php settings_errors(); ?>
 	<form id="poll_template_form" method="post" action="options.php">
 		<?php
-		settings_fields( Polls_Settings::GROUP );
-		do_settings_sections( Polls_Settings::PAGE_TEMPLATES );
+		settings_fields( WP_Polls_Settings::GROUP );
+		do_settings_sections( WP_Polls_Settings::PAGE_TEMPLATES );
 		submit_button();
 		?>
 	</form>

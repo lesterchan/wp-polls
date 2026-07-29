@@ -8,18 +8,18 @@
 /**
  * Vote recording, duplicate detection and the AJAX endpoint.
  *
- * @covers Polls_Vote
+ * @covers WP_Polls_Vote
  */
-class Test_Polls_Vote extends WP_Polls_TestCase {
+class WP_Polls_Vote_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Logging by IP so the tests exercise the database path rather than cookies.
 	 */
 	public function set_up() {
 		parent::set_up();
-		Polls_Options::set( 'logging_method', 2 );
-		Polls_Options::set( 'allow_to_vote', 0 );
-		Polls_Options::flush();
+		WP_Polls_Options::set( 'logging_method', 2 );
+		WP_Polls_Options::set( 'allow_to_vote', 0 );
+		WP_Polls_Options::flush();
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
 	}
 
@@ -31,7 +31,7 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 
 		$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT polla_votes FROM {$wpdb->pollsa} WHERE polla_aid = %d", $answers[0] ) ) );
 		$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ) );
@@ -46,10 +46,10 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 
 		$this->expectException( InvalidArgumentException::class );
-		Polls_Vote::vote_poll_process( $poll_id, array( $answers[1] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[1] ) );
 	}
 
 	/**
@@ -60,9 +60,9 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 		try {
-			Polls_Vote::vote_poll_process( $poll_id, array( $answers[1] ) );
+			WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[1] ) );
 		} catch ( InvalidArgumentException $e ) {
 			unset( $e );
 		}
@@ -83,7 +83,7 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		$b_answers = $this->answer_ids( $poll_b );
 
 		$this->expectException( InvalidArgumentException::class );
-		Polls_Vote::vote_poll_process( $poll_a, array( $b_answers[0] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_a, array( $b_answers[0] ) );
 	}
 
 	/**
@@ -94,7 +94,7 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		$answers = $this->answer_ids( $poll_id );
 
 		$this->expectException( InvalidArgumentException::class );
-		Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 	}
 
 	/**
@@ -104,7 +104,7 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 
 		$this->expectException( InvalidArgumentException::class );
-		Polls_Vote::vote_poll_process( $poll_id, array() );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array() );
 	}
 
 	/**
@@ -118,7 +118,7 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		);
 		$answers = $this->answer_ids( $poll_id );
 
-		Polls_Vote::vote_poll_process( $poll_id, array( $answers[0], $answers[1] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0], $answers[1] ) );
 
 		$this->assertSame( 2, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->pollsip} WHERE pollip_qid = %d", $poll_id ) ) );
 		$this->assertSame( 2, (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ) );
@@ -133,7 +133,7 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 
 		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT pollip_ip FROM {$wpdb->pollsip} WHERE pollip_qid = %d", $poll_id ) );
 		$this->assertNotSame( '203.0.113.10', $stored );
@@ -148,7 +148,7 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	public function test_missing_remote_addr_does_not_warn() {
 		unset( $_SERVER['REMOTE_ADDR'] );
 
-		$this->assertSame( '', Polls_Vote::poll_get_raw_ipaddress() );
+		$this->assertSame( '', WP_Polls_Vote::poll_get_raw_ipaddress() );
 	}
 
 	/**
@@ -159,12 +159,12 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	 * the junk itself never gets looked up.
 	 */
 	public function test_non_ip_header_never_reaches_the_resolver() {
-		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
-		Polls_Options::flush();
+		WP_Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		WP_Polls_Options::flush();
 		$_SERVER['REMOTE_ADDR']          = '203.0.113.10';
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip';
 
-		$this->assertStringNotContainsString( 'not-an-ip', Polls_Vote::poll_get_hostname() );
+		$this->assertStringNotContainsString( 'not-an-ip', WP_Polls_Vote::poll_get_hostname() );
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 	}
@@ -173,12 +173,12 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	 * With no usable address at all the hostname is empty.
 	 */
 	public function test_no_address_yields_empty_hostname() {
-		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
-		Polls_Options::flush();
+		WP_Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		WP_Polls_Options::flush();
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip';
 		unset( $_SERVER['REMOTE_ADDR'] );
 
-		$this->assertSame( '', Polls_Vote::poll_get_hostname() );
+		$this->assertSame( '', WP_Polls_Vote::poll_get_hostname() );
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 	}
@@ -193,17 +193,17 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_appending_a_hop_does_not_change_identity() {
-		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		WP_Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.5';
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7';
-		$plain                           = Polls_Vote::poll_get_ipaddress();
+		$plain                           = WP_Polls_Vote::poll_get_ipaddress();
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 10.0.0.1';
-		$appended                        = Polls_Vote::poll_get_ipaddress();
+		$appended                        = WP_Polls_Vote::poll_get_ipaddress();
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 10.0.0.1, 172.16.0.9';
-		$appended_twice                  = Polls_Vote::poll_get_ipaddress();
+		$appended_twice                  = WP_Polls_Vote::poll_get_ipaddress();
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
@@ -217,11 +217,11 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_configured_header_takes_the_first_address() {
-		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		WP_Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.5';
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 70.41.3.18';
-		$this->assertSame( '203.0.113.7', Polls_Vote::poll_get_raw_ipaddress() );
+		$this->assertSame( '203.0.113.7', WP_Polls_Vote::poll_get_raw_ipaddress() );
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 	}
@@ -232,14 +232,14 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_junk_header_falls_back_to_remote_addr() {
-		Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
+		WP_Polls_Options::set( 'ip_header', 'HTTP_X_FORWARDED_FOR' );
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.5';
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip, still-not-an-ip';
-		$this->assertSame( '198.51.100.5', Polls_Vote::poll_get_raw_ipaddress() );
+		$this->assertSame( '198.51.100.5', WP_Polls_Vote::poll_get_raw_ipaddress() );
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '<script>alert(1)</script>';
-		$this->assertSame( '198.51.100.5', Polls_Vote::poll_get_raw_ipaddress() );
+		$this->assertSame( '198.51.100.5', WP_Polls_Vote::poll_get_raw_ipaddress() );
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 	}
@@ -250,11 +250,11 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_proxy_headers_are_ignored_by_default() {
-		Polls_Options::set( 'ip_header', '' );
+		WP_Polls_Options::set( 'ip_header', '' );
 		$_SERVER['REMOTE_ADDR']          = '198.51.100.5';
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7';
 
-		$this->assertSame( '198.51.100.5', Polls_Vote::poll_get_raw_ipaddress() );
+		$this->assertSame( '198.51.100.5', WP_Polls_Vote::poll_get_raw_ipaddress() );
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 	}
@@ -265,12 +265,12 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_trust_proxy_filter_opts_in() {
-		Polls_Options::set( 'ip_header', '' );
+		WP_Polls_Options::set( 'ip_header', '' );
 		$_SERVER['REMOTE_ADDR']          = '198.51.100.5';
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 10.0.0.1';
 
 		add_filter( 'wp_polls_trust_proxy', '__return_true' );
-		$ip = Polls_Vote::poll_get_raw_ipaddress();
+		$ip = WP_Polls_Vote::poll_get_raw_ipaddress();
 		remove_filter( 'wp_polls_trust_proxy', '__return_true' );
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
@@ -287,11 +287,11 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_remote_addr_identity_is_unchanged() {
-		Polls_Options::set( 'ip_header', '' );
+		WP_Polls_Options::set( 'ip_header', '' );
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
 
-		$this->assertSame( '203.0.113.10', Polls_Vote::poll_get_raw_ipaddress() );
-		$this->assertSame( wp_hash( '203.0.113.10' ), Polls_Vote::poll_get_ipaddress() );
+		$this->assertSame( '203.0.113.10', WP_Polls_Vote::poll_get_raw_ipaddress() );
+		$this->assertSame( wp_hash( '203.0.113.10' ), WP_Polls_Vote::poll_get_ipaddress() );
 	}
 
 	/**
@@ -308,11 +308,11 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	public function test_trust_proxy_constant_opts_in() {
 		define( 'WP_POLLS_TRUST_PROXY', true );
 
-		Polls_Options::set( 'ip_header', '' );
+		WP_Polls_Options::set( 'ip_header', '' );
 		$_SERVER['REMOTE_ADDR']          = '198.51.100.5';
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.7, 10.0.0.1';
 
-		$ip = Polls_Vote::poll_get_raw_ipaddress();
+		$ip = WP_Polls_Vote::poll_get_raw_ipaddress();
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
@@ -330,12 +330,12 @@ class Test_Polls_Vote extends WP_Polls_TestCase {
 	public function test_named_header_beats_the_constant() {
 		define( 'WP_POLLS_TRUST_PROXY', true );
 
-		Polls_Options::set( 'ip_header', 'HTTP_CF_CONNECTING_IP' );
+		WP_Polls_Options::set( 'ip_header', 'HTTP_CF_CONNECTING_IP' );
 		$_SERVER['REMOTE_ADDR']           = '198.51.100.5';
 		$_SERVER['HTTP_CF_CONNECTING_IP'] = '203.0.113.99';
 		$_SERVER['HTTP_X_FORWARDED_FOR']  = '203.0.113.7';
 
-		$ip = Polls_Vote::poll_get_raw_ipaddress();
+		$ip = WP_Polls_Vote::poll_get_raw_ipaddress();
 
 		unset( $_SERVER['HTTP_CF_CONNECTING_IP'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
 

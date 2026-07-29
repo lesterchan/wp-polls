@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the setting, the sections and the fields, and validates the input.
  */
-class Polls_Settings {
+class WP_Polls_Settings {
 
 	/**
 	 * Settings group both screens post under.
@@ -61,7 +61,7 @@ class Polls_Settings {
 		// Poll Options screen because the save happens on options.php, which never
 		// loads that screen - a callback added while the screen renders would only
 		// ever run on a request that is not saving anything.
-		add_action( 'update_option_' . Polls_Options::OPTION, array( 'Polls_Core', 'cron_polls_place' ) );
+		add_action( 'update_option_' . WP_Polls_Options::OPTION, array( 'WP_Polls', 'cron_polls_place' ) );
 	}
 
 	/**
@@ -78,11 +78,11 @@ class Polls_Settings {
 	public static function register() {
 		register_setting(
 			self::GROUP,
-			Polls_Options::OPTION,
+			WP_Polls_Options::OPTION,
 			array(
 				'type'              => 'array',
 				'sanitize_callback' => array( __CLASS__, 'sanitize' ),
-				'default'           => Polls_Options::defaults(),
+				'default'           => WP_Polls_Options::defaults(),
 			)
 		);
 
@@ -456,7 +456,7 @@ class Polls_Settings {
 	/**
 	 * The Poll Templates screen, as sections of template fields.
 	 *
-	 * The order matches Polls_Options::template_keys().
+	 * The order matches WP_Polls_Options::template_keys().
 	 *
 	 * @return array
 	 */
@@ -674,7 +674,7 @@ class Polls_Settings {
 	 * @return void
 	 */
 	public static function field_select( $args ) {
-		$current = (string) Polls_Options::get( $args['path'] );
+		$current = (string) WP_Polls_Options::get( $args['path'] );
 
 		echo '<select name="' . esc_attr( self::field_name( $args['path'] ) ) . '" id="' . esc_attr( $args['label_for'] ) . '">';
 		foreach ( $args['options'] as $value => $label ) {
@@ -709,7 +709,7 @@ class Polls_Settings {
 
 		$input  = '<input type="text" id="' . esc_attr( $args['label_for'] ) . '"';
 		$input .= ' name="' . esc_attr( self::field_name( $args['path'] ) ) . '"';
-		$input .= ' value="' . esc_attr( Polls_Options::get( $args['path'] ) ) . '"';
+		$input .= ' value="' . esc_attr( WP_Polls_Options::get( $args['path'] ) ) . '"';
 		$input .= ' class="' . esc_attr( $args['class_name'] ) . '"';
 
 		if ( $args['maxlength'] ) {
@@ -754,7 +754,7 @@ class Polls_Settings {
 			'<input type="color" id="%1$s" name="%2$s" value="#%3$s" data-poll-action="pollbar-update" data-poll-field="%4$s" />',
 			esc_attr( $args['label_for'] ),
 			esc_attr( self::field_name( $args['path'] ) ),
-			esc_attr( Polls_Core::sanitize_bar_color( Polls_Options::get( $args['path'] ) ) ),
+			esc_attr( WP_Polls::sanitize_bar_color( WP_Polls_Options::get( $args['path'] ) ) ),
 			esc_attr( $args['field'] )
 		);
 	}
@@ -765,7 +765,7 @@ class Polls_Settings {
 	 * @return void
 	 */
 	public static function field_bar_style() {
-		$bar    = Polls_Options::get( 'bar' );
+		$bar    = WP_Polls_Options::get( 'bar' );
 		$labels = array(
 			'flat'     => __( 'Flat', 'wp-polls' ),
 			'gradient' => __( 'Gradient', 'wp-polls' ),
@@ -778,9 +778,9 @@ class Polls_Settings {
 			// actually visible at.
 			$swatch = sprintf(
 				'--wp-polls-bar-background: #%1$s; --wp-polls-bar-border: #%2$s; --wp-polls-bar-image: %3$s;',
-				Polls_Core::sanitize_bar_color( $bar['background'] ),
-				Polls_Core::sanitize_bar_color( $bar['border'] ),
-				Polls_Core::bar_image( $style )
+				WP_Polls::sanitize_bar_color( $bar['background'] ),
+				WP_Polls::sanitize_bar_color( $bar['border'] ),
+				WP_Polls::bar_image( $style )
 			);
 
 			echo '<p>';
@@ -808,14 +808,14 @@ class Polls_Settings {
 	 * @return void
 	 */
 	public static function field_bar_preview() {
-		$bar = Polls_Options::get( 'bar' );
+		$bar = WP_Polls_Options::get( 'bar' );
 
 		$style = sprintf(
 			'--wp-polls-bar-height: %1$dpx; --wp-polls-bar-background: #%2$s; --wp-polls-bar-border: #%3$s; --wp-polls-bar-image: %4$s;',
 			(int) $bar['height'],
-			Polls_Core::sanitize_bar_color( $bar['background'] ),
-			Polls_Core::sanitize_bar_color( $bar['border'] ),
-			Polls_Core::bar_image( $bar['style'] )
+			WP_Polls::sanitize_bar_color( $bar['background'] ),
+			WP_Polls::sanitize_bar_color( $bar['border'] ),
+			WP_Polls::bar_image( $bar['style'] )
 		);
 
 		echo '<div id="wp-polls-pollbar" class="wp-polls" style="' . esc_attr( $style ) . '">';
@@ -832,7 +832,7 @@ class Polls_Settings {
 	public static function field_current_poll( $args ) {
 		global $wpdb;
 
-		$current = (int) Polls_Options::get( 'current_poll' );
+		$current = (int) WP_Polls_Options::get( 'current_poll' );
 
 		echo '<select name="' . esc_attr( self::field_name( 'current_poll' ) ) . '" id="' . esc_attr( $args['label_for'] ) . '">';
 
@@ -871,7 +871,7 @@ class Polls_Settings {
 			'<textarea id="%1$s" name="%2$s" class="large-text code" rows="10">%3$s</textarea>',
 			esc_attr( $args['label_for'] ),
 			esc_attr( self::field_name( $path ) ),
-			esc_textarea( removeslashes( Polls_Options::get( $path ) ) )
+			esc_textarea( removeslashes( WP_Polls_Options::get( $path ) ) )
 		);
 
 		$tokens = esc_html__( 'N/A', 'wp-polls' );
@@ -916,7 +916,7 @@ class Polls_Settings {
 	 * @return string
 	 */
 	protected static function field_name( $path ) {
-		$name = Polls_Options::OPTION;
+		$name = WP_Polls_Options::OPTION;
 
 		foreach ( explode( '.', $path ) as $segment ) {
 			$name .= '[' . $segment . ']';
@@ -962,7 +962,7 @@ class Polls_Settings {
 	 * @return array The complete option, ready to store.
 	 */
 	public static function sanitize( $input ) {
-		$current = Polls_Options::all();
+		$current = WP_Polls_Options::all();
 
 		if ( ! is_array( $input ) ) {
 			return $current;
@@ -972,8 +972,8 @@ class Polls_Settings {
 		if ( isset( $input['bar'] ) && is_array( $input['bar'] ) ) {
 			$bar                          = $input['bar'];
 			$current['bar']['style']      = isset( $bar['style'] ) ? sanitize_text_field( $bar['style'] ) : $current['bar']['style'];
-			$current['bar']['background'] = isset( $bar['background'] ) ? Polls_Core::sanitize_bar_color( $bar['background'] ) : $current['bar']['background'];
-			$current['bar']['border']     = isset( $bar['border'] ) ? Polls_Core::sanitize_bar_color( $bar['border'] ) : $current['bar']['border'];
+			$current['bar']['background'] = isset( $bar['background'] ) ? WP_Polls::sanitize_bar_color( $bar['background'] ) : $current['bar']['background'];
+			$current['bar']['border']     = isset( $bar['border'] ) ? WP_Polls::sanitize_bar_color( $bar['border'] ) : $current['bar']['border'];
 			$current['bar']['height']     = isset( $bar['height'] ) ? max( 1, (int) $bar['height'] ) : $current['bar']['height'];
 
 			if ( ! in_array( $current['bar']['style'], self::bar_styles(), true ) ) {
@@ -1020,7 +1020,7 @@ class Polls_Settings {
 
 		// --- Poll Templates screen -----------------------------------------
 		if ( isset( $input['templates'] ) && is_array( $input['templates'] ) ) {
-			foreach ( Polls_Options::template_keys() as $key ) {
+			foreach ( WP_Polls_Options::template_keys() as $key ) {
 				if ( ! isset( $input['templates'][ $key ] ) ) {
 					continue;
 				}

@@ -2,11 +2,11 @@
 /**
  * Poll Options admin screen.
  *
- * Every row on this screen is declared in Polls_Settings as a section and a
+ * Every row on this screen is declared in WP_Polls_Settings as a section and a
  * field, so all this file does is open the form, hand it to
  * do_settings_sections() and close it. Saving is handled by the Settings API:
  * the form posts to options.php, which validates the nonce and hands the input
- * to Polls_Settings::sanitize().
+ * to WP_Polls_Settings::sanitize().
  *
  * @package WP-Polls
  */
@@ -14,7 +14,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( Polls_Admin::capability() ) ) {
+if ( ! current_user_can( WP_Polls_Admin::capability() ) ) {
 	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 ?>
@@ -27,7 +27,7 @@ if ( ! current_user_can( Polls_Admin::capability() ) ) {
 	}
 	// The background-image for each style comes from the same helper the front
 	// end uses, so the preview cannot drift from what actually renders.
-	var pollbar_images = <?php echo wp_json_encode( array_combine( Polls_Settings::bar_styles(), array_map( array( 'Polls_Core', 'bar_image' ), Polls_Settings::bar_styles() ) ) ); ?>;
+	var pollbar_images = <?php echo wp_json_encode( array_combine( WP_Polls_Settings::bar_styles(), array_map( array( 'WP_Polls', 'bar_image' ), WP_Polls_Settings::bar_styles() ) ) ); ?>;
 	// The two colour fields are colour inputs, so their value is already the
 	// "#rrggbb" CSS wants and they show the colour themselves - there is no
 	// separate swatch beside them to keep in step any more.
@@ -86,8 +86,8 @@ if ( ! current_user_can( Polls_Admin::capability() ) ) {
 	<?php settings_errors(); ?>
 	<form id="poll_options_form" method="post" action="options.php">
 		<?php
-		settings_fields( Polls_Settings::GROUP );
-		do_settings_sections( Polls_Settings::PAGE_OPTIONS );
+		settings_fields( WP_Polls_Settings::GROUP );
+		do_settings_sections( WP_Polls_Settings::PAGE_OPTIONS );
 		submit_button();
 		?>
 	</form>

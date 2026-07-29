@@ -11,7 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( Polls_Admin::capability() ) ) {
+if ( ! current_user_can( WP_Polls_Admin::capability() ) ) {
 	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 
@@ -26,7 +26,7 @@ $poll_registered               = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(p
 $poll_comments                 = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(pollip_user) FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_user != %s AND pollip_userid = 0", $poll_id, __( 'Guest', 'wp-polls' ) ) );
 $poll_guest                    = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(pollip_user) FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_user = %s", $poll_id, __( 'Guest', 'wp-polls' ) ) );
 $poll_totalrecorded            = ( $poll_registered + $poll_comments + $poll_guest );
-list( $order_by, $sort_order ) = Polls_Display::get_ans_sort();
+list( $order_by, $sort_order ) = WP_Polls_Display::get_ans_sort();
 $poll_answers_data             = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers FROM $wpdb->pollsa WHERE polla_qid = %d ORDER BY $order_by $sort_order", $poll_id ) );
 $poll_voters                   = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT pollip_user FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_user != %s ORDER BY pollip_user ASC", $poll_id, __( 'Guest', 'wp-polls' ) ) );
 $poll_logs_count               = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(pollip_id) FROM $wpdb->pollsip WHERE pollip_qid = %d", $poll_id ) );
@@ -150,7 +150,7 @@ if ( $poll_filtered ) {
 } else {
 	$poll_ips = $wpdb->get_results( $wpdb->prepare( "SELECT pollip_aid, pollip_ip, pollip_host, pollip_timestamp, pollip_user FROM $wpdb->pollsip WHERE pollip_qid = %d ORDER BY pollip_aid ASC, pollip_user ASC LIMIT %d", $poll_id, $max_records ) );
 }
-$poll_logs_url = Polls_List_Table::page_url( array( 'mode' => 'logs' ), $poll_id );
+$poll_logs_url = WP_Polls_List_Table::page_url( array( 'mode' => 'logs' ), $poll_id );
 ?>
 <div class="wrap">
 	<h1><?php esc_html_e( 'Poll\'s Logs', 'wp-polls' ); ?></h1>
@@ -297,7 +297,7 @@ $poll_logs_url = Polls_List_Table::page_url( array( 'mode' => 'logs' ), $poll_id
 					$pollip_user = removeslashes( $poll_ip->pollip_user );
 					$pollip_ip   = $poll_ip->pollip_ip;
 					$pollip_host = $poll_ip->pollip_host;
-					$pollip_date = Polls_List_Table::format_date( $poll_ip->pollip_timestamp );
+					$pollip_date = WP_Polls_List_Table::format_date( $poll_ip->pollip_timestamp );
 
 					if ( $pollip_user !== $temp_pollip_user ) {
 						echo '<tr class="highlight">';
@@ -324,7 +324,7 @@ $poll_logs_url = Polls_List_Table::page_url( array( 'mode' => 'logs' ), $poll_id
 					$pollip_user = apply_filters( 'wp_polls_log_secret_ballot', removeslashes( $poll_ip->pollip_user ) );
 					$pollip_ip   = $poll_ip->pollip_ip;
 					$pollip_host = $poll_ip->pollip_host;
-					$pollip_date = Polls_List_Table::format_date( $poll_ip->pollip_timestamp );
+					$pollip_date = WP_Polls_List_Table::format_date( $poll_ip->pollip_timestamp );
 					if ( $pollip_aid !== $poll_last_aid ) {
 						if ( 0 === $pollip_aid ) {
 							echo '<tr class="highlight"><td colspan="4"><strong>' . esc_html( $pollip_answers[0] ) . '</strong></td></tr>';

@@ -20,7 +20,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * Lists the polls on the Manage Polls screen.
  */
-class Polls_List_Table extends WP_List_Table {
+class WP_Polls_List_Table extends WP_List_Table {
 
 	/**
 	 * Polls shown per page.
@@ -114,8 +114,8 @@ class Polls_List_Table extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 
-		$this->current_poll = (int) Polls_Options::get( 'current_poll' );
-		$this->latest_poll  = (int) Polls_Options::get( 'latest_poll' );
+		$this->current_poll = (int) WP_Polls_Options::get( 'current_poll' );
+		$this->latest_poll  = (int) WP_Polls_Options::get( 'latest_poll' );
 
 		$total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->pollsq" );
 		$order_by = $this->order_by();

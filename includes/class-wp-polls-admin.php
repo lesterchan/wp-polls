@@ -10,7 +10,21 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Everything that only runs inside wp-admin.
  */
-class Polls_Admin {
+class WP_Polls_Admin {
+
+	/**
+	 * Slug of the top level menu, and of the screen it opens on.
+	 *
+	 * @var string
+	 */
+	const PAGE = 'wp-polls';
+
+	/**
+	 * Capability every screen and every write path checks, before the filter.
+	 *
+	 * @var string
+	 */
+	const CAPABILITY = 'manage_polls';
 
 	/**
 	 * Hook registration.
@@ -37,7 +51,7 @@ class Polls_Admin {
 	 * @return array
 	 */
 	public static function page_slugs() {
-		return array( 'wp-polls', 'wp-polls-add', 'wp-polls-options', 'wp-polls-templates' );
+		return array( self::PAGE, self::PAGE . '-add', self::PAGE . '-options', self::PAGE . '-templates' );
 	}
 
 	/**
@@ -54,8 +68,8 @@ class Polls_Admin {
 	 * @return string
 	 */
 	public static function hook_suffix( $slug ) {
-		if ( 'wp-polls' === $slug ) {
-			return 'toplevel_page_wp-polls';
+		if ( self::PAGE === $slug ) {
+			return 'toplevel_page_' . self::PAGE;
 		}
 
 		return sanitize_title( self::menu_title() ) . '_page_' . $slug;
@@ -90,12 +104,12 @@ class Polls_Admin {
 		$capability = self::capability();
 		$menu_title = self::menu_title();
 
-		add_menu_page( $menu_title, $menu_title, $capability, 'wp-polls', array( __CLASS__, 'render_manage' ), 'dashicons-chart-bar' );
+		add_menu_page( $menu_title, $menu_title, $capability, self::PAGE, array( __CLASS__, 'render_manage' ), 'dashicons-chart-bar' );
 
-		add_submenu_page( 'wp-polls', __( 'Manage Polls', 'wp-polls' ), __( 'Manage Polls', 'wp-polls' ), $capability, 'wp-polls', array( __CLASS__, 'render_manage' ) );
-		add_submenu_page( 'wp-polls', __( 'Add Poll', 'wp-polls' ), __( 'Add Poll', 'wp-polls' ), $capability, 'wp-polls-add', array( __CLASS__, 'render_add' ) );
-		add_submenu_page( 'wp-polls', __( 'Poll Options', 'wp-polls' ), __( 'Poll Options', 'wp-polls' ), $capability, 'wp-polls-options', array( __CLASS__, 'render_options' ) );
-		add_submenu_page( 'wp-polls', __( 'Poll Templates', 'wp-polls' ), __( 'Poll Templates', 'wp-polls' ), $capability, 'wp-polls-templates', array( __CLASS__, 'render_templates' ) );
+		add_submenu_page( self::PAGE, __( 'Manage Polls', 'wp-polls' ), __( 'Manage Polls', 'wp-polls' ), $capability, self::PAGE, array( __CLASS__, 'render_manage' ) );
+		add_submenu_page( self::PAGE, __( 'Add Poll', 'wp-polls' ), __( 'Add Poll', 'wp-polls' ), $capability, self::PAGE . '-add', array( __CLASS__, 'render_add' ) );
+		add_submenu_page( self::PAGE, __( 'Poll Options', 'wp-polls' ), __( 'Poll Options', 'wp-polls' ), $capability, self::PAGE . '-options', array( __CLASS__, 'render_options' ) );
+		add_submenu_page( self::PAGE, __( 'Poll Templates', 'wp-polls' ), __( 'Poll Templates', 'wp-polls' ), $capability, self::PAGE . '-templates', array( __CLASS__, 'render_templates' ) );
 	}
 
 	/**
@@ -105,7 +119,7 @@ class Polls_Admin {
 	 * @return string
 	 */
 	public static function capability( $context = 'screen' ) {
-		return apply_filters( 'wp_polls_capability', 'manage_polls', $context );
+		return apply_filters( 'wp_polls_capability', self::CAPABILITY, $context );
 	}
 
 	/**
@@ -522,7 +536,7 @@ class Polls_Admin {
 						}
 
 						// Update Lastest Poll ID To Poll Options.
-						Polls_Options::set( 'latest_poll', Polls_Core::polls_latest_id() );
+						WP_Polls_Options::set( 'latest_poll', WP_Polls::polls_latest_id() );
 						do_action( 'wp_polls_delete_poll', $pollq_id );
 						break;
 				}

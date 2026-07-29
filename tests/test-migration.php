@@ -17,10 +17,10 @@
  * that quietly wrote defaults instead of carrying values across would look
  * correct against a default-valued fixture.
  *
- * @covers Polls_Install::upgrade
- * @covers Polls_Options::migrate_from_legacy_rows
+ * @covers WP_Polls_Install::upgrade
+ * @covers WP_Polls_Options::migrate_from_legacy_rows
  */
-class Test_Polls_Migration extends WP_Polls_TestCase {
+class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 	/**
 	 * A 3.0.0 install's worth of scattered rows, none of them default.
@@ -49,9 +49,9 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	private function make_legacy_install() {
-		delete_option( Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::OPTION );
 		delete_option( 'poll_version' );
-		Polls_Options::flush();
+		WP_Polls_Options::flush();
 
 		foreach ( $this->legacy as $name => $value ) {
 			update_option( $name, $value );
@@ -82,8 +82,8 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	private function run_upgrade() {
-		Polls_Install::upgrade();
-		Polls_Options::flush();
+		WP_Polls_Install::upgrade();
+		WP_Polls_Options::flush();
 	}
 
 	/**
@@ -95,18 +95,18 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
-		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', Polls_Options::get( 'templates.votefooter' ) );
-		$this->assertSame( 'No polls, sorry.', Polls_Options::get( 'templates.disable' ) );
-		$this->assertSame( 'polla_votes', Polls_Options::get( 'sort.answers_by' ) );
-		$this->assertSame( 'desc', Polls_Options::get( 'sort.answers_order' ) );
-		$this->assertSame( 17, (int) Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( 3, (int) Polls_Options::get( 'archive.display_poll' ) );
-		$this->assertSame( 3, (int) Polls_Options::get( 'close' ) );
-		$this->assertSame( 2, (int) Polls_Options::get( 'logging_method' ) );
-		$this->assertSame( 86400, (int) Polls_Options::get( 'cookie_expiry' ) );
-		$this->assertSame( 1, (int) Polls_Options::get( 'allow_to_vote' ) );
-		$this->assertSame( 2, (int) Polls_Options::get( 'current_poll' ) );
-		$this->assertSame( 3, (int) Polls_Options::get( 'latest_poll' ) );
+		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( 'No polls, sorry.', WP_Polls_Options::get( 'templates.disable' ) );
+		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.answers_by' ) );
+		$this->assertSame( 'desc', WP_Polls_Options::get( 'sort.answers_order' ) );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 3, (int) WP_Polls_Options::get( 'archive.display_poll' ) );
+		$this->assertSame( 3, (int) WP_Polls_Options::get( 'close' ) );
+		$this->assertSame( 2, (int) WP_Polls_Options::get( 'logging_method' ) );
+		$this->assertSame( 86400, (int) WP_Polls_Options::get( 'cookie_expiry' ) );
+		$this->assertSame( 1, (int) WP_Polls_Options::get( 'allow_to_vote' ) );
+		$this->assertSame( 2, (int) WP_Polls_Options::get( 'current_poll' ) );
+		$this->assertSame( 3, (int) WP_Polls_Options::get( 'latest_poll' ) );
 	}
 
 	/**
@@ -121,12 +121,12 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		// The fold carries poll_bar across intact and the bar upgrade then maps
 		// the style: images/default_gradient is gone, and it shaded light to
 		// dark, so it lands on the CSS gradient. The colours are untouched.
-		$this->assertSame( 'gradient', Polls_Options::get( 'bar.style' ) );
-		$this->assertSame( 'ff0000', Polls_Options::get( 'bar.background' ) );
-		$this->assertSame( '00ff00', Polls_Options::get( 'bar.border' ) );
-		$this->assertSame( 12, (int) Polls_Options::get( 'bar.height' ) );
-		$this->assertSame( 0, (int) Polls_Options::get( 'ajax.loading' ) );
-		$this->assertSame( 0, (int) Polls_Options::get( 'ajax.fading' ) );
+		$this->assertSame( 'gradient', WP_Polls_Options::get( 'bar.style' ) );
+		$this->assertSame( 'ff0000', WP_Polls_Options::get( 'bar.background' ) );
+		$this->assertSame( '00ff00', WP_Polls_Options::get( 'bar.border' ) );
+		$this->assertSame( 12, (int) WP_Polls_Options::get( 'bar.height' ) );
+		$this->assertSame( 0, (int) WP_Polls_Options::get( 'ajax.loading' ) );
+		$this->assertSame( 0, (int) WP_Polls_Options::get( 'ajax.fading' ) );
 	}
 
 	/**
@@ -142,7 +142,7 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
-		$this->assertSame( 'HTTP_X_FORWARDED_FOR', Polls_Options::get( 'ip_header' ) );
+		$this->assertSame( 'HTTP_X_FORWARDED_FOR', WP_Polls_Options::get( 'ip_header' ) );
 	}
 
 	/**
@@ -154,9 +154,9 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
-		$defaults = Polls_Options::defaults();
-		$this->assertSame( $defaults['sort']['results_by'], Polls_Options::get( 'sort.results_by' ) );
-		$this->assertNotNull( Polls_Options::get( 'templates.voteheader' ) );
+		$defaults = WP_Polls_Options::defaults();
+		$this->assertSame( $defaults['sort']['results_by'], WP_Polls_Options::get( 'sort.results_by' ) );
+		$this->assertNotNull( WP_Polls_Options::get( 'templates.voteheader' ) );
 	}
 
 	/**
@@ -169,8 +169,8 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		$this->run_upgrade();
 
 		$names = array_merge(
-			array_keys( Polls_Options::legacy_map() ),
-			Polls_Options::legacy_extra_rows()
+			array_keys( WP_Polls_Options::legacy_map() ),
+			WP_Polls_Options::legacy_extra_rows()
 		);
 
 		$leftover = array();
@@ -189,8 +189,8 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_the_consolidated_row_is_not_in_the_delete_list() {
-		$this->assertNotContains( Polls_Options::OPTION, Polls_Options::legacy_extra_rows() );
-		$this->assertArrayNotHasKey( Polls_Options::OPTION, Polls_Options::legacy_map() );
+		$this->assertNotContains( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_extra_rows() );
+		$this->assertArrayNotHasKey( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_map() );
 	}
 
 	/**
@@ -215,8 +215,8 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		$this->run_upgrade();
 		$this->run_upgrade();
 
-		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', Polls_Options::get( 'templates.votefooter' ) );
-		$this->assertSame( 17, (int) Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
 	}
 
 	/**
@@ -235,8 +235,8 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		delete_option( 'poll_version' );
 		$this->run_upgrade();
 
-		$this->assertSame( 17, (int) Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
 	}
 
 	/**
@@ -252,16 +252,16 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 	public function test_install_stamped_3_0_0_but_unmigrated_is_still_folded_in() {
 		$this->make_legacy_install();
 
-		delete_option( Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::OPTION );
 		update_option( 'poll_version', '3.0.0' );
 		update_option( 'poll_archive_perpage', 23 );
 		update_option( 'poll_template_disable', 'DEV BRANCH TEXT' );
-		Polls_Options::flush();
+		WP_Polls_Options::flush();
 
 		$this->run_upgrade();
 
-		$this->assertSame( 23, (int) Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( 'DEV BRANCH TEXT', Polls_Options::get( 'templates.disable' ) );
+		$this->assertSame( 23, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 'DEV BRANCH TEXT', WP_Polls_Options::get( 'templates.disable' ) );
 	}
 
 	/**
@@ -270,12 +270,12 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_already_migrated_install_is_untouched() {
-		Polls_Options::set( 'archive.per_page', 42 );
+		WP_Polls_Options::set( 'archive.per_page', 42 );
 		update_option( 'poll_version', WP_POLLS_VERSION );
 
 		$this->run_upgrade();
 
-		$this->assertSame( 42, (int) Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 42, (int) WP_Polls_Options::get( 'archive.per_page' ) );
 	}
 
 	/**
@@ -292,7 +292,7 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$footer = Polls_Options::get( 'templates.votefooter' );
+		$footer = WP_Polls_Options::get( 'templates.votefooter' );
 
 		$this->assertStringNotContainsString( 'onclick', $footer );
 		$this->assertStringContainsString( 'data-poll-id="%POLL_ID%"', $footer );
@@ -311,7 +311,7 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$this->assertSame( $custom, Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( $custom, WP_Polls_Options::get( 'templates.votefooter' ) );
 	}
 
 	// --- the poll bar -----------------------------------------------------
@@ -330,7 +330,7 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$body = Polls_Options::get( 'templates.resultbody' );
+		$body = WP_Polls_Options::get( 'templates.resultbody' );
 
 		$this->assertStringNotContainsString( 'class="pollbar"', $body );
 		$this->assertStringContainsString( 'class="wp-polls-bar"', $body );
@@ -356,10 +356,10 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$body = Polls_Options::get( 'templates.resultbody' );
+		$body = WP_Polls_Options::get( 'templates.resultbody' );
 
 		$this->assertStringNotContainsString( 'MY OWN MARKUP', $body );
-		$this->assertSame( Polls_Templates::get_default( 'resultbody' ), $body );
+		$this->assertSame( WP_Polls_Template::get_default( 'resultbody' ), $body );
 	}
 
 	/**
@@ -386,7 +386,7 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$this->assertSame( $expected, Polls_Options::get( 'bar.style' ) );
+		$this->assertSame( $expected, WP_Polls_Options::get( 'bar.style' ) );
 	}
 
 	/**
@@ -420,10 +420,10 @@ class Test_Polls_Migration extends WP_Polls_TestCase {
 		$this->run_upgrade();
 
 		// Customise the result template the way a user would, post-upgrade.
-		Polls_Options::set( 'templates.resultbody', '<li>EDITED AFTERWARDS</li>' );
+		WP_Polls_Options::set( 'templates.resultbody', '<li>EDITED AFTERWARDS</li>' );
 
 		$this->run_upgrade();
 
-		$this->assertSame( '<li>EDITED AFTERWARDS</li>', Polls_Options::get( 'templates.resultbody' ) );
+		$this->assertSame( '<li>EDITED AFTERWARDS</li>', WP_Polls_Options::get( 'templates.resultbody' ) );
 	}
 }

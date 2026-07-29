@@ -9,19 +9,19 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit();
 }
 
-require_once __DIR__ . '/includes/class-polls-templates.php';
-require_once __DIR__ . '/includes/class-polls-options.php';
-require_once __DIR__ . '/includes/class-polls-install.php';
+require_once __DIR__ . '/includes/class-wp-polls-template.php';
+require_once __DIR__ . '/includes/class-wp-polls-options.php';
+require_once __DIR__ . '/includes/class-wp-polls-install.php';
 
 // From 3.0.0 the settings are a single row. The pre-3.0.0 names are still
 // listed because an install that was never loaded after upgrading - deleted
 // straight from the plugins screen - still has them, and they would otherwise
-// be orphaned forever. The list is taken from Polls_Options so it cannot
+// be orphaned forever. The list is taken from WP_Polls_Options so it cannot
 // drift from the migration's idea of which rows belong to the plugin.
 $option_names = array_merge(
-	array( Polls_Options::OPTION, 'poll_version', Polls_Install::DB_VERSION_OPTION ),
-	array_keys( Polls_Options::legacy_map() ),
-	Polls_Options::legacy_extra_rows(),
+	array( WP_Polls_Options::OPTION, 'poll_version', WP_Polls_Install::DB_VERSION_OPTION ),
+	array_keys( WP_Polls_Options::legacy_map() ),
+	WP_Polls_Options::legacy_extra_rows(),
 	array( 'widget_polls', 'widget_polls-widget' )
 );
 

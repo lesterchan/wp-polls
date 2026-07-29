@@ -13,10 +13,10 @@
  * or a legitimate voter locked out. The IP *derivation* was already covered;
  * nothing covered what gets *decided* with it.
  *
- * @covers Polls_Vote::check_voted
- * @covers Polls_Vote::check_allowtovote
+ * @covers WP_Polls_Vote::check_voted
+ * @covers WP_Polls_Vote::check_allowtovote
  */
-class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
+class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Set up.
@@ -27,8 +27,8 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 		parent::set_up();
 
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
-		Polls_Options::set( 'ip_header', '' );
-		Polls_Options::set( 'cookie_expiry', 0 );
+		WP_Polls_Options::set( 'ip_header', '' );
+		WP_Polls_Options::set( 'cookie_expiry', 0 );
 	}
 
 	/**
@@ -61,9 +61,9 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 			array(
 				'pollip_qid'       => $poll_id,
 				'pollip_aid'       => $answer_id,
-				'pollip_ip'        => Polls_Vote::poll_get_ipaddress(),
+				'pollip_ip'        => WP_Polls_Vote::poll_get_ipaddress(),
 				'pollip_host'      => 'localhost',
-				'pollip_timestamp' => Polls_Core::now(),
+				'pollip_timestamp' => WP_Polls::now(),
 				'pollip_user'      => 'Guest',
 				'pollip_userid'    => $user_id,
 			)
@@ -78,13 +78,13 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_guests_only_rejects_logged_in_users() {
-		Polls_Options::set( 'allow_to_vote', 0 );
+		WP_Polls_Options::set( 'allow_to_vote', 0 );
 
 		wp_set_current_user( 0 );
-		$this->assertTrue( Polls_Vote::check_allowtovote() );
+		$this->assertTrue( WP_Polls_Vote::check_allowtovote() );
 
 		wp_set_current_user( self::factory()->user->create() );
-		$this->assertFalse( Polls_Vote::check_allowtovote() );
+		$this->assertFalse( WP_Polls_Vote::check_allowtovote() );
 	}
 
 	/**
@@ -93,13 +93,13 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_registered_only_rejects_guests() {
-		Polls_Options::set( 'allow_to_vote', 1 );
+		WP_Polls_Options::set( 'allow_to_vote', 1 );
 
 		wp_set_current_user( 0 );
-		$this->assertFalse( Polls_Vote::check_allowtovote() );
+		$this->assertFalse( WP_Polls_Vote::check_allowtovote() );
 
 		wp_set_current_user( self::factory()->user->create() );
-		$this->assertTrue( Polls_Vote::check_allowtovote() );
+		$this->assertTrue( WP_Polls_Vote::check_allowtovote() );
 	}
 
 	/**
@@ -108,13 +108,13 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_everyone_may_vote() {
-		Polls_Options::set( 'allow_to_vote', 2 );
+		WP_Polls_Options::set( 'allow_to_vote', 2 );
 
 		wp_set_current_user( 0 );
-		$this->assertTrue( Polls_Vote::check_allowtovote() );
+		$this->assertTrue( WP_Polls_Vote::check_allowtovote() );
 
 		wp_set_current_user( self::factory()->user->create() );
-		$this->assertTrue( Polls_Vote::check_allowtovote() );
+		$this->assertTrue( WP_Polls_Vote::check_allowtovote() );
 	}
 
 	// --- logging method 0: do not log ------------------------------------
@@ -125,14 +125,14 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_logging_off_never_reports_a_previous_vote() {
-		Polls_Options::set( 'logging_method', 0 );
+		WP_Polls_Options::set( 'logging_method', 0 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
 		$_COOKIE[ 'voted_' . $poll_id ] = (string) $answers[0];
 
-		$this->assertSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	// --- logging method 1: cookie ----------------------------------------
@@ -143,15 +143,15 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_logging_reads_the_cookie() {
-		Polls_Options::set( 'logging_method', 1 );
+		WP_Polls_Options::set( 'logging_method', 1 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		$this->assertSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 
 		$_COOKIE[ 'voted_' . $poll_id ] = $answers[0] . ',' . $answers[1];
 
-		$this->assertSame( array( $answers[0], $answers[1] ), Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( $answers[0], $answers[1] ), WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	/**
@@ -160,13 +160,13 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_logging_is_per_poll() {
-		Polls_Options::set( 'logging_method', 1 );
+		WP_Polls_Options::set( 'logging_method', 1 );
 		$first  = $this->make_poll();
 		$second = $this->make_poll();
 
 		$_COOKIE[ 'voted_' . $first ] = '1';
 
-		$this->assertSame( 0, Polls_Vote::check_voted( $second ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $second ) );
 	}
 
 	/**
@@ -175,12 +175,12 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_values_are_cast_to_integers() {
-		Polls_Options::set( 'logging_method', 1 );
+		WP_Polls_Options::set( 'logging_method', 1 );
 		$poll_id = $this->make_poll();
 
 		$_COOKIE[ 'voted_' . $poll_id ] = '3,<script>alert(1)</script>,7';
 
-		$this->assertSame( array( 3, 0, 7 ), Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( 3, 0, 7 ), WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	// --- logging method 2: IP --------------------------------------------
@@ -191,15 +191,15 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_ip_logging_finds_a_previous_vote() {
-		Polls_Options::set( 'logging_method', 2 );
+		WP_Polls_Options::set( 'logging_method', 2 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		$this->assertSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
 
-		$this->assertSame( array( (string) $answers[0] ), Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	/**
@@ -208,7 +208,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_ip_logging_is_per_address() {
-		Polls_Options::set( 'logging_method', 2 );
+		WP_Polls_Options::set( 'logging_method', 2 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -216,7 +216,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.77';
 
-		$this->assertSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	/**
@@ -227,22 +227,22 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	public function test_ip_logging_respects_the_expiry() {
 		global $wpdb;
 
-		Polls_Options::set( 'logging_method', 2 );
-		Polls_Options::set( 'cookie_expiry', 3600 );
+		WP_Polls_Options::set( 'logging_method', 2 );
+		WP_Polls_Options::set( 'cookie_expiry', 3600 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
-		$this->assertNotSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertNotSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 
 		// Push the logged vote back beyond the window.
 		$wpdb->update(
 			$wpdb->pollsip,
-			array( 'pollip_timestamp' => Polls_Core::now() - 7200 ),
+			array( 'pollip_timestamp' => WP_Polls::now() - 7200 ),
 			array( 'pollip_qid' => $poll_id )
 		);
 
-		$this->assertSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	// --- logging method 3: cookie then IP --------------------------------
@@ -253,14 +253,14 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_and_ip_prefers_the_cookie() {
-		Polls_Options::set( 'logging_method', 3 );
+		WP_Polls_Options::set( 'logging_method', 3 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
 		$_COOKIE[ 'voted_' . $poll_id ] = (string) $answers[1];
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
 
-		$this->assertSame( array( $answers[1] ), Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( $answers[1] ), WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	/**
@@ -269,13 +269,13 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_and_ip_falls_back_to_the_address() {
-		Polls_Options::set( 'logging_method', 3 );
+		WP_Polls_Options::set( 'logging_method', 3 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
 
-		$this->assertSame( array( (string) $answers[0] ), Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	/**
@@ -287,7 +287,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_clearing_the_cookie_does_not_allow_another_vote() {
-		Polls_Options::set( 'logging_method', 3 );
+		WP_Polls_Options::set( 'logging_method', 3 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -296,7 +296,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 
 		unset( $_COOKIE[ 'voted_' . $poll_id ] );
 
-		$this->assertNotSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertNotSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	// --- logging method 4: username --------------------------------------
@@ -307,12 +307,12 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_username_logging_blocks_guests_outright() {
-		Polls_Options::set( 'logging_method', 4 );
+		WP_Polls_Options::set( 'logging_method', 4 );
 		$poll_id = $this->make_poll();
 
 		wp_set_current_user( 0 );
 
-		$this->assertSame( 1, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 1, WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	/**
@@ -323,14 +323,14 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	public function test_username_logging_allows_a_new_user() {
 		global $user_ID;
 
-		Polls_Options::set( 'logging_method', 4 );
+		WP_Polls_Options::set( 'logging_method', 4 );
 		$poll_id = $this->make_poll();
 
 		$user_id = self::factory()->user->create();
 		wp_set_current_user( $user_id );
 		$user_ID = $user_id; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase, WordPress.WP.GlobalVariablesOverride.Prohibited -- The function reads this global.
 
-		$this->assertSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	/**
@@ -341,7 +341,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	public function test_username_logging_finds_the_user_from_a_new_address() {
 		global $user_ID;
 
-		Polls_Options::set( 'logging_method', 4 );
+		WP_Polls_Options::set( 'logging_method', 4 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -354,7 +354,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 		// Somewhere else entirely; the user is what is being matched.
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.77';
 
-		$this->assertSame( array( (string) $answers[0] ), Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 
 	/**
@@ -365,7 +365,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 	public function test_username_logging_is_per_user() {
 		global $user_ID;
 
-		Polls_Options::set( 'logging_method', 4 );
+		WP_Polls_Options::set( 'logging_method', 4 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -376,6 +376,6 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 		wp_set_current_user( $other );
 		$user_ID = $other; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase, WordPress.WP.GlobalVariablesOverride.Prohibited -- The function reads this global.
 
-		$this->assertSame( 0, Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
 	}
 }

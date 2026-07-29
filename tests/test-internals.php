@@ -8,13 +8,13 @@
 /**
  * The last entry points without coverage of their own.
  *
- * @covers Polls_Vote::polls_acquire_lock
- * @covers Polls_Vote::polls_release_lock
- * @covers Polls_Vote::polls_lock_file
- * @covers Polls_Install::activation
- * @covers Polls_Core::poll_scripts
+ * @covers WP_Polls_Vote::polls_acquire_lock
+ * @covers WP_Polls_Vote::polls_release_lock
+ * @covers WP_Polls_Vote::polls_lock_file
+ * @covers WP_Polls_Install::activation
+ * @covers WP_Polls::poll_scripts
  */
-class Test_Polls_Internals extends WP_Polls_TestCase {
+class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Set up.
@@ -58,8 +58,8 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_lock_files_are_named_per_site_and_poll() {
-		$first  = Polls_Vote::polls_lock_file( 1 );
-		$second = Polls_Vote::polls_lock_file( 2 );
+		$first  = WP_Polls_Vote::polls_lock_file( 1 );
+		$second = WP_Polls_Vote::polls_lock_file( 2 );
 
 		$this->assertNotSame( $first, $second );
 		$this->assertStringContainsString( 'wp-blog-' . get_current_blog_id() . '-', $first );
@@ -83,7 +83,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 			2
 		);
 
-		$this->assertSame( '/tmp/custom-9.lock', Polls_Vote::polls_lock_file( 9 ) );
+		$this->assertSame( '/tmp/custom-9.lock', WP_Polls_Vote::polls_lock_file( 9 ) );
 	}
 
 	/**
@@ -92,12 +92,12 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_acquiring_the_lock_creates_the_file() {
-		$handle = Polls_Vote::polls_acquire_lock( 1 );
+		$handle = WP_Polls_Vote::polls_acquire_lock( 1 );
 
 		$this->assertIsResource( $handle );
-		$this->assertFileExists( Polls_Vote::polls_lock_file( 1 ) );
+		$this->assertFileExists( WP_Polls_Vote::polls_lock_file( 1 ) );
 
-		Polls_Vote::polls_release_lock( $handle, 1 );
+		WP_Polls_Vote::polls_release_lock( $handle, 1 );
 	}
 
 	/**
@@ -109,10 +109,10 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_releasing_the_lock_removes_the_file() {
-		$handle = Polls_Vote::polls_acquire_lock( 1 );
-		$path   = Polls_Vote::polls_lock_file( 1 );
+		$handle = WP_Polls_Vote::polls_acquire_lock( 1 );
+		$path   = WP_Polls_Vote::polls_lock_file( 1 );
 
-		$this->assertTrue( Polls_Vote::polls_release_lock( $handle, 1 ) );
+		$this->assertTrue( WP_Polls_Vote::polls_release_lock( $handle, 1 ) );
 		$this->assertFileDoesNotExist( $path );
 	}
 
@@ -122,8 +122,8 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_releasing_a_non_handle_is_refused() {
-		$this->assertFalse( Polls_Vote::polls_release_lock( false, 1 ) );
-		$this->assertFalse( Polls_Vote::polls_release_lock( null, 1 ) );
+		$this->assertFalse( WP_Polls_Vote::polls_release_lock( false, 1 ) );
+		$this->assertFalse( WP_Polls_Vote::polls_release_lock( null, 1 ) );
 	}
 
 	/**
@@ -137,7 +137,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_a_contending_lock_fails_fast() {
-		$path = Polls_Vote::polls_lock_file( 1 );
+		$path = WP_Polls_Vote::polls_lock_file( 1 );
 
 		$holder = fopen( $path, 'w+' );
 		$this->assertTrue( flock( $holder, LOCK_EX | LOCK_NB ) );
@@ -159,12 +159,12 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		Polls_Options::set( 'allow_to_vote', 2 );
-		Polls_Options::set( 'logging_method', 0 );
+		WP_Polls_Options::set( 'allow_to_vote', 2 );
+		WP_Polls_Options::set( 'logging_method', 0 );
 
-		Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 
-		$this->assertFileDoesNotExist( Polls_Vote::polls_lock_file( $poll_id ) );
+		$this->assertFileDoesNotExist( WP_Polls_Vote::polls_lock_file( $poll_id ) );
 	}
 
 	/**
@@ -176,14 +176,14 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		Polls_Options::set( 'allow_to_vote', 2 );
-		Polls_Options::set( 'logging_method', 0 );
+		WP_Polls_Options::set( 'allow_to_vote', 2 );
+		WP_Polls_Options::set( 'logging_method', 0 );
 
-		$holder = fopen( Polls_Vote::polls_lock_file( $poll_id ), 'w+' );
+		$holder = fopen( WP_Polls_Vote::polls_lock_file( $poll_id ), 'w+' );
 		flock( $holder, LOCK_EX | LOCK_NB );
 
 		try {
-			Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+			WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 			$this->fail( 'the vote was not refused' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertStringContainsString( (string) $poll_id, $e->getMessage() );
@@ -211,7 +211,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 
 		get_role( 'administrator' )->remove_cap( 'manage_polls' );
 
-		Polls_Install::activation( false );
+		WP_Polls_Install::activation( false );
 
 		foreach ( array( 'pollsq', 'pollsa', 'pollsip' ) as $table ) {
 			$name = $wpdb->$table;
@@ -247,7 +247,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		// this fix names wp_get_sites(), so a substring search matches the
 		// documentation and never the code.
 		$called = array();
-		foreach ( token_get_all( file_get_contents( WP_POLLS_DIR . 'includes/class-polls-install.php' ) ) as $token ) {
+		foreach ( token_get_all( file_get_contents( WP_POLLS_DIR . 'includes/class-wp-polls-install.php' ) ) as $token ) {
 			if ( is_array( $token ) && T_STRING === $token[0] ) {
 				$called[] = $token[1];
 			}
@@ -257,7 +257,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		$this->assertContains( 'get_sites', $called );
 		$this->assertStringContainsString(
 			"get_sites( array( 'number' => 0 ) )",
-			file_get_contents( WP_POLLS_DIR . 'includes/class-polls-install.php' ),
+			file_get_contents( WP_POLLS_DIR . 'includes/class-wp-polls-install.php' ),
 			'the hundred site default limit is no longer lifted'
 		);
 	}
@@ -279,7 +279,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		$role->remove_cap( 'manage_polls' );
 		$this->assertFalse( get_role( 'administrator' )->has_cap( 'manage_polls' ) );
 
-		Polls_Install::activation( true );
+		WP_Polls_Install::activation( true );
 
 		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ) );
 	}
@@ -290,8 +290,8 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_activation_is_idempotent() {
-		Polls_Install::activation( false );
-		Polls_Install::activation( false );
+		WP_Polls_Install::activation( false );
+		WP_Polls_Install::activation( false );
 
 		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ) );
 	}
@@ -309,14 +309,14 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_sanitize_bar_color_normalises_what_the_picker_posts() {
-		$this->assertSame( 'aabbcc', Polls_Core::sanitize_bar_color( '#aabbcc' ) );
-		$this->assertSame( 'aabbcc', Polls_Core::sanitize_bar_color( 'aabbcc' ) );
-		$this->assertSame( 'aabbcc', Polls_Core::sanitize_bar_color( '  #AABBCC  ' ) );
-		$this->assertSame( 'aabbcc', Polls_Core::sanitize_bar_color( '#abc' ) );
-		$this->assertSame( 'ffffff', Polls_Core::sanitize_bar_color( 'fff' ) );
-		$this->assertSame( '000000', Polls_Core::sanitize_bar_color( 'zzzzzz' ) );
-		$this->assertSame( '000000', Polls_Core::sanitize_bar_color( 'red; } body { display: none; } .x {' ) );
-		$this->assertSame( '000000', Polls_Core::sanitize_bar_color( '' ) );
+		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '#aabbcc' ) );
+		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( 'aabbcc' ) );
+		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '  #AABBCC  ' ) );
+		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '#abc' ) );
+		$this->assertSame( 'ffffff', WP_Polls::sanitize_bar_color( 'fff' ) );
+		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( 'zzzzzz' ) );
+		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( 'red; } body { display: none; } .x {' ) );
+		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( '' ) );
 	}
 
 	/**
@@ -329,12 +329,12 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_poll_scripts_emits_the_bar_custom_properties() {
-		Polls_Options::set( 'bar.style', 'flat' );
-		Polls_Options::set( 'bar.height', 12 );
-		Polls_Options::set( 'bar.background', 'ff0000' );
-		Polls_Options::set( 'bar.border', '00ff00' );
+		WP_Polls_Options::set( 'bar.style', 'flat' );
+		WP_Polls_Options::set( 'bar.height', 12 );
+		WP_Polls_Options::set( 'bar.background', 'ff0000' );
+		WP_Polls_Options::set( 'bar.border', '00ff00' );
 
-		Polls_Core::poll_scripts();
+		WP_Polls::poll_scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
@@ -351,9 +351,9 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_poll_scripts_emits_the_gradient_without_an_image() {
-		Polls_Options::set( 'bar.style', 'gradient' );
+		WP_Polls_Options::set( 'bar.style', 'gradient' );
 
-		Polls_Core::poll_scripts();
+		WP_Polls::poll_scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
@@ -371,10 +371,10 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_the_gradient_keeps_the_configured_colour() {
-		Polls_Options::set( 'bar.style', 'gradient' );
-		Polls_Options::set( 'bar.background', 'ff0000' );
+		WP_Polls_Options::set( 'bar.style', 'gradient' );
+		WP_Polls_Options::set( 'bar.background', 'ff0000' );
 
-		Polls_Core::poll_scripts();
+		WP_Polls::poll_scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
@@ -391,11 +391,11 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_poll_scripts_sanitises_the_bar_colours() {
-		Polls_Options::set( 'bar.style', 'flat' );
-		Polls_Options::set( 'bar.background', 'red; } body { display: none; } .x {' );
-		Polls_Options::set( 'bar.height', 8 );
+		WP_Polls_Options::set( 'bar.style', 'flat' );
+		WP_Polls_Options::set( 'bar.background', 'red; } body { display: none; } .x {' );
+		WP_Polls_Options::set( 'bar.height', 8 );
 
-		Polls_Core::poll_scripts();
+		WP_Polls::poll_scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
@@ -413,7 +413,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_one_stylesheet_serves_both_directions() {
-		Polls_Core::poll_scripts();
+		WP_Polls::poll_scripts();
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ) );
 		$this->assertFalse( wp_style_is( 'wp-polls-rtl', 'enqueued' ), 'the RTL handle is back' );
@@ -434,10 +434,10 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_poll_scripts_localises_without_jquery() {
-		Polls_Options::set( 'ajax.loading', 1 );
-		Polls_Options::set( 'ajax.fading', 0 );
+		WP_Polls_Options::set( 'ajax.loading', 1 );
+		WP_Polls_Options::set( 'ajax.fading', 0 );
 
-		Polls_Core::poll_scripts();
+		WP_Polls::poll_scripts();
 
 		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ) );
 		$this->assertSame( array(), wp_scripts()->registered['wp-polls']->deps, 'jQuery is back' );
@@ -462,13 +462,13 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_answer_sort_rejects_anything_off_the_list() {
-		Polls_Options::set( 'sort.answers_by', 'polla_votes' );
-		Polls_Options::set( 'sort.answers_order', 'desc' );
-		$this->assertSame( array( 'polla_votes', 'desc' ), Polls_Display::get_ans_sort() );
+		WP_Polls_Options::set( 'sort.answers_by', 'polla_votes' );
+		WP_Polls_Options::set( 'sort.answers_order', 'desc' );
+		$this->assertSame( array( 'polla_votes', 'desc' ), WP_Polls_Display::get_ans_sort() );
 
-		Polls_Options::set( 'sort.answers_by', 'polla_aid; DROP TABLE wp_pollsq' );
-		Polls_Options::set( 'sort.answers_order', 'desc; DROP TABLE wp_pollsq' );
-		$this->assertSame( array( 'polla_aid', 'asc' ), Polls_Display::get_ans_sort() );
+		WP_Polls_Options::set( 'sort.answers_by', 'polla_aid; DROP TABLE wp_pollsq' );
+		WP_Polls_Options::set( 'sort.answers_order', 'desc; DROP TABLE wp_pollsq' );
+		$this->assertSame( array( 'polla_aid', 'asc' ), WP_Polls_Display::get_ans_sort() );
 	}
 
 	/**
@@ -477,12 +477,12 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_result_sort_rejects_anything_off_the_list() {
-		Polls_Options::set( 'sort.results_by', 'RAND()' );
-		Polls_Options::set( 'sort.results_order', 'asc' );
-		$this->assertSame( array( 'RAND()', 'asc' ), Polls_Display::get_ans_result_sort() );
+		WP_Polls_Options::set( 'sort.results_by', 'RAND()' );
+		WP_Polls_Options::set( 'sort.results_order', 'asc' );
+		$this->assertSame( array( 'RAND()', 'asc' ), WP_Polls_Display::get_ans_result_sort() );
 
-		Polls_Options::set( 'sort.results_by', 'nonsense' );
-		$this->assertSame( array( 'polla_aid', 'asc' ), Polls_Display::get_ans_result_sort() );
+		WP_Polls_Options::set( 'sort.results_by', 'nonsense' );
+		$this->assertSame( array( 'polla_aid', 'asc' ), WP_Polls_Display::get_ans_result_sort() );
 	}
 
 	/**
@@ -491,14 +491,14 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_archive_link_paging() {
-		Polls_Options::set( 'archive.url', 'https://example.com/polls/' );
+		WP_Polls_Options::set( 'archive.url', 'https://example.com/polls/' );
 
-		$this->assertSame( 'https://example.com/polls/', Polls_Display::polls_archive_link( 0 ) );
-		$this->assertSame( 'https://example.com/polls/?poll_page=2', Polls_Display::polls_archive_link( 2 ) );
+		$this->assertSame( 'https://example.com/polls/', WP_Polls_Display::polls_archive_link( 0 ) );
+		$this->assertSame( 'https://example.com/polls/?poll_page=2', WP_Polls_Display::polls_archive_link( 2 ) );
 
-		Polls_Options::set( 'archive.url', 'https://example.com/?page_id=9' );
+		WP_Polls_Options::set( 'archive.url', 'https://example.com/?page_id=9' );
 
-		$this->assertSame( 'https://example.com/?page_id=9&amp;poll_page=3', Polls_Display::polls_archive_link( 3 ) );
+		$this->assertSame( 'https://example.com/?page_id=9&amp;poll_page=3', WP_Polls_Display::polls_archive_link( 3 ) );
 	}
 
 	/**
@@ -532,7 +532,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( $newest, Polls_Core::polls_latest_id() );
+		$this->assertSame( $newest, WP_Polls::polls_latest_id() );
 	}
 
 	/**
@@ -541,7 +541,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_latest_poll_id_with_no_polls() {
-		$this->assertSame( 0, Polls_Core::polls_latest_id() );
+		$this->assertSame( 0, WP_Polls::polls_latest_id() );
 	}
 
 	/**
@@ -552,11 +552,11 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	public function test_cron_is_scheduled_once() {
 		wp_clear_scheduled_hook( 'polls_cron' );
 
-		Polls_Core::cron_polls_place();
+		WP_Polls::cron_polls_place();
 		$first = wp_next_scheduled( 'polls_cron' );
 		$this->assertNotFalse( $first );
 
-		Polls_Core::cron_polls_place();
+		WP_Polls::cron_polls_place();
 		$this->assertNotFalse( wp_next_scheduled( 'polls_cron' ) );
 		$this->assertCount( 1, _get_cron_array()[ wp_next_scheduled( 'polls_cron' ) ]['polls_cron'] );
 	}
@@ -570,8 +570,8 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_every_template_key_has_a_default() {
-		$keys     = Polls_Options::template_keys();
-		$defaults = Polls_Templates::defaults();
+		$keys     = WP_Polls_Options::template_keys();
+		$defaults = WP_Polls_Template::defaults();
 
 		$this->assertNotEmpty( $keys );
 		$this->assertSame( array(), array_diff( $keys, array_keys( $defaults ) ), 'keys with no default' );
@@ -582,11 +582,11 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		$optional = array( 'pollarchiveheader', 'pollarchivepagingheader', 'pollarchivepagingfooter' );
 
 		foreach ( array_diff( $keys, $optional ) as $key ) {
-			$this->assertNotSame( '', Polls_Templates::get_default( $key ), $key . ' has an empty default' );
+			$this->assertNotSame( '', WP_Polls_Template::get_default( $key ), $key . ' has an empty default' );
 		}
 
 		foreach ( $optional as $key ) {
-			$this->assertSame( '', Polls_Templates::get_default( $key ), $key . ' is no longer optional' );
+			$this->assertSame( '', WP_Polls_Template::get_default( $key ), $key . ' is no longer optional' );
 		}
 	}
 
@@ -596,7 +596,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_an_unknown_template_key_is_empty() {
-		$this->assertSame( '', Polls_Templates::get_default( 'no-such-template' ) );
+		$this->assertSame( '', WP_Polls_Template::get_default( 'no-such-template' ) );
 	}
 
 	/**
@@ -605,7 +605,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_template_variables_are_substituted() {
-		$out = Polls_Display::poll_template_vote_markup(
+		$out = WP_Polls_Display::poll_template_vote_markup(
 			'<li>%POLL_ANSWER% (%POLL_ANSWER_VOTES%)</li>',
 			null,
 			array(
@@ -623,7 +623,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_wp_stats_defaults_are_additive() {
-		$merged = Polls_Admin::polls_wp_stats_defaults( array( 'something_else' => 0 ) );
+		$merged = WP_Polls_Admin::polls_wp_stats_defaults( array( 'something_else' => 0 ) );
 
 		$this->assertSame( 1, $merged['polls'] );
 		$this->assertArrayHasKey( 'something_else', $merged );
@@ -635,7 +635,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_wp_stats_defaults_do_not_override() {
-		$merged = Polls_Admin::polls_wp_stats_defaults( array( 'polls' => 0 ) );
+		$merged = WP_Polls_Admin::polls_wp_stats_defaults( array( 'polls' => 0 ) );
 
 		$this->assertSame( 0, $merged['polls'] );
 	}
@@ -651,11 +651,11 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		global $hook_suffix;
 
 		$this->become_poll_admin();
-		Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
-		$hook_suffix = Polls_Admin::hook_suffix( 'wp-polls' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
+		WP_Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
+		$hook_suffix = WP_Polls_Admin::hook_suffix( 'wp-polls' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
 
 		ob_start();
-		Polls_Install::onclick_notice();
+		WP_Polls_Install::onclick_notice();
 		$html = ob_get_clean();
 
 		$this->assertStringContainsString( 'notice-warning', $html );
@@ -671,11 +671,11 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 		global $hook_suffix;
 
 		$this->become_poll_admin();
-		Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
+		WP_Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
 		$hook_suffix = 'options-general.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
 
 		ob_start();
-		Polls_Install::onclick_notice();
+		WP_Polls_Install::onclick_notice();
 
 		$this->assertSame( '', ob_get_clean() );
 	}
@@ -688,12 +688,12 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	public function test_onclick_notice_needs_the_capability() {
 		global $hook_suffix;
 
-		Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
+		WP_Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
-		$hook_suffix = Polls_Admin::hook_suffix( 'wp-polls' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
+		$hook_suffix = WP_Polls_Admin::hook_suffix( 'wp-polls' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
 
 		ob_start();
-		Polls_Install::onclick_notice();
+		WP_Polls_Install::onclick_notice();
 
 		$this->assertSame( '', ob_get_clean() );
 	}
@@ -704,13 +704,13 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_upgrading_the_templates_silences_the_notice() {
-		Polls_Options::set( 'templates.votefooter', '<a href="#" onclick="poll_result(%POLL_ID%); return false;">Results</a>' );
+		WP_Polls_Options::set( 'templates.votefooter', '<a href="#" onclick="poll_result(%POLL_ID%); return false;">Results</a>' );
 
-		$this->assertTrue( Polls_Install::templates_have_onclick() );
+		$this->assertTrue( WP_Polls_Install::templates_have_onclick() );
 
-		Polls_Install::upgrade_templates_onclick();
+		WP_Polls_Install::upgrade_templates_onclick();
 
-		$this->assertFalse( Polls_Install::templates_have_onclick() );
-		$this->assertStringContainsString( 'data-poll-action="result"', Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertFalse( WP_Polls_Install::templates_have_onclick() );
+		$this->assertStringContainsString( 'data-poll-action="result"', WP_Polls_Options::get( 'templates.votefooter' ) );
 	}
 }

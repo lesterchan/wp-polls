@@ -15,7 +15,7 @@
  *
  * @covers ::get_poll
  */
-class Test_Polls_Template_Tags extends WP_Polls_TestCase {
+class WP_Polls_Template_Tags_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Every documented tag is callable as a global function.

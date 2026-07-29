@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Renders a poll in a sidebar.
  */
-class Polls_Widget extends WP_Widget {
+class WP_Polls_Widget extends WP_Widget {
 	/**
 	 * Constructor.
 	 *
@@ -37,9 +37,9 @@ class Polls_Widget extends WP_Widget {
 		if ( ! empty( $title ) ) {
 			echo wp_kses_post( $args['before_title'] . $title . $args['after_title'] );
 		}
-		Polls_Display::get_poll( $poll_id );
+		WP_Polls_Display::get_poll( $poll_id );
 		if ( $display_pollarchive ) {
-			Polls_Display::display_polls_archive_link();
+			WP_Polls_Display::display_polls_archive_link();
 		}
 		echo wp_kses_post( $args['after_widget'] );
 	}

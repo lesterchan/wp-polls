@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Decides who may vote, records votes and serves the AJAX endpoint.
  */
-class Polls_Vote {
+class WP_Polls_Vote {
 
 	/**
 	 * Hook registration.
@@ -31,7 +31,7 @@ class Polls_Vote {
 		global $user_ID;
 		// Read into a local rather than reassigning the WordPress global.
 		$current_user_id = (int) $user_ID;
-		$allow_to_vote   = (int) Polls_Options::get( 'allow_to_vote' );
+		$allow_to_vote   = (int) WP_Polls_Options::get( 'allow_to_vote' );
 		switch ( $allow_to_vote ) {
 			// Guests Only.
 			case 0:
@@ -54,7 +54,7 @@ class Polls_Vote {
 	 * @return mixed
 	 */
 	public static function check_voted( $poll_id ) {
-		$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
+		$poll_logging_method = (int) WP_Polls_Options::get( 'logging_method' );
 		switch ( $poll_logging_method ) {
 			// Do Not Log.
 			case 0:
@@ -103,10 +103,10 @@ class Polls_Vote {
 	 */
 	public static function check_voted_ip( $poll_id ) {
 		global $wpdb;
-		$log_expiry     = (int) Polls_Options::get( 'cookie_expiry' );
+		$log_expiry     = (int) WP_Polls_Options::get( 'cookie_expiry' );
 		$log_expiry_sql = '';
 		if ( $log_expiry > 0 ) {
-			$log_expiry_sql = ' AND (' . Polls_Core::now() . '-(pollip_timestamp+0)) < ' . $log_expiry;
+			$log_expiry_sql = ' AND (' . WP_Polls::now() . '-(pollip_timestamp+0)) < ' . $log_expiry;
 		}
 		// Check IP From IP Logging Database.
 		$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s", $poll_id, self::poll_get_ipaddress() ) . $log_expiry_sql );
@@ -131,10 +131,10 @@ class Polls_Vote {
 			return 1;
 		}
 		$pollsip_userid = (int) $user_ID;
-		$log_expiry     = (int) Polls_Options::get( 'cookie_expiry' );
+		$log_expiry     = (int) WP_Polls_Options::get( 'cookie_expiry' );
 		$log_expiry_sql = '';
 		if ( $log_expiry > 0 ) {
-			$log_expiry_sql = ' AND (' . Polls_Core::now() . '-(pollip_timestamp+0)) < ' . $log_expiry;
+			$log_expiry_sql = ' AND (' . WP_Polls::now() . '-(pollip_timestamp+0)) < ' . $log_expiry;
 		}
 		// Check User ID From IP Logging Database.
 		$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_userid = %d", $poll_id, $pollsip_userid ) . $log_expiry_sql );
@@ -173,7 +173,7 @@ class Polls_Vote {
 		// through the poll display path. Reading it unguarded warns on PHP 8.
 		$ip = self::valid_ip( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
 
-		$header = (string) Polls_Options::get( 'ip_header', '' );
+		$header = (string) WP_Polls_Options::get( 'ip_header', '' );
 
 		/**
 		 * Filters whether the usual proxy headers may be trusted.
@@ -420,12 +420,12 @@ class Polls_Vote {
 		$pollip_userid       = $user_ID;
 		$pollip_ip           = self::poll_get_ipaddress();
 		$pollip_host         = self::poll_get_hostname();
-		$pollip_timestamp    = Polls_Core::now();
-		$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
+		$pollip_timestamp    = WP_Polls::now();
+		$poll_logging_method = (int) WP_Polls_Options::get( 'logging_method' );
 
 		// Only Create Cookie If User Choose Logging Method 1 Or 3.
 		if ( 1 === $poll_logging_method || 3 === $poll_logging_method ) {
-			$cookie_expiry = (int) Polls_Options::get( 'cookie_expiry' );
+			$cookie_expiry = (int) WP_Polls_Options::get( 'cookie_expiry' );
 			if ( 0 === $cookie_expiry ) {
 				$cookie_expiry = YEAR_IN_SECONDS;
 			}
@@ -479,7 +479,7 @@ class Polls_Vote {
 
 		do_action( 'wp_polls_vote_poll_success' );
 
-		return Polls_Display::display_pollresult( $poll_id, $poll_aid_array, false );
+		return WP_Polls_Display::display_pollresult( $poll_id, $poll_aid_array, false );
 	}
 
 	// Function: Vote Poll.
@@ -541,13 +541,13 @@ class Polls_Vote {
 					break;
 				// Poll Result.
 				case 'result':
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup assembled and escaped by Polls_Display.
-					echo Polls_Display::display_pollresult( $poll_id, 0, false );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup assembled and escaped by WP_Polls_Display.
+					echo WP_Polls_Display::display_pollresult( $poll_id, 0, false );
 					break;
 				// Poll Booth Aka Poll Voting Form.
 				case 'booth':
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup assembled and escaped by Polls_Display.
-					echo Polls_Display::display_pollvote( $poll_id, false );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Poll markup assembled and escaped by WP_Polls_Display.
+					echo WP_Polls_Display::display_pollvote( $poll_id, false );
 					break;
 			} // End of the view switch.
 		} // End of the polls action guard.

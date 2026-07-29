@@ -28,9 +28,9 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 		$wpdb->query( "DELETE FROM {$wpdb->pollsa}" );
 		$wpdb->query( "DELETE FROM {$wpdb->pollsip}" );
 
-		delete_option( Polls_Options::OPTION );
-		Polls_Options::flush();
-		Polls_Options::save( Polls_Options::defaults() );
+		delete_option( WP_Polls_Options::OPTION );
+		WP_Polls_Options::flush();
+		WP_Polls_Options::save( WP_Polls_Options::defaults() );
 	}
 
 	/**
@@ -131,7 +131,7 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 		// the time the Options and Templates screens run their sections and fields
 		// are registered. Requiring the file directly skips that, and
 		// do_settings_sections() would then render an empty screen.
-		Polls_Settings::register();
+		WP_Polls_Settings::register();
 
 		$depth = ob_get_level();
 		$html  = '';

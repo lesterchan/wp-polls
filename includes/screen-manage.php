@@ -17,13 +17,13 @@ defined( 'ABSPATH' ) || exit;
 global $wpdb;
 
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( Polls_Admin::capability() ) ) {
+if ( ! current_user_can( WP_Polls_Admin::capability() ) ) {
 	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 
 // Loaded here rather than from the plugin bootstrap: WP_List_Table only exists
 // inside wp-admin, and this is the one screen that extends it.
-require_once WP_POLLS_DIR . 'includes/class-polls-list-table.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-list-table.php';
 
 // Variables Variables Variables.
 $poll_mode = isset( $_GET['mode'] ) ? sanitize_key( wp_unslash( $_GET['mode'] ) ) : '';
@@ -50,7 +50,7 @@ if ( ! empty( $_POST['do'] ) ) {
 			// Poll Active.
 			$pollq_active = isset( $_POST['pollq_active'] ) ? (int) $_POST['pollq_active'] : 0;
 			// Poll Start Date.
-			$pollq_timestamp    = isset( $_POST['poll_timestamp_old'] ) ? (int) $_POST['poll_timestamp_old'] : Polls_Core::now();
+			$pollq_timestamp    = isset( $_POST['poll_timestamp_old'] ) ? (int) $_POST['poll_timestamp_old'] : WP_Polls::now();
 			$edit_polltimestamp = ( isset( $_POST['edit_polltimestamp'] ) && 1 === (int) $_POST['edit_polltimestamp'] ) ? 1 : 0;
 			if ( 1 === $edit_polltimestamp ) {
 				$pollq_timestamp_day    = isset( $_POST['pollq_timestamp_day'] ) ? (int) $_POST['pollq_timestamp_day'] : 0;
@@ -60,7 +60,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				$pollq_timestamp_minute = isset( $_POST['pollq_timestamp_minute'] ) ? (int) $_POST['pollq_timestamp_minute'] : 0;
 				$pollq_timestamp_second = isset( $_POST['pollq_timestamp_second'] ) ? (int) $_POST['pollq_timestamp_second'] : 0;
 				$pollq_timestamp        = gmmktime( $pollq_timestamp_hour, $pollq_timestamp_minute, $pollq_timestamp_second, $pollq_timestamp_month, $pollq_timestamp_day, $pollq_timestamp_year );
-				if ( $pollq_timestamp > Polls_Core::now() ) {
+				if ( $pollq_timestamp > WP_Polls::now() ) {
 					$pollq_active = -1;
 				}
 			}
@@ -76,7 +76,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				$pollq_expiry_minute = isset( $_POST['pollq_expiry_minute'] ) ? (int) $_POST['pollq_expiry_minute'] : 0;
 				$pollq_expiry_second = isset( $_POST['pollq_expiry_second'] ) ? (int) $_POST['pollq_expiry_second'] : 0;
 				$pollq_expiry        = gmmktime( $pollq_expiry_hour, $pollq_expiry_minute, $pollq_expiry_second, $pollq_expiry_month, $pollq_expiry_day, $pollq_expiry_year );
-				if ( $pollq_expiry <= Polls_Core::now() ) {
+				if ( $pollq_expiry <= WP_Polls::now() ) {
 					$pollq_active = 0;
 				}
 				if ( 1 === $edit_polltimestamp ) {
@@ -205,10 +205,10 @@ if ( ! empty( $_POST['do'] ) ) {
 				$text = '<p style="color: green">' . sprintf( __( 'Poll \'%s\' Edited Successfully.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p>';
 			}
 			// Update Lastest Poll ID To Poll Options.
-			$latest_pollid     = Polls_Core::polls_latest_id();
-			$update_latestpoll = Polls_Options::set( 'latest_poll', $latest_pollid );
+			$latest_pollid     = WP_Polls::polls_latest_id();
+			$update_latestpoll = WP_Polls_Options::set( 'latest_poll', $latest_pollid );
 			do_action( 'wp_polls_update_poll', $pollq_id );
-			Polls_Core::cron_polls_place();
+			WP_Polls::cron_polls_place();
 			break;
 	}
 }
@@ -241,7 +241,7 @@ switch ( $poll_mode ) {
 				echo '<div id="message" class="notice notice-success" style="display: none;"></div>';
 			}
 			?>
-			<form method="post" action="<?php echo esc_url( Polls_List_Table::page_url( array( 'mode' => 'edit' ), $poll_id ) ); ?>">
+			<form method="post" action="<?php echo esc_url( WP_Polls_List_Table::page_url( array( 'mode' => 'edit' ), $poll_id ) ); ?>">
 				<?php wp_nonce_field( 'wp-polls_edit-poll' ); ?>
 				<input type="hidden" name="pollq_id" value="<?php echo esc_attr( $poll_id ); ?>" />
 				<input type="hidden" name="pollq_active" value="<?php echo esc_attr( $poll_active ); ?>" />
@@ -348,9 +348,9 @@ switch ( $poll_mode ) {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Start Date/Time', 'wp-polls' ); ?></th>
 						<td>
-							<?php echo esc_html( Polls_List_Table::format_date( $poll_timestamp ) ); ?><br />
+							<?php echo esc_html( WP_Polls_List_Table::format_date( $poll_timestamp ) ); ?><br />
 							<input type="checkbox" name="edit_polltimestamp" id="edit_polltimestamp" value="1" data-poll-action="toggle-timestamp" />&nbsp;<label for="edit_polltimestamp"><?php esc_html_e( 'Edit Start Date/Time', 'wp-polls' ); ?></label><br />
-							<?php Polls_Admin::poll_timestamp( $poll_timestamp, 'pollq_timestamp', 'none' ); ?>
+							<?php WP_Polls_Admin::poll_timestamp( $poll_timestamp, 'pollq_timestamp', 'none' ); ?>
 						</td>
 					</tr>
 					<tr>
@@ -360,7 +360,7 @@ switch ( $poll_mode ) {
 							if ( empty( $poll_expiry ) ) {
 								esc_html_e( 'This Poll Will Not Expire', 'wp-polls' );
 							} else {
-								echo esc_html( Polls_List_Table::format_date( $poll_expiry ) );
+								echo esc_html( WP_Polls_List_Table::format_date( $poll_expiry ) );
 							}
 							?>
 							<br />
@@ -368,9 +368,9 @@ switch ( $poll_mode ) {
 							<label for="pollq_expiry_no"><?php esc_html_e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label><br />
 							<?php
 							if ( empty( $poll_expiry ) ) {
-								Polls_Admin::poll_timestamp( Polls_Core::now(), 'pollq_expiry', 'none' );
+								WP_Polls_Admin::poll_timestamp( WP_Polls::now(), 'pollq_expiry', 'none' );
 							} else {
-								Polls_Admin::poll_timestamp( $poll_expiry, 'pollq_expiry' );
+								WP_Polls_Admin::poll_timestamp( $poll_expiry, 'pollq_expiry' );
 							}
 							?>
 						</td>
@@ -392,7 +392,7 @@ switch ( $poll_mode ) {
 					?>
 					<button type="button" class="button" id="close_poll" data-poll-action="close-poll" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php echo esc_attr( $close_confirm ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_close-poll' ) ); ?>" style="display: <?php echo esc_attr( $poll_close_display ); ?>;"><?php esc_html_e( 'Close Poll', 'wp-polls' ); ?></button>
 					<button type="button" class="button" id="open_poll" data-poll-action="open-poll" data-poll-id="<?php echo esc_attr( $poll_id ); ?>" data-poll-confirm="<?php echo esc_attr( $open_confirm ); ?>" data-poll-nonce="<?php echo esc_attr( wp_create_nonce( 'wp-polls_open-poll' ) ); ?>" style="display: <?php echo esc_attr( $poll_open_display ); ?>;"><?php esc_html_e( 'Open Poll', 'wp-polls' ); ?></button>
-					<a class="button" href="<?php echo esc_url( Polls_List_Table::page_url() ); ?>"><?php esc_html_e( 'Cancel', 'wp-polls' ); ?></a>
+					<a class="button" href="<?php echo esc_url( WP_Polls_List_Table::page_url() ); ?>"><?php esc_html_e( 'Cancel', 'wp-polls' ); ?></a>
 				</p>
 			</form>
 		</div>
@@ -400,9 +400,9 @@ switch ( $poll_mode ) {
 		break;
 	// Main Page.
 	default:
-		$poll_list = new Polls_List_Table();
+		$poll_list = new WP_Polls_List_Table();
 		$poll_list->prepare_items();
-		$poll_stats = Polls_List_Table::stats();
+		$poll_stats = WP_Polls_List_Table::stats();
 		$poll_ips   = (int) $wpdb->get_var( "SELECT COUNT(pollip_id) FROM $wpdb->pollsip" );
 		?>
 		<div class="wrap">

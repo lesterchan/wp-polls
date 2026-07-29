@@ -6,16 +6,16 @@
  */
 
 /**
- * Polls_Admin::manage_poll, the wp_ajax_polls-admin handler.
+ * WP_Polls_Admin::manage_poll, the wp_ajax_polls-admin handler.
  *
  * A privileged, destructive endpoint reachable by any logged in user: it
  * deletes polls, answers and logs, and opens and closes polls. Nothing checked
  * that it turns away a user without manage_polls, that each branch verifies its
  * own nonce, or that it deletes the right rows.
  *
- * @covers Polls_Admin::manage_poll
+ * @covers WP_Polls_Admin::manage_poll
  */
-class Test_Polls_Admin_Ajax extends WP_Polls_TestCase {
+class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Make the endpoint reachable from a test.
@@ -61,7 +61,7 @@ class Test_Polls_Admin_Ajax extends WP_Polls_TestCase {
 
 		try {
 			ob_start();
-			Polls_Admin::manage_poll();
+			WP_Polls_Admin::manage_poll();
 		} catch ( WPDieException $e ) {
 			unset( $e );
 		} finally {

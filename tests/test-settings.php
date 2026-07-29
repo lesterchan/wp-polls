@@ -13,18 +13,18 @@
 /**
  * Settings API registration and the sanitize callback both screens share.
  *
- * @covers Polls_Settings
+ * @covers WP_Polls_Settings
  */
-class Test_Polls_Settings extends WP_Polls_TestCase {
+class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Saving the Options screen must not disturb the templates.
 	 */
 	public function test_options_save_preserves_templates() {
-		Polls_Options::set( 'templates.votefooter', 'SENTINEL' );
-		Polls_Options::flush();
+		WP_Polls_Options::set( 'templates.votefooter', 'SENTINEL' );
+		WP_Polls_Options::flush();
 
-		$result = Polls_Settings::sanitize(
+		$result = WP_Polls_Settings::sanitize(
 			array(
 				'bar'     => array(
 					'style'      => 'default',
@@ -45,11 +45,11 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * And the reverse: saving Templates must not disturb the options.
 	 */
 	public function test_templates_save_preserves_options() {
-		Polls_Options::set( 'bar.background', 'aabbcc' );
-		Polls_Options::set( 'ip_header', 'HTTP_X_REAL_IP' );
-		Polls_Options::flush();
+		WP_Polls_Options::set( 'bar.background', 'aabbcc' );
+		WP_Polls_Options::set( 'ip_header', 'HTTP_X_REAL_IP' );
+		WP_Polls_Options::flush();
 
-		$result = Polls_Settings::sanitize(
+		$result = WP_Polls_Settings::sanitize(
 			array( 'templates' => array( 'disable' => 'Nothing here' ) )
 		);
 
@@ -62,10 +62,10 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * A template the form did not submit keeps its stored value.
 	 */
 	public function test_untouched_template_is_preserved() {
-		Polls_Options::set( 'templates.voteheader', 'KEEP ME' );
-		Polls_Options::flush();
+		WP_Polls_Options::set( 'templates.voteheader', 'KEEP ME' );
+		WP_Polls_Options::flush();
 
-		$result = Polls_Settings::sanitize( array( 'templates' => array( 'disable' => 'x' ) ) );
+		$result = WP_Polls_Settings::sanitize( array( 'templates' => array( 'disable' => 'x' ) ) );
 
 		$this->assertSame( 'KEEP ME', $result['templates']['voteheader'] );
 	}
@@ -74,7 +74,7 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * An unchecked checkbox is absent from the payload, and means zero.
 	 */
 	public function test_absent_checkbox_becomes_zero() {
-		$result = Polls_Settings::sanitize( array( 'ajax' => array( 'loading' => 1 ) ) );
+		$result = WP_Polls_Settings::sanitize( array( 'ajax' => array( 'loading' => 1 ) ) );
 
 		$this->assertSame( 1, (int) $result['ajax']['loading'] );
 		$this->assertSame( 0, (int) $result['ajax']['fading'] );
@@ -84,7 +84,7 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * Values outside the whitelist are rejected, not stored.
 	 */
 	public function test_invalid_values_are_rejected() {
-		$result = Polls_Settings::sanitize(
+		$result = WP_Polls_Settings::sanitize(
 			array(
 				'bar'  => array(
 					'style'      => '../../etc/passwd',
@@ -105,7 +105,7 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * Garbage input returns the stored option rather than destroying it.
 	 */
 	public function test_non_array_input_returns_current_option() {
-		$result = Polls_Settings::sanitize( 'not an array' );
+		$result = WP_Polls_Settings::sanitize( 'not an array' );
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'templates', $result );
@@ -118,7 +118,7 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * this fails.
 	 */
 	public function test_template_sanitiser_strips_onclick_but_keeps_data_attributes() {
-		$out = Polls_Settings::sanitize_template(
+		$out = WP_Polls_Settings::sanitize_template(
 			'votefooter',
 			'<input type="button" onclick="poll_vote(1)" data-poll-id="%POLL_ID%" data-poll-action="vote" />'
 		);
@@ -132,7 +132,7 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * Scripts never survive a template save.
 	 */
 	public function test_template_sanitiser_strips_scripts() {
-		$out = Polls_Settings::sanitize_template( 'voteheader', '<p>ok</p><script>alert(1)</script>' );
+		$out = WP_Polls_Settings::sanitize_template( 'voteheader', '<p>ok</p><script>alert(1)</script>' );
 
 		$this->assertStringNotContainsStringIgnoringCase( '<script', $out );
 		$this->assertStringContainsString( '<p>ok</p>', $out );
@@ -142,10 +142,10 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * The setting is registered under the group both screens post to.
 	 */
 	public function test_setting_is_registered() {
-		Polls_Settings::register();
+		WP_Polls_Settings::register();
 
 		$registered = get_registered_settings();
-		$this->assertArrayHasKey( Polls_Options::OPTION, $registered );
+		$this->assertArrayHasKey( WP_Polls_Options::OPTION, $registered );
 	}
 
 	/**
@@ -159,7 +159,7 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 		wp_clear_scheduled_hook( 'polls_cron' );
 		$this->assertFalse( wp_next_scheduled( 'polls_cron' ) );
 
-		Polls_Options::set( 'cookie_expiry', 3600 );
+		WP_Polls_Options::set( 'cookie_expiry', 3600 );
 
 		$this->assertNotFalse( wp_next_scheduled( 'polls_cron' ) );
 	}
@@ -171,11 +171,11 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * bucket here is an empty screen there.
 	 */
 	public function test_both_screens_are_registered_as_sections_and_fields() {
-		Polls_Settings::register();
+		WP_Polls_Settings::register();
 
 		global $wp_settings_sections, $wp_settings_fields;
 
-		foreach ( array( Polls_Settings::PAGE_OPTIONS, Polls_Settings::PAGE_TEMPLATES ) as $page ) {
+		foreach ( array( WP_Polls_Settings::PAGE_OPTIONS, WP_Polls_Settings::PAGE_TEMPLATES ) as $page ) {
 			$this->assertArrayHasKey( $page, $wp_settings_sections, $page . ' registered no sections' );
 			$this->assertNotEmpty( $wp_settings_sections[ $page ], $page . ' registered no sections' );
 			$this->assertArrayHasKey( $page, $wp_settings_fields, $page . ' registered no fields' );
@@ -187,24 +187,24 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * Every template the plugin stores has a field of its own, and no more.
 	 *
 	 * The screen used to list the fifteen textareas by hand, so a template added
-	 * to Polls_Options::template_keys() could be saved by the sanitiser and
+	 * to WP_Polls_Options::template_keys() could be saved by the sanitiser and
 	 * still have nowhere to edit it.
 	 */
 	public function test_every_template_key_has_exactly_one_field() {
-		Polls_Settings::register();
+		WP_Polls_Settings::register();
 
 		global $wp_settings_fields;
 
 		$ids = array();
-		foreach ( $wp_settings_fields[ Polls_Settings::PAGE_TEMPLATES ] as $section ) {
+		foreach ( $wp_settings_fields[ WP_Polls_Settings::PAGE_TEMPLATES ] as $section ) {
 			$ids = array_merge( $ids, array_keys( $section ) );
 		}
 
-		foreach ( Polls_Options::template_keys() as $key ) {
+		foreach ( WP_Polls_Options::template_keys() as $key ) {
 			$this->assertContains( 'poll_template_' . $key, $ids, $key . ' has no field on the screen' );
 		}
 
-		$this->assertCount( count( Polls_Options::template_keys() ), $ids );
+		$this->assertCount( count( WP_Polls_Options::template_keys() ), $ids );
 	}
 
 	/**
@@ -214,16 +214,16 @@ class Test_Polls_Settings extends WP_Polls_TestCase {
 	 * way wp-admin does before including a screen.
 	 */
 	public function test_registering_twice_does_not_duplicate_rows() {
-		Polls_Settings::register();
+		WP_Polls_Settings::register();
 
 		global $wp_settings_sections, $wp_settings_fields;
 
-		$sections = count( $wp_settings_sections[ Polls_Settings::PAGE_OPTIONS ] );
-		$fields   = count( $wp_settings_fields[ Polls_Settings::PAGE_OPTIONS ]['wp_polls_bar'] );
+		$sections = count( $wp_settings_sections[ WP_Polls_Settings::PAGE_OPTIONS ] );
+		$fields   = count( $wp_settings_fields[ WP_Polls_Settings::PAGE_OPTIONS ]['wp_polls_bar'] );
 
-		Polls_Settings::register();
+		WP_Polls_Settings::register();
 
-		$this->assertCount( $sections, $wp_settings_sections[ Polls_Settings::PAGE_OPTIONS ] );
-		$this->assertCount( $fields, $wp_settings_fields[ Polls_Settings::PAGE_OPTIONS ]['wp_polls_bar'] );
+		$this->assertCount( $sections, $wp_settings_sections[ WP_Polls_Settings::PAGE_OPTIONS ] );
+		$this->assertCount( $fields, $wp_settings_fields[ WP_Polls_Settings::PAGE_OPTIONS ]['wp_polls_bar'] );
 	}
 }

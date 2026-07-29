@@ -18,7 +18,7 @@
  * Asserting on the source is what is left. Each assertion below stands in for a
  * failure that reports success while silently leaving data behind.
  */
-class Test_Polls_Uninstall extends WP_Polls_TestCase {
+class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 
 	/**
 	 * The uninstall source.
@@ -102,7 +102,7 @@ class Test_Polls_Uninstall extends WP_Polls_TestCase {
 	/**
 	 * Every option row the plugin owns is on the uninstall list.
 	 *
-	 * The list is built from Polls_Options so it cannot drift from the
+	 * The list is built from WP_Polls_Options so it cannot drift from the
 	 * migration's idea of which rows belong to the plugin, and the consolidated
 	 * row itself has to be on it.
 	 *
@@ -111,9 +111,9 @@ class Test_Polls_Uninstall extends WP_Polls_TestCase {
 	public function test_the_consolidated_row_is_removed() {
 		$source = $this->source();
 
-		$this->assertStringContainsString( 'Polls_Options::OPTION', $source );
-		$this->assertStringContainsString( 'Polls_Options::legacy_map()', $source );
-		$this->assertStringContainsString( 'Polls_Install::DB_VERSION_OPTION', $source );
+		$this->assertStringContainsString( 'WP_Polls_Options::OPTION', $source );
+		$this->assertStringContainsString( 'WP_Polls_Options::legacy_map()', $source );
+		$this->assertStringContainsString( 'WP_Polls_Install::DB_VERSION_OPTION', $source );
 		$this->assertStringContainsString( "'poll_version'", $source );
 	}
 

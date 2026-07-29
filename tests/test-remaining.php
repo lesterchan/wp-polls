@@ -8,12 +8,12 @@
 /**
  * The last few entry points with no coverage of their own.
  *
- * @covers Polls_Display::polls_archive
- * @covers Polls_Widget
- * @covers Polls_Core::cron_polls_status
- * @covers Polls_Install::templates_have_onclick
+ * @covers WP_Polls_Display::polls_archive
+ * @covers WP_Polls_Widget
+ * @covers WP_Polls::cron_polls_status
+ * @covers WP_Polls_Install::templates_have_onclick
  */
-class Test_Polls_Remaining extends WP_Polls_TestCase {
+class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 	// --- the archive ------------------------------------------------------
 
@@ -25,9 +25,9 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	public function test_archive_lists_polls() {
 		$this->make_poll( array( 'pollq_question' => 'Archive poll one' ) );
 		$this->make_poll( array( 'pollq_question' => 'Archive poll two' ) );
-		Polls_Options::set( 'archive.display_poll', 3 );
+		WP_Polls_Options::set( 'archive.display_poll', 3 );
 
-		$html = Polls_Display::polls_archive();
+		$html = WP_Polls_Display::polls_archive();
 
 		$this->assertStringContainsString( 'Archive poll one', $html );
 		$this->assertStringContainsString( 'Archive poll two', $html );
@@ -46,9 +46,9 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 				'pollq_active'   => -1,
 			)
 		);
-		Polls_Options::set( 'archive.display_poll', 3 );
+		WP_Polls_Options::set( 'archive.display_poll', 3 );
 
-		$html = Polls_Display::polls_archive();
+		$html = WP_Polls_Display::polls_archive();
 
 		$this->assertStringContainsString( 'Published poll', $html );
 		$this->assertStringNotContainsString( 'Scheduled poll', $html );
@@ -73,13 +73,13 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 			)
 		);
 
-		Polls_Options::set( 'archive.display_poll', 1 );
-		$closed_only = Polls_Display::polls_archive();
+		WP_Polls_Options::set( 'archive.display_poll', 1 );
+		$closed_only = WP_Polls_Display::polls_archive();
 		$this->assertStringContainsString( 'A closed poll', $closed_only );
 		$this->assertStringNotContainsString( 'An open poll', $closed_only );
 
-		Polls_Options::set( 'archive.display_poll', 2 );
-		$open_only = Polls_Display::polls_archive();
+		WP_Polls_Options::set( 'archive.display_poll', 2 );
+		$open_only = WP_Polls_Display::polls_archive();
 		$this->assertStringContainsString( 'An open poll', $open_only );
 		$this->assertStringNotContainsString( 'A closed poll', $open_only );
 	}
@@ -91,9 +91,9 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	 */
 	public function test_archive_does_not_double_escape() {
 		$this->make_poll( array( 'pollq_question' => 'Tabs & "spaces"' ) );
-		Polls_Options::set( 'archive.display_poll', 3 );
+		WP_Polls_Options::set( 'archive.display_poll', 3 );
 
-		$html = Polls_Display::polls_archive();
+		$html = WP_Polls_Display::polls_archive();
 
 		$this->assertStringNotContainsString( '&amp;amp;', $html );
 	}
@@ -108,7 +108,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	public function test_widget_renders_the_configured_poll() {
 		$poll_id = $this->make_poll( array( 'pollq_question' => 'Widget poll' ) );
 
-		$widget = new Polls_Widget();
+		$widget = new WP_Polls_Widget();
 
 		ob_start();
 		$widget->widget(
@@ -140,7 +140,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	public function test_widget_omits_an_empty_title() {
 		$poll_id = $this->make_poll();
 
-		$widget = new Polls_Widget();
+		$widget = new WP_Polls_Widget();
 
 		ob_start();
 		$widget->widget(
@@ -167,7 +167,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_widget_update_casts_its_settings() {
-		$widget = new Polls_Widget();
+		$widget = new WP_Polls_Widget();
 
 		$saved = $widget->update(
 			array(
@@ -190,7 +190,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_widget_update_without_submit_keeps_the_old_instance() {
-		$widget = new Polls_Widget();
+		$widget = new WP_Polls_Widget();
 
 		$this->assertFalse( $widget->update( array( 'title' => 'New' ), array( 'title' => 'Old' ) ) );
 	}
@@ -209,11 +209,11 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 			array(
 				'pollq_question' => 'Expired',
 				'pollq_active'   => 1,
-				'pollq_expiry'   => Polls_Core::now() - HOUR_IN_SECONDS,
+				'pollq_expiry'   => WP_Polls::now() - HOUR_IN_SECONDS,
 			)
 		);
 
-		Polls_Core::cron_polls_status();
+		WP_Polls::cron_polls_status();
 
 		$this->assertSame(
 			0,
@@ -236,7 +236,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 			)
 		);
 
-		Polls_Core::cron_polls_status();
+		WP_Polls::cron_polls_status();
 
 		$this->assertSame(
 			1,
@@ -256,11 +256,11 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 			array(
 				'pollq_question'  => 'Due',
 				'pollq_active'    => -1,
-				'pollq_timestamp' => Polls_Core::now() - HOUR_IN_SECONDS,
+				'pollq_timestamp' => WP_Polls::now() - HOUR_IN_SECONDS,
 			)
 		);
 
-		Polls_Core::cron_polls_status();
+		WP_Polls::cron_polls_status();
 
 		$this->assertSame(
 			1,
@@ -279,11 +279,11 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll(
 			array(
 				'pollq_active'    => -1,
-				'pollq_timestamp' => Polls_Core::now() + DAY_IN_SECONDS,
+				'pollq_timestamp' => WP_Polls::now() + DAY_IN_SECONDS,
 			)
 		);
 
-		Polls_Core::cron_polls_status();
+		WP_Polls::cron_polls_status();
 
 		$this->assertSame(
 			-1,
@@ -300,14 +300,14 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll(
 			array(
 				'pollq_active'    => -1,
-				'pollq_timestamp' => Polls_Core::now() - HOUR_IN_SECONDS,
+				'pollq_timestamp' => WP_Polls::now() - HOUR_IN_SECONDS,
 			)
 		);
 
-		Polls_Options::set( 'latest_poll', 0 );
-		Polls_Core::cron_polls_status();
+		WP_Polls_Options::set( 'latest_poll', 0 );
+		WP_Polls::cron_polls_status();
 
-		$this->assertSame( $poll_id, (int) Polls_Options::get( 'latest_poll' ) );
+		$this->assertSame( $poll_id, (int) WP_Polls_Options::get( 'latest_poll' ) );
 	}
 
 	// --- the upgrade notice ----------------------------------------------
@@ -318,9 +318,9 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_onclick_left_in_a_template_is_detected() {
-		Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
+		WP_Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
 
-		$this->assertTrue( Polls_Install::templates_have_onclick() );
+		$this->assertTrue( WP_Polls_Install::templates_have_onclick() );
 	}
 
 	/**
@@ -329,10 +329,10 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_converted_templates_are_not_flagged() {
-		Polls_Options::set( 'templates.votefooter', '<a data-poll-action="vote">Vote</a>' );
-		Polls_Options::set( 'templates.resultfooter2', '<a data-poll-action="booth">Vote</a>' );
+		WP_Polls_Options::set( 'templates.votefooter', '<a data-poll-action="vote">Vote</a>' );
+		WP_Polls_Options::set( 'templates.resultfooter2', '<a data-poll-action="booth">Vote</a>' );
 
-		$this->assertFalse( Polls_Install::templates_have_onclick() );
+		$this->assertFalse( WP_Polls_Install::templates_have_onclick() );
 	}
 
 	/**
@@ -341,9 +341,9 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_the_result_footer_is_checked_as_well() {
-		Polls_Options::set( 'templates.votefooter', '<a data-poll-action="vote">Vote</a>' );
-		Polls_Options::set( 'templates.resultfooter2', '<a onClick="poll_booth(1)">Vote</a>' );
+		WP_Polls_Options::set( 'templates.votefooter', '<a data-poll-action="vote">Vote</a>' );
+		WP_Polls_Options::set( 'templates.resultfooter2', '<a onClick="poll_booth(1)">Vote</a>' );
 
-		$this->assertTrue( Polls_Install::templates_have_onclick() );
+		$this->assertTrue( WP_Polls_Install::templates_have_onclick() );
 	}
 }

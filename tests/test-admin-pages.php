@@ -16,9 +16,9 @@
 /**
  * The Manage/Add/Options/Templates screens and the logs view.
  *
- * @covers Polls_Admin
+ * @covers WP_Polls_Admin
  */
-class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
+class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Set up.
@@ -287,7 +287,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	public function test_options_offers_only_saveable_bar_styles() {
 		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
-		$styles = Polls_Settings::bar_styles();
+		$styles = WP_Polls_Settings::bar_styles();
 		$this->assertNotEmpty( $styles, 'no bar styles found on disk' );
 
 		foreach ( $styles as $style ) {
@@ -308,8 +308,8 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_renders_the_bar_colours_as_colour_inputs() {
-		Polls_Options::set( 'bar.background', 'aabbcc' );
-		Polls_Options::set( 'bar.border', 'ddeeff' );
+		WP_Polls_Options::set( 'bar.background', 'aabbcc' );
+		WP_Polls_Options::set( 'bar.border', 'ddeeff' );
 
 		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
@@ -323,7 +323,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_stores_what_the_colour_input_posts() {
-		$saved = Polls_Settings::sanitize( array( 'bar' => array( 'background' => '#123456' ) ) );
+		$saved = WP_Polls_Settings::sanitize( array( 'bar' => array( 'background' => '#123456' ) ) );
 
 		$this->assertSame( '123456', $saved['bar']['background'] );
 	}
@@ -334,9 +334,9 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_checks_the_saved_bar_style() {
-		$styles = Polls_Settings::bar_styles();
+		$styles = WP_Polls_Settings::bar_styles();
 		$style  = end( $styles );
-		Polls_Options::set( 'bar.style', $style );
+		WP_Polls_Options::set( 'bar.style', $style );
 
 		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
@@ -370,7 +370,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$html = $this->render_admin_page( 'includes/screen-templates.php' );
 
 		$this->assertStringContainsString( 'action="options.php"', $html );
-		$this->assertStringContainsString( "value='" . Polls_Settings::GROUP . "'", $html );
+		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html );
 	}
 
 	/**
@@ -382,7 +382,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
 		$this->assertStringContainsString( 'action="options.php"', $html );
-		$this->assertStringContainsString( "value='" . Polls_Settings::GROUP . "'", $html );
+		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html );
 	}
 
 	/**
@@ -409,7 +409,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_manage_paginates_the_polls() {
-		for ( $i = 1; $i <= Polls_List_Table::PER_PAGE + 3; $i++ ) {
+		for ( $i = 1; $i <= WP_Polls_List_Table::PER_PAGE + 3; $i++ ) {
 			$this->make_poll(
 				array(
 					'pollq_question'  => 'Poll ' . $i,
@@ -421,7 +421,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$first  = $this->render_admin_page( 'includes/screen-manage.php' );
 		$second = $this->render_admin_page( 'includes/screen-manage.php', array( 'paged' => '2' ) );
 
-		$this->assertSame( Polls_List_Table::PER_PAGE, substr_count( $first, '<tr id="poll-' ) );
+		$this->assertSame( WP_Polls_List_Table::PER_PAGE, substr_count( $first, '<tr id="poll-' ) );
 		$this->assertSame( 3, substr_count( $second, '<tr id="poll-' ) );
 	}
 
@@ -434,18 +434,18 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_manage_stats_cover_every_page() {
-		for ( $i = 1; $i <= Polls_List_Table::PER_PAGE + 2; $i++ ) {
+		for ( $i = 1; $i <= WP_Polls_List_Table::PER_PAGE + 2; $i++ ) {
 			$this->make_poll(
 				array( 'pollq_question' => 'Poll ' . $i ),
 				array( array( 'Yes', 2 ), array( 'No', 1 ) )
 			);
 		}
 
-		$stats = Polls_List_Table::stats();
+		$stats = WP_Polls_List_Table::stats();
 
-		$this->assertSame( Polls_List_Table::PER_PAGE + 2, $stats['polls'] );
-		$this->assertSame( ( Polls_List_Table::PER_PAGE + 2 ) * 2, $stats['answers'] );
-		$this->assertSame( ( Polls_List_Table::PER_PAGE + 2 ) * 3, $stats['votes'] );
+		$this->assertSame( WP_Polls_List_Table::PER_PAGE + 2, $stats['polls'] );
+		$this->assertSame( ( WP_Polls_List_Table::PER_PAGE + 2 ) * 2, $stats['answers'] );
+		$this->assertSame( ( WP_Polls_List_Table::PER_PAGE + 2 ) * 3, $stats['votes'] );
 	}
 
 	/**
@@ -566,7 +566,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * Neither settings screen writes its own form markup.
 	 *
 	 * Both are meant to be nothing but settings_fields(), do_settings_sections()
-	 * and submit_button(), with every row declared in Polls_Settings. A table or
+	 * and submit_button(), with every row declared in WP_Polls_Settings. A table or
 	 * an input appearing in either file means a field has been added outside the
 	 * Settings API, where the sanitiser and the section ordering cannot see it.
 	 *
@@ -606,7 +606,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 					continue;
 				}
 
-				$this->assertStringStartsWith( Polls_Options::OPTION . '[', $name, $file );
+				$this->assertStringStartsWith( WP_Polls_Options::OPTION . '[', $name, $file );
 			}
 		}
 	}
@@ -621,7 +621,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 
 		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
-		foreach ( $wp_settings_sections[ Polls_Settings::PAGE_OPTIONS ] as $section ) {
+		foreach ( $wp_settings_sections[ WP_Polls_Settings::PAGE_OPTIONS ] as $section ) {
 			// Matched loosely on purpose: do_settings_sections() gained an id
 			// attribute on the heading in WP 6.6, so a literal <h2> only holds on
 			// the older end of the versions this plugin supports.
@@ -638,7 +638,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_templates_renders_stored_template() {
-		Polls_Options::set( 'templates.voteheader', '<p>CUSTOM HEADER</p>' );
+		WP_Polls_Options::set( 'templates.voteheader', '<p>CUSTOM HEADER</p>' );
 
 		$html = $this->render_admin_page( 'includes/screen-templates.php' );
 

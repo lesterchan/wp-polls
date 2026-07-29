@@ -23,14 +23,21 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Reads and writes the single poll_options row.
  */
-class Polls_Options {
+class WP_Polls_Options {
 
 	/**
-	 * Name of the consolidated option row.
+	 * Name of the consolidated settings row.
 	 *
 	 * @var string
 	 */
 	const OPTION = 'poll_options';
+
+	/**
+	 * Name of the row holding the plugin and schema version markers.
+	 *
+	 * @var string
+	 */
+	const VERSION = 'poll_version';
 
 	/**
 	 * Runtime cache so a page render does not re-read the row per lookup.
@@ -114,14 +121,14 @@ class Polls_Options {
 	/**
 	 * Default values for every key.
 	 *
-	 * Templates are filled in by Polls_Templates so the markup lives in one
+	 * Templates are filled in by WP_Polls_Template so the markup lives in one
 	 * place rather than being duplicated between defaults and the reset button.
 	 *
 	 * @return array
 	 */
 	public static function defaults() {
 		return array(
-			'templates'      => Polls_Templates::defaults(),
+			'templates'      => WP_Polls_Template::defaults(),
 			// These mirror the pre-3.0.0 add_option() calls exactly. Changing any
 			// of them silently changes what a fresh install looks like.
 			// 'gradient' rather than the pre-3.0.0 'default': that default was the

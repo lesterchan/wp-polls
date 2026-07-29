@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Boots the front end side of the plugin.
  */
-class Polls_Core {
+class WP_Polls {
 
 	/**
 	 * Hook registration.
@@ -38,7 +38,7 @@ class Polls_Core {
 		} else {
 			wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'css/wp-polls.css', array(), WP_POLLS_VERSION );
 		}
-		$pollbar = Polls_Options::get( 'bar' );
+		$pollbar = WP_Polls_Options::get( 'bar' );
 		// This lands in an inline <style> block on every front end page, so never
 		// trust the stored values even though only 'manage_polls' can set them.
 		$pollbar_height     = (int) $pollbar['height'];
@@ -54,7 +54,7 @@ class Polls_Core {
 		$pollbar_css .= "\t" . '--wp-polls-bar-image: ' . self::bar_image( $pollbar['style'] ) . ';' . "\n";
 		$pollbar_css .= '}' . "\n";
 		wp_add_inline_style( 'wp-polls', $pollbar_css );
-		$poll_ajax_style = Polls_Options::get( 'ajax' );
+		$poll_ajax_style = WP_Polls_Options::get( 'ajax' );
 		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'js/wp-polls.js', array(), WP_POLLS_VERSION, true );
 		wp_localize_script(
 			'wp-polls',
@@ -83,7 +83,7 @@ class Polls_Core {
 	 */
 	public static function poll_page_shortcode( $atts ) {
 		unset( $atts );
-		return Polls_Display::polls_archive();
+		return WP_Polls_Display::polls_archive();
 	}
 
 	// Function: Short Code For Inserting Polls Into Posts.
@@ -112,9 +112,9 @@ class Polls_Core {
 			}
 
 			if ( 'vote' === $attributes['type'] ) {
-				return Polls_Display::get_poll( $id, false );
+				return WP_Polls_Display::get_poll( $id, false );
 			} elseif ( 'result' === $attributes['type'] ) {
-				return Polls_Display::display_pollresult( $id );
+				return WP_Polls_Display::display_pollresult( $id );
 			}
 		} else {
 			return __( 'Note: There is a poll embedded within this post, please visit the site to participate in this post\'s poll.', 'wp-polls' );
@@ -149,7 +149,7 @@ class Polls_Core {
 		$active_polls = $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->pollsq SET pollq_active = 1 WHERE pollq_timestamp <= %d AND pollq_active = -1", $now ) );
 		// Update Latest Poll If Future Poll Is Opened.
 		if ( $active_polls ) {
-			Polls_Options::set( 'latest_poll', self::polls_latest_id() );
+			WP_Polls_Options::set( 'latest_poll', self::polls_latest_id() );
 		}
 	}
 
@@ -189,7 +189,7 @@ class Polls_Core {
 	 * @return mixed
 	 */
 	public static function widget_polls_init() {
-		register_widget( 'Polls_Widget' );
+		register_widget( 'WP_Polls_Widget' );
 	}
 
 	/**

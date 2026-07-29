@@ -3,7 +3,7 @@
  *
  * The contract these lock down is the one the PHP side depends on: the answer
  * ids arrive as a comma separated string in a single poll_<id> field. If the
- * script ever sent an array instead, Polls_Vote would sanitize it to an empty
+ * script ever sent an array instead, WP_Polls_Vote would sanitize it to an empty
  * string and silently record no vote.
  */
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
