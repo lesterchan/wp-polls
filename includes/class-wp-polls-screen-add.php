@@ -20,13 +20,14 @@ class WP_Polls_Screen_Add {
 	public static function render() {
 		global $wpdb;
 
-		// Status message the write paths below build up, shown once at the top of
-		// the screen. Declared here because only some branches set it.
-		$text = '';
 		// Check Whether User Can Manage Polls.
 		if ( ! current_user_can( WP_Polls_Admin::capability() ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 		}
+
+		// Status message the write paths below build up, shown once at the top of
+		// the screen. Declared here because only some branches set it.
+		$text = '';
 
 		// Poll Manager.
 		$base_page = admin_url( 'admin.php?page=wp-polls' );
@@ -38,7 +39,6 @@ class WP_Polls_Screen_Add {
 				// Add Poll.
 				case __( 'Add Poll', 'wp-polls' ):
 					check_admin_referer( 'wp-polls_add-poll' );
-					$text = '';
 					// Poll Question.
 					$pollq_question = isset( $_POST['pollq_question'] ) ? trim( wp_kses_post( wp_unslash( $_POST['pollq_question'] ) ) ) : '';
 					if ( ! empty( $pollq_question ) ) {

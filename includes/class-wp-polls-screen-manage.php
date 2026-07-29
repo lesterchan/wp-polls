@@ -24,18 +24,20 @@ class WP_Polls_Screen_Manage {
 	public static function render() {
 		global $wpdb;
 
-		// Status message the write paths below build up, shown once at the top of
-		// the screen. Declared here because only some branches set it.
-		$text = '';
 		// Check Whether User Can Manage Polls.
 		if ( ! current_user_can( WP_Polls_Admin::capability() ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 		}
 
+		// Status message the write paths below build up, shown once at the top of
+		// the screen. Declared here because only some branches set it.
+		$text = '';
+
 		// Variables Variables Variables.
+		// Which view, and which poll it is about. Both only choose what to show;
+		// every write path below verifies its own nonce first.
 		$poll_mode = isset( $_GET['mode'] ) ? sanitize_key( wp_unslash( $_GET['mode'] ) ) : '';
 		$poll_id   = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
-		$poll_aid  = isset( $_GET['aid'] ) ? (int) $_GET['aid'] : 0;
 
 		// Form Processing.
 		if ( ! empty( $_POST['do'] ) ) {

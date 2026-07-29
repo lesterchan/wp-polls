@@ -38,7 +38,9 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 * never touches. Covering only the default view is how an early version of
 	 * these tests missed a translators comment injected into the edit branch.
 	 *
-	 * The id placeholder is replaced with the seeded poll's real id.
+	 * Each case is the screen name WP_Polls_Admin::render_*() answers to, plus
+	 * the query args that pick a view. The id placeholder is replaced with the
+	 * seeded poll's real id.
 	 *
 	 * @return array
 	 */
@@ -98,7 +100,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 *
 	 * @dataProvider admin_page_provider
 	 *
-	 * @param string $file File name.
+	 * @param string $file Screen name.
 	 * @param array  $get  Query args.
 	 * @return void
 	 */
@@ -123,7 +125,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 *
 	 * @dataProvider admin_page_provider
 	 *
-	 * @param string $file File name.
+	 * @param string $file Screen name.
 	 * @param array  $get  Query args.
 	 * @return void
 	 */
@@ -145,7 +147,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	 *
 	 * @dataProvider admin_page_provider
 	 *
-	 * @param string $file File name.
+	 * @param string $file Screen name.
 	 * @param array  $get  Query args.
 	 * @return void
 	 */
