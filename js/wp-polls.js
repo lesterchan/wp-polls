@@ -8,7 +8,7 @@
 ( function() {
 	'use strict';
 
-	const l10n = window.pollsL10n || {};
+	const l10n = window.wpPollsL10n || {};
 	const showLoading = parseInt( l10n.show_loading, 10 ) > 0;
 	const showFading = parseInt( l10n.show_fading, 10 ) > 0;
 

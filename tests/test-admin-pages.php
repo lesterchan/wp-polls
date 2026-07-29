@@ -44,24 +44,24 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 */
 	public function admin_page_provider() {
 		return array(
-			'manage polls' => array( 'polls-manager.php', array() ),
+			'manage polls' => array( 'includes/screen-manage.php', array() ),
 			'edit poll'    => array(
-				'polls-manager.php',
+				'includes/screen-manage.php',
 				array(
 					'mode' => 'edit',
 					'id'   => '%POLL_ID%',
 				),
 			),
 			'poll logs'    => array(
-				'polls-manager.php',
+				'includes/screen-manage.php',
 				array(
 					'mode' => 'logs',
 					'id'   => '%POLL_ID%',
 				),
 			),
-			'add poll'     => array( 'polls-add.php', array() ),
-			'poll options' => array( 'polls-options.php', array() ),
-			'templates'    => array( 'polls-templates.php', array() ),
+			'add poll'     => array( 'includes/screen-add.php', array() ),
+			'poll options' => array( 'includes/screen-options.php', array() ),
+			'templates'    => array( 'includes/screen-templates.php', array() ),
 		);
 	}
 
@@ -167,7 +167,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	public function test_question_is_not_double_escaped() {
 		$this->make_poll( array( 'pollq_question' => 'Tabs & "spaces"?' ) );
 
-		foreach ( array( 'polls-manager.php', 'polls-options.php' ) as $file ) {
+		foreach ( array( 'includes/screen-manage.php', 'includes/screen-options.php' ) as $file ) {
 			$html = $this->render_admin_page( $file );
 
 			$this->assertStringNotContainsString( '&amp;amp;', $html, $file );
@@ -185,7 +185,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$this->make_poll( array( 'pollq_question' => 'First poll' ) );
 		$this->make_poll( array( 'pollq_question' => 'Second poll' ) );
 
-		$html = $this->render_admin_page( 'polls-manager.php' );
+		$html = $this->render_admin_page( 'includes/screen-manage.php' );
 
 		$this->assertStringContainsString( 'First poll', $html );
 		$this->assertStringContainsString( 'Second poll', $html );
@@ -210,7 +210,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$this->make_vote_log( $poll_id, $answers[1], 'Guest' );
 
 		$html = $this->render_admin_page(
-			'polls-manager.php',
+			'includes/screen-manage.php',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -239,7 +239,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$this->make_vote_log( $poll_id, $answers[0], "O'Brien" );
 
 		$html = $this->render_admin_page(
-			'polls-manager.php',
+			'includes/screen-manage.php',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -262,7 +262,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		);
 
 		$html = $this->render_admin_page(
-			'polls-manager.php',
+			'includes/screen-manage.php',
 			array(
 				'mode' => 'edit',
 				'id'   => (string) $poll_id,
@@ -285,7 +285,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_offers_only_saveable_bar_styles() {
-		$html = $this->render_admin_page( 'polls-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
 		$styles = Polls_Settings::bar_styles();
 		$this->assertNotEmpty( $styles, 'no bar styles found on disk' );
@@ -311,7 +311,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		Polls_Options::set( 'bar.background', 'aabbcc' );
 		Polls_Options::set( 'bar.border', 'ddeeff' );
 
-		$html = $this->render_admin_page( 'polls-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
 		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_bg"[^>]*value="#aabbcc"/', $html );
 		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_border"[^>]*value="#ddeeff"/', $html );
@@ -338,7 +338,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$style  = end( $styles );
 		Polls_Options::set( 'bar.style', $style );
 
-		$html = $this->render_admin_page( 'polls-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
 		$this->assertMatchesRegularExpression(
 			'/id="poll_bar_style-' . preg_quote( $style, '/' ) . '"[^>]*\schecked/',
@@ -352,7 +352,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_add_renders_answer_fields() {
-		$html = $this->render_admin_page( 'polls-add.php' );
+		$html = $this->render_admin_page( 'includes/screen-add.php' );
 
 		$this->assertStringContainsString( 'name="polla_answers[]"', $html );
 		$this->assertStringContainsString( 'name="pollq_question"', $html );
@@ -367,7 +367,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_templates_posts_to_the_right_settings_group() {
-		$html = $this->render_admin_page( 'polls-templates.php' );
+		$html = $this->render_admin_page( 'includes/screen-templates.php' );
 
 		$this->assertStringContainsString( 'action="options.php"', $html );
 		$this->assertStringContainsString( "value='" . Polls_Settings::GROUP . "'", $html );
@@ -379,7 +379,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_options_posts_to_the_right_settings_group() {
-		$html = $this->render_admin_page( 'polls-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
 		$this->assertStringContainsString( 'action="options.php"', $html );
 		$this->assertStringContainsString( "value='" . Polls_Settings::GROUP . "'", $html );
@@ -393,7 +393,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	public function test_manage_renders_a_list_table_with_row_actions() {
 		$poll_id = $this->make_poll( array( 'pollq_question' => 'Listed poll' ) );
 
-		$html = $this->render_admin_page( 'polls-manager.php' );
+		$html = $this->render_admin_page( 'includes/screen-manage.php' );
 
 		$this->assertStringContainsString( 'class="wp-list-table', $html );
 		$this->assertStringContainsString( '<tr id="poll-' . $poll_id . '"', $html );
@@ -418,8 +418,8 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 			);
 		}
 
-		$first  = $this->render_admin_page( 'polls-manager.php' );
-		$second = $this->render_admin_page( 'polls-manager.php', array( 'paged' => '2' ) );
+		$first  = $this->render_admin_page( 'includes/screen-manage.php' );
+		$second = $this->render_admin_page( 'includes/screen-manage.php', array( 'paged' => '2' ) );
 
 		$this->assertSame( Polls_List_Table::PER_PAGE, substr_count( $first, '<tr id="poll-' ) );
 		$this->assertSame( 3, substr_count( $second, '<tr id="poll-' ) );
@@ -464,7 +464,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$answers = $this->answer_ids( $poll_id );
 
 		$html = $this->render_admin_page(
-			'polls-manager.php',
+			'includes/screen-manage.php',
 			array(
 				'mode' => 'edit',
 				'id'   => (string) $poll_id,
@@ -499,7 +499,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$this->make_vote_log( $poll_id, $answers[0], 'Registered Voter', 7 );
 
 		$html = $this->render_admin_page(
-			'polls-manager.php',
+			'includes/screen-manage.php',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -528,7 +528,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 
 		add_filter( 'wp_polls_log_show_log_filter', '__return_false' );
 		$html = $this->render_admin_page(
-			'polls-manager.php',
+			'includes/screen-manage.php',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -551,7 +551,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		$this->make_vote_log( $poll_id, 0, 'Guest' );
 
 		$html = $this->render_admin_page(
-			'polls-manager.php',
+			'includes/screen-manage.php',
 			array(
 				'mode' => 'logs',
 				'id'   => (string) $poll_id,
@@ -573,7 +573,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_settings_screens_contain_no_hand_written_form_markup() {
-		foreach ( array( 'polls-options.php', 'polls-templates.php' ) as $file ) {
+		foreach ( array( 'includes/screen-options.php', 'includes/screen-templates.php' ) as $file ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a file from the plugin under test, not a remote resource.
 			$source = file_get_contents( WP_POLLS_DIR . $file );
 
@@ -595,7 +595,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 		// settings_fields() and submit_button() contribute these.
 		$allowed = array( '_wpnonce', '_wp_http_referer', 'option_page', 'action', 'submit' );
 
-		foreach ( array( 'polls-options.php', 'polls-templates.php' ) as $file ) {
+		foreach ( array( 'includes/screen-options.php', 'includes/screen-templates.php' ) as $file ) {
 			$html = $this->render_admin_page( $file );
 
 			preg_match_all( '/\sname="([^"]+)"/', $html, $matches );
@@ -619,7 +619,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	public function test_options_renders_every_registered_section() {
 		global $wp_settings_sections;
 
-		$html = $this->render_admin_page( 'polls-options.php' );
+		$html = $this->render_admin_page( 'includes/screen-options.php' );
 
 		foreach ( $wp_settings_sections[ Polls_Settings::PAGE_OPTIONS ] as $section ) {
 			// Matched loosely on purpose: do_settings_sections() gained an id
@@ -640,7 +640,7 @@ class Test_Polls_Admin_Pages extends WP_Polls_TestCase {
 	public function test_templates_renders_stored_template() {
 		Polls_Options::set( 'templates.voteheader', '<p>CUSTOM HEADER</p>' );
 
-		$html = $this->render_admin_page( 'polls-templates.php' );
+		$html = $this->render_admin_page( 'includes/screen-templates.php' );
 
 		$this->assertStringContainsString( 'CUSTOM HEADER', $html );
 	}

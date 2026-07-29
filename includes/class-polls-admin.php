@@ -29,21 +29,54 @@ class Polls_Admin {
 	}
 
 	/**
-	 * The hook suffixes WordPress reports for this plugin's own admin screens.
+	 * The page slugs this plugin registers, in menu order.
 	 *
-	 * The logs screen is absent on purpose: polls-logs.php renders inside
-	 * polls-manager.php under mode=logs, so it arrives with the manager's
-	 * hook suffix.
+	 * The logs screen is absent on purpose: screen-logs.php renders inside
+	 * screen-manage.php under mode=logs, so it has no slug of its own.
+	 *
+	 * @return array
+	 */
+	public static function page_slugs() {
+		return array( 'wp-polls', 'wp-polls-add', 'wp-polls-options', 'wp-polls-templates' );
+	}
+
+	/**
+	 * The hook suffix WordPress reports for one of this plugin's page slugs.
+	 *
+	 * Derived rather than captured from add_submenu_page(), so it can be asked
+	 * for before 'admin_menu' has run - the notice on 'admin_notices' and the
+	 * enqueue on 'admin_enqueue_scripts' both need it, and so do the tests,
+	 * which never build a menu at all. WordPress names a submenu screen after
+	 * the sanitised title of its parent menu, which is why that title is read
+	 * from one place here rather than written out twice.
+	 *
+	 * @param string $slug Page slug.
+	 * @return string
+	 */
+	public static function hook_suffix( $slug ) {
+		if ( 'wp-polls' === $slug ) {
+			return 'toplevel_page_wp-polls';
+		}
+
+		return sanitize_title( self::menu_title() ) . '_page_' . $slug;
+	}
+
+	/**
+	 * The top level menu's title, which also names every submenu's hook suffix.
+	 *
+	 * @return string
+	 */
+	public static function menu_title() {
+		return __( 'Polls', 'wp-polls' );
+	}
+
+	/**
+	 * The hook suffixes WordPress reports for this plugin's own admin screens.
 	 *
 	 * @return array
 	 */
 	public static function admin_pages() {
-		return array(
-			WP_POLLS_SLUG . '/polls-manager.php',
-			WP_POLLS_SLUG . '/polls-add.php',
-			WP_POLLS_SLUG . '/polls-options.php',
-			WP_POLLS_SLUG . '/polls-templates.php',
-		);
+		return array_map( array( __CLASS__, 'hook_suffix' ), self::page_slugs() );
 	}
 
 	// Function: Poll Administration Menu.
@@ -54,14 +87,61 @@ class Polls_Admin {
 	 * @return mixed
 	 */
 	public static function poll_menu() {
-		$manager = WP_POLLS_SLUG . '/polls-manager.php';
+		$capability = self::capability();
+		$menu_title = self::menu_title();
 
-		add_menu_page( __( 'Polls', 'wp-polls' ), __( 'Polls', 'wp-polls' ), 'manage_polls', $manager, '', 'dashicons-chart-bar' );
+		add_menu_page( $menu_title, $menu_title, $capability, 'wp-polls', array( __CLASS__, 'render_manage' ), 'dashicons-chart-bar' );
 
-		add_submenu_page( $manager, __( 'Manage Polls', 'wp-polls' ), __( 'Manage Polls', 'wp-polls' ), 'manage_polls', $manager );
-		add_submenu_page( $manager, __( 'Add Poll', 'wp-polls' ), __( 'Add Poll', 'wp-polls' ), 'manage_polls', WP_POLLS_SLUG . '/polls-add.php' );
-		add_submenu_page( $manager, __( 'Poll Options', 'wp-polls' ), __( 'Poll Options', 'wp-polls' ), 'manage_polls', WP_POLLS_SLUG . '/polls-options.php' );
-		add_submenu_page( $manager, __( 'Poll Templates', 'wp-polls' ), __( 'Poll Templates', 'wp-polls' ), 'manage_polls', WP_POLLS_SLUG . '/polls-templates.php' );
+		add_submenu_page( 'wp-polls', __( 'Manage Polls', 'wp-polls' ), __( 'Manage Polls', 'wp-polls' ), $capability, 'wp-polls', array( __CLASS__, 'render_manage' ) );
+		add_submenu_page( 'wp-polls', __( 'Add Poll', 'wp-polls' ), __( 'Add Poll', 'wp-polls' ), $capability, 'wp-polls-add', array( __CLASS__, 'render_add' ) );
+		add_submenu_page( 'wp-polls', __( 'Poll Options', 'wp-polls' ), __( 'Poll Options', 'wp-polls' ), $capability, 'wp-polls-options', array( __CLASS__, 'render_options' ) );
+		add_submenu_page( 'wp-polls', __( 'Poll Templates', 'wp-polls' ), __( 'Poll Templates', 'wp-polls' ), $capability, 'wp-polls-templates', array( __CLASS__, 'render_templates' ) );
+	}
+
+	/**
+	 * The capability every screen and every write path checks.
+	 *
+	 * @param string $context What the capability is being checked for.
+	 * @return string
+	 */
+	public static function capability( $context = 'screen' ) {
+		return apply_filters( 'wp_polls_capability', 'manage_polls', $context );
+	}
+
+	/**
+	 * Render the Manage Polls screen.
+	 *
+	 * @return void
+	 */
+	public static function render_manage() {
+		require WP_POLLS_DIR . 'includes/screen-manage.php';
+	}
+
+	/**
+	 * Render the Add Poll screen.
+	 *
+	 * @return void
+	 */
+	public static function render_add() {
+		require WP_POLLS_DIR . 'includes/screen-add.php';
+	}
+
+	/**
+	 * Render the Poll Options screen.
+	 *
+	 * @return void
+	 */
+	public static function render_options() {
+		require WP_POLLS_DIR . 'includes/screen-options.php';
+	}
+
+	/**
+	 * Render the Poll Templates screen.
+	 *
+	 * @return void
+	 */
+	public static function render_templates() {
+		require WP_POLLS_DIR . 'includes/screen-templates.php';
 	}
 
 	// Function: Enqueue Polls Stylesheets/JavaScripts In WP-Admin.
@@ -75,19 +155,19 @@ class Polls_Admin {
 	 */
 	public static function poll_scripts_admin( $hook_suffix ) {
 		if ( in_array( $hook_suffix, self::admin_pages(), true ) ) {
-			wp_enqueue_style( 'wp-polls-admin', WP_POLLS_URL . 'polls-admin-css.css', false, WP_POLLS_VERSION, 'all' );
+			wp_enqueue_style( 'wp-polls-admin', WP_POLLS_URL . 'css/wp-polls-admin.css', array(), WP_POLLS_VERSION );
 			// The Poll Options screen previews the bar using the real front end
 			// markup, so it loads the real front end rules rather than keeping a
 			// second copy of them in the admin stylesheet to drift out of sync.
-			// Always the plugin's own copy: a theme override of polls-css.css
+			// Always the plugin's own copy: a theme override of wp-polls.css
 			// would make the preview show the theme's bar, not the setting.
-			if ( WP_POLLS_SLUG . '/polls-options.php' === $hook_suffix ) {
-				wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'polls-css.css', false, WP_POLLS_VERSION, 'all' );
+			if ( self::hook_suffix( 'wp-polls-options' ) === $hook_suffix ) {
+				wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'css/wp-polls.css', array(), WP_POLLS_VERSION );
 			}
-			wp_enqueue_script( 'wp-polls-admin', WP_POLLS_URL . 'polls-admin-js.js', array(), WP_POLLS_VERSION, true );
+			wp_enqueue_script( 'wp-polls-admin', WP_POLLS_URL . 'js/wp-polls-admin.js', array(), WP_POLLS_VERSION, true );
 			wp_localize_script(
 				'wp-polls-admin',
-				'pollsAdminL10n',
+				'wpPollsAdminL10n',
 				array(
 					'admin_ajax_url'                 => admin_url( 'admin-ajax.php' ),
 					'text_delete_poll'               => __( 'Delete Poll', 'wp-polls' ),
@@ -286,7 +366,7 @@ class Polls_Admin {
 		// Every branch below is an administrative action. The per-action nonces are
 		// only ever rendered on pages that already require 'manage_polls', but check
 		// the capability itself rather than relying on the nonce for authorisation.
-		if ( ! current_user_can( 'manage_polls' ) ) {
+		if ( ! current_user_can( Polls_Admin::capability() ) ) {
 			wp_die( '', '', array( 'response' => null ) );
 		}
 

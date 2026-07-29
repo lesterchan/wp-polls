@@ -3,7 +3,7 @@
  * Settings API registration for the Poll Options and Poll Templates screens.
  *
  * Both screens are built entirely out of add_settings_section() and
- * add_settings_field(): polls-options.php and polls-templates.php open the
+ * add_settings_field(): screen-options.php and screen-templates.php open the
  * form, call do_settings_sections() and close it, so every row on both screens
  * is declared here rather than written out as hand rolled table markup.
  *
@@ -774,7 +774,7 @@ class Polls_Settings {
 		foreach ( self::bar_styles() as $style ) {
 			// Each swatch is the real bar markup with only the image property
 			// overridden, so what is offered is what is rendered. No height here:
-			// polls-admin-css.css fixes the swatches at a size the gradient is
+			// css/wp-polls-admin.css fixes the swatches at a size the gradient is
 			// actually visible at.
 			$swatch = sprintf(
 				'--wp-polls-bar-background: #%1$s; --wp-polls-bar-border: #%2$s; --wp-polls-bar-image: %3$s;',

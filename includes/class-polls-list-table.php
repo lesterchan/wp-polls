@@ -333,7 +333,7 @@ class Polls_List_Table extends WP_List_Table {
 	 * @return string
 	 */
 	public static function page_url( $args = array(), $poll_id = 0 ) {
-		$args = array_merge( array( 'page' => WP_POLLS_SLUG . '/polls-manager.php' ), $args );
+		$args = array_merge( array( 'page' => 'wp-polls' ), $args );
 
 		if ( $poll_id ) {
 			$args['id'] = (int) $poll_id;

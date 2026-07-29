@@ -6,14 +6,19 @@
  * of one poll. The list is a WP_List_Table; the other two are ordinary
  * form-table forms that post back here.
  *
+ * Required from WP_Polls_Admin::render_manage(), so the globals wp-admin used
+ * to have in scope for a plugin page file are pulled in explicitly.
+ *
  * @package WP-Polls
  */
 
 defined( 'ABSPATH' ) || exit;
 
+global $wpdb;
+
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( 'manage_polls' ) ) {
-	die( 'Access Denied' );
+if ( ! current_user_can( Polls_Admin::capability() ) ) {
+	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 
 // Loaded here rather than from the plugin bootstrap: WP_List_Table only exists
@@ -21,8 +26,6 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 require_once WP_POLLS_DIR . 'includes/class-polls-list-table.php';
 
 // Variables Variables Variables.
-$base_name = WP_POLLS_SLUG . '/polls-manager.php';
-$base_page = 'admin.php?page=' . $base_name;
 $poll_mode = isset( $_GET['mode'] ) ? sanitize_key( wp_unslash( $_GET['mode'] ) ) : '';
 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Selects which poll to display; the write paths below verify their own nonces.
 $poll_id  = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
@@ -214,7 +217,7 @@ if ( ! empty( $_POST['do'] ) ) {
 switch ( $poll_mode ) {
 	// Poll Logging.
 	case 'logs':
-		require 'polls-logs.php';
+		require __DIR__ . '/screen-logs.php';
 		break;
 	// Edit A Poll.
 	case 'edit':
@@ -404,7 +407,7 @@ switch ( $poll_mode ) {
 		?>
 		<div class="wrap">
 			<h1 class="wp-heading-inline"><?php esc_html_e( 'Manage Polls', 'wp-polls' ); ?></h1>
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . WP_POLLS_SLUG . '/polls-add.php' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add Poll', 'wp-polls' ); ?></a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-polls-add' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add Poll', 'wp-polls' ); ?></a>
 			<hr class="wp-header-end" />
 
 			<!-- Where the AJAX actions report what they did. -->

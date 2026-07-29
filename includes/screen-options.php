@@ -14,8 +14,8 @@
 defined( 'ABSPATH' ) || exit;
 
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( 'manage_polls' ) ) {
-	die( 'Access Denied' );
+if ( ! current_user_can( Polls_Admin::capability() ) ) {
+	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 ?>
 <script type="text/javascript">
@@ -48,7 +48,7 @@ if ( ! current_user_can( 'manage_polls' ) ) {
 		}
 		// The swatches follow the colours too, so the two styles stay comparable
 		// while the fields are being edited. Their height stays fixed: it is set
-		// in polls-admin-css.css so the gradient is visible at any bar height.
+		// in css/wp-polls-admin.css so the gradient is visible at any bar height.
 		var swatches = document.querySelectorAll(".wp-polls-swatch");
 		for(var i = 0; i < swatches.length; i++) {
 			swatches[i].style.setProperty("--wp-polls-bar-background", pollbar_background);

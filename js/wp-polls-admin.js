@@ -8,7 +8,7 @@
 ( function() {
 	'use strict';
 
-	const pollsAdminL10n = window.pollsAdminL10n || {};
+	const l10n = window.wpPollsAdminL10n || {};
 
 	let globalPollId = 0;
 	let globalPollAid = 0;
@@ -25,7 +25,7 @@
 			body.append( name, fields[ name ] );
 		} );
 
-		fetch( pollsAdminL10n.admin_ajax_url, {
+		fetch( l10n.admin_ajax_url, {
 			method: 'POST',
 			credentials: 'same-origin',
 			cache: 'no-cache',
@@ -64,7 +64,7 @@
 	function pollClearLogsPanel() {
 		const logs = document.getElementById( 'poll_logs' );
 		if ( logs ) {
-			logs.textContent = pollsAdminL10n.text_no_poll_logs;
+			logs.textContent = l10n.text_no_poll_logs;
 		}
 	}
 
@@ -76,7 +76,7 @@
 		globalPollId = pollId;
 		pollAdminRequest(
 			{
-				do: pollsAdminL10n.text_delete_poll,
+				do: l10n.text_delete_poll,
 				pollq_id: pollId,
 				_ajax_nonce: nonce,
 			},
@@ -92,12 +92,12 @@
 			return;
 		}
 		if ( ! pollDeleteLogsConfirmed() ) {
-			alert( pollsAdminL10n.text_checkbox_delete_all_logs );
+			alert( l10n.text_checkbox_delete_all_logs );
 			return;
 		}
 		pollAdminRequest(
 			{
-				do: pollsAdminL10n.text_delete_all_logs,
+				do: l10n.text_delete_all_logs,
 				delete_logs_yes: 'yes',
 				_ajax_nonce: nonce,
 			},
@@ -111,13 +111,13 @@
 			return;
 		}
 		if ( ! pollDeleteLogsConfirmed() ) {
-			alert( pollsAdminL10n.text_checkbox_delete_poll_logs );
+			alert( l10n.text_checkbox_delete_poll_logs );
 			return;
 		}
 		globalPollId = pollId;
 		pollAdminRequest(
 			{
-				do: pollsAdminL10n.text_delete_poll_logs,
+				do: l10n.text_delete_poll_logs,
 				pollq_id: pollId,
 				delete_logs_yes: 'yes',
 				_ajax_nonce: nonce,
@@ -149,7 +149,7 @@
 		tempVoteCount = 0;
 		pollAdminRequest(
 			{
-				do: pollsAdminL10n.text_delete_poll_ans,
+				do: l10n.text_delete_poll_ans,
 				pollq_id: pollId,
 				polla_aid: pollAid,
 				_ajax_nonce: nonce,
@@ -193,7 +193,7 @@
 		globalPollId = pollId;
 		pollAdminRequest(
 			{
-				do: pollsAdminL10n.text_open_poll,
+				do: l10n.text_open_poll,
 				pollq_id: pollId,
 				_ajax_nonce: nonce,
 			},
@@ -211,7 +211,7 @@
 		globalPollId = pollId;
 		pollAdminRequest(
 			{
-				do: pollsAdminL10n.text_close_poll,
+				do: l10n.text_close_poll,
 				pollq_id: pollId,
 				_ajax_nonce: nonce,
 			},
@@ -234,7 +234,7 @@
 
 		const headers = document.querySelectorAll( '#poll_answers tr > th' );
 		Array.prototype.forEach.call( headers, function( header, index ) {
-			header.textContent = pollsAdminL10n.text_answer + ' ' + ( index + 1 );
+			header.textContent = l10n.text_answer + ' ' + ( index + 1 );
 
 			const option = document.createElement( 'option' );
 			option.value = index + 1;
@@ -297,7 +297,7 @@
 		const removeButton = document.createElement( 'button' );
 		removeButton.type = 'button';
 		removeButton.className = 'button';
-		removeButton.textContent = pollsAdminL10n.text_remove_poll_answer;
+		removeButton.textContent = l10n.text_remove_poll_answer;
 		removeButton.addEventListener( 'click', onRemove );
 		answerCell.appendChild( removeButton );
 		row.appendChild( answerCell );

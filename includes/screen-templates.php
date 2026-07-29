@@ -14,8 +14,8 @@
 defined( 'ABSPATH' ) || exit;
 
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( 'manage_polls' ) ) {
-	die( 'Access Denied' );
+if ( ! current_user_can( Polls_Admin::capability() ) ) {
+	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 ?>
 <script type="text/javascript">

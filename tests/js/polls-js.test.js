@@ -23,7 +23,7 @@ beforeAll( () => {
 		text_valid: 'Please choose a valid poll answer.',
 		text_multiple: 'Maximum number of choices allowed:',
 	};
-	loadScript( 'polls-js.js' );
+	loadScript( 'js/wp-polls.js' );
 } );
 
 beforeEach( () => {

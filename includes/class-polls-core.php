@@ -33,10 +33,10 @@ class Polls_Core {
 	 * @return mixed
 	 */
 	public static function poll_scripts() {
-		if ( file_exists( get_stylesheet_directory() . '/polls-css.css' ) ) {
-			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/polls-css.css', false, WP_POLLS_VERSION, 'all' );
+		if ( file_exists( get_stylesheet_directory() . '/wp-polls.css' ) ) {
+			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/wp-polls.css', array(), WP_POLLS_VERSION );
 		} else {
-			wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'polls-css.css', false, WP_POLLS_VERSION, 'all' );
+			wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'css/wp-polls.css', array(), WP_POLLS_VERSION );
 		}
 		$pollbar = Polls_Options::get( 'bar' );
 		// This lands in an inline <style> block on every front end page, so never
@@ -45,7 +45,7 @@ class Polls_Core {
 		$pollbar_background = self::sanitize_bar_color( $pollbar['background'] );
 		$pollbar_border     = self::sanitize_bar_color( $pollbar['border'] );
 		// Only the configured values are emitted here. The rules that consume
-		// them live in polls-css.css, which is why this no longer branches on the
+		// them live in css/wp-polls.css, which is why this no longer branches on the
 		// bar style: every style is now a difference in these four values.
 		$pollbar_css  = '.wp-polls {' . "\n";
 		$pollbar_css .= "\t" . '--wp-polls-bar-height: ' . $pollbar_height . 'px;' . "\n";
@@ -55,10 +55,10 @@ class Polls_Core {
 		$pollbar_css .= '}' . "\n";
 		wp_add_inline_style( 'wp-polls', $pollbar_css );
 		$poll_ajax_style = Polls_Options::get( 'ajax' );
-		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'polls-js.js', array(), WP_POLLS_VERSION, true );
+		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'js/wp-polls.js', array(), WP_POLLS_VERSION, true );
 		wp_localize_script(
 			'wp-polls',
-			'pollsL10n',
+			'wpPollsL10n',
 			array(
 				'ajax_url'      => admin_url( 'admin-ajax.php' ),
 				'text_wait'     => __( 'Your last request is still being processed. Please wait a while ...', 'wp-polls' ),

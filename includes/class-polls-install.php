@@ -226,7 +226,7 @@ class Polls_Install {
 			return;
 		}
 
-		if ( ! current_user_can( 'manage_polls' ) || ! self::templates_have_onclick() ) {
+		if ( ! current_user_can( Polls_Admin::capability() ) || ! self::templates_have_onclick() ) {
 			return;
 		}
 
@@ -236,7 +236,7 @@ class Polls_Install {
 		printf(
 			/* translators: %s: value. */
 			wp_kses_post( __( 'Open <a href="%s">Poll Templates</a> and press <strong>Restore Default Template</strong> on the Voting Form Footer and Result Footer, or replace the handler yourself with <code>data-poll-id="%%POLL_ID%%"</code> and <code>data-poll-action="vote"</code> (or <code>result</code> / <code>booth</code>).', 'wp-polls' ) ),
-			esc_url( admin_url( 'admin.php?page=wp-polls/polls-templates.php' ) )
+			esc_url( admin_url( 'admin.php?page=wp-polls-templates' ) )
 		);
 		echo '</p></div>';
 	}

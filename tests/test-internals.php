@@ -322,9 +322,9 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	/**
 	 * The bar settings become custom properties, not rules.
 	 *
-	 * The rules that consume them live in polls-css.css. Only the configured
+	 * The rules that consume them live in css/wp-polls.css. Only the configured
 	 * values are inline, which is what makes the bar restyleable from a theme
-	 * stylesheet rather than by copying polls-css.css into the theme.
+	 * stylesheet rather than by copying css/wp-polls.css into the theme.
 	 *
 	 * @return void
 	 */
@@ -406,7 +406,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 	/**
 	 * One stylesheet serves both directions.
 	 *
-	 * The old polls-css-rtl.css existed only to flip text-align and swap a margin.
+	 * The old wp-polls-rtl.css existed only to flip text-align and swap a margin.
 	 * Logical properties do that on their own, so there is no second file and
 	 * no separate handle to enqueue.
 	 *
@@ -417,9 +417,9 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ) );
 		$this->assertFalse( wp_style_is( 'wp-polls-rtl', 'enqueued' ), 'the RTL handle is back' );
-		$this->assertFileDoesNotExist( WP_POLLS_DIR . 'polls-css-rtl.css' );
+		$this->assertFileDoesNotExist( WP_POLLS_DIR . 'wp-polls-rtl.css' );
 
-		$css = file_get_contents( WP_POLLS_DIR . 'polls-css.css' );
+		$css = file_get_contents( WP_POLLS_DIR . 'css/wp-polls.css' );
 
 		// A physical direction here is what would need a second file again.
 		$this->assertStringNotContainsString( 'text-align: left', $css );
@@ -652,7 +652,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 
 		$this->become_poll_admin();
 		Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
-		$hook_suffix = WP_POLLS_SLUG . '/polls-manager.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
+		$hook_suffix = Polls_Admin::hook_suffix( 'wp-polls' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
 
 		ob_start();
 		Polls_Install::onclick_notice();
@@ -690,7 +690,7 @@ class Test_Polls_Internals extends WP_Polls_TestCase {
 
 		Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
-		$hook_suffix = WP_POLLS_SLUG . '/polls-manager.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
+		$hook_suffix = Polls_Admin::hook_suffix( 'wp-polls' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The notice reads this global.
 
 		ob_start();
 		Polls_Install::onclick_notice();

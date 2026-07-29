@@ -2,17 +2,23 @@
 /**
  * Add Poll admin screen.
  *
+ * Required from WP_Polls_Admin::render_add(), so the globals wp-admin used to
+ * have in scope for a plugin page file are pulled in explicitly.
+ *
  * @package WP-Polls
  */
 
+defined( 'ABSPATH' ) || exit;
+
+global $wpdb;
+
 // Check Whether User Can Manage Polls.
-if ( ! current_user_can( 'manage_polls' ) ) {
-	die( 'Access Denied' );
+if ( ! current_user_can( Polls_Admin::capability() ) ) {
+	wp_die( esc_html__( 'Sorry, you are not allowed to manage polls.', 'wp-polls' ), '', array( 'response' => 403 ) );
 }
 
 // Poll Manager.
-$base_name = WP_POLLS_SLUG . '/polls-manager.php';
-$base_page = 'admin.php?page=' . $base_name;
+$base_page = admin_url( 'admin.php?page=wp-polls' );
 
 // Form Processing.
 if ( ! empty( $_POST['do'] ) ) {
@@ -147,7 +153,7 @@ $poll_noquestion = 2;
 		echo wp_kses_post( '<div id="message" class="notice notice-success is-dismissible">' . removeslashes( $text ) . '</div>' );
 	}
 	?>
-	<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . WP_POLLS_SLUG . '/polls-add.php' ) ); ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=wp-polls-add' ) ); ?>">
 		<?php wp_nonce_field( 'wp-polls_add-poll' ); ?>
 
 		<h2><?php esc_html_e( 'Poll Question', 'wp-polls' ); ?></h2>
@@ -227,7 +233,7 @@ $poll_noquestion = 2;
 
 		<p class="submit">
 			<?php submit_button( __( 'Add Poll', 'wp-polls' ), 'primary', 'do', false ); ?>
-			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=' . WP_POLLS_SLUG . '/polls-manager.php' ) ); ?>"><?php esc_html_e( 'Cancel', 'wp-polls' ); ?></a>
+			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=wp-polls' ) ); ?>"><?php esc_html_e( 'Cancel', 'wp-polls' ); ?></a>
 		</p>
 	</form>
 </div>
