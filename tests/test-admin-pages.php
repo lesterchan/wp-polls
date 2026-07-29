@@ -28,6 +28,13 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function set_up() {
 		parent::set_up();
 		$this->become_poll_admin();
+
+		// The list table is loaded by the menu callback that renders Manage
+		// Polls, because WP_List_Table only exists inside wp-admin. A test run
+		// on its own with --filter has not been through that callback, so a
+		// reference to WP_Polls_List_Table::PER_PAGE below would fatal purely
+		// because of the order the tests happened to run in.
+		require_once WP_POLLS_DIR . 'includes/class-wp-polls-list-table.php';
 	}
 
 	/**
