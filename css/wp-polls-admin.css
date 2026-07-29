@@ -54,10 +54,12 @@ input.wp-polls-votes {
 }
 
 /* The poll the site is currently showing, highlighted in the Manage Polls
-   list the way the active row is elsewhere in wp-admin. */
+   list the way the active row is elsewhere in wp-admin. The fallback is core's
+   own highlight; the property is there so an admin colour scheme can change
+   it. */
 .wp-list-table tr.wp-polls-displayed td,
 .wp-list-table tr.wp-polls-displayed th {
-	background-color: #f0f6fc;
+	background-color: var(--wp-polls-admin-highlight, #f0f6fc);
 }
 
 /* The two poll bar colour fields. Browsers size a colour input like a small

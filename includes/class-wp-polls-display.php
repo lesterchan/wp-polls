@@ -882,7 +882,7 @@ class WP_Polls_Display {
 			if ( function_exists( 'wp_pagenavi' ) ) {
 				$pollsarchive_output_archive .= '<div class="wp-pagenavi">' . "\n";
 			} else {
-				$pollsarchive_output_archive .= '<div class="wp-polls-paging">' . "\n";
+				$pollsarchive_output_archive .= '<div class="wp-polls wp-polls-paging">' . "\n";
 			}
 			/* translators: 1: value, 2: value. */
 			$pollsarchive_output_archive .= '<span class="pages">&#8201;' . sprintf( __( 'Page %1$s of %2$s', 'wp-polls' ), esc_html( number_format_i18n( $page ) ), esc_html( number_format_i18n( $max_page ) ) ) . '&#8201;</span>';

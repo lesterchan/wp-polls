@@ -1,58 +1,64 @@
-/*
-+----------------------------------------------------------------+
-|																							|
-|	WordPress Plugin: WP-Polls										|
-|	Copyright (c) 2012 Lester "GaMerZ" Chan									|
-|																							|
-|	File Written By:																	|
-|	- Lester "GaMerZ" Chan															|
-|	- http://lesterchan.net															|
-|																							|
-|	File Information:																	|
-|	- Polls CSS File																	|
-|	- wp-content/plugins/wp-polls/polls-css.css								|
-|																							|
-+----------------------------------------------------------------+
-*/
+/**
+ * WP-Polls front end.
+ *
+ * Everything is scoped under the .wp-polls root class the plugin puts on the
+ * outermost element of every block it renders, and nothing here sets a font or
+ * a text colour: a poll is part of the page it sits in, so it inherits.
+ *
+ * The custom properties are the supported way to restyle a poll. Set them in
+ * your own stylesheet rather than copying this file into your theme, and an
+ * upgrade cannot take your changes away:
+ *
+ *   --wp-polls-bar-height        height of the result bar
+ *   --wp-polls-bar-background    its fill colour
+ *   --wp-polls-bar-border        its border colour
+ *   --wp-polls-bar-image         a background-image layered over the fill
+ *   --wp-polls-bar-radius        its corner radius
+ *   --wp-polls-border            colour of the button and paging borders
+ *   --wp-polls-surface           background of the vote button
+ *
+ * The fallback after each var() is what the settings screen ships with, so a
+ * poll still renders if the inline block carrying the settings is filtered out.
+ */
 
-
-.wp-polls-archive {
-	/* background-color: #ffffff; */
-}
-.wp-polls, .wp-polls-form {
-	/* background-color: #ffffff; */
-}
-.wp-polls ul li, .wp-polls-ul li, .wp-polls-ans ul li {
-	text-align: start;
-	background-image: none;
-	display: block;
-}
-.wp-polls ul, .wp-polls-ul, .wp-polls-ans ul  {
+/* Poll answers. The list markers are cleared because a poll is a form, not
+   prose, and themes commonly style li::before in a way that lands in the
+   middle of an answer. */
+.wp-polls ul,
+.wp-polls-ul,
+.wp-polls-ans ul {
 	text-align: start;
 	list-style: none;
 	float: none;
 }
-.wp-polls ul li:before, .wp-polls-ans ul li:before, #sidebar ul ul li:before {
+.wp-polls ul li,
+.wp-polls-ul li,
+.wp-polls-ans ul li {
+	text-align: start;
+	background-image: none;
+	display: block;
+}
+.wp-polls ul li::before,
+.wp-polls-ans ul li::before {
 	content: '';
 }
-.wp-polls label, .wp-polls input {
+.wp-polls label,
+.wp-polls input {
 	display: inline;
-	border: 0px;
-	padding: 0px;
-	margin: 0px;
+	border: 0;
+	padding: 0;
+	margin: 0;
 }
 .wp-polls-ul {
-	padding: 0px;
-	margin-block: 0px 10px;
-	margin-inline: 10px 0px;
+	padding: 0;
+	margin-block: 0 10px;
+	margin-inline: 10px 0;
 }
 .wp-polls-ans {
-	width:100%;
-	filter: alpha(opacity=100);
-	-moz-opacity: 1;
-	opacity: 1;
-	/* background-color: #ffffff; */
+	width: 100%;
 }
+
+/* The AJAX placeholder, hidden until a request is in flight. */
 .wp-polls-loading {
 	display: none;
 	text-align: center;
@@ -86,12 +92,9 @@
 		opacity: 0.4;
 	}
 }
-/* Poll Result Bar */
-/* The four custom properties carry the Poll Options settings and are the
-   supported way to restyle the bar - set them in your own stylesheet rather
-   than copying this file into your theme. The fallbacks after each var() are
-   what the settings screen ships with, so the bar still renders if the inline
-   block is filtered out. */
+
+/* The result bar: a track holding a fill, so a unanimous answer can render at
+   a true 100% without its own border overflowing the track. */
 .wp-polls .wp-polls-bar {
 	box-sizing: border-box;
 	width: 100%;
@@ -112,7 +115,9 @@
 	transform-origin: left center;
 	animation: wp-polls-bar-grow 0.45s ease-out;
 }
-/* transform has no logical-property equivalent, so the RTL origin is explicit. */
+/* transform-origin has no logical keywords - the property predates them and
+   Transforms Level 2 still only takes left/right - so this one direction rule
+   is written out rather than avoided. */
 [dir="rtl"] .wp-polls .wp-polls-bar-fill {
 	transform-origin: right center;
 }
@@ -129,59 +134,32 @@
 		animation: none;
 	}
 }
+
+/* The vote button. Both colours are properties rather than fixed values, and
+   both fall back to something derived from the text colour, so the button is
+   still visible on a theme that paints a dark background. */
 .wp-polls .Buttons {
-	border:1px solid #c8c8c8;
-	background-color: #f3f6f8;
+	border: 1px solid var(--wp-polls-border, currentColor);
+	background-color: var(--wp-polls-surface, transparent);
+	color: inherit;
 }
-/* Polls Archive Paging */
-.wp-polls-paging a, .wp-polls-paging a:link {
-	padding: 2px 4px 2px 4px; 
+
+/* Polls archive paging. currentColor throughout: the page decides what colour
+   text is, and these are links in that text. */
+.wp-polls-paging a,
+.wp-polls-paging span {
+	padding: 2px 4px;
 	margin: 2px;
+	border: 1px solid var(--wp-polls-border, currentColor);
+	color: inherit;
+}
+.wp-polls-paging a {
 	text-decoration: none;
-	border: 1px solid #0066cc;
-	color: #0066cc;
-	background-color: #FFFFFF;	
 }
-.wp-polls-paging a:visited {
-	padding: 2px 4px 2px 4px; 
-	margin: 2px;
-	text-decoration: none;
-	border: 1px solid #0066cc;
-	color: #0066cc;
-	background-color: #FFFFFF;	
-}
-.wp-polls-paging a:hover {	
-	border: 1px solid #000000;
-	color: #000000;
-	background-color: #FFFFFF;
-}
-.wp-polls-paging a:active {
-	padding: 2px 4px 2px 4px; 
-	margin: 2px;
-	text-decoration: none;
-	border: 1px solid #0066cc;
-	color: #0066cc;
-	background-color: #FFFFFF;	
-}
-.wp-polls-paging span.pages {
-	padding: 2px 4px 2px 4px; 
-	margin: 2px 2px 2px 2px;
-	color: #000000;
-	border: 1px solid #000000;
-	background-color: #FFFFFF;
+.wp-polls-paging a:hover,
+.wp-polls-paging a:focus {
+	text-decoration: underline;
 }
 .wp-polls-paging span.current {
-	padding: 2px 4px 2px 4px; 
-	margin: 2px;
 	font-weight: bold;
-	border: 1px solid #000000;
-	color: #000000;
-	background-color: #FFFFFF;
-}
-.wp-polls-paging span.extend {
-	padding: 2px 4px 2px 4px; 
-	margin: 2px;	
-	border: 1px solid #000000;
-	color: #000000;
-	background-color: #FFFFFF;
 }

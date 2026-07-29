@@ -417,15 +417,51 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ) );
 		$this->assertFalse( wp_style_is( 'wp-polls-rtl', 'enqueued' ), 'the RTL handle is back' );
-		$this->assertFileDoesNotExist( WP_POLLS_DIR . 'wp-polls-rtl.css' );
+		$this->assertFileDoesNotExist( WP_POLLS_DIR . 'css/wp-polls-rtl.css' );
 
 		$css = file_get_contents( WP_POLLS_DIR . 'css/wp-polls.css' );
 
 		// A physical direction here is what would need a second file again.
 		$this->assertStringNotContainsString( 'text-align: left', $css );
 		$this->assertStringNotContainsString( 'text-align: right', $css );
+		$this->assertStringNotContainsString( 'margin-left', $css );
+		$this->assertStringNotContainsString( 'padding-right', $css );
 		$this->assertStringContainsString( 'text-align: start', $css );
 		$this->assertStringContainsString( 'margin-inline:', $css );
+		$this->assertStringContainsString( 'border-inline-end-color', $css );
+	}
+
+	/**
+	 * The front end stylesheet leaves the theme's typography alone.
+	 *
+	 * A poll is part of the page it sits in, so it inherits the font and the
+	 * text colour rather than declaring its own, and it never wins an argument
+	 * with the theme by force.
+	 *
+	 * @return void
+	 */
+	public function test_the_stylesheet_inherits_typography_and_uses_no_important() {
+		$css = file_get_contents( WP_POLLS_DIR . 'css/wp-polls.css' );
+
+		$this->assertStringNotContainsString( 'font-family', $css );
+		$this->assertStringNotContainsString( 'font-size', $css );
+		$this->assertStringNotContainsString( '!important', $css );
+	}
+
+	/**
+	 * Any motion the stylesheet adds can be switched off by the visitor.
+	 *
+	 * @return void
+	 */
+	public function test_every_animation_respects_reduced_motion() {
+		$css = file_get_contents( WP_POLLS_DIR . 'css/wp-polls.css' );
+
+		$this->assertSame(
+			substr_count( $css, '@keyframes' ),
+			substr_count( $css, 'animation: none' ),
+			'every animation needs a prefers-reduced-motion counterpart'
+		);
+		$this->assertStringContainsString( 'prefers-reduced-motion: reduce', $css );
 	}
 
 	/**
