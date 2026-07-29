@@ -2,17 +2,17 @@
 /**
  * Consolidated option storage for WP-Polls.
  *
- * Everything the plugin configures lives in one wp_options row holding a
- * nested array, rather than the thirty separate rows used up to 3.0.0. It
- * reuses the existing poll_options name, which before 3.0.0 held only the
- * ip_header setting. The
+ * Everything the plugin configures lives in one wp_polls_options row holding a
+ * nested array, rather than the thirty separate rows used up to 3.0.0. The
  * value is a plain PHP array: update_option() serialises it and get_option()
  * unserialises it, so there is no encode/decode layer at the call sites and
  * register_setting()'s sanitize_callback receives the structure intact.
  *
  * Two things deliberately stay in their own rows:
- *   - poll_version, because it is read to decide whether this option needs
- *     migrating and so cannot live inside the thing being migrated
+ *   - wp_polls_version, which holds the plugin and schema markers. A
+ *     sanitize_callback maps what the form posted to what gets stored, and the
+ *     settings form never posts a version marker, so a marker kept in this
+ *     array would have to be rescued from the stored value on every save
  *   - widget_polls-widget, which belongs to WP_Widget rather than to us
  *
  * @package WP-Polls
@@ -30,14 +30,14 @@ class WP_Polls_Options {
 	 *
 	 * @var string
 	 */
-	const OPTION = 'poll_options';
+	const OPTION = 'wp_polls_options';
 
 	/**
 	 * Name of the row holding the plugin and schema version markers.
 	 *
 	 * @var string
 	 */
-	const VERSION = 'poll_version';
+	const VERSION = 'wp_polls_version';
 
 	/**
 	 * Runtime cache so a page render does not re-read the row per lookup.
@@ -108,14 +108,63 @@ class WP_Polls_Options {
 	/**
 	 * Legacy rows that carry no value forward but must still be cleaned up.
 	 *
-	 * The poll_archive_show row was already dead before 3.0.0. poll_options is NOT
-	 * listed: it is the row the settings now live in, so deleting it would
-	 * throw away everything the migration just wrote.
+	 * The poll_archive_show row was already dead before 3.0.0. poll_version and
+	 * poll_db_version are the two markers that collapse into the single
+	 * wp_polls_version row. poll_options is read by the migration - both the
+	 * pre-3.0.0 shape, which held only ip_header, and the unreleased 3.0.0
+	 * shape, which held the whole nested array - and removed afterwards, so it
+	 * is listed here rather than in the map.
+	 *
+	 * stats_display is the shared, unprefixed row seven plugins used to write
+	 * their WP-Stats toggle into. Each of them now owns its own copy of the
+	 * setting, and each removes the shared row, which is what the cross-plugin
+	 * contract asks for.
 	 *
 	 * @return array
 	 */
 	public static function legacy_extra_rows() {
-		return array( 'poll_archive_show' );
+		return array( 'poll_archive_show', 'poll_options', 'poll_version', 'poll_db_version', 'stats_display' );
+	}
+
+	/**
+	 * The plugin and schema markers, normalised.
+	 *
+	 * Always exactly the two keys, whatever is in the row, so callers never
+	 * have to guard a partial or absent value.
+	 *
+	 * @return array
+	 */
+	public static function markers() {
+		$stored = get_option( self::VERSION, array() );
+
+		if ( ! is_array( $stored ) ) {
+			$stored = array();
+		}
+
+		return array(
+			'plugin' => isset( $stored['plugin'] ) ? (string) $stored['plugin'] : '',
+			'db'     => isset( $stored['db'] ) ? (string) $stored['db'] : '',
+		);
+	}
+
+	/**
+	 * Record both markers in one write.
+	 *
+	 * Together rather than one at a time, so a half finished upgrade never
+	 * records itself as complete.
+	 *
+	 * @param string $plugin Plugin version just brought up to date.
+	 * @param string $db     Schema version just brought up to date.
+	 * @return bool
+	 */
+	public static function save_markers( $plugin, $db ) {
+		return update_option(
+			self::VERSION,
+			array(
+				'plugin' => (string) $plugin,
+				'db'     => (string) $db,
+			)
+		);
 	}
 
 	/**
@@ -162,6 +211,10 @@ class WP_Polls_Options {
 			'cookie_expiry'  => 0,
 			'allow_to_vote'  => 2,
 			'ip_header'      => '',
+			// Whether WP-Polls contributes a section to WP-Stats. Owned here
+			// rather than in the shared stats_display row WP-Stats used to
+			// keep, so no plugin can read or clobber another's toggle.
+			'stats_display'  => true,
 		);
 	}
 
@@ -277,7 +330,7 @@ class WP_Polls_Options {
 	public static function migrate_from_legacy_rows() {
 		// Start from whatever is already stored, not from the defaults. The
 		// version gate is the primary guard, but it is not sufficient on its
-		// own: an install whose poll_version row is missing while poll_options
+		// own: an install whose marker row is missing while wp_polls_options
 		// survives - a partial restore, a downgrade and re-upgrade, an
 		// over-eager cleanup plugin - would otherwise have every setting
 		// overwritten with defaults, because there are no legacy rows left to
@@ -285,6 +338,15 @@ class WP_Polls_Options {
 		// in that case instead of destructive.
 		self::flush();
 		$values = self::all();
+
+		// The old consolidated row first, so the individual rows below still
+		// win where both exist. Two shapes reach this: the pre-3.0.0 one, which
+		// held only ip_header, and the unreleased 3.0.0 one, which held the
+		// whole nested array.
+		$legacy_row = get_option( 'poll_options', array() );
+		if ( is_array( $legacy_row ) ) {
+			$values = self::merge( $values, $legacy_row );
+		}
 
 		foreach ( self::legacy_map() as $legacy => $path ) {
 			$stored = get_option( $legacy, null );
@@ -301,9 +363,13 @@ class WP_Polls_Options {
 			}
 		}
 
-		// Pre-3.0.0 the row held only { ip_header: ... }. No special case is
-		// needed: it is the same row, so all() above already merged that single
-		// key over the defaults.
+		// WP-Stats used to keep one shared, unprefixed stats_display row that
+		// seven plugins wrote their toggle into. Take the WP-Polls entry out of
+		// it; the row itself is deleted below with the rest of the legacy ones.
+		$stats_display = get_option( 'stats_display', null );
+		if ( is_array( $stats_display ) && isset( $stats_display['polls'] ) ) {
+			$values['stats_display'] = (bool) $stats_display['polls'];
+		}
 
 		self::save( $values );
 

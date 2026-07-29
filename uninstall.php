@@ -11,22 +11,22 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 require_once __DIR__ . '/includes/class-wp-polls-template.php';
 require_once __DIR__ . '/includes/class-wp-polls-options.php';
-require_once __DIR__ . '/includes/class-wp-polls-install.php';
 
-// From 3.0.0 the settings are a single row. The pre-3.0.0 names are still
-// listed because an install that was never loaded after upgrading - deleted
-// straight from the plugins screen - still has them, and they would otherwise
-// be orphaned forever. The list is taken from WP_Polls_Options so it cannot
-// drift from the migration's idea of which rows belong to the plugin.
+// From 3.0.0 the settings are a single row and the two version markers are a
+// second. The pre-3.0.0 names are still listed because an install that was
+// never loaded after upgrading - deleted straight from the plugins screen -
+// still has them, and they would otherwise be orphaned forever. The list is
+// taken from WP_Polls_Options so it cannot drift from the migration's idea of
+// which rows belong to the plugin.
 $option_names = array_merge(
-	array( WP_Polls_Options::OPTION, 'poll_version', WP_Polls_Install::DB_VERSION_OPTION ),
+	array( WP_Polls_Options::OPTION, WP_Polls_Options::VERSION ),
 	array_keys( WP_Polls_Options::legacy_map() ),
 	WP_Polls_Options::legacy_extra_rows(),
 	array( 'widget_polls', 'widget_polls-widget' )
 );
 
 if ( is_multisite() ) {
-	// wp_get_sites() was removed in WP 5.1; the floor is 6.0.
+	// wp_get_sites() was removed in WP 5.1; the floor is 6.8.
 	//
 	// 'number' => 0 lifts WP_Site_Query's default cap of 100, which would
 	// otherwise stop at the hundredth site and leave every site after it with

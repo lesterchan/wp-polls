@@ -618,26 +618,59 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * The WP-Stats hooks are only added, never replacing that plugin's own.
+	 * The WP-Stats section is contributed under the plugin's own key.
 	 *
 	 * @return void
 	 */
-	public function test_wp_stats_defaults_are_additive() {
-		$merged = WP_Polls_Admin::polls_wp_stats_defaults( array( 'something_else' => 0 ) );
+	public function test_the_wp_stats_section_is_keyed_by_the_plugin_slug() {
+		$sections = WP_Polls_WPStats::register_section( array( 'something_else' => array() ) );
 
-		$this->assertSame( 1, $merged['polls'] );
-		$this->assertArrayHasKey( 'something_else', $merged );
+		$this->assertArrayHasKey( 'wp_polls', $sections, 'WP-Polls contributes its own entry.' );
+		$this->assertArrayHasKey( 'something_else', $sections, 'Another plugin\'s entry is left alone.' );
 	}
 
 	/**
-	 * WP-Stats' own value for polls wins over the added default.
+	 * The entry carries exactly the three keys WP-Stats reads.
 	 *
 	 * @return void
 	 */
-	public function test_wp_stats_defaults_do_not_override() {
-		$merged = WP_Polls_Admin::polls_wp_stats_defaults( array( 'polls' => 0 ) );
+	public function test_the_wp_stats_section_has_a_title_a_priority_and_a_renderer() {
+		$section = WP_Polls_WPStats::register_section( array() )['wp_polls'];
 
-		$this->assertSame( 0, $merged['polls'] );
+		$this->assertSame( array( 'title', 'priority', 'render' ), array_keys( $section ) );
+		$this->assertNotEmpty( $section['title'], 'The heading is translated, not empty.' );
+		$this->assertIsInt( $section['priority'], 'The sort order is an integer.' );
+		$this->assertIsCallable( $section['render'], 'The renderer can be called.' );
+	}
+
+	/**
+	 * Turning the setting off contributes nothing at all.
+	 *
+	 * @return void
+	 */
+	public function test_the_wp_stats_section_is_withheld_when_the_setting_is_off() {
+		WP_Polls_Options::set( 'stats_display', false );
+
+		$this->assertSame( array(), WP_Polls_WPStats::register_section( array() ) );
+	}
+
+	/**
+	 * The renderer echoes the three counts rather than returning them.
+	 *
+	 * @return void
+	 */
+	public function test_the_wp_stats_renderer_echoes_the_poll_counts() {
+		$this->make_poll( array( 'pollq_question' => 'Counted' ), array( array( 'Yes', 2 ), array( 'No', 1 ) ) );
+
+		ob_start();
+		$returned = WP_Polls_WPStats::render();
+		$html     = ob_get_clean();
+
+		$this->assertNull( $returned, 'render() echoes; it does not return markup.' );
+		$this->assertStringContainsString( '<li>', $html );
+		$this->assertStringContainsString( '<strong>1</strong>', $html, 'One poll was created.' );
+		$this->assertStringContainsString( '<strong>2</strong>', $html, 'Two answers were given.' );
+		$this->assertStringContainsString( '<strong>3</strong>', $html, 'Three votes were cast.' );
 	}
 
 	// --- the upgrade notice ----------------------------------------------

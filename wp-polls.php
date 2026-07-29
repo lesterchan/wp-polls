@@ -65,12 +65,14 @@ require_once __DIR__ . '/includes/class-wp-polls-install.php';
 require_once __DIR__ . '/includes/class-wp-polls-vote.php';
 require_once __DIR__ . '/includes/class-wp-polls-display.php';
 require_once __DIR__ . '/includes/class-wp-polls-admin.php';
+require_once __DIR__ . '/includes/class-wp-polls-wpstats.php';
 require_once __DIR__ . '/includes/class-wp-polls.php';
 require_once __DIR__ . '/includes/template-tags.php';
 WP_Polls_Install::init();
 WP_Polls_Vote::init();
 WP_Polls_Display::init();
 WP_Polls_Admin::init();
+WP_Polls_WPStats::init();
 WP_Polls::init();
 WP_Polls_Settings::init();
 

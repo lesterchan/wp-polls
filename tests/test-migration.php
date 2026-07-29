@@ -50,7 +50,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	 */
 	private function make_legacy_install() {
 		delete_option( WP_Polls_Options::OPTION );
-		delete_option( 'poll_version' );
+		delete_option( WP_Polls_Options::VERSION );
 		WP_Polls_Options::flush();
 
 		foreach ( $this->legacy as $name => $value ) {
@@ -130,15 +130,15 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * The poll_options row already existed and is the one being migrated into.
+	 * The old poll_options row is read before it is deleted.
 	 *
-	 * Pre-3.0.0 it held only { ip_header: ... }. Reusing the name means the
-	 * migration has to read that value before it overwrites the row, and must
-	 * never appear in the list of rows to delete afterwards.
+	 * Pre-3.0.0 it held only { ip_header: ... }, and the unreleased 3.0.0 held
+	 * the whole nested array. Both are folded into wp_polls_options before the
+	 * old name is removed.
 	 *
 	 * @return void
 	 */
-	public function test_ip_header_survives_reusing_the_same_row() {
+	public function test_ip_header_survives_the_move_to_the_new_row() {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
@@ -184,25 +184,51 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * The consolidated row is never itself deleted as a legacy row.
+	 * Neither of the two rows WP-Polls keeps is on the delete list.
 	 *
 	 * @return void
 	 */
-	public function test_the_consolidated_row_is_not_in_the_delete_list() {
+	public function test_the_current_rows_are_not_in_the_delete_list() {
 		$this->assertNotContains( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_extra_rows() );
+		$this->assertNotContains( WP_Polls_Options::VERSION, WP_Polls_Options::legacy_extra_rows() );
 		$this->assertArrayNotHasKey( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_map() );
 	}
 
 	/**
-	 * The version is stamped so the upgrade does not run forever.
+	 * Both markers are stamped so the upgrade does not run forever.
 	 *
 	 * @return void
 	 */
-	public function test_version_is_recorded() {
+	public function test_both_version_markers_are_recorded() {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
-		$this->assertSame( WP_POLLS_VERSION, get_option( 'poll_version' ) );
+		$this->assertSame(
+			array(
+				'plugin' => WP_POLLS_VERSION,
+				'db'     => WP_POLLS_DB_VERSION,
+			),
+			get_option( WP_Polls_Options::VERSION ),
+			'The marker row holds exactly the plugin and schema versions.'
+		);
+	}
+
+	/**
+	 * The WP-Stats toggle is taken out of the shared row and the row removed.
+	 *
+	 * Up to 3.0.0 seven plugins wrote their toggle into one unprefixed
+	 * stats_display row. Each of them owns its own copy now.
+	 *
+	 * @return void
+	 */
+	public function test_the_shared_stats_display_row_is_folded_in_and_removed() {
+		$this->make_legacy_install();
+		update_option( 'stats_display', array( 'polls' => 0 ) );
+
+		$this->run_upgrade();
+
+		$this->assertFalse( WP_Polls_Options::get( 'stats_display' ), 'The opt-out carried across.' );
+		$this->assertFalse( get_option( 'stats_display', false ), 'The shared row is gone.' );
 	}
 
 	/**
@@ -232,7 +258,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
-		delete_option( 'poll_version' );
+		delete_option( WP_Polls_Options::VERSION );
 		$this->run_upgrade();
 
 		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
@@ -253,7 +279,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 
 		delete_option( WP_Polls_Options::OPTION );
-		update_option( 'poll_version', '3.0.0' );
+		WP_Polls_Options::save_markers( '3.0.0', WP_POLLS_DB_VERSION );
 		update_option( 'poll_archive_perpage', 23 );
 		update_option( 'poll_template_disable', 'DEV BRANCH TEXT' );
 		WP_Polls_Options::flush();
@@ -271,7 +297,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	 */
 	public function test_already_migrated_install_is_untouched() {
 		WP_Polls_Options::set( 'archive.per_page', 42 );
-		update_option( 'poll_version', WP_POLLS_VERSION );
+		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
 
 		$this->run_upgrade();
 

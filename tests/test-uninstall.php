@@ -112,9 +112,9 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 		$source = $this->source();
 
 		$this->assertStringContainsString( 'WP_Polls_Options::OPTION', $source );
+		$this->assertStringContainsString( 'WP_Polls_Options::VERSION', $source );
 		$this->assertStringContainsString( 'WP_Polls_Options::legacy_map()', $source );
-		$this->assertStringContainsString( 'WP_Polls_Install::DB_VERSION_OPTION', $source );
-		$this->assertStringContainsString( "'poll_version'", $source );
+		$this->assertStringContainsString( 'WP_Polls_Options::legacy_extra_rows()', $source );
 	}
 
 	/**

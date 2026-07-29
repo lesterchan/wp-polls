@@ -10,7 +10,7 @@
  */
 
 /**
- * The consolidated poll_options row: defaults, dot paths and migration.
+ * The consolidated wp_polls_options row: defaults, dot paths and migration.
  *
  * @covers WP_Polls_Options
  */
@@ -59,12 +59,13 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'archive.per_page', 7 );
 
 		$rows = $wpdb->get_col(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'poll\_%' ORDER BY option_name"
+			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'wp\_polls\_%' ORDER BY option_name"
 		);
 
 		$this->assertSame(
-			array( 'poll_db_version', 'poll_options', 'poll_version' ),
-			$rows
+			array( WP_Polls_Options::OPTION, WP_Polls_Options::VERSION ),
+			$rows,
+			'The settings and the version markers are the only two rows WP-Polls owns.'
 		);
 	}
 
@@ -73,7 +74,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	 */
 	public function test_migration_carries_legacy_values_across() {
 		delete_option( WP_Polls_Options::OPTION );
-		delete_option( 'poll_version' );
+		delete_option( WP_Polls_Options::VERSION );
 		WP_Polls_Options::flush();
 
 		update_option( 'poll_template_votefooter', '<ul>CUSTOM %POLL_ID%</ul>' );
@@ -111,7 +112,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	 */
 	public function test_migration_leaves_untouched_keys_at_defaults() {
 		delete_option( WP_Polls_Options::OPTION );
-		delete_option( 'poll_version' );
+		delete_option( WP_Polls_Options::VERSION );
 		WP_Polls_Options::flush();
 		update_option( 'poll_archive_perpage', 17 );
 
@@ -123,12 +124,11 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * The old rows are removed once folded in - except poll_options, which is
-	 * the row they were folded into.
+	 * The old rows are removed once folded in.
 	 */
 	public function test_migration_deletes_the_legacy_rows() {
 		delete_option( WP_Polls_Options::OPTION );
-		delete_option( 'poll_version' );
+		delete_option( WP_Polls_Options::VERSION );
 		WP_Polls_Options::flush();
 		update_option( 'poll_archive_perpage', 17 );
 		update_option( 'poll_ans_sortby', 'polla_votes' );
@@ -137,6 +137,9 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 
 		$this->assertFalse( get_option( 'poll_archive_perpage', false ) );
 		$this->assertFalse( get_option( 'poll_ans_sortby', false ) );
+		$this->assertFalse( get_option( 'poll_options', false ) );
+		$this->assertFalse( get_option( 'poll_version', false ) );
+		$this->assertFalse( get_option( 'poll_db_version', false ) );
 		$this->assertNotFalse( get_option( WP_Polls_Options::OPTION, false ) );
 	}
 
@@ -149,7 +152,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	 */
 	public function test_migration_is_idempotent() {
 		delete_option( WP_Polls_Options::OPTION );
-		delete_option( 'poll_version' );
+		delete_option( WP_Polls_Options::VERSION );
 		WP_Polls_Options::flush();
 		update_option( 'poll_archive_perpage', 17 );
 
@@ -162,7 +165,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 
 		// And with the version row missing, which is what a partial restore or
 		// a downgrade-and-re-upgrade looks like.
-		delete_option( 'poll_version' );
+		delete_option( WP_Polls_Options::VERSION );
 		WP_Polls_Install::upgrade();
 		WP_Polls_Options::flush();
 		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
@@ -175,7 +178,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	public function test_migration_handles_install_stamped_with_current_version() {
 		delete_option( WP_Polls_Options::OPTION );
 		WP_Polls_Options::flush();
-		update_option( 'poll_version', WP_POLLS_VERSION );
+		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
 		update_option( 'poll_archive_perpage', 23 );
 
 		WP_Polls_Install::upgrade();

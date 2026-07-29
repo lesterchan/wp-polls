@@ -13,16 +13,6 @@ defined( 'ABSPATH' ) || exit;
 class WP_Polls_Install {
 
 	/**
-	 * Option holding the installed schema version, up to 3.0.0.
-	 *
-	 * Kept only so the migration and uninstall.php know which row to remove;
-	 * the schema counter itself is the WP_POLLS_DB_VERSION constant.
-	 *
-	 * @var string
-	 */
-	const DB_VERSION_OPTION = 'poll_db_version';
-
-	/**
 	 * Hook registration.
 	 *
 	 * @return void
@@ -70,8 +60,13 @@ class WP_Polls_Install {
 	 * @return mixed
 	 */
 	public static function upgrade() {
-		$installed_version = get_option( 'poll_version' );
-		$is_pre_3          = empty( $installed_version ) || version_compare( $installed_version, '3.0.0', '<' );
+		$markers = WP_Polls_Options::markers();
+
+		// An install that has not run this yet has no marker row at all, so the
+		// pre-3.0.0 poll_version row is still the only record of what it last
+		// ran. Read through to it once; the migration deletes it.
+		$installed_version = '' !== $markers['plugin'] ? $markers['plugin'] : (string) get_option( 'poll_version', '' );
+		$is_pre_3          = '' === $installed_version || version_compare( $installed_version, '3.0.0', '<' );
 
 		// Version 3.0.0: fold the ~30 scattered option rows into a single one.
 		// Must run before anything else that touches templates, so there is only
@@ -96,16 +91,16 @@ class WP_Polls_Install {
 			self::upgrade_poll_bar();
 		}
 
-		if ( WP_POLLS_VERSION === $installed_version ) {
-			return;
-		}
-
 		// Version 3.0.0: Inline onclick handlers were replaced by data-poll-* attributes.
 		if ( $is_pre_3 ) {
 			self::upgrade_templates_onclick();
 		}
 
-		update_option( 'poll_version', WP_POLLS_VERSION );
+		if ( WP_POLLS_VERSION !== $markers['plugin'] || WP_POLLS_DB_VERSION !== $markers['db'] ) {
+			// Both markers in one write, at the end, so a half finished upgrade
+			// never records itself as complete.
+			WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
+		}
 	}
 
 	/**
@@ -304,14 +299,17 @@ class WP_Polls_Install {
 		// landed in the error log on every single activation. Schema changes
 		// after the initial create are handled by the explicit index and column
 		// work below, so nothing is lost by not re-diffing.
-		if ( WP_POLLS_DB_VERSION !== get_option( self::DB_VERSION_OPTION ) ) {
+		//
+		// The gate is the schema marker, which self::upgrade() records at the
+		// end of this method along with the plugin marker.
+		$markers = WP_Polls_Options::markers();
+		if ( WP_POLLS_DB_VERSION !== $markers['db'] ) {
 			foreach ( $create_table as $table => $sql ) {
 				$table_name = $wpdb->$table;
 				if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) ) {
 					dbDelta( $sql );
 				}
 			}
-			update_option( self::DB_VERSION_OPTION, WP_POLLS_DB_VERSION );
 		}
 		// Check Whether It is Install Or Upgrade.
 		$first_poll = $wpdb->get_var( "SELECT pollq_id FROM $wpdb->pollsq LIMIT 1" );

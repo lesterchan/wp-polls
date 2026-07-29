@@ -39,7 +39,6 @@ class WP_Polls_Admin {
 		}
 		add_action( 'init', array( __CLASS__, 'poll_tinymce_addbuttons' ) );
 		add_action( 'wp_ajax_polls-admin', array( __CLASS__, 'manage_poll' ) );
-		add_action( 'plugins_loaded', array( __CLASS__, 'polls_wp_stats' ) );
 	}
 
 	/**
@@ -543,90 +542,5 @@ class WP_Polls_Admin {
 				wp_die( '', '', array( 'response' => null ) );
 			}
 		}
-	}
-
-	// Function: Plug Into WP-Stats.
-
-	/**
-	 * Polls wp stats.
-	 *
-	 * @return mixed
-	 */
-	public static function polls_wp_stats() {
-		add_filter( 'wp_stats_display_defaults', array( __CLASS__, 'polls_wp_stats_defaults' ) );
-		add_filter( 'wp_stats_page_admin_plugins', array( __CLASS__, 'polls_page_admin_general_stats' ) );
-		add_filter( 'wp_stats_page_plugins', array( __CLASS__, 'polls_page_general_stats' ) );
-	}
-
-	/**
-	 * Tell WP-Stats about the toggle this plugin owns, and its default.
-	 *
-	 * Without this WP-Stats only learns the key exists once its checkbox has
-	 * been submitted, so the panel would start out off on a fresh install.
-	 *
-	 * @param mixed $defaults Registered toggles.
-	 *
-	 * @return array
-	 */
-	public static function polls_wp_stats_defaults( $defaults ) {
-		// WP-Stats' own defaults win, so this only ever adds.
-		return array_merge( array( 'polls' => 1 ), (array) $defaults );
-	}
-
-	/**
-	 * Whether the WP-Polls toggle is on in WP-Stats.
-	 *
-	 * @return bool
-	 */
-	protected static function polls_wp_stats_enabled() {
-		if ( function_exists( 'wp_stats_display_enabled' ) ) {
-			return wp_stats_display_enabled( 'polls' );
-		}
-
-		// WP-Stats before 3.0.0 kept the toggles in their own option row.
-		$stats_display = get_option( 'stats_display' );
-
-		return is_array( $stats_display ) && 1 === (int) ( $stats_display['polls'] ?? 0 );
-	}
-
-	/**
-	 * Add WP-Polls General Stats To WP-Stats Page Options.
-	 *
-	 * @param mixed $content Value.
-	 *
-	 * @return mixed
-	 */
-	public static function polls_page_admin_general_stats( $content ) {
-		// WP-Stats 3.0.0 owns the field name, which changed when it consolidated
-		// its option rows.
-		if ( function_exists( 'wp_stats_checkbox' ) ) {
-			return $content . wp_stats_checkbox( 'polls', __( 'WP-Polls', 'wp-polls' ) );
-		}
-
-		$checked = self::polls_wp_stats_enabled() ? ' checked="checked"' : '';
-
-		return $content . '<input type="checkbox" name="stats_display[]" id="wpstats_polls" value="polls"' . $checked . ' />&nbsp;&nbsp;<label for="wpstats_polls">' . __( 'WP-Polls', 'wp-polls' ) . '</label><br />' . "\n";
-	}
-
-	/**
-	 * Add WP-Polls General Stats To WP-Stats Page.
-	 *
-	 * @param mixed $content Value.
-	 *
-	 * @return mixed
-	 */
-	public static function polls_page_general_stats( $content ) {
-		if ( self::polls_wp_stats_enabled() ) {
-			$content .= '<p><strong>' . __( 'WP-Polls', 'wp-polls' ) . '</strong></p>' . "\n";
-			$content .= '<ul>' . "\n";
-			/* translators: %1$s: value, %2$s: value. */
-			$content .= '<li>' . sprintf( _n( '<strong>%s</strong> poll was created.', '<strong>%s</strong> polls were created.', get_pollquestions( false ), 'wp-polls' ), esc_html( number_format_i18n( get_pollquestions( false ) ) ) ) . '</li>' . "\n";
-			/* translators: %1$s: value, %2$s: value. */
-			$content .= '<li>' . sprintf( _n( '<strong>%s</strong> polls\' answer was given.', '<strong>%s</strong> polls\' answers were given.', get_pollanswers( false ), 'wp-polls' ), esc_html( number_format_i18n( get_pollanswers( false ) ) ) ) . '</li>' . "\n";
-			/* translators: %1$s: value, %2$s: value. */
-			$content .= '<li>' . sprintf( _n( '<strong>%s</strong> vote was cast.', '<strong>%s</strong> votes were cast.', get_pollvotes( false ), 'wp-polls' ), esc_html( number_format_i18n( get_pollvotes( false ) ) ) ) . '</li>' . "\n";
-			$content .= '</ul>' . "\n";
-		}
-		return $content;
 	}
 }

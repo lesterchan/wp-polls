@@ -29,7 +29,7 @@ class WP_Polls_Settings {
 	 *
 	 * @var string
 	 */
-	const GROUP = 'poll_options_group';
+	const GROUP = 'wp_polls_options';
 
 	/**
 	 * Page slug the Poll Options sections and fields are registered under.
@@ -384,6 +384,22 @@ class WP_Polls_Settings {
 			)
 		);
 
+		// --- WP-Stats ---------------------------------------------------------
+		add_settings_section( 'wp_polls_stats', __( 'WP-Stats', 'wp-polls' ), array( __CLASS__, 'section_stats' ), $page );
+
+		add_settings_field(
+			'poll_stats_display',
+			__( 'Show Poll Statistics In WP-Stats', 'wp-polls' ),
+			array( __CLASS__, 'field_select' ),
+			$page,
+			'wp_polls_stats',
+			array(
+				'label_for' => 'poll_stats_display',
+				'path'      => 'stats_display',
+				'options'   => $yes_no,
+			)
+		);
+
 		// --- Current Active Poll ----------------------------------------------
 		add_settings_section( 'wp_polls_current', __( 'Current Active Poll', 'wp-polls' ), '__return_false', $page );
 
@@ -631,6 +647,15 @@ class WP_Polls_Settings {
 	}
 
 	/**
+	 * What the WP-Stats toggle does, and what happens without WP-Stats.
+	 *
+	 * @return void
+	 */
+	public static function section_stats() {
+		echo '<p class="description">' . esc_html__( 'WP-Polls contributes its own section to the WP-Stats page. The setting is stored by WP-Polls rather than by WP-Stats, so turning it off here cannot affect any other plugin\'s section, and it does nothing at all if WP-Stats is not installed.', 'wp-polls' ) . '</p>';
+	}
+
+	/**
 	 * The token reference above the template fields.
 	 *
 	 * @return void
@@ -674,7 +699,10 @@ class WP_Polls_Settings {
 	 * @return void
 	 */
 	public static function field_select( $args ) {
-		$current = (string) WP_Polls_Options::get( $args['path'] );
+		$value = WP_Polls_Options::get( $args['path'] );
+		// Booleans stringify to '1' and '', neither of which is an option value,
+		// so they are cast through int first.
+		$current = is_bool( $value ) ? (string) (int) $value : (string) $value;
 
 		echo '<select name="' . esc_attr( self::field_name( $args['path'] ) ) . '" id="' . esc_attr( $args['label_for'] ) . '">';
 		foreach ( $args['options'] as $value => $label ) {
@@ -1016,6 +1044,10 @@ class WP_Polls_Settings {
 
 		if ( isset( $input['ip_header'] ) ) {
 			$current['ip_header'] = sanitize_text_field( $input['ip_header'] );
+		}
+
+		if ( isset( $input['stats_display'] ) ) {
+			$current['stats_display'] = ! empty( $input['stats_display'] );
 		}
 
 		// --- Poll Templates screen -----------------------------------------
