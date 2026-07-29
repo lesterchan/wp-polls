@@ -213,7 +213,7 @@ class WP_Polls_Display {
 			if ( $display_loading ) {
 				$poll_ajax_style = WP_Polls_Options::get( 'ajax' );
 				if ( 1 === (int) $poll_ajax_style['loading'] ) {
-					$temp_pollvote .= "<div id=\"polls-$poll_question_id-loading\" class=\"wp-polls-loading\"><img src=\"" . WP_POLLS_URL . 'images/loading.gif" width="16" height="16" alt="' . __( 'Loading', 'wp-polls' ) . ' ..." title="' . __( 'Loading', 'wp-polls' ) . ' ..." class="wp-polls-image" />&nbsp;' . __( 'Loading', 'wp-polls' ) . " ...</div>\n";
+					$temp_pollvote .= self::loading_markup( $poll_question_id );
 				}
 			}
 		} else {
@@ -221,6 +221,27 @@ class WP_Polls_Display {
 		}
 		// Return Poll Vote Template.
 		return $temp_pollvote;
+	}
+
+	/**
+	 * The "loading" placeholder shown while an AJAX request is in flight.
+	 *
+	 * Up to 3.0.0 this was a 16x16 animated GIF under images/. It is drawn in
+	 * CSS now, so it inherits the theme's colour through currentColor, scales
+	 * with the font size, costs no request, and stops moving for a visitor who
+	 * has asked for reduced motion. The ring itself is decorative - the word
+	 * beside it is the actual message - so it is hidden from assistive
+	 * technology.
+	 *
+	 * @param int $poll_id Poll the placeholder belongs to.
+	 * @return string
+	 */
+	public static function loading_markup( $poll_id ) {
+		return sprintf(
+			'<div id="polls-%1$d-loading" class="wp-polls wp-polls-loading"><span class="wp-polls-spinner" aria-hidden="true"></span> %2$s</div>' . "\n",
+			(int) $poll_id,
+			esc_html__( 'Loading ...', 'wp-polls' )
+		);
 	}
 
 	/**
@@ -507,7 +528,7 @@ class WP_Polls_Display {
 			if ( $display_loading ) {
 				$poll_ajax_style = WP_Polls_Options::get( 'ajax' );
 				if ( 1 === (int) $poll_ajax_style['loading'] ) {
-					$temp_pollresult .= "<div id=\"polls-$poll_question_id-loading\" class=\"wp-polls-loading\"><img src=\"" . WP_POLLS_URL . 'images/loading.gif" width="16" height="16" alt="' . __( 'Loading', 'wp-polls' ) . ' ..." title="' . __( 'Loading', 'wp-polls' ) . ' ..." class="wp-polls-image" />&nbsp;' . __( 'Loading', 'wp-polls' ) . " ...</div>\n";
+					$temp_pollresult .= self::loading_markup( $poll_question_id );
 				}
 			}
 		} else {

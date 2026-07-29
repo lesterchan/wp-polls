@@ -90,6 +90,6 @@ export function voteForm( { id = 1, type = 'radio', ids = [ 1, 2, 3 ], max = 0 }
 				<a href="#ViewPollResults" data-poll-id="${ id }" data-poll-action="result">View Results</a>
 			</form>
 		</div>
-		<div id="polls-${ id }-loading" class="wp-polls-loading">Loading ...</div>
+		<div id="polls-${ id }-loading" class="wp-polls wp-polls-loading"><span class="wp-polls-spinner" aria-hidden="true"></span> Loading ...</div>
 	`;
 }

@@ -35,7 +35,7 @@
 .wp-polls ul li:before, .wp-polls-ans ul li:before, #sidebar ul ul li:before {
 	content: '';
 }
-.wp-polls IMG, .wp-polls LABEL , .wp-polls INPUT, .wp-polls-loading IMG, .wp-polls-image IMG {
+.wp-polls label, .wp-polls input {
 	display: inline;
 	border: 0px;
 	padding: 0px;
@@ -56,11 +56,35 @@
 .wp-polls-loading {
 	display: none;
 	text-align: center;
-	height: 16px;
-	line-height: 16px;
 }
-.wp-polls-image {
-	border: 0px;
+/* The loading indicator. Drawn rather than shipped as a GIF: it inherits the
+   theme's colour through currentColor, scales with the surrounding font size,
+   and costs no request. The ring is three-quarters of a circle - one border
+   side is transparent - spun by a transform. */
+.wp-polls .wp-polls-spinner {
+	display: inline-block;
+	box-sizing: border-box;
+	width: 1em;
+	height: 1em;
+	vertical-align: -0.125em;
+	border: 2px solid currentColor;
+	border-inline-end-color: transparent;
+	border-radius: 50%;
+	animation: wp-polls-spin 0.8s linear infinite;
+}
+@keyframes wp-polls-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+/* Still legible, just not moving: the ring stays as a dimmed circle so the
+   placeholder does not turn into an unexplained gap beside the word. */
+@media (prefers-reduced-motion: reduce) {
+	.wp-polls .wp-polls-spinner {
+		animation: none;
+		border-inline-end-color: currentColor;
+		opacity: 0.4;
+	}
 }
 /* Poll Result Bar */
 /* The four custom properties carry the Poll Options settings and are the
