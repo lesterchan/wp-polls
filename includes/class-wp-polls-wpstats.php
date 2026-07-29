@@ -38,9 +38,10 @@ class WP_Polls_WPStats {
 	 * @return array
 	 */
 	public static function register_section( $sections ) {
-		$options = get_option( WP_Polls_Options::OPTION, array() );
-
-		if ( ! is_array( $options ) || empty( $options['stats_display'] ) ) {
+		// Read through the option accessor rather than get_option() so an
+		// install whose row has not been written yet gets the default, which is
+		// on. A raw read would see nothing and read that as an opt-out.
+		if ( ! WP_Polls_Options::get( 'stats_display', true ) ) {
 			// Opted out: contribute nothing rather than an empty section.
 			return $sections;
 		}
@@ -56,6 +57,11 @@ class WP_Polls_WPStats {
 
 	/**
 	 * Echo the body of the WP-Polls section.
+	 *
+	 * The heading is WP-Stats' to print: its own listener on
+	 * wp_stats_section_wp_polls echoes the title and then calls this. Echoing
+	 * rather than returning matters too - WP-Stats assembles the page inside an
+	 * output buffer, so a returned string would be dropped without a word.
 	 *
 	 * @return void
 	 */

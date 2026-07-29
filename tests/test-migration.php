@@ -232,6 +232,40 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * The older list shape of the shared row is read too.
+	 *
+	 * @return void
+	 */
+	public function test_the_shared_stats_display_row_is_read_as_a_list_as_well() {
+		$this->make_legacy_install();
+		update_option( 'stats_display', array( 'email', 'polls' ) );
+
+		$this->run_upgrade();
+
+		$this->assertTrue( WP_Polls_Options::get( 'stats_display' ) );
+	}
+
+	/**
+	 * A shared row that some other plugin already deleted leaves the block on.
+	 *
+	 * All seven migrations delete that row, so only whichever plugin the site
+	 * upgrades first ever sees it. Reading its absence as a deliberate opt-out
+	 * would make the polls block disappear from WP-Stats, silently, on every
+	 * site that updated WP-Stats before WP-Polls.
+	 *
+	 * @return void
+	 */
+	public function test_a_missing_shared_stats_display_row_is_not_an_opt_out() {
+		$this->make_legacy_install();
+		delete_option( 'stats_display' );
+
+		$this->run_upgrade();
+
+		$this->assertTrue( WP_Polls_Options::get( 'stats_display' ), 'Absent means already migrated, not off.' );
+		$this->assertArrayHasKey( 'wp_polls', WP_Polls_WPStats::register_section( array() ) );
+	}
+
+	/**
 	 * Running the upgrade twice must not reset anything.
 	 *
 	 * @return void

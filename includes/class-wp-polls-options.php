@@ -127,6 +127,30 @@ class WP_Polls_Options {
 	}
 
 	/**
+	 * Whether the shared WP-Stats row had the polls block switched on.
+	 *
+	 * The row reached this plugin in two shapes over the years: a map of
+	 * key => 1, which is what the checkbox posted once WP-Stats normalised it,
+	 * and a plain list of the enabled keys, which is what a bare
+	 * name="stats_display[]" posts. Both are read here so an older install is
+	 * not quietly treated as an opt-out.
+	 *
+	 * @param mixed $legacy The stats_display row as stored.
+	 * @return bool
+	 */
+	public static function legacy_stats_display( $legacy ) {
+		if ( ! is_array( $legacy ) ) {
+			return (bool) $legacy;
+		}
+
+		if ( array_key_exists( 'polls', $legacy ) ) {
+			return (bool) $legacy['polls'];
+		}
+
+		return in_array( 'polls', $legacy, true );
+	}
+
+	/**
 	 * The plugin and schema markers, normalised.
 	 *
 	 * Always exactly the two keys, whatever is in the row, so callers never
@@ -366,9 +390,16 @@ class WP_Polls_Options {
 		// WP-Stats used to keep one shared, unprefixed stats_display row that
 		// seven plugins wrote their toggle into. Take the WP-Polls entry out of
 		// it; the row itself is deleted below with the rest of the legacy ones.
-		$stats_display = get_option( 'stats_display', null );
-		if ( is_array( $stats_display ) && isset( $stats_display['polls'] ) ) {
-			$values['stats_display'] = (bool) $stats_display['polls'];
+		//
+		// An ABSENT row means a sibling upgraded first and deleted it, not that
+		// the site switched this block off - all seven migrations delete it, so
+		// only the first one to run ever sees it. Reading absence as an opt-out
+		// would make the polls block vanish from WP-Stats with no error on any
+		// site that updated WP-Stats before WP-Polls. Absent therefore leaves
+		// the default, which is on.
+		$legacy_stats = get_option( 'stats_display', null );
+		if ( null !== $legacy_stats && false !== $legacy_stats ) {
+			$values['stats_display'] = self::legacy_stats_display( $legacy_stats );
 		}
 
 		self::save( $values );
