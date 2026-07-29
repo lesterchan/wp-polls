@@ -135,7 +135,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * uninstall.php declares no global function, so it cannot collide.
+	 * The uninstall entry point declares no global function, so it cannot collide.
 	 *
 	 * Every plugin's uninstall.php is loaded into the same request when several
 	 * are deleted at once, so an unprefixed global there is a fatal error
