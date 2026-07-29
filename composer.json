@@ -1,32 +1,26 @@
 {
-    "name": "lesterchan/wp-polls",
-    "description": "Adds an AJAX poll system to your WordPress blog.",
-    "type": "wordpress-plugin",
-    "keywords": [
-        "wordpress",
-        "plugin",
-        "poll"
-    ],
-    "license": [
-        "GPL-2.0-only"
-    ],
-    "authors": [
-        {
-            "name": "Lester Chan",
-            "email": "lesterchan@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=7.4"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.6",
-        "yoast/phpunit-polyfills": "^2.0"
-    },
-    "scripts": {
-        "test": "phpunit"
-    },
-    "config": {
-        "allow-plugins": false
-    }
+	"name": "lesterchan/wp-polls",
+	"description": "Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.",
+	"type": "wordpress-plugin",
+	"homepage": "https://wordpress.org/plugins/wp-polls/",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Lester Chan",
+			"email": "lesterchan@gmail.com"
+		}
+	],
+	"require": {
+		"php": ">=8.2"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9.6",
+		"yoast/phpunit-polyfills": "^2.0"
+	},
+	"scripts": {
+		"test": "phpunit"
+	},
+	"config": {
+		"allow-plugins": false
+	}
 }

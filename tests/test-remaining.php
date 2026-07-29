@@ -209,7 +209,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 			array(
 				'pollq_question' => 'Expired',
 				'pollq_active'   => 1,
-				'pollq_expiry'   => current_time( 'timestamp' ) - HOUR_IN_SECONDS,
+				'pollq_expiry'   => Polls_Core::now() - HOUR_IN_SECONDS,
 			)
 		);
 
@@ -256,7 +256,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 			array(
 				'pollq_question'  => 'Due',
 				'pollq_active'    => -1,
-				'pollq_timestamp' => current_time( 'timestamp' ) - HOUR_IN_SECONDS,
+				'pollq_timestamp' => Polls_Core::now() - HOUR_IN_SECONDS,
 			)
 		);
 
@@ -279,7 +279,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll(
 			array(
 				'pollq_active'    => -1,
-				'pollq_timestamp' => current_time( 'timestamp' ) + DAY_IN_SECONDS,
+				'pollq_timestamp' => Polls_Core::now() + DAY_IN_SECONDS,
 			)
 		);
 
@@ -300,7 +300,7 @@ class Test_Polls_Remaining extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll(
 			array(
 				'pollq_active'    => -1,
-				'pollq_timestamp' => current_time( 'timestamp' ) - HOUR_IN_SECONDS,
+				'pollq_timestamp' => Polls_Core::now() - HOUR_IN_SECONDS,
 			)
 		);
 

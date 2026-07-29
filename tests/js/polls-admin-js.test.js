@@ -24,7 +24,7 @@ const L10N = {
 };
 
 beforeAll( () => {
-	window.pollsAdminL10n = L10N;
+	window.wpPollsAdminL10n = L10N;
 	loadScript( 'js/wp-polls-admin.js' );
 } );
 

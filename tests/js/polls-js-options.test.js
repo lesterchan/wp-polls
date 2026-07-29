@@ -9,7 +9,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { clickAndSettle, loadScript, stubFetch, voteForm } from './helpers.js';
 
 beforeAll( () => {
-	window.pollsL10n = {
+	window.wpPollsL10n = {
 		ajax_url: '/wp-admin/admin-ajax.php',
 		show_loading: '0',
 		show_fading: '0',

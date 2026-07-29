@@ -35,7 +35,7 @@ class Test_Polls_Admin_Writes extends WP_Polls_TestCase {
 	 * @return array
 	 */
 	private function date_fields( $prefix, $offset = 0 ) {
-		$time = current_time( 'timestamp' ) + $offset;
+		$time = Polls_Core::now() + $offset;
 
 		return array(
 			$prefix . '_day'    => gmdate( 'j', $time ),

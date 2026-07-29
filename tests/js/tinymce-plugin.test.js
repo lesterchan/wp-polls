@@ -11,6 +11,7 @@ import { loadScript } from './helpers.js';
 
 let command;
 let editor;
+let button;
 
 beforeAll( () => {
 	// Captured when the script registers itself.
@@ -34,7 +35,9 @@ beforeAll( () => {
 		addCommand: vi.fn( ( name, callback ) => {
 			command = { name, callback };
 		} ),
-		addButton: vi.fn(),
+		addButton: ( name, config ) => {
+			button = { name, config };
+		},
 		insertContent: vi.fn(),
 	};
 	register.callback( editor );
@@ -47,15 +50,12 @@ beforeEach( () => {
 describe( 'registration', () => {
 	it( 'registers the insert command and the toolbar button', () => {
 		expect( command.name ).toBe( 'WP-Polls-Insert_Poll' );
-		expect( editor.addButton ).toHaveBeenCalledWith(
-			'polls',
-			expect.objectContaining( { text: false } ),
-		);
+		expect( button.name ).toBe( 'polls' );
+		expect( button.config.text ).toBe( false );
 	} );
 
 	it( 'runs the command from the button', () => {
-		const [ , config ] = editor.addButton.mock.calls[ 0 ];
-		config.onclick();
+		button.config.onclick();
 
 		expect( window.tinyMCE.activeEditor.execCommand ).toHaveBeenCalledWith(
 			'WP-Polls-Insert_Poll',

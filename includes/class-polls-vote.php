@@ -106,7 +106,7 @@ class Polls_Vote {
 		$log_expiry     = (int) Polls_Options::get( 'cookie_expiry' );
 		$log_expiry_sql = '';
 		if ( $log_expiry > 0 ) {
-			$log_expiry_sql = ' AND (' . current_time( 'timestamp' ) . '-(pollip_timestamp+0)) < ' . $log_expiry;
+			$log_expiry_sql = ' AND (' . Polls_Core::now() . '-(pollip_timestamp+0)) < ' . $log_expiry;
 		}
 		// Check IP From IP Logging Database.
 		$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_ip = %s", $poll_id, self::poll_get_ipaddress() ) . $log_expiry_sql );
@@ -134,7 +134,7 @@ class Polls_Vote {
 		$log_expiry     = (int) Polls_Options::get( 'cookie_expiry' );
 		$log_expiry_sql = '';
 		if ( $log_expiry > 0 ) {
-			$log_expiry_sql = ' AND (' . current_time( 'timestamp' ) . '-(pollip_timestamp+0)) < ' . $log_expiry;
+			$log_expiry_sql = ' AND (' . Polls_Core::now() . '-(pollip_timestamp+0)) < ' . $log_expiry;
 		}
 		// Check User ID From IP Logging Database.
 		$get_voted_aids = $wpdb->get_col( $wpdb->prepare( "SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = %d AND pollip_userid = %d", $poll_id, $pollsip_userid ) . $log_expiry_sql );
@@ -369,7 +369,7 @@ class Polls_Vote {
 		$fp_lock = self::polls_acquire_lock( $poll_id );
 		if ( false === $fp_lock ) {
 			/* translators: %s: value. */
-			throw new InvalidArgumentException( sprintf( __( 'Unable to obtain lock for Poll ID #%s', 'wp-polls' ), $poll_id ) );
+			throw new InvalidArgumentException( esc_html( sprintf( __( 'Unable to obtain lock for Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		$polla_aids = $wpdb->get_col( $wpdb->prepare( "SELECT polla_aid FROM $wpdb->pollsa WHERE polla_qid = %d", $poll_id ) );
@@ -377,35 +377,35 @@ class Polls_Vote {
 
 		if ( ! $is_real ) {
 			/* translators: %s: value. */
-			throw new InvalidArgumentException( sprintf( __( 'Invalid Answer to Poll ID #%s', 'wp-polls' ), $poll_id ) );
+			throw new InvalidArgumentException( esc_html( sprintf( __( 'Invalid Answer to Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		if ( ! self::check_allowtovote() ) {
 			/* translators: %s: value. */
-			throw new InvalidArgumentException( sprintf( __( 'User is not allowed to vote for Poll ID #%s', 'wp-polls' ), $poll_id ) );
+			throw new InvalidArgumentException( esc_html( sprintf( __( 'User is not allowed to vote for Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		if ( empty( $poll_aid_array ) ) {
 			/* translators: %s: value. */
-			throw new InvalidArgumentException( sprintf( __( 'No answers given for Poll ID #%s', 'wp-polls' ), $poll_id ) );
+			throw new InvalidArgumentException( esc_html( sprintf( __( 'No answers given for Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		if ( 0 === $poll_id ) {
 			/* translators: %s: value. */
-			throw new InvalidArgumentException( sprintf( __( 'Invalid Poll ID. Poll ID #%s', 'wp-polls' ), $poll_id ) );
+			throw new InvalidArgumentException( esc_html( sprintf( __( 'Invalid Poll ID. Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		$is_poll_open = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsq WHERE pollq_id = %d AND pollq_active = 1", $poll_id ) );
 
 		if ( 0 === $is_poll_open ) {
 			/* translators: %s: value. */
-			throw new InvalidArgumentException( sprintf( __( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id ) );
+			throw new InvalidArgumentException( esc_html( sprintf( __( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		$check_voted = self::check_voted( $poll_id );
 		if ( ! empty( $check_voted ) ) {
 			/* translators: %s: value. */
-			throw new InvalidArgumentException( sprintf( __( 'You Had Already Voted For This Poll. Poll ID #%s', 'wp-polls' ), $poll_id ) );
+			throw new InvalidArgumentException( esc_html( sprintf( __( 'You Had Already Voted For This Poll. Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		if ( ! empty( $user_identity ) ) {
@@ -420,7 +420,7 @@ class Polls_Vote {
 		$pollip_userid       = $user_ID;
 		$pollip_ip           = self::poll_get_ipaddress();
 		$pollip_host         = self::poll_get_hostname();
-		$pollip_timestamp    = current_time( 'timestamp' );
+		$pollip_timestamp    = Polls_Core::now();
 		$poll_logging_method = (int) Polls_Options::get( 'logging_method' );
 
 		// Only Create Cookie If User Choose Logging Method 1 Or 3.
@@ -444,7 +444,7 @@ class Polls_Vote {
 		$vote_q = $wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+" . count( $poll_aid_array ) . "), pollq_totalvoters = (pollq_totalvoters + 1) WHERE pollq_id = $poll_id AND pollq_active = 1" );
 		if ( ! $vote_q ) {
 			/* translators: %s: value. */
-			throw new InvalidArgumentException( sprintf( __( 'Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls' ), $poll_id ) );
+			throw new InvalidArgumentException( esc_html( sprintf( __( 'Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		foreach ( $poll_aid_array as $polla_aid ) {
@@ -531,8 +531,11 @@ class Polls_Vote {
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						echo self::vote_poll_process( $poll_id, $poll_aid_array );
 					} catch ( Exception $e ) {
-						// Escaped here rather than at each throw site, so the message
-						// is escaped exactly once at the point it reaches the browser.
+						// Escaped at the throw site as well. Every message is plain
+						// text plus an integer poll id, so running it through
+						// esc_html() twice cannot change it, and the alternative is a
+						// path where an exception raised by anything other than this
+						// method reaches the browser unescaped.
 						echo esc_html( $e->getMessage() );
 					}
 					break;

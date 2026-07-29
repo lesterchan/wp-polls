@@ -4,66 +4,57 @@
 
 	<file>.</file>
 
+	<!-- WPCS has no JavaScript sniffs; never let PHPCS touch .js. -->
+	<arg name="extensions" value="php"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
 	<!-- Scanning these makes the CI runner run out of memory. -->
 	<exclude-pattern>/vendor/*</exclude-pattern>
 	<exclude-pattern>/node_modules/*</exclude-pattern>
 
-	<arg name="extensions" value="php"/>
-	<arg name="colors"/>
-	<arg value="ps"/>
+	<rule ref="WordPress"/>
 
-	<rule ref="WordPress">
-		<!-- The plugin owns three tables. There is no core API to use and
-		     nothing to cache, so these two are noise here. -->
-		<exclude name="WordPress.DB.DirectDatabaseQuery.DirectQuery"/>
-		<exclude name="WordPress.DB.DirectDatabaseQuery.NoCaching"/>
-		<!-- Table identifiers cannot be bound, and %i needs WP 6.2. -->
-		<exclude name="WordPress.DB.PreparedSQL.InterpolatedNotPrepared"/>
+	<config name="text_domain" value="wp-polls"/>
+	<config name="minimum_wp_version" value="6.8"/>
+
+	<!--
+		WP-Polls owns three tables - wp_pollsq, wp_pollsa and wp_pollsip - and
+		everything below follows from that. None of it can be fixed in the code,
+		which is the bar the standard sets for an extra rule: there is no core
+		API for a plugin's own tables, no object cache key that would be correct
+		across a vote, and no way to bind a table identifier before WordPress
+		6.2's %i placeholder, which cannot express ORDER BY direction either.
+
+		Kept as ruleset entries rather than inline phpcs:ignore comments so the
+		reasoning lives in one place instead of being repeated at ninety call
+		sites.
+	-->
+	<rule ref="WordPress.DB.DirectDatabaseQuery.DirectQuery">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.DB.DirectDatabaseQuery.NoCaching">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.DB.PreparedSQL.InterpolatedNotPrepared">
+		<severity>0</severity>
 	</rule>
 
-	<!-- The public voting endpoint is nonce-checked by check_ajax_referer()
-	     inside the handler, which the sniff cannot see.
-
-	     Polls_Display only ever reads request data to decide which poll to
-	     render (?pollresult=N, the posted poll_id) and writes nothing, so there
-	     is nothing for a nonce to protect. Every state change goes through
-	     Polls_Vote, which does check one. -->
-	<rule ref="WordPress.Security.NonceVerification">
-		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
-		<exclude-pattern>/includes/class-polls-display.php</exclude-pattern>
-	</rule>
-
-	<!-- Polls_Vote::polls_acquire_lock() takes an flock() advisory lock so two
-	     concurrent votes cannot both read the same tally. WP_Filesystem has no
-	     locking primitive at all — it abstracts over FTP and SSH transports —
-	     so there is nothing to port this to. The deletion does use
-	     wp_delete_file(). -->
-	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fopen">
-		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fwrite">
-		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fclose">
-		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
-	</rule>
-
-	<!-- Creating, indexing and dropping the plugin's own three tables is the
-	     entire job of the installer and the uninstaller. -->
+	<!--
+		Creating, indexing and dropping those three tables is the entire job of
+		the installer and the uninstaller.
+	-->
 	<rule ref="WordPress.DB.DirectDatabaseQuery.SchemaChange">
-		<exclude-pattern>/includes/class-polls-install.php</exclude-pattern>
+		<exclude-pattern>/includes/class-wp-polls-install.php</exclude-pattern>
 		<exclude-pattern>/uninstall.php</exclude-pattern>
 	</rule>
 
-	<!-- manage_polls is this plugin's own capability, granted to administrator
-	     on activation. The sniff only knows core's list. -->
-	<!-- Exception messages from the voting endpoint are escaped once where they
-	     are echoed, in Polls_Vote::vote_poll(), rather than at each of the eight
-	     throw sites. Escaping at both would double encode. -->
-	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
-		<exclude-pattern>/includes/class-polls-vote.php</exclude-pattern>
-	</rule>
-
+	<!--
+		manage_polls is this plugin's own capability, added to the administrator
+		role on activation and preserved by the standard. The sniff only knows
+		core's list, so it has to be told.
+	-->
 	<rule ref="WordPress.WP.Capabilities">
 		<properties>
 			<property name="custom_capabilities" type="array">
@@ -72,42 +63,112 @@
 		</properties>
 	</rule>
 
-	<!-- current_time( 'timestamp' ) is deprecated in favour of time(), but the
-	     two are not interchangeable here: poll timestamps have always been
-	     stored as site-local time and are rendered back with gmdate(). Swapping
-	     in time() would shift every newly created poll by the GMT offset
-	     relative to the rows already in the table. Left alone deliberately. -->
-	<rule ref="WordPress.DateTime.CurrentTimeTimestamp">
-		<severity>0</severity>
+	<!--
+		WP_Polls_Vote::acquire_lock() takes an flock() advisory lock so two
+		concurrent votes cannot both read the same tally. WP_Filesystem has no
+		locking primitive - it abstracts over FTP and SSH transports - so there
+		is nothing to port this to. The deletion does use wp_delete_file().
+	-->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fopen">
+		<exclude-pattern>/includes/class-wp-polls-vote.php</exclude-pattern>
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fwrite">
+		<exclude-pattern>/includes/class-wp-polls-vote.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fclose">
+		<exclude-pattern>/includes/class-wp-polls-vote.php</exclude-pattern>
+		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
 
-	<rule ref="WordPress.WP.I18n">
-		<properties>
-			<property name="text_domain" type="array" value="wp-polls"/>
-		</properties>
+	<!--
+		The public voting endpoint is nonce-checked by check_ajax_referer()
+		inside the handler, which the sniff cannot see. The three screens listed
+		here only read the request to decide what to show - which poll, which
+		page, which log filter - and every write path in them calls
+		check_admin_referer() first.
+	-->
+	<rule ref="WordPress.Security.NonceVerification">
+		<exclude-pattern>/includes/class-wp-polls-vote.php</exclude-pattern>
+		<exclude-pattern>/includes/class-wp-polls-display.php</exclude-pattern>
+		<exclude-pattern>/includes/class-wp-polls-list-table.php</exclude-pattern>
+		<exclude-pattern>/includes/screen-*.php</exclude-pattern>
 	</rule>
 
-	<!-- Tests assemble their own markup and assert on it. -->
+	<!--
+		Everything below relaxes a sniff for the test suite only, and this list
+		is closed: it is identical in all nineteen plugins. A sniff firing in
+		includes/ is a bug in the code, not a missing exclusion - fix the code.
+	-->
+
+	<!-- The tests assert on the plugin's own markup, so they must not escape it. -->
 	<rule ref="WordPress.Security.EscapeOutput">
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
 
-	<!-- The lock tests open and flock() the lock file directly, which is the only
-	     way to simulate a second concurrent voter from one process, and one test
-	     reads a source file to prove a removed function is no longer called. -->
-	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fopen">
+	<!--
+		A test method's name is its documentation - test_a_malformed_range_does_
+		not_ban_everyone() gains nothing from a docblock repeating it. Required
+		everywhere else.
+	-->
+	<rule ref="Squiz.Commenting.FunctionComment.Missing">
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
-	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fclose">
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
+
+	<!--
+		Test files are named test-*.php by WordPress convention rather than
+		class-*.php; the coding standard excepts test classes from that rule.
+	-->
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<!--
+		The tests read wp_options directly to assert which rows the migration
+		left behind. There is no API for "which rows exist".
+	-->
+	<rule ref="WordPress.DB.DirectDatabaseQuery">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<!--
+		The tests drive superglobals to simulate proxy headers and form posts;
+		that is the behaviour under test, not unvalidated input.
+	-->
+	<rule ref="WordPress.Security.ValidatedSanitizedInput">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.NonceVerification">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<!-- The tests read the plugin's own source; WP_Filesystem is not appropriate. -->
 	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
 
-	<!-- The class-*.php file naming rule exempts test classes, which follow
-	     PHPUnit's own test-*.php convention. -->
-	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+	<!--
+		The admin-screen tests install an error handler on purpose: collecting
+		the diagnostics is what makes them more than smoke tests.
+	-->
+	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<!--
+		The settings tests set $hook_suffix, which wp-admin would have set before
+		any page callback ran. WP_List_Table's constructor reaches
+		WP_Screen::get(), which reads that global, so the test bootstrap has to
+		stand in for admin.php.
+
+		Worth re-checking now the floor is WordPress 6.8: this exclusion was
+		added for a much older core, and if current WP guards the read, the
+		tests can drop the assignment and this rule can go.
+	-->
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
 </ruleset>

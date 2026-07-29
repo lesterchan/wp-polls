@@ -19,19 +19,14 @@ export default [
 			globals: {
 				...globals.browser,
 				// Localised into the page by wp_localize_script().
-				pollsL10n: 'readonly',
-				pollsAdminL10n: 'readonly',
+				wpPollsL10n: 'readonly',
+				wpPollsAdminL10n: 'readonly',
 			},
 		},
 		rules: {
-			// Properties stay exempt: the wp_localize_script() objects and the
-			// fields posted to admin-ajax.php are named on the PHP side, so their
-			// keys are snake_case by necessity.
-			camelcase: [ 'error', { properties: 'never' } ],
-
 			// The plugin confirms destructive admin actions and reports vote
-			// validation with the native dialogs. Replacing them means building a
-			// modal, which is a UX change, not a lint fix.
+			// validation with the browser's own dialogs. Replacing them means
+			// building a modal, which is a UX change rather than a lint fix.
 			'no-alert': 'off',
 		},
 		settings: {
@@ -39,13 +34,21 @@ export default [
 		},
 	},
 	{
-		// The TinyMCE button runs inside the editor iframe against TinyMCE's own API.
+		// The Classic Editor button runs inside the editor iframe against
+		// TinyMCE's own API, which is a global the editor puts there.
 		files: [ 'tinymce/**/*.js' ],
 		languageOptions: {
 			globals: {
-				...globals.browser,
 				tinyMCE: 'readonly',
 				tinymce: 'readonly',
+			},
+		},
+	},
+	{
+		files: [ 'tests/js/**/*.test.js' ],
+		languageOptions: {
+			globals: {
+				...globals.node,
 			},
 		},
 	},

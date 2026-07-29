@@ -40,7 +40,7 @@ if ( ! empty( $_POST['do'] ) ) {
 				$pollq_timestamp_minute = isset( $_POST['pollq_timestamp_minute'] ) ? (int) $_POST['pollq_timestamp_minute'] : 0;
 				$pollq_timestamp_second = isset( $_POST['pollq_timestamp_second'] ) ? (int) $_POST['pollq_timestamp_second'] : 0;
 				$pollq_timestamp        = gmmktime( $pollq_timestamp_hour, $pollq_timestamp_minute, $pollq_timestamp_second, $pollq_timestamp_month, $pollq_timestamp_day, $pollq_timestamp_year );
-				if ( $pollq_timestamp > current_time( 'timestamp' ) ) {
+				if ( $pollq_timestamp > Polls_Core::now() ) {
 					$pollq_active = -1;
 				} else {
 					$pollq_active = 1;
@@ -57,7 +57,7 @@ if ( ! empty( $_POST['do'] ) ) {
 					$pollq_expiry_minute = isset( $_POST['pollq_expiry_minute'] ) ? (int) $_POST['pollq_expiry_minute'] : 0;
 					$pollq_expiry_second = isset( $_POST['pollq_expiry_second'] ) ? (int) $_POST['pollq_expiry_second'] : 0;
 					$pollq_expiry        = gmmktime( $pollq_expiry_hour, $pollq_expiry_minute, $pollq_expiry_second, $pollq_expiry_month, $pollq_expiry_day, $pollq_expiry_year );
-					if ( $pollq_expiry <= current_time( 'timestamp' ) ) {
+					if ( $pollq_expiry <= Polls_Core::now() ) {
 						$pollq_active = 0;
 					}
 				}
@@ -220,13 +220,13 @@ $poll_noquestion = 2;
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><?php esc_html_e( 'Start Date/Time', 'wp-polls' ); ?></th>
-				<td><?php Polls_Admin::poll_timestamp( current_time( 'timestamp' ) ); ?></td>
+				<td><?php Polls_Admin::poll_timestamp( Polls_Core::now() ); ?></td>
 			</tr>
 			<tr>
 				<th scope="row"><?php esc_html_e( 'End Date/Time', 'wp-polls' ); ?></th>
 				<td>
 					<input type="checkbox" name="pollq_expiry_no" id="pollq_expiry_no" value="1" checked="checked" data-poll-action="toggle-expiry" />&nbsp;<label for="pollq_expiry_no"><?php esc_html_e( 'Do NOT Expire This Poll', 'wp-polls' ); ?></label>
-					<?php Polls_Admin::poll_timestamp( current_time( 'timestamp' ), 'pollq_expiry', 'none' ); ?>
+					<?php Polls_Admin::poll_timestamp( Polls_Core::now(), 'pollq_expiry', 'none' ); ?>
 				</td>
 			</tr>
 		</table>

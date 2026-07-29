@@ -1,12 +1,10 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
 	"core": null,
-	"plugins": [
-		"."
-	],
-	"port": 8890,
-	"testsPort": 8891,
-	"phpVersion": "7.4",
+	"plugins": [ "." ],
+	"phpVersion": "8.2",
+	"port": 8908,
+	"testsPort": 8909,
 	"config": {
 		"WP_DEBUG": true,
 		"WP_DEBUG_DISPLAY": true,

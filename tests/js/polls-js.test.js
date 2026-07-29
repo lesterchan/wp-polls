@@ -16,7 +16,7 @@ import {
 } from './helpers.js';
 
 beforeAll( () => {
-	window.pollsL10n = {
+	window.wpPollsL10n = {
 		ajax_url: '/wp-admin/admin-ajax.php',
 		show_loading: '1',
 		show_fading: '1',
@@ -86,7 +86,7 @@ describe( 'voting', () => {
 
 		expect( spy ).not.toHaveBeenCalled();
 		expect( window.alert ).toHaveBeenCalledWith(
-			window.pollsL10n.text_valid,
+			window.wpPollsL10n.text_valid,
 		);
 	} );
 

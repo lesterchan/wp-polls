@@ -142,7 +142,7 @@ class Polls_Core {
 	 */
 	public static function cron_polls_status() {
 		global $wpdb;
-		$now = current_time( 'timestamp' );
+		$now = self::now();
 		// Close Poll.
 		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->pollsq SET pollq_active = 0 WHERE pollq_expiry < %d AND pollq_expiry != 0 AND pollq_active != 0", $now ) );
 		// Open Future Polls.
@@ -151,6 +151,22 @@ class Polls_Core {
 		if ( $active_polls ) {
 			Polls_Options::set( 'latest_poll', self::polls_latest_id() );
 		}
+	}
+
+	/**
+	 * The current time as WP-Polls has always stored it.
+	 *
+	 * Poll timestamps are site-local rather than UTC and are rendered back with
+	 * gmdate(), so time() is not a drop-in replacement: it would shift every
+	 * newly created poll by the GMT offset relative to the rows already in the
+	 * table. This spells out what the deprecated current_time( 'timestamp' )
+	 * did, so the intent - site-local, on purpose - is visible rather than
+	 * hidden behind a call WordPress now warns about.
+	 *
+	 * @return int
+	 */
+	public static function now() {
+		return time() + (int) ( (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
 	}
 
 	/**

@@ -63,7 +63,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 				'pollip_aid'       => $answer_id,
 				'pollip_ip'        => Polls_Vote::poll_get_ipaddress(),
 				'pollip_host'      => 'localhost',
-				'pollip_timestamp' => current_time( 'timestamp' ),
+				'pollip_timestamp' => Polls_Core::now(),
 				'pollip_user'      => 'Guest',
 				'pollip_userid'    => $user_id,
 			)
@@ -238,7 +238,7 @@ class Test_Polls_Vote_Guards extends WP_Polls_TestCase {
 		// Push the logged vote back beyond the window.
 		$wpdb->update(
 			$wpdb->pollsip,
-			array( 'pollip_timestamp' => current_time( 'timestamp' ) - 7200 ),
+			array( 'pollip_timestamp' => Polls_Core::now() - 7200 ),
 			array( 'pollip_qid' => $poll_id )
 		);
 

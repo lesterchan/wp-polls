@@ -330,7 +330,7 @@ class Polls_Install {
 				$wpdb->pollsq,
 				array(
 					'pollq_question'  => __( 'How Is My Site?', 'wp-polls' ),
-					'pollq_timestamp' => current_time( 'timestamp' ),
+					'pollq_timestamp' => Polls_Core::now(),
 				),
 				array( '%s', '%s' )
 			);

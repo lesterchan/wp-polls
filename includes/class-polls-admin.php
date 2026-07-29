@@ -366,7 +366,7 @@ class Polls_Admin {
 		// Every branch below is an administrative action. The per-action nonces are
 		// only ever rendered on pages that already require 'manage_polls', but check
 		// the capability itself rather than relying on the nonce for authorisation.
-		if ( ! current_user_can( Polls_Admin::capability() ) ) {
+		if ( ! current_user_can( self::capability() ) ) {
 			wp_die( '', '', array( 'response' => null ) );
 		}
 
