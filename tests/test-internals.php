@@ -264,7 +264,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 			}
 		}
 
-		$this->assertNotContains( 'wp_get_sites', $called, 'the removed function is still called' );
+		$this->assertNotContains( 'wp_get_sites', $called, 'the deprecated, 100-site-capped function is still called' );
 		$this->assertContains( 'get_sites', $called );
 		$this->assertStringContainsString(
 			"get_sites( array( 'number' => 0 ) )",

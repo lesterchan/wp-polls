@@ -17,7 +17,7 @@ require_once __DIR__ . '/includes/class-wp-polls-options.php';
 require_once __DIR__ . '/includes/class-wp-polls-install.php';
 
 if ( is_multisite() ) {
-	// wp_get_sites() was removed in WP 5.1; the floor is 6.8.
+	// get_sites(), not wp_get_sites(): that one is deprecated and capped at 100.
 	//
 	// 'number' => 0 lifts WP_Site_Query's default cap of 100, which would
 	// otherwise stop at the hundredth site and leave every site after it with
