@@ -34,10 +34,12 @@ class WP_Polls_Install {
 	 */
 	public static function activation( $network_wide ) {
 		if ( is_multisite() && $network_wide ) {
-			// wp_get_sites() was removed in WP 5.1, so network activation has
-			// been a fatal error since then. get_sites() replaces it and
-			// returns WP_Site objects rather than arrays. 'number' => 0 lifts
-			// the default limit of 100 sites.
+			// get_sites(), not the wp_get_sites() this used to call. That one has
+			// been deprecated since WP 4.6 and still ships in ms-deprecated.php,
+			// so the old call raised a deprecation notice rather than failing
+			// outright — and silently activated on only the first 100 sites,
+			// because that is its default limit. get_sites() returns WP_Site
+			// objects rather than arrays, and 'number' => 0 lifts the limit.
 			$ms_sites = get_sites( array( 'number' => 0 ) );
 
 			foreach ( $ms_sites as $ms_site ) {

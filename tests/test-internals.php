@@ -232,21 +232,26 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * Network activation walks every site instead of fataling.
+	 * Network activation walks every site, and walks all of them.
 	 *
-	 * The wp_get_sites() helper was removed in WordPress 5.1, so this path was a fatal
-	 * error from 2019 until it was fixed in 3.0.0. The function it now uses has
-	 * to exist and has to lift the default hundred-site limit.
+	 * This used to call wp_get_sites(), which has been deprecated since
+	 * WordPress 4.6 and is capped at 100 sites, so network activation quietly
+	 * skipped every site past the hundredth. 3.0.0 moved to get_sites() with the
+	 * limit lifted.
+	 *
+	 * Deliberately not asserted as `! function_exists( 'wp_get_sites' )`, which
+	 * is what this test used to do. That function was never removed — it still
+	 * ships in ms-deprecated.php — and only *looks* absent on a single site,
+	 * because that file is loaded for multisite alone. So the assertion passed
+	 * for the wrong reason single-site and failed outright as a network.
 	 *
 	 * @return void
 	 */
 	public function test_network_activation_uses_a_function_that_still_exists() {
-		$this->assertFalse( function_exists( 'wp_get_sites' ), 'wp_get_sites() is back; the guard needs revisiting' );
-
 		// get_sites() is declared in ms-blogs.php, which a single site install
 		// never loads, so it only has to exist where the branch actually runs.
 		if ( is_multisite() ) {
-			$this->assertTrue( function_exists( 'get_sites' ) );
+			$this->assertTrue( function_exists( 'get_sites' ), 'get_sites() is missing where the branch runs' );
 		}
 
 		// Checked over tokens rather than raw text: the comment that explains
