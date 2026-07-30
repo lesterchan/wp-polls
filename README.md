@@ -427,7 +427,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 
 ### 3.0.0
 
-**Update WordPress and PHP first.** WP-Polls 3.0.0 requires WordPress 6.8 and PHP 8.2, up from 6.0 and 7.4. A site on an older stack is simply not offered the update, so if WP-Polls has stopped appearing in your updates list, that is why.
+**Update WordPress and PHP first.** WP-Polls 3.0.0 requires WordPress 6.8 and PHP 8.2. A site on an older stack is simply not offered the update, so if WP-Polls has stopped appearing in your updates list, that is why.
 
 **Update WP-Stats at the same time, and the other WP-Stats plugins with it.** Up to now seven plugins shared one `stats_display` row to record which blocks the WP-Stats page shows. Each of them now keeps its own copy and the shared row is deleted by whichever one you update first. WP-Polls treats a missing row as "on", so the worst that happens is a block you have to switch off again — but if a block you wanted is missing after updating, switch it back on from that plugin's own settings screen. For WP-Polls it is **Polls → Settings → WP-Stats**.
 
