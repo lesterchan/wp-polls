@@ -77,10 +77,20 @@ class WP_Polls_Admin {
 	/**
 	 * The top level menu's title, which also names every submenu's hook suffix.
 	 *
+	 * The plugin's own name, per STANDARDS.md 4.1: a site owner installs
+	 * WP-Polls and sees WP-Polls on the Plugins screen, so that is the string to
+	 * look for in the sidebar. The submenus underneath still say what they are --
+	 * Manage Polls, Add Poll, Settings.
+	 *
+	 * Changing this moves every submenu hook suffix with it, from polls_page_* to
+	 * wp-polls_page_*, because WordPress derives that prefix by running the menu
+	 * title through sanitize_title(). That is why hook_suffix() derives it here
+	 * too rather than hardcoding the string.
+	 *
 	 * @return string
 	 */
 	public static function menu_title() {
-		return __( 'Polls', 'wp-polls' );
+		return __( 'WP-Polls', 'wp-polls' );
 	}
 
 	/**
