@@ -1,439 +1,166 @@
 <?php
 /**
- * The checks every one of these plugins carries.
+ * WP-Polls' half of the metadata contract.
  *
- * None of them is about polls. They are the shared contract - readme shape,
- * header fields, option rows, directory layout - and they exist so that a
- * plugin drifting away from its siblings fails a test rather than being
- * noticed a year later by a reader.
+ * The contract itself is Plugin_Metadata_TestCase, a byte-identical copy of
+ * _standards/templates/helper-metadata-testcase.php that every one of the
+ * nineteen plugins carries. Everything shared lives there. What is left here is
+ * what a machine cannot derive from the directory: the version being shipped,
+ * the class prefix, the breaks the Upgrade Notice has to name, and the handful
+ * of hooks that have to reach into WP-Polls' own classes.
  *
  * @package WP-Polls
  */
 
 /**
- * Metadata and layout checks shared by all nineteen plugins.
+ * The shared contract, plus what only WP-Polls can answer.
  */
-class WP_Polls_Metadata_Test extends WP_Polls_TestCase {
+class WP_Polls_Metadata_Test extends Plugin_Metadata_TestCase {
 
 	/**
-	 * Whether uninstall.php ran and the tables need putting back.
+	 * The version this release ships.
 	 *
-	 * @var bool
+	 * Written out rather than read from WP_POLLS_VERSION, so a bump has to be
+	 * made here as well and cannot happen by accident.
+	 *
+	 * @return string
 	 */
-	protected $uninstalled = false;
+	protected function expected_version() {
+		return '3.0.0';
+	}
 
 	/**
-	 * Put the tables back after the uninstall test dropped them.
+	 * The prefix every class the plugin declares carries.
 	 *
-	 * DROP TABLE is not rolled back with the rest of the fixture, because MySQL
-	 * commits DDL, so this is the one test that has to clean up after itself.
+	 * @return string
+	 */
+	protected function class_prefix() {
+		return 'WP_Polls';
+	}
+
+	/**
+	 * Everything a site owner updating from the released version would notice.
+	 *
+	 * The stored XSS fix, the shared stats_display row, the two screens that
+	 * moved, the option rows that were folded up, the two poll templates that
+	 * are overwritten, the renamed stylesheet, the three template functions that
+	 * no longer exist, the class renames and the two renamed L10n objects.
+	 *
+	 * @return string[]
+	 */
+	protected function upgrade_notice_subjects() {
+		return array(
+			'6.8',
+			'8.2',
+			'stats_display',
+			'wp_polls_options',
+			'wp_polls_version',
+			'wp-polls-settings',
+			'polls-options.php',
+			'%POLL_ANSWER_IMAGEWIDTH%',
+			'%POLL_ANSWER_PERCENTAGE%',
+			'%POLL_RESULT_URL%',
+			'polls-css.css',
+			'wp-polls.css',
+			'polls-css-rtl.css',
+			'poll_vote()',
+			'data-poll-action',
+			'onclick',
+			'Polls_Core',
+			'WP_Polls_',
+			'pollsL10n',
+			'wpPollsL10n',
+			'pollsAdminL10n',
+			'wpPollsAdminL10n',
+		);
+	}
+
+	/**
+	 * WP-Polls is one of the seven sharing the WP-Stats surface.
+	 *
+	 * @return bool
+	 */
+	protected function wp_stats_family() {
+		return true;
+	}
+
+	/**
+	 * The one unprefixed WP-Stats row WP-Polls reads but does not own.
+	 *
+	 * The other shared row, stats_mostlimit, is not on the list: WP-Polls never
+	 * read it.
+	 *
+	 * @return string[]
+	 */
+	protected function shared_wp_stats_rows() {
+		return array( WP_Polls_Options::LEGACY_STATS_DISPLAY );
+	}
+
+	/**
+	 * Write the rows uninstall is expected to remove.
 	 *
 	 * @return void
 	 */
-	public function tear_down() {
-		parent::tear_down();
-
-		if ( $this->uninstalled ) {
-			WP_Polls_Install::activate();
-			$this->uninstalled = false;
-		}
+	protected function seed_option_rows() {
+		WP_Polls_Options::save( WP_Polls_Options::defaults() );
+		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
 	}
 
 	/**
-	 * The plugin file, as text.
+	 * Write the wp_polls_version marker row.
 	 *
-	 * @return string
+	 * @return void
 	 */
-	protected function plugin_file() {
-		return file_get_contents( WP_POLLS_DIR . 'wp-polls.php' );
+	protected function write_version_row() {
+		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
 	}
 
 	/**
-	 * The readme, as text.
+	 * Round-trip the settings sanitiser.
 	 *
-	 * @return string
+	 * @param array $input What the settings form is pretending to have posted.
+	 * @return array
 	 */
-	protected function readme() {
-		return file_get_contents( WP_POLLS_DIR . 'README.md' );
+	protected function sanitize_settings( array $input ) {
+		return (array) WP_Polls_Settings::sanitize( $input );
 	}
 
 	/**
-	 * The nine readme header lines, in order.
+	 * A real settings key to send through the sanitiser beside the poison.
 	 *
 	 * @return array
 	 */
-	protected function readme_header() {
-		$lines  = explode( "\n", $this->readme() );
-		$header = array();
-
-		foreach ( array_slice( $lines, 1 ) as $line ) {
-			if ( '' === trim( $line ) ) {
-				break;
-			}
-			$header[] = $line;
-		}
-
-		return $header;
+	protected function settings_fixture() {
+		return array( 'archive' => array( 'per_page' => 9 ) );
 	}
 
 	/**
-	 * One field out of the plugin file header.
+	 * Register the front-end and admin assets.
 	 *
-	 * @param string $field Field name, without the colon.
-	 * @return string
-	 */
-	protected function header_field( $field ) {
-		preg_match( '/^\s*\*\s*' . preg_quote( $field, '/' ) . ':\s*(.+?)\s*$/m', $this->plugin_file(), $matches );
-
-		return isset( $matches[1] ) ? $matches[1] : '';
-	}
-
-	/**
-	 * One field out of the readme header.
+	 * The admin half needs the hook suffix of the plugin's own screen, or it
+	 * returns without registering anything.
 	 *
-	 * @param string $field Field name, without the colon.
-	 * @return string
+	 * @return void
 	 */
-	protected function readme_field( $field ) {
-		preg_match( '/^' . preg_quote( $field, '/' ) . ':\s*(.+?)\s*$/m', $this->readme(), $matches );
-
-		return isset( $matches[1] ) ? $matches[1] : '';
-	}
-
-	public function test_every_readme_header_line_keeps_its_line_break() {
-		$header = $this->readme_header();
-
-		$this->assertCount( 9, $header, 'The readme header is nine fields.' );
-
-		foreach ( array_slice( $header, 0, 8 ) as $line ) {
-			$this->assertStringEndsWith(
-				'  ',
-				$line,
-				'"' . trim( $line ) . '" needs two trailing spaces or the line break is lost'
-			);
-		}
-
-		$last = $header[8];
-		$this->assertSame( rtrim( $last ), $last, 'The last header line takes no trailing spaces.' );
-	}
-
-	public function test_canonical_lesterchan_urls() {
-		$this->assertSame( 'https://lesterchan.net/portfolio/programming/php/', $this->header_field( 'Plugin URI' ) );
-		$this->assertSame( 'https://lesterchan.net', $this->header_field( 'Author URI' ) );
-		$this->assertSame( 'https://lesterchan.net/site/donation/', $this->readme_field( 'Donate link' ) );
-		$this->assertSame( 'https://www.gnu.org/licenses/gpl-2.0.html', $this->header_field( 'License URI' ) );
-		$this->assertSame( 'https://www.gnu.org/licenses/gpl-2.0.html', $this->readme_field( 'License URI' ) );
-	}
-
-	public function test_contributors_is_gamerz_only() {
-		$this->assertSame( 'GamerZ', $this->readme_field( 'Contributors' ), 'Contributors is GamerZ and nothing else.' );
-	}
-
-	public function test_text_domain_is_the_plugin_slug() {
-		$this->assertSame( 'wp-polls', $this->header_field( 'Text Domain' ) );
-		$this->assertSame( '/languages', $this->header_field( 'Domain Path' ) );
-		$this->assertSame( 'wp-polls', WP_POLLS_SLUG );
-	}
-
-	public function test_version_matches_everywhere() {
-		$this->assertSame( WP_POLLS_VERSION, $this->header_field( 'Version' ), 'The plugin header disagrees with WP_POLLS_VERSION.' );
-		$this->assertSame( WP_POLLS_VERSION, $this->readme_field( 'Stable tag' ), 'The readme stable tag disagrees with WP_POLLS_VERSION.' );
-	}
-
-	public function test_requires_headers_match_readme() {
-		$this->assertSame( '6.8', $this->header_field( 'Requires at least' ) );
-		$this->assertSame( '6.8', $this->readme_field( 'Requires at least' ) );
-		$this->assertSame( '8.2', $this->header_field( 'Requires PHP' ) );
-		$this->assertSame( '8.2', $this->readme_field( 'Requires PHP' ) );
-	}
-
-	public function test_readme_sections_are_the_canonical_set() {
-		preg_match_all( '/^## .+$/m', $this->readme(), $matches );
-
-		$this->assertSame(
-			array(
-				'## Description',
-				'## Usage',
-				'## Frequently Asked Questions',
-				'## Screenshots',
-				'## Changelog',
-				'## Upgrade Notice',
-			),
-			array_map( 'rtrim', $matches[0] ),
-			'The level two headings are a closed set, in this order.'
-		);
-	}
-
-	public function test_changelog_prefixes_are_canonical() {
-		$allowed  = array( 'BREAKING:', 'NEW:', 'CHANGED:', 'FIXED:', 'NOTE:' );
-		$readme   = $this->readme();
-		$section  = substr( $readme, strpos( $readme, '## Changelog' ) );
-		$section  = substr( $section, 0, strpos( $section, '## Upgrade Notice' ) );
-		$offences = array();
-
-		foreach ( explode( "\n", $section ) as $line ) {
-			if ( 0 !== strpos( $line, '* ' ) ) {
-				continue;
-			}
-
-			$body = substr( $line, 2 );
-			foreach ( $allowed as $prefix ) {
-				if ( 0 === strpos( $body, $prefix ) ) {
-					continue 2;
-				}
-			}
-
-			$offences[] = substr( $body, 0, 60 );
-		}
-
-		$this->assertSame( array(), $offences, 'Changelog bullets start with one of: ' . implode( ' ', $allowed ) );
-	}
-
-	public function test_no_jquery_is_enqueued() {
+	protected function register_plugin_assets() {
 		WP_Polls::poll_scripts();
 		WP_Polls_Admin::poll_scripts_admin( WP_Polls_Admin::hook_suffix( WP_Polls_Admin::PAGE ) );
-
-		foreach ( wp_scripts()->registered as $handle => $script ) {
-			if ( 0 !== strpos( $handle, 'wp-polls' ) ) {
-				continue;
-			}
-
-			$this->assertNotContains( 'jquery', $script->deps, $handle . ' depends on jQuery' );
-		}
-	}
-
-	public function test_every_directory_has_an_index_php() {
-		$skip    = array( 'node_modules', 'vendor', '.git', '.github', 'languages', 'artifacts' );
-		$missing = array();
-
-		$directories = new RecursiveIteratorIterator(
-			new RecursiveCallbackFilterIterator(
-				new RecursiveDirectoryIterator( WP_POLLS_DIR, FilesystemIterator::SKIP_DOTS ),
-				static function ( $current ) use ( $skip ) {
-					return ! $current->isDir() || ! in_array( $current->getFilename(), $skip, true );
-				}
-			),
-			RecursiveIteratorIterator::SELF_FIRST
-		);
-
-		foreach ( $directories as $entry ) {
-			if ( ! $entry->isDir() || 0 === strpos( $entry->getFilename(), '.' ) ) {
-				continue;
-			}
-
-			if ( ! file_exists( $entry->getPathname() . '/index.php' ) ) {
-				$missing[] = str_replace( WP_POLLS_DIR, '', $entry->getPathname() );
-			}
-		}
-
-		$this->assertSame( array(), $missing, 'Every shipped directory needs a silence-is-golden index.php.' );
-	}
-
-	public function test_uninstall_removes_every_option_row() {
-		global $wpdb;
-
-		WP_Polls_Options::save( WP_Polls_Options::defaults() );
-		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
-
-		$this->uninstalled = true;
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', 'wp-polls/wp-polls.php' );
-		}
-		require_once WP_POLLS_DIR . 'uninstall.php';
-
-		// The multisite half of this is the same run under
-		// phpunit-multisite.xml.dist: uninstall.php loops over get_sites() and
-		// this assertion then covers whichever site the run is on.
-		$survivors = $wpdb->get_col(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'wp\_polls\_%'"
-		);
-
-		$this->assertSame( array(), $survivors, 'Uninstall left rows behind: ' . implode( ', ', $survivors ) );
-	}
-
-	public function test_version_row_holds_exactly_plugin_and_db() {
-		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
-
-		$row = get_option( WP_Polls_Options::VERSION );
-
-		$this->assertIsArray( $row, 'The marker row is an array.' );
-		$this->assertSame( array( 'plugin', 'db' ), array_keys( $row ), 'The marker row holds these two keys and nothing else.' );
-	}
-
-	public function test_settings_sanitizer_never_stores_version_markers() {
-		$clean = WP_Polls_Settings::sanitize(
-			array(
-				'archive'    => array( 'per_page' => 9 ),
-				'version'    => '9.9.9',
-				'db_version' => '99',
-				'versions'   => array( 'plugin' => '9.9.9' ),
-			)
-		);
-
-		foreach ( array( 'version', 'db_version', 'versions' ) as $marker ) {
-			$this->assertArrayNotHasKey(
-				$marker,
-				$clean,
-				'A version marker must never be written into the settings row; that is what wp_polls_version is for.'
-			);
-		}
-
-		$this->assertSame( 9, (int) $clean['archive']['per_page'], 'The sanitiser still cleans what the form did post.' );
-	}
-
-	public function test_no_rtl_stylesheet_is_registered() {
-		WP_Polls::poll_scripts();
-
-		foreach ( wp_styles()->registered as $handle => $style ) {
-			if ( 0 !== strpos( $handle, 'wp-polls' ) ) {
-				continue;
-			}
-
-			$this->assertFalse( wp_styles()->get_data( $handle, 'rtl' ), $handle . ' registers rtl style data' );
-			$this->assertStringNotContainsString( '-rtl.css', $style->src, $handle . ' points at an RTL stylesheet' );
-		}
-
-		$this->assertSame( array(), glob( WP_POLLS_DIR . 'css/*-rtl.css' ), 'No plugin ships an RTL stylesheet.' );
-	}
-	/**
-	 * The plugin root, whatever the checkout is called.
-	 *
-	 * @return string
-	 */
-	protected function metadata_root() {
-		return dirname( __DIR__ );
 	}
 
 	/**
-	 * Every PHP file the plugin ships, concatenated.
+	 * The sanitiser still cleans what the form did post.
 	 *
-	 * @return string
-	 */
-	protected function metadata_source() {
-		$source = '';
-
-		foreach ( (array) glob( $this->metadata_root() . '/*.php' ) as $file ) {
-			$source .= (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading the plugin's own source in a test.
-		}
-
-		foreach ( (array) glob( $this->metadata_root() . '/includes/*.php' ) as $file ) {
-			$source .= (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading the plugin's own source in a test.
-		}
-
-		return $this->without_comments( $source );
-	}
-
-	/**
-	 * The same source with every comment removed.
-	 *
-	 * A test that greps the source for a call it does not want finds the comment
-	 * explaining why the call is absent, and fails the plugin for documenting
-	 * itself. wp-sweep says "There is no load_plugin_textdomain() call" and was
-	 * failed for saying so. Tokenising is the only honest way to tell code from
-	 * prose about code.
-	 *
-	 * @param string $source PHP source.
-	 * @return string
-	 */
-	protected function without_comments( $source ) {
-		$code = '';
-
-		foreach ( token_get_all( $source ) as $token ) {
-			if ( is_array( $token ) ) {
-				if ( T_COMMENT === $token[0] || T_DOC_COMMENT === $token[0] ) {
-					continue;
-				}
-				$code .= $token[1];
-				continue;
-			}
-
-			$code .= $token;
-		}
-
-		return $code;
-	}
-
-	/**
-	 * The GPL text ships with the plugin.
+	 * The shared test proves the markers are dropped; that alone would also pass
+	 * a sanitiser that returned an empty array, so the fixture key has to come
+	 * out the other side as well.
 	 *
 	 * @return void
 	 */
-	public function test_the_gpl_licence_is_shipped() {
-		$licence = (string) file_get_contents( $this->metadata_root() . '/LICENSE' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading the plugin's own licence in a test.
-
-		$this->assertStringContainsString( 'GNU GENERAL PUBLIC LICENSE', $licence, 'The GPL text must ship with the plugin.' );
-		$this->assertStringContainsString( 'Version 2, June 1991', $licence, 'The licence must be GPLv2, matching the plugin header.' );
-	}
-
-	/**
-	 * The plugin header fields appear in the canonical order.
-	 *
-	 * @return void
-	 */
-	public function test_the_plugin_header_fields_are_in_the_canonical_order() {
-		$expected = array(
-			'Plugin Name',
-			'Plugin URI',
-			'Description',
-			'Version',
-			'Requires at least',
-			'Requires PHP',
-			'Author',
-			'Author URI',
-			'License',
-			'License URI',
-			'Text Domain',
-			'Domain Path',
+	public function test_the_sanitizer_keeps_cleaning_what_the_form_posted() {
+		$clean = $this->sanitize_settings(
+			array_merge( $this->settings_fixture(), array( 'version' => '9.9.9' ) )
 		);
 
-		// The main file is named for the directory, which is what wordpress.org
-		// installs it as.
-		$main = $this->metadata_root() . '/' . basename( $this->metadata_root() ) . '.php';
-		$this->assertFileExists( $main, 'The main plugin file is named after the plugin directory.' );
-
-		preg_match( '#^<\?php\s*/\*\*(.+?)\*/#s', (string) file_get_contents( $main ), $matches ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading the plugin's own source in a test.
-		$this->assertNotEmpty( $matches, 'The plugin file must open with a docblock header.' );
-
-		preg_match_all( '/^\s*\*\s*([A-Z][A-Za-z ]*?):\s/m', $matches[1], $fields );
-
-		$this->assertSame( $expected, $fields[1], 'Plugin header fields must appear in the canonical order.' );
-	}
-
-	/**
-	 * The plugin leaves loading its translations to WordPress.
-	 *
-	 * @return void
-	 */
-	public function test_the_plugin_does_not_load_its_own_textdomain() {
-		// WordPress has loaded translations for wordpress.org plugins itself
-		// since 4.6, so a load_plugin_textdomain() call is dead weight that
-		// also fires before the plugin is on the translation server.
-		$this->assertStringNotContainsString(
-			'load_plugin_textdomain',
-			$this->metadata_source(),
-			'WordPress loads the textdomain itself since 4.6.'
-		);
-	}
-
-	/**
-	 * No build, editor or translation artefacts ship.
-	 *
-	 * @return void
-	 */
-	public function test_no_abandoned_build_or_translation_artefacts_ship() {
-		$root = $this->metadata_root();
-
-		$this->assertFileDoesNotExist( $root . '/.travis.yml', 'CI is GitHub Actions.' );
-		$this->assertFileDoesNotExist( $root . '/.wp-env.override.json', 'A personal wp-env override must not ship.' );
-		$this->assertDirectoryDoesNotExist( $root . '/languages', 'translate.wordpress.org builds the catalogue.' );
-		$this->assertDirectoryDoesNotExist( $root . '/.idea', 'Editor settings must not ship.' );
-
-		foreach ( array( 'pot', 'po', 'mo' ) as $extension ) {
-			$this->assertSame(
-				array(),
-				(array) glob( $root . '/*.' . $extension ),
-				"No .{$extension} files: translate.wordpress.org builds the catalogue."
-			);
-		}
+		$this->assertSame( 9, (int) $clean['archive']['per_page'], 'The sanitiser dropped the field the form posted.' );
 	}
 }
