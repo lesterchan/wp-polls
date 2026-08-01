@@ -203,7 +203,7 @@ class WP_Polls_Metadata_Test extends WP_Polls_TestCase {
 	}
 
 	public function test_every_directory_has_an_index_php() {
-		$skip    = array( 'node_modules', 'vendor', '.git', '.github', 'languages' );
+		$skip    = array( 'node_modules', 'vendor', '.git', '.github', 'languages', 'artifacts' );
 		$missing = array();
 
 		$directories = new RecursiveIteratorIterator(
