@@ -42,12 +42,29 @@
 .wp-polls-ans ul li::before {
 	content: '';
 }
-.wp-polls label,
-.wp-polls input {
+/* The answer text sits beside its control rather than under it. A theme that
+   makes every label a block would otherwise put each answer on its own line,
+   below the radio it belongs to. */
+.wp-polls label {
 	display: inline;
-	border: 0;
-	padding: 0;
-	margin: 0;
+}
+
+/* The controls themselves are the theme's business.
+ *
+ * This rule used to reset display, border, padding and margin on every input
+ * inside a poll, which breaks any theme that draws its own radio -- and the
+ * bundled ones all do. With appearance: none an input is a non-replaced inline
+ * box, and width and height do not apply to those, so display: inline threw
+ * away the size the theme had set; border: 0 then erased the ring it drew the
+ * circle with. Twenty Twenty-One's 25px circles came out as 6px slivers,
+ * stretched to the line height.
+ *
+ * Nothing here needed that reset. The vote button carries its own border and
+ * background a few rules down, and the list chrome is neutralised above. All
+ * the poll actually wants is a gap between a control and the words next to it. */
+.wp-polls input[type="radio"],
+.wp-polls input[type="checkbox"] {
+	margin-inline-end: 0.4em;
 }
 .wp-polls-ul {
 	padding: 0;
