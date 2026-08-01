@@ -386,7 +386,7 @@ class WP_Polls_Settings {
 
 		add_settings_field(
 			'poll_ip_header',
-			__( 'Header That Contains The IP:', 'wp-polls' ),
+			__( 'Header That Contains The IP', 'wp-polls' ),
 			array( __CLASS__, 'field_text' ),
 			$page,
 			self::SECTION_LOGGING,
