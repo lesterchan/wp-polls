@@ -204,7 +204,7 @@ class WP_Polls_Settings {
 
 		add_settings_field(
 			'poll_bar_style',
-			__( 'Appearance', 'wp-polls' ),
+			__( 'Poll Bar Type', 'wp-polls' ),
 			array( __CLASS__, 'field_bar_style' ),
 			$page,
 			self::SECTION_BAR
@@ -265,7 +265,7 @@ class WP_Polls_Settings {
 		);
 
 		// --- Sorting Of Poll Answers -----------------------------------------
-		add_settings_section( self::SECTION_ANSWERS_SORT, __( 'Sorting Of Poll Answers', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_ANSWERS_SORT, __( 'Answer Order', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_ans_sortby',
@@ -294,7 +294,7 @@ class WP_Polls_Settings {
 		);
 
 		// --- Sorting Of Poll Results -----------------------------------------
-		add_settings_section( self::SECTION_RESULTS_SORT, __( 'Sorting Of Poll Results', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_RESULTS_SORT, __( 'Result Order', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_result_sortby',
@@ -399,7 +399,7 @@ class WP_Polls_Settings {
 		);
 
 		// --- Poll Archive -----------------------------------------------------
-		add_settings_section( self::SECTION_ARCHIVE, __( 'Poll Archive', 'wp-polls' ), array( __CLASS__, 'section_archive' ), $page );
+		add_settings_section( self::SECTION_ARCHIVE, __( 'Archive', 'wp-polls' ), array( __CLASS__, 'section_archive' ), $page );
 
 		add_settings_field(
 			'poll_archive_perpage',
@@ -462,11 +462,11 @@ class WP_Polls_Settings {
 		);
 
 		// --- Current Active Poll ----------------------------------------------
-		add_settings_section( self::SECTION_CURRENT, __( 'Current Active Poll', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_CURRENT, __( 'Current Poll', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_currentpoll',
-			__( 'Current Active Poll', 'wp-polls' ),
+			__( 'Current Poll', 'wp-polls' ),
 			array( __CLASS__, 'field_current_poll' ),
 			$page,
 			self::SECTION_CURRENT,
