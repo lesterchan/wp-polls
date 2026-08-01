@@ -213,10 +213,10 @@ class WP_Polls_Display {
 			$temp_pollvote .= "\t</form>\n";
 			$temp_pollvote .= "</div>\n";
 			if ( $display_loading ) {
-				$poll_ajax_style = WP_Polls_Options::get( 'ajax' );
-				if ( 1 === (int) $poll_ajax_style['loading'] ) {
-					$temp_pollvote .= self::loading_markup( $poll_question_id );
-				}
+				// Always. Telling somebody their vote is in flight is feedback,
+				// not decoration, and a setting to switch feedback off is a
+				// setting whose "off" position is a worse plugin.
+				$temp_pollvote .= self::loading_markup( $poll_question_id );
 			}
 		} else {
 			$temp_pollvote .= removeslashes( WP_Polls_Options::get( 'templates.disable' ) );
@@ -529,10 +529,7 @@ class WP_Polls_Display {
 			$temp_pollresult .= "\t\t<input type=\"hidden\" id=\"poll_{$poll_question_id}_nonce\" name=\"wp-polls-nonce\" value=\"" . wp_create_nonce( 'poll_' . $poll_question_id . '-nonce' ) . "\" />\n";
 			$temp_pollresult .= "</div>\n";
 			if ( $display_loading ) {
-				$poll_ajax_style = WP_Polls_Options::get( 'ajax' );
-				if ( 1 === (int) $poll_ajax_style['loading'] ) {
-					$temp_pollresult .= self::loading_markup( $poll_question_id );
-				}
+				$temp_pollresult .= self::loading_markup( $poll_question_id );
 			}
 		} else {
 			$temp_pollresult .= removeslashes( WP_Polls_Options::get( 'templates.disable' ) );

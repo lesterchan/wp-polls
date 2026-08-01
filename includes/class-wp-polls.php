@@ -54,7 +54,6 @@ class WP_Polls {
 		$pollbar_css .= "\t" . '--wp-polls-bar-image: ' . self::bar_image( $pollbar['style'] ) . ';' . "\n";
 		$pollbar_css .= '}' . "\n";
 		wp_add_inline_style( 'wp-polls', $pollbar_css );
-		$poll_ajax_style = WP_Polls_Options::get( 'ajax' );
 		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'js/wp-polls.js', array(), WP_POLLS_VERSION, true );
 		wp_localize_script(
 			'wp-polls',
@@ -64,8 +63,6 @@ class WP_Polls {
 				'text_wait'     => __( 'Your last request is still being processed. Please wait a while ...', 'wp-polls' ),
 				'text_valid'    => __( 'Please choose a valid poll answer.', 'wp-polls' ),
 				'text_multiple' => __( 'Maximum number of choices allowed: ', 'wp-polls' ),
-				'show_loading'  => (int) $poll_ajax_style['loading'],
-				'show_fading'   => (int) $poll_ajax_style['fading'],
 			)
 		);
 	}

@@ -90,7 +90,6 @@ class WP_Polls_Options {
 	public static function legacy_map() {
 		$map = array(
 			'poll_bar'                  => 'bar',
-			'poll_ajax_style'           => 'ajax',
 			'poll_ans_sortby'           => 'sort.answers_by',
 			'poll_ans_sortorder'        => 'sort.answers_order',
 			'poll_ans_result_sortby'    => 'sort.results_by',
@@ -101,7 +100,7 @@ class WP_Polls_Options {
 			'poll_currentpoll'          => 'current_poll',
 			'poll_latestpoll'           => 'latest_poll',
 			'poll_close'                => 'close',
-			'poll_logging_method'       => 'logging_method',
+			'poll_logging_method'       => 'check_method',
 			'poll_cookielog_expiry'     => 'cookie_expiry',
 			'poll_allowtovote'          => 'allow_to_vote',
 		);
@@ -240,44 +239,40 @@ class WP_Polls_Options {
 	 */
 	public static function defaults() {
 		return array(
-			'templates'      => WP_Polls_Template::defaults(),
+			'templates'     => WP_Polls_Template::defaults(),
 			// These mirror the pre-3.0.0 add_option() calls exactly. Changing any
 			// of them silently changes what a fresh install looks like.
 			// 'gradient' rather than the pre-3.0.0 'default': that default was the
 			// images/default/pollbg.gif tile, a light-to-dark shade, so gradient is
 			// the value that leaves a fresh install looking the same.
-			'bar'            => array(
+			'bar'           => array(
 				'style'      => 'gradient',
 				'background' => 'd8e1eb',
 				'border'     => 'c8c8c8',
 				'height'     => 8,
 			),
-			'ajax'           => array(
-				'loading' => 1,
-				'fading'  => 1,
-			),
-			'sort'           => array(
+			'sort'          => array(
 				'answers_by'    => 'polla_aid',
 				'answers_order' => 'asc',
 				'results_by'    => 'polla_votes',
 				'results_order' => 'desc',
 			),
-			'archive'        => array(
+			'archive'       => array(
 				'per_page'     => 5,
 				'display_poll' => 2,
 				'url'          => site_url( 'pollsarchive' ),
 			),
-			'current_poll'   => 0,
-			'latest_poll'    => 1,
-			'close'          => 1,
-			'logging_method' => 3,
-			'cookie_expiry'  => 0,
-			'allow_to_vote'  => 2,
-			'ip_header'      => '',
+			'current_poll'  => 0,
+			'latest_poll'   => 1,
+			'close'         => 1,
+			'check_method'  => 3,
+			'cookie_expiry' => 0,
+			'allow_to_vote' => 2,
+			'ip_header'     => '',
 			// Whether WP-Polls contributes a section to WP-Stats. Owned here
 			// rather than in the shared stats_display row WP-Stats used to
 			// keep, so no plugin can read or clobber another's toggle.
-			'stats_display'  => true,
+			'stats_display' => true,
 		);
 	}
 
@@ -410,6 +405,29 @@ class WP_Polls_Options {
 		if ( is_array( $legacy_row ) ) {
 			$values = self::merge( $values, $legacy_row );
 		}
+
+		/*
+		 * The key is 'check_method' now, not 'logging_method', and the AJAX
+		 * style toggles are gone.
+		 *
+		 * Here rather than after the loop below, and unconditional rather than
+		 * guarded on check_method being unset: $values was seeded from all(),
+		 * so every default key is already present and "is it missing" is never
+		 * true. Renaming first lets the released poll_logging_method row still
+		 * win in the loop, which is the rule the whole migration follows.
+		 *
+		 * Only a 3.0.0 beta ever wrote these names into the consolidated array;
+		 * the released install keeps them in rows of their own. The numbers are
+		 * unchanged -- what moved is the name, because the setting never chose
+		 * whether to log anything.
+		 */
+		if ( isset( $values['logging_method'] ) ) {
+			$values['check_method'] = $values['logging_method'];
+
+			unset( $values['logging_method'] );
+		}
+
+		unset( $values['ajax'] );
 
 		foreach ( self::legacy_map() as $legacy => $path ) {
 			$stored = get_option( $legacy, null );

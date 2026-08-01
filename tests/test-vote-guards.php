@@ -125,7 +125,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_logging_off_never_reports_a_previous_vote() {
-		WP_Polls_Options::set( 'logging_method', 0 );
+		WP_Polls_Options::set( 'check_method', 0 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -143,7 +143,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_logging_reads_the_cookie() {
-		WP_Polls_Options::set( 'logging_method', 1 );
+		WP_Polls_Options::set( 'check_method', 1 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -160,7 +160,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_logging_is_per_poll() {
-		WP_Polls_Options::set( 'logging_method', 1 );
+		WP_Polls_Options::set( 'check_method', 1 );
 		$first  = $this->make_poll();
 		$second = $this->make_poll();
 
@@ -175,7 +175,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_values_are_cast_to_integers() {
-		WP_Polls_Options::set( 'logging_method', 1 );
+		WP_Polls_Options::set( 'check_method', 1 );
 		$poll_id = $this->make_poll();
 
 		$_COOKIE[ 'voted_' . $poll_id ] = '3,<script>alert(1)</script>,7';
@@ -191,7 +191,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_ip_logging_finds_a_previous_vote() {
-		WP_Polls_Options::set( 'logging_method', 2 );
+		WP_Polls_Options::set( 'check_method', 2 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -208,7 +208,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_ip_logging_is_per_address() {
-		WP_Polls_Options::set( 'logging_method', 2 );
+		WP_Polls_Options::set( 'check_method', 2 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -227,7 +227,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	public function test_ip_logging_respects_the_expiry() {
 		global $wpdb;
 
-		WP_Polls_Options::set( 'logging_method', 2 );
+		WP_Polls_Options::set( 'check_method', 2 );
 		WP_Polls_Options::set( 'cookie_expiry', 3600 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
@@ -253,7 +253,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_and_ip_prefers_the_cookie() {
-		WP_Polls_Options::set( 'logging_method', 3 );
+		WP_Polls_Options::set( 'check_method', 3 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -269,7 +269,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_cookie_and_ip_falls_back_to_the_address() {
-		WP_Polls_Options::set( 'logging_method', 3 );
+		WP_Polls_Options::set( 'check_method', 3 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -287,7 +287,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_clearing_the_cookie_does_not_allow_another_vote() {
-		WP_Polls_Options::set( 'logging_method', 3 );
+		WP_Polls_Options::set( 'check_method', 3 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -307,7 +307,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_username_logging_blocks_guests_outright() {
-		WP_Polls_Options::set( 'logging_method', 4 );
+		WP_Polls_Options::set( 'check_method', 4 );
 		$poll_id = $this->make_poll();
 
 		wp_set_current_user( 0 );
@@ -323,7 +323,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	public function test_username_logging_allows_a_new_user() {
 		global $user_ID;
 
-		WP_Polls_Options::set( 'logging_method', 4 );
+		WP_Polls_Options::set( 'check_method', 4 );
 		$poll_id = $this->make_poll();
 
 		$user_id = self::factory()->user->create();
@@ -341,7 +341,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	public function test_username_logging_finds_the_user_from_a_new_address() {
 		global $user_ID;
 
-		WP_Polls_Options::set( 'logging_method', 4 );
+		WP_Polls_Options::set( 'check_method', 4 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
@@ -365,7 +365,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 	public function test_username_logging_is_per_user() {
 		global $user_ID;
 
-		WP_Polls_Options::set( 'logging_method', 4 );
+		WP_Polls_Options::set( 'check_method', 4 );
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 

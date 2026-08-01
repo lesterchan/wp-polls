@@ -9,11 +9,26 @@
 	'use strict';
 
 	const l10n = window.wpPollsL10n || {};
-	const showLoading = parseInt( l10n.show_loading, 10 ) > 0;
-	const showFading = parseInt( l10n.show_fading, 10 ) > 0;
 
 	// Matches the fade duration used before.
 	const FADE_DURATION = 400;
+
+	/**
+	 * Whether the visitor has asked for less movement.
+	 *
+	 * The fade is an inline transition, so a stylesheet media query cannot
+	 * reach it the way it reaches the spinner and the result bars -- an inline
+	 * style wins. Read here instead, and read on every call rather than once at
+	 * load, because the setting can change while the page is open.
+	 *
+	 * @return {boolean} True when motion should be skipped.
+	 */
+	function prefersReducedMotion() {
+		return (
+			typeof window.matchMedia === 'function' &&
+			window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches
+		);
+	}
 
 	// The Poll Container For A Given Poll
 	function pollContainer( currentPollId ) {
@@ -34,10 +49,16 @@
 
 	// Fade An Element To The Given Opacity
 	function fadeTo( element, opacity ) {
-		if ( element ) {
-			element.style.transition = 'opacity ' + FADE_DURATION + 'ms';
-			element.style.opacity = opacity;
+		if ( ! element ) {
+			return;
 		}
+
+		// Straight to the end state when motion is unwelcome: the poll still
+		// dims, it just does not travel there.
+		element.style.transition = prefersReducedMotion()
+			? ''
+			: 'opacity ' + FADE_DURATION + 'ms';
+		element.style.opacity = opacity;
 	}
 
 	// Make Sure A Poll Is Fully Visible
@@ -117,12 +138,8 @@
 			} );
 		}
 
-		if ( showFading ) {
-			fadeTo( pollContainer( currentPollId ), 0 );
-		}
-		if ( showLoading ) {
-			setLoading( currentPollId, true );
-		}
+		fadeTo( pollContainer( currentPollId ), 0 );
+		setLoading( currentPollId, true );
 
 		fetch( l10n.ajax_url, {
 			method: 'POST',
@@ -172,15 +189,11 @@
 			);
 		}
 
-		if ( showLoading ) {
-			setLoading( currentPollId, false );
-		}
+		setLoading( currentPollId, false );
 
-		if ( showFading ) {
-			// The old poll was faded out and has now been thrown away, so all that
-			// is left to do is make sure the markup that replaced it is visible.
-			show( pollContainer( currentPollId ) );
-		}
+		// The old poll was faded out and has now been thrown away, so all that is
+		// left to do is make sure the markup that replaced it is visible.
+		show( pollContainer( currentPollId ) );
 	}
 
 	// On Click Events

@@ -164,7 +164,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$answers = $this->answer_ids( $poll_id );
 
 		WP_Polls_Options::set( 'allow_to_vote', 2 );
-		WP_Polls_Options::set( 'logging_method', 0 );
+		WP_Polls_Options::set( 'check_method', 0 );
 
 		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 
@@ -181,7 +181,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$answers = $this->answer_ids( $poll_id );
 
 		WP_Polls_Options::set( 'allow_to_vote', 2 );
-		WP_Polls_Options::set( 'logging_method', 0 );
+		WP_Polls_Options::set( 'check_method', 0 );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Taking a second flock() on the lock file is the only way to simulate a concurrent voter from one process.
 		$holder = fopen( WP_Polls_Vote::polls_lock_file( $poll_id ), 'w+' );
@@ -491,11 +491,12 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		$data = wp_scripts()->get_data( 'wp-polls', 'data' );
 
-		// wp_localize_script() stringifies every value, which is why the script
-		// reads them back through parseInt().
-		$this->assertStringContainsString( '"show_loading":"1"', $data );
-		$this->assertStringContainsString( '"show_fading":"0"', $data );
 		$this->assertStringContainsString( 'admin-ajax.php', $data );
+
+		// The two AJAX style flags are gone. The loading indicator always shows,
+		// and the fade asks prefers-reduced-motion rather than an option.
+		$this->assertStringNotContainsString( 'show_loading', $data, 'the AJAX style flags are back' );
+		$this->assertStringNotContainsString( 'show_fading', $data, 'the AJAX style flags are back' );
 	}
 
 	// --- small helpers ----------------------------------------------------

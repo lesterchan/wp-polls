@@ -98,7 +98,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 		$this->assertSame( '<ul>CUSTOM %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
 		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.answers_by' ) );
 		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( 2, (int) WP_Polls_Options::get( 'logging_method' ) );
+		$this->assertSame( 2, (int) WP_Polls_Options::get( 'check_method' ) );
 		// 'aqua' was an images/ directory, and those are gone, so the bar upgrade
 		// maps it onto the gradient. The height beside it is carried across
 		// untouched, which is what this test is really about.

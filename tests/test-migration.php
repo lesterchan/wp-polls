@@ -66,13 +66,6 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 				'height'     => 12,
 			)
 		);
-		update_option(
-			'poll_ajax_style',
-			array(
-				'loading' => 0,
-				'fading'  => 0,
-			)
-		);
 		update_option( 'poll_options', array( 'ip_header' => 'HTTP_X_FORWARDED_FOR' ) );
 	}
 
@@ -102,7 +95,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
 		$this->assertSame( 3, (int) WP_Polls_Options::get( 'archive.display_poll' ) );
 		$this->assertSame( 3, (int) WP_Polls_Options::get( 'close' ) );
-		$this->assertSame( 2, (int) WP_Polls_Options::get( 'logging_method' ) );
+		$this->assertSame( 2, (int) WP_Polls_Options::get( 'check_method' ) );
 		$this->assertSame( 86400, (int) WP_Polls_Options::get( 'cookie_expiry' ) );
 		$this->assertSame( 1, (int) WP_Polls_Options::get( 'allow_to_vote' ) );
 		$this->assertSame( 2, (int) WP_Polls_Options::get( 'current_poll' ) );
@@ -485,5 +478,36 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->run_upgrade();
 
 		$this->assertSame( '<li>EDITED AFTERWARDS</li>', WP_Polls_Options::get( 'templates.resultbody' ) );
+	}
+	/**
+	 * A 3.0.0 beta row carrying the old key names is brought forward.
+	 *
+	 * The released row is poll_logging_method, which the legacy map folds
+	 * straight into check_method. This is the other shape: a consolidated array
+	 * written by a beta, holding the old name inside it. Left behind, the site
+	 * would silently fall back to checking by cookie and IP -- and would keep an
+	 * 'ajax' key nothing reads.
+	 */
+	public function test_a_beta_row_is_brought_forward() {
+		update_option(
+			WP_Polls_Options::LEGACY_OPTION,
+			array(
+				'logging_method' => 4,
+				'ajax'           => array(
+					'loading' => 0,
+					'fading'  => 0,
+				),
+			)
+		);
+
+		WP_Polls_Options::migrate_from_legacy_rows();
+		WP_Polls_Options::flush();
+
+		$this->assertSame( 4, (int) WP_Polls_Options::get( 'check_method' ), 'the beta key was not carried into check_method' );
+
+		$all = WP_Polls_Options::all();
+
+		$this->assertArrayNotHasKey( 'logging_method', $all, 'the old key survived the migration' );
+		$this->assertArrayNotHasKey( 'ajax', $all, 'the AJAX style key survived the migration' );
 	}
 }

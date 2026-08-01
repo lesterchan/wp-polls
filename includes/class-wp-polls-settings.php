@@ -61,7 +61,6 @@ class WP_Polls_Settings {
 	 * @var string
 	 */
 	const SECTION_BAR          = 'wp_polls_bar';
-	const SECTION_AJAX         = 'wp_polls_ajax';
 	const SECTION_ANSWERS_SORT = 'wp_polls_answers_sort';
 	const SECTION_RESULTS_SORT = 'wp_polls_results_sort';
 	const SECTION_VOTE         = 'wp_polls_vote';
@@ -265,35 +264,6 @@ class WP_Polls_Settings {
 			self::SECTION_BAR
 		);
 
-		// --- Polls AJAX Style -------------------------------------------------
-		add_settings_section( self::SECTION_AJAX, __( 'Polls AJAX Style', 'wp-polls' ), '__return_false', $page );
-
-		add_settings_field(
-			'poll_ajax_loading',
-			__( 'Show Loading Image With Text', 'wp-polls' ),
-			array( __CLASS__, 'field_select' ),
-			$page,
-			self::SECTION_AJAX,
-			array(
-				'label_for' => 'poll_ajax_loading',
-				'path'      => 'ajax.loading',
-				'options'   => $yes_no,
-			)
-		);
-
-		add_settings_field(
-			'poll_ajax_fading',
-			__( 'Show Fading In And Fading Out Of Poll', 'wp-polls' ),
-			array( __CLASS__, 'field_select' ),
-			$page,
-			self::SECTION_AJAX,
-			array(
-				'label_for' => 'poll_ajax_fading',
-				'path'      => 'ajax.fading',
-				'options'   => $yes_no,
-			)
-		);
-
 		// --- Sorting Of Poll Answers -----------------------------------------
 		add_settings_section( self::SECTION_ANSWERS_SORT, __( 'Sorting Of Poll Answers', 'wp-polls' ), '__return_false', $page );
 
@@ -372,39 +342,45 @@ class WP_Polls_Settings {
 			)
 		);
 
-		// --- Logging Method ---------------------------------------------------
-		add_settings_section( self::SECTION_LOGGING, __( 'Logging Method', 'wp-polls' ), '__return_false', $page );
+		// --- Repeat votes -----------------------------------------------------
+		add_settings_section( self::SECTION_LOGGING, __( 'Repeat Votes', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
-			'poll_logging_method',
-			__( 'Poll Logging Method:', 'wp-polls' ),
+			'poll_check_method',
+			__( 'Check For Repeat Votes:', 'wp-polls' ),
 			array( __CLASS__, 'field_select' ),
 			$page,
 			self::SECTION_LOGGING,
 			array(
-				'label_for' => 'poll_logging_method',
-				'path'      => 'logging_method',
-				'options'   => array(
-					0 => __( 'Do Not Log', 'wp-polls' ),
-					1 => __( 'Logged By Cookie', 'wp-polls' ),
-					2 => __( 'Logged By IP', 'wp-polls' ),
-					3 => __( 'Logged By Cookie And IP', 'wp-polls' ),
-					4 => __( 'Logged By Username', 'wp-polls' ),
+				'label_for'   => 'poll_check_method',
+				'path'        => 'check_method',
+				// The stored numbers are unchanged: 1 has meant the cookie and 2
+				// the address since long before this screen was rewritten, and
+				// renumbering them would quietly reinterpret the setting on
+				// every existing site.
+				'options'     => array(
+					0 => __( 'Do Not Check', 'wp-polls' ),
+					1 => __( 'Check By Cookie', 'wp-polls' ),
+					2 => __( 'Check By IP Address', 'wp-polls' ),
+					3 => __( 'Check By Cookie And IP Address', 'wp-polls' ),
+					4 => __( 'Check By Username', 'wp-polls' ),
 				),
+				'description' => array( __CLASS__, 'describe_check_method' ),
 			)
 		);
 
 		add_settings_field(
 			'poll_cookielog_expiry',
-			__( 'Expiry Time For Cookie And Log:', 'wp-polls' ),
+			__( 'Remember A Voter For:', 'wp-polls' ),
 			array( __CLASS__, 'field_text' ),
 			$page,
 			self::SECTION_LOGGING,
 			array(
-				'label_for'  => 'poll_cookielog_expiry',
-				'path'       => 'cookie_expiry',
-				'class_name' => 'small-text',
-				'after'      => __( 'seconds (0 to disable)', 'wp-polls' ),
+				'label_for'   => 'poll_cookielog_expiry',
+				'path'        => 'cookie_expiry',
+				'class_name'  => 'small-text',
+				'after'       => __( 'seconds (0 to remember indefinitely)', 'wp-polls' ),
+				'description' => array( __CLASS__, 'describe_vote_expiry' ),
 			)
 		);
 
@@ -992,13 +968,45 @@ class WP_Polls_Settings {
 	 * @return void
 	 */
 	public static function describe_ip_header() {
-		echo esc_html__( 'Leave blank to use REMOTE_ADDR. Only set this if a proxy in front of WordPress always overwrites the header, because visitors can otherwise forge it and vote more than once.', 'wp-polls' ) . '<br />';
+		echo esc_html__( 'Leave this blank unless the site is behind a reverse proxy or CDN. Blank means the address the web server saw is used.', 'wp-polls' ) . '<br />';
 		printf(
-			/* translators: 1: The WP_POLLS_TRUST_PROXY constant, 2: the wp_polls_trust_proxy filter, both in code spans. */
-			esc_html__( 'Example: HTTP_X_FORWARDED_FOR. You can also opt in with the %1$s constant or the %2$s filter.', 'wp-polls' ),
+			/* translators: 1: an example header name, 2: the WP_POLLS_TRUST_PROXY constant, 3: the wp_polls_trust_proxy filter, all in code spans. */
+			esc_html__( 'Example: %1$s. You can also opt in with the %2$s constant or the %3$s filter, which trust the usual proxy headers instead of one you name.', 'wp-polls' ),
+			'<code>HTTP_X_FORWARDED_FOR</code>',
 			'<code>WP_POLLS_TRUST_PROXY</code>',
 			'<code>wp_polls_trust_proxy</code>'
 		);
+		echo '<br />';
+		printf(
+			'<strong>%s</strong>',
+			esc_html__( 'Only name a header your proxy sets and overwrites. A visitor can send any header they like, so trusting one your stack does not control lets anyone vote as often as they wish.', 'wp-polls' )
+		);
+	}
+
+	/**
+	 * How long a vote keeps somebody from voting again.
+	 *
+	 * Called "Expiry Time For Cookie And Log" until 3.0.0, offered "0 to
+	 * disable", and nothing about that was true. Zero does not disable
+	 * anything: it is what makes the block permanent, giving the cookie a year
+	 * and dropping the time limit from the IP and username queries entirely --
+	 * the opposite of what the label promised. Nothing expires either, in the
+	 * sense of being deleted; the log keeps every vote whatever this says. All
+	 * it decides is how far back a check looks.
+	 *
+	 * @return void
+	 */
+	public static function describe_vote_expiry() {
+		esc_html_e( 'How long a vote stops the same visitor voting in that poll again. It sets the lifetime of the cookie, and how far back the IP address and username checks look. Nothing is deleted: the poll log keeps every vote whatever this is set to.', 'wp-polls' );
+	}
+
+	/**
+	 * What the repeat-vote check does, and what it does not do.
+	 *
+	 * @return void
+	 */
+	public static function describe_check_method() {
+		esc_html_e( 'Every vote is recorded in the poll log whichever of these is chosen. This decides only what a returning visitor is matched against. Do Not Check lets anyone vote in a poll as often as they like.', 'wp-polls' );
 	}
 
 	// --- Helpers -------------------------------------------------------------
@@ -1078,11 +1086,6 @@ class WP_Polls_Settings {
 			}
 		}
 
-		if ( isset( $input['ajax'] ) && is_array( $input['ajax'] ) ) {
-			$current['ajax']['loading'] = empty( $input['ajax']['loading'] ) ? 0 : 1;
-			$current['ajax']['fading']  = empty( $input['ajax']['fading'] ) ? 0 : 1;
-		}
-
 		if ( isset( $input['sort'] ) && is_array( $input['sort'] ) ) {
 			foreach ( self::choices() as $path => $allowed ) {
 				list( , $key ) = explode( '.', $path );
@@ -1105,7 +1108,7 @@ class WP_Polls_Settings {
 			}
 		}
 
-		foreach ( array( 'current_poll', 'close', 'logging_method', 'cookie_expiry', 'allow_to_vote' ) as $key ) {
+		foreach ( array( 'current_poll', 'close', 'check_method', 'cookie_expiry', 'allow_to_vote' ) as $key ) {
 			if ( isset( $input[ $key ] ) ) {
 				$current[ $key ] = (int) $input[ $key ];
 			}

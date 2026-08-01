@@ -71,13 +71,21 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * An unchecked checkbox is absent from the payload, and means zero.
+	 * The AJAX style toggles are gone, and nothing puts them back.
+	 *
+	 * They chose whether to show a loading indicator and whether to fade the
+	 * poll while a vote was in flight. Telling somebody their vote is being
+	 * processed is feedback rather than decoration, and a setting whose "off"
+	 * position is a worse plugin is a setting to remove; the fade now follows
+	 * prefers-reduced-motion, which is the visitor's answer rather than the
+	 * site owner's.
 	 */
-	public function test_absent_checkbox_becomes_zero() {
+	public function test_the_ajax_style_settings_are_gone() {
+		$this->assertArrayNotHasKey( 'ajax', WP_Polls_Options::all(), 'the AJAX style keys are back' );
+
 		$result = WP_Polls_Settings::sanitize( array( 'ajax' => array( 'loading' => 1 ) ) );
 
-		$this->assertSame( 1, (int) $result['ajax']['loading'] );
-		$this->assertSame( 0, (int) $result['ajax']['fading'] );
+		$this->assertArrayNotHasKey( 'ajax', $result, 'the sanitizer accepted a setting that no longer exists' );
 	}
 
 	/**

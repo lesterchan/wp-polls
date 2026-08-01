@@ -18,8 +18,6 @@ import {
 beforeAll( () => {
 	window.wpPollsL10n = {
 		ajax_url: '/wp-admin/admin-ajax.php',
-		show_loading: '1',
-		show_fading: '1',
 		text_valid: 'Please choose a valid poll answer.',
 		text_multiple: 'Maximum number of choices allowed:',
 	};

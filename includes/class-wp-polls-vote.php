@@ -54,25 +54,25 @@ class WP_Polls_Vote {
 	 * @return mixed
 	 */
 	public static function check_voted( $poll_id ) {
-		$poll_logging_method = (int) WP_Polls_Options::get( 'logging_method' );
-		switch ( $poll_logging_method ) {
-			// Do Not Log.
+		$check_method = (int) WP_Polls_Options::get( 'check_method' );
+		switch ( $check_method ) {
+			// Do Not Check.
 			case 0:
 				return 0;
-			// Logged By Cookie.
+			// Check By Cookie.
 			case 1:
 				return self::check_voted_cookie( $poll_id );
-			// Logged By IP.
+			// Check By IP Address.
 			case 2:
 				return self::check_voted_ip( $poll_id );
-			// Logged By Cookie And IP.
+			// Check By Cookie And IP Address.
 			case 3:
 				$check_voted_cookie = self::check_voted_cookie( $poll_id );
 				if ( ! empty( $check_voted_cookie ) ) {
 					return $check_voted_cookie;
 				}
 				return self::check_voted_ip( $poll_id );
-			// Logged By Username.
+			// Check By Username.
 			case 4:
 				return self::check_voted_username( $poll_id );
 		}
@@ -452,15 +452,24 @@ class WP_Polls_Vote {
 			$pollip_user = __( 'Guest', 'wp-polls' );
 		}
 
-		$pollip_user         = sanitize_text_field( $pollip_user );
-		$pollip_userid       = $user_ID;
-		$pollip_ip           = self::poll_get_ipaddress();
-		$pollip_host         = self::poll_get_hostname();
-		$pollip_timestamp    = WP_Polls::now();
-		$poll_logging_method = (int) WP_Polls_Options::get( 'logging_method' );
+		$pollip_user      = sanitize_text_field( $pollip_user );
+		$pollip_userid    = $user_ID;
+		$pollip_ip        = self::poll_get_ipaddress();
+		$pollip_host      = self::poll_get_hostname();
+		$pollip_timestamp = WP_Polls::now();
+		$check_method     = (int) WP_Polls_Options::get( 'check_method' );
 
-		// Only Create Cookie If User Choose Logging Method 1 Or 3.
-		if ( 1 === $poll_logging_method || 3 === $poll_logging_method ) {
+		/*
+		 * A cookie only where the repeat check reads one -- and only while one
+		 * can still be set.
+		 *
+		 * headers_sent() as well as the setting: once anything has been written
+		 * to the response the call is guaranteed to fail and its only effect is
+		 * a "headers already sent" warning. A theme or another plugin echoing
+		 * before this runs is enough to trigger it, and a warning printed into
+		 * the JSON of an AJAX vote is what breaks the vote.
+		 */
+		if ( ( 1 === $check_method || 3 === $check_method ) && ! headers_sent() ) {
 			$cookie_expiry = (int) WP_Polls_Options::get( 'cookie_expiry' );
 			if ( 0 === $cookie_expiry ) {
 				$cookie_expiry = YEAR_IN_SECONDS;
@@ -504,9 +513,35 @@ class WP_Polls_Vote {
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
+		/*
+		 * Every vote is recorded, whatever the repeat-vote check is set to.
+		 *
+		 * Those were one setting until 3.0.0: choosing "Do Not Log" or "Logged
+		 * By Cookie" -- now "Do Not Check" and "Check By Cookie" -- meant no row
+		 * was written, so the vote log, the Logs screen and the WP-Stats figures
+		 * were all empty on a site that had simply picked a lighter check. The
+		 * two are not the same question. What a returning visitor is matched
+		 * against is a matter of how strict the site wants to be; whether its
+		 * votes are recorded at all is not something that should follow from it.
+		 */
+
+		/**
+		 * Filters whether this vote is written to the poll log.
+		 *
+		 * The answer's own tally and the poll's totals are columns on the poll
+		 * tables and are updated either way; this is the per-vote row behind the
+		 * Logs screen, the IP and username checks, and the WP-Stats figures.
+		 * Returning false leaves those with nothing to read.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param bool $log     Whether to record the vote.
+		 * @param int  $poll_id Poll being voted on.
+		 */
+		$log_vote = (bool) apply_filters( 'wp_polls_log_vote', true, $poll_id );
+
 		foreach ( $poll_aid_array as $polla_aid ) {
-			// Log Ratings In DB If User Choose Logging Method 2, 3 or 4.
-			if ( $poll_logging_method > 1 ) {
+			if ( $log_vote ) {
 				$wpdb->insert(
 					$wpdb->pollsip,
 					array(

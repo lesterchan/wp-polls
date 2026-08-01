@@ -17,7 +17,7 @@ class WP_Polls_Vote_Test extends WP_Polls_TestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
-		WP_Polls_Options::set( 'logging_method', 2 );
+		WP_Polls_Options::set( 'check_method', 2 );
 		WP_Polls_Options::set( 'allow_to_vote', 0 );
 		WP_Polls_Options::flush();
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
@@ -36,6 +36,70 @@ class WP_Polls_Vote_Test extends WP_Polls_TestCase {
 		$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT polla_votes FROM {$wpdb->pollsa} WHERE polla_aid = %d", $answers[0] ) ) );
 		$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ) );
 		$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->pollsip} WHERE pollip_qid = %d", $poll_id ) ) );
+	}
+
+	/**
+	 * A row reaches the log whatever the repeat-vote check is set to.
+	 *
+	 * Until 3.0.0 these were one setting: "Do Not Log" and "Logged By Cookie"
+	 * wrote no row, so a site that only wanted a lighter check also lost its
+	 * vote log, its Logs screen and its WP-Stats figures -- which is not what
+	 * either choice sounds like.
+	 */
+	public function test_every_check_method_logs_the_vote() {
+		global $wpdb;
+
+		// Signed in, and everybody allowed to vote: "Check By Username" refuses a
+		// guest outright, because a guest has no username to tell apart from the
+		// next one. That is the setting working, not a case to route around.
+		wp_set_current_user( self::factory()->user->create() );
+		WP_Polls_Options::set( 'allow_to_vote', 2 );
+
+		foreach ( array( 0, 1, 2, 3, 4 ) as $method ) {
+			WP_Polls_Options::set( 'check_method', $method );
+			WP_Polls_Options::flush();
+
+			$poll_id = $this->make_poll();
+			$answers = $this->answer_ids( $poll_id );
+
+			WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+
+			$this->assertSame(
+				1,
+				(int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->pollsip} WHERE pollip_qid = %d", $poll_id ) ),
+				'check method ' . $method . ' wrote no log row'
+			);
+		}
+	}
+
+	/**
+	 * A site that would rather not keep the record can say so.
+	 */
+	public function test_the_log_filter_can_turn_the_row_off() {
+		global $wpdb;
+
+		add_filter( 'wp_polls_log_vote', '__return_false' );
+
+		$poll_id = $this->make_poll();
+		$answers = $this->answer_ids( $poll_id );
+
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
+
+		remove_filter( 'wp_polls_log_vote', '__return_false' );
+
+		$this->assertSame(
+			0,
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->pollsip} WHERE pollip_qid = %d", $poll_id ) ),
+			'the filter did not stop the log row'
+		);
+
+		// The vote itself still counts: the tally is a column on the poll, not
+		// something read back out of the log.
+		$this->assertSame(
+			1,
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT polla_votes FROM {$wpdb->pollsa} WHERE polla_aid = %d", $answers[0] ) ),
+			'the vote itself should still count'
+		);
 	}
 
 	/**

@@ -1,9 +1,14 @@
 /**
- * The two front end display options, with both switched off.
+ * The fade, when the visitor has asked for less movement.
  *
- * They are read once as the IIFE runs, so they cannot be changed inside a test
- * file that already loaded the script with them on — hence a file of their own.
- * Poll Options exposes both, and neither had any coverage.
+ * This file replaces one that covered the two "Polls AJAX Style" options, which
+ * are gone. They let a site owner switch off the loading indicator and the fade;
+ * the indicator is feedback rather than decoration and now always shows, and
+ * whether to animate is the visitor's answer rather than the site owner's.
+ *
+ * It is a file of its own because the script reads matchMedia through a helper
+ * called on every fade, but the stub has to be installed before the IIFE runs
+ * for the listener to be attached against it.
  */
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { clickAndSettle, loadScript, stubFetch, voteForm } from './helpers.js';
@@ -11,11 +16,19 @@ import { clickAndSettle, loadScript, stubFetch, voteForm } from './helpers.js';
 beforeAll( () => {
 	window.wpPollsL10n = {
 		ajax_url: '/wp-admin/admin-ajax.php',
-		show_loading: '0',
-		show_fading: '0',
 		text_valid: 'Please choose a valid poll answer.',
 		text_multiple: 'Maximum number of choices allowed:',
 	};
+
+	// jsdom has no matchMedia at all, so this is both the stub and the reason
+	// the script guards on typeof before calling it.
+	window.matchMedia = vi.fn( ( query ) => ( {
+		matches: query.includes( 'prefers-reduced-motion' ),
+		media: query,
+		addEventListener() {},
+		removeEventListener() {},
+	} ) );
+
 	loadScript( 'js/wp-polls.js' );
 } );
 
@@ -24,34 +37,8 @@ beforeEach( () => {
 	window.alert = vi.fn();
 } );
 
-describe( 'with both display options off', () => {
-	it( 'never touches the loading indicator, leaving the stylesheet to hide it', async () => {
-		document.body.innerHTML = voteForm( { id: 1 } );
-		const loading = document.getElementById( 'polls-1-loading' );
-
-		let resolveBody;
-		const pending = new Promise( ( resolve ) => {
-			resolveBody = resolve;
-		} );
-		global.fetch = vi.fn( () => Promise.resolve( { text: () => pending } ) );
-		window.fetch = global.fetch;
-
-		document.getElementById( 'poll-answer-1' ).checked = true;
-		document
-			.querySelector( '[data-poll-action="vote"]' )
-			.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
-
-		// show_loading: '1' would have set this to block mid-flight.
-		expect( loading.style.display ).toBe( '' );
-
-		resolveBody( '<div id="polls-1">done</div>' );
-		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
-
-		// And left alone afterwards, rather than pinned to none inline.
-		expect( loading.style.display ).toBe( '' );
-	} );
-
-	it( 'does not fade the poll out before replacing it', async () => {
+describe( 'with prefers-reduced-motion: reduce', () => {
+	it( 'dims the poll without animating towards it', async () => {
 		document.body.innerHTML = voteForm( { id: 1 } );
 		const container = document.getElementById( 'polls-1' );
 
@@ -67,13 +54,43 @@ describe( 'with both display options off', () => {
 			.querySelector( '[data-poll-action="vote"]' )
 			.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
 
-		expect( container.style.opacity ).toBe( '' );
+		// The poll still dims -- the request is in flight and the old numbers are
+		// about to be replaced -- it just does not travel there.
+		expect( container.style.opacity ).toBe( '0' );
+		expect( container.style.transition ).toBe( '' );
 
 		resolveBody( '<div id="polls-1">done</div>' );
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	} );
 
-	it( 'still votes and still swaps in the response', async () => {
+	it( 'still shows the loading indicator, which is not decoration', async () => {
+		document.body.innerHTML = voteForm( { id: 1 } );
+		const loading = document.getElementById( 'polls-1-loading' );
+
+		let resolveBody;
+		const pending = new Promise( ( resolve ) => {
+			resolveBody = resolve;
+		} );
+		global.fetch = vi.fn( () => Promise.resolve( { text: () => pending } ) );
+		window.fetch = global.fetch;
+
+		document.getElementById( 'poll-answer-1' ).checked = true;
+		document
+			.querySelector( '[data-poll-action="vote"]' )
+			.dispatchEvent( new window.MouseEvent( 'click', { bubbles: true } ) );
+
+		// Reduced motion is a request for less movement, not for less
+		// information. The stylesheet stops the spinner spinning; the indicator
+		// itself still appears.
+		expect( loading.style.display ).toBe( 'block' );
+
+		resolveBody( '<div id="polls-1">done</div>' );
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+
+		expect( loading.style.display ).toBe( 'none' );
+	} );
+
+	it( 'still votes and swaps in the response', async () => {
 		document.body.innerHTML = voteForm( { id: 1 } );
 		const spy = stubFetch( '<div id="polls-1">RESULTS</div>' );
 
@@ -81,9 +98,7 @@ describe( 'with both display options off', () => {
 		await clickAndSettle( document.querySelector( '[data-poll-action="vote"]' ) );
 
 		expect( spy ).toHaveBeenCalledTimes( 1 );
-		expect( document.getElementById( 'polls-1' ).textContent ).toContain(
-			'RESULTS',
-		);
+		expect( document.getElementById( 'polls-1' ).textContent ).toContain( 'RESULTS' );
 	} );
 
 	it( 'leaves the replaced poll fully visible', async () => {
