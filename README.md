@@ -147,7 +147,7 @@ In the admin side just call the custom variable like so and the variable has bee
 ## Frequently Asked Questions
 
 ### Everyone can vote as many times as they like
-Check **Poll Options → Header That Contains The IP**. If it names a header such as
+Check **Settings → Header That Contains The IP**. If it names a header such as
 `HTTP_X_FORWARDED_FOR`, make sure the proxy in front of WordPress always overwrites
 that header. Anything a visitor can set themselves can be changed on every request,
 and WP-Polls has no way to tell a real proxy from a forged header.
@@ -160,7 +160,7 @@ If you are not behind a proxy, leave the setting blank.
 
 ### Every voter is logged with the same IP, or the wrong one
 WordPress is behind a proxy or a CDN and every request reaches it from the proxy's
-address. Name the header your proxy sets under **Poll Options → Header That Contains
+address. Name the header your proxy sets under **Settings → Header That Contains
 The IP** — `HTTP_CF_CONNECTING_IP` for Cloudflare — or, to trust the usual set of
 proxy headers without naming one, add this to `wp-config.php`:
 
@@ -244,8 +244,8 @@ be. That class no longer exists, so the old snippet colours nothing.
 
 1. Admin - Add Poll
 2. Admin - Manage Polls
-3. Admin - Poll Options
-4. Admin - Poll Templates
+3. Admin - Settings
+4. Admin - Templates
 5. Admin - Poll Widget
 6. Poll - Single Poll Answer
 7. Poll - Mutiple Poll Answers

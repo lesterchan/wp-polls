@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings API registration for the Poll Options and Poll Templates tabs.
+ * Settings API registration for the Settings and Templates tabs.
  *
  * Both tabs are built entirely out of add_settings_section() and
  * add_settings_field(): WP_Polls_Screen_Settings draws the tabs, opens the form,
@@ -90,7 +90,7 @@ class WP_Polls_Settings {
 
 		// The cron schedule follows the cookie/log expiry setting, so it has to be
 		// rebuilt whenever the option is written. Hooked here rather than from the
-		// Poll Options screen because the save happens on options.php, which never
+		// Settings tab because the save happens on options.php, which never
 		// loads that screen - a callback added while the screen renders would only
 		// ever run on a request that is not saving anything.
 		add_action( 'update_option_' . WP_Polls_Options::OPTION, array( 'WP_Polls', 'cron_polls_place' ) );
@@ -103,8 +103,8 @@ class WP_Polls_Settings {
 	 */
 	public static function tabs() {
 		return array(
-			self::TAB_OPTIONS   => __( 'Poll Options', 'wp-polls' ),
-			self::TAB_TEMPLATES => __( 'Poll Templates', 'wp-polls' ),
+			self::TAB_OPTIONS   => __( 'Settings', 'wp-polls' ),
+			self::TAB_TEMPLATES => __( 'Templates', 'wp-polls' ),
 		);
 	}
 
@@ -175,7 +175,7 @@ class WP_Polls_Settings {
 	}
 
 	/**
-	 * Sections and fields for the Poll Options screen.
+	 * Sections and fields for the Settings tab.
 	 *
 	 * @return void
 	 */
@@ -200,11 +200,11 @@ class WP_Polls_Settings {
 		);
 
 		// --- Poll Bar Style ---------------------------------------------------
-		add_settings_section( self::SECTION_BAR, __( 'Poll Bar Style', 'wp-polls' ), '__return_false', $page );
+		add_settings_section( self::SECTION_BAR, __( 'Appearance', 'wp-polls' ), '__return_false', $page );
 
 		add_settings_field(
 			'poll_bar_style',
-			__( 'Poll Bar Style', 'wp-polls' ),
+			__( 'Appearance', 'wp-polls' ),
 			array( __CLASS__, 'field_bar_style' ),
 			$page,
 			self::SECTION_BAR
@@ -492,7 +492,7 @@ class WP_Polls_Settings {
 	}
 
 	/**
-	 * Sections and fields for the Poll Templates screen.
+	 * Sections and fields for the Templates tab.
 	 *
 	 * Every row is the same shape - a textarea, the tokens it understands and a
 	 * restore button - so these are registered from the definition in
@@ -531,7 +531,7 @@ class WP_Polls_Settings {
 	}
 
 	/**
-	 * The Poll Templates screen, as sections of template fields.
+	 * The Templates tab, as sections of template fields.
 	 *
 	 * The order matches WP_Polls_Options::template_keys().
 	 *
@@ -1073,7 +1073,7 @@ class WP_Polls_Settings {
 			return $current;
 		}
 
-		// --- Poll Options screen -------------------------------------------
+		// --- Settings tab -------------------------------------------
 		if ( isset( $input['bar'] ) && is_array( $input['bar'] ) ) {
 			$bar                          = $input['bar'];
 			$current['bar']['style']      = isset( $bar['style'] ) ? sanitize_text_field( $bar['style'] ) : $current['bar']['style'];
@@ -1122,7 +1122,7 @@ class WP_Polls_Settings {
 			$current['stats_display'] = ! empty( $input['stats_display'] );
 		}
 
-		// --- Poll Templates screen -----------------------------------------
+		// --- Templates tab -----------------------------------------
 		if ( isset( $input['templates'] ) && is_array( $input['templates'] ) ) {
 			foreach ( WP_Polls_Options::template_keys() as $key ) {
 				if ( ! isset( $input['templates'][ $key ] ) ) {
@@ -1136,7 +1136,7 @@ class WP_Polls_Settings {
 	}
 
 	/**
-	 * The poll bar styles the Poll Options screen offers.
+	 * The poll bar styles the Settings tab offers.
 	 *
 	 * Up to 3.0.0 this globbed images/ for directories holding a pollbg.gif, so
 	 * the list of styles was whatever happened to be on disk and every entry

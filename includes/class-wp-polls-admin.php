@@ -184,7 +184,7 @@ class WP_Polls_Admin {
 	public static function poll_scripts_admin( $hook_suffix ) {
 		if ( in_array( $hook_suffix, self::admin_pages(), true ) ) {
 			wp_enqueue_style( 'wp-polls-admin', WP_POLLS_URL . 'css/wp-polls-admin.css', array(), WP_POLLS_VERSION );
-			// The Poll Options screen previews the bar using the real front end
+			// The Settings tab previews the bar using the real front end
 			// markup, so it loads the real front end rules rather than keeping a
 			// second copy of them in the admin stylesheet to drift out of sync.
 			// Always the plugin's own copy: a theme override of wp-polls.css

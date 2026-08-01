@@ -288,7 +288,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * Poll Options offers exactly the bar styles the sanitizer accepts.
+	 * The Settings tab offers exactly the bar styles the sanitizer accepts.
 	 *
 	 * These two lists were computed separately and disagreed: the screen
 	 * required a pollbg.gif and the sanitizer took any directory, so a style the
@@ -371,7 +371,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * Poll Templates posts to options.php with the right settings group.
+	 * The Templates tab posts to options.php with the right settings group.
 	 *
 	 * An empty or wrong option_page makes the Settings API reject the save with
 	 * a 403, which looks like a permissions problem rather than a typo.
@@ -386,7 +386,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * Poll Options posts to options.php with the right settings group.
+	 * The Settings tab posts to options.php with the right settings group.
 	 *
 	 * @return void
 	 */

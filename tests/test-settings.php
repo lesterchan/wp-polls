@@ -160,7 +160,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 	 * Writing the option reschedules the cron job.
 	 *
 	 * The expiry setting decides the schedule, and the save happens on
-	 * options.php. The callback used to be added while the Poll Options tab
+	 * options.php. The callback used to be added while the Settings tab
 	 * rendered, so it was never registered on the request that did the saving.
 	 */
 	public function test_saving_the_option_reschedules_the_cron() {

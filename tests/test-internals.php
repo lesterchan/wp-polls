@@ -312,7 +312,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	/**
 	 * What the colour fields can post, and what comes back out.
 	 *
-	 * The Poll Options colour fields are colour inputs, which post '#rrggbb';
+	 * The Settings tab colour fields are colour inputs, which post '#rrggbb';
 	 * the setting is stored as the six digits alone, and every caller adds the
 	 * '#' back. Three digit values predate 3.0.0 and have to be expanded,
 	 * because CSS understands '#abc' but a colour input will not show it.
