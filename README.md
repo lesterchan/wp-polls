@@ -254,7 +254,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 
 ## Changelog
 ### 3.0.0
-* BREAKING: Requires WordPress 6.8 and PHP 8.2, up from 6.0 and 7.4. A site on an older stack will not be offered the update at all.
+* BREAKING: Requires WordPress 6.8 and PHP 8.2, up from 6.0 and 7.4.
 * BREAKING: The scripts no longer define any global JavaScript functions. `poll_vote()`, `poll_result()`, `poll_booth()` and the admin equivalents are now private, so custom templates or themes that called them directly must move to `data-poll-id` / `data-poll-action` attributes. WP-Polls converts the stock templates for you on upgrade and warns in wp-admin about any it could not convert.
 * CHANGED: Options, templates, settings, the widget and the install/upgrade routine moved into classes under `includes/`. The documented extension points are unchanged: every `wp_polls_*` filter and action, both the `[poll]` and `[page_polls]` shortcodes, and the template tags keep their exact names and signatures.
 * CHANGED: The thirty-odd separate `wp_options` rows are now a single `wp_polls_options` row holding a nested array. Your settings are migrated automatically on upgrade; the old rows are removed once they have been folded in.
@@ -326,22 +326,24 @@ be. That class no longer exists, so the old snippet colours nothing.
 
 ### 3.0.0
 
-**Update WordPress and PHP first.** WP-Polls 3.0.0 requires WordPress 6.8 and PHP 8.2. A site on an older stack is simply not offered the update, so if WP-Polls has stopped appearing in your updates list, that is why.
+Requires WordPress 6.8 and PHP 8.2.
 
-**Update WP-Stats at the same time, and the other WP-Stats plugins with it.** Up to now seven plugins shared one `stats_display` row to record which blocks the WP-Stats page shows. Each of them now keeps its own copy and the shared row is deleted by whichever one you update first. WP-Polls treats a missing row as "on", so the worst that happens is a block you have to switch off again — but if a block you wanted is missing after updating, switch it back on from that plugin's own settings screen. For WP-Polls it is **Polls → Settings → WP-Stats**.
+**This release fixes a stored XSS, so take it even if nothing else here applies.** A poll question or answer containing markup was written into the Poll Templates screen through an inline `onclick`, where it could put a working script into the screen of anyone able to manage polls. Inline handlers are replaced by `data-poll-action` / `data-poll-id` attributes throughout, `onclick` is no longer an allowed attribute in poll templates, and the poll bar colours, the voting form action and `%POLL_RESULT_URL%` are escaped on output.
 
-**Your settings screens have moved.** Poll Options and Poll Templates are now two tabs of one **Polls → Settings** screen. Bookmarks and any links you have to `admin.php?page=wp-polls/polls-options.php` or `…/polls-templates.php` will not resolve; use `admin.php?page=wp-polls-settings`. Manage Polls is `admin.php?page=wp-polls` and Add Poll is `admin.php?page=wp-polls-add`.
+**Update WP-Stats and the other WP-Stats plugins at the same time.** Seven plugins shared one `stats_display` row recording which blocks the WP-Stats page shows. Each keeps its own copy now, and the shared row is deleted by whichever you update first. A missing row means "on", so a block you had hidden may reappear; if a block you wanted is missing, switch it back on from that plugin's own settings. For WP-Polls that is **Polls -> Settings -> WP-Stats**.
 
-**Your settings move themselves.** The thirty-odd `poll_*` option rows, plus the older `poll_options` row and both version markers, are folded into `wp_polls_options` and `wp_polls_version` the first time wp-admin loads after the update. Nothing to do; the old rows are removed once they have been read.
+**The settings screens moved.** Poll Options and Poll Templates are two tabs of one **Polls -> Settings** screen. `admin.php?page=wp-polls/polls-options.php` and `.../polls-templates.php` no longer resolve; use `admin.php?page=wp-polls-settings`. Manage Polls is `admin.php?page=wp-polls` and Add Poll is `admin.php?page=wp-polls-add`.
 
-**The poll bar is rebuilt, and two templates are replaced.** If you customised **Result Body** or **Result Body (Voted)**, those two are overwritten with the new markup and your changes are lost. There was no way to carry them forward: the class names and the stylesheet changed with the markup, so a customised copy of the old template has no rules left to match it. Re-apply your changes on Poll Templates, keeping the two `wp-polls-bar` elements. `%POLL_ANSWER_IMAGEWIDTH%` no longer exists — use `%POLL_ANSWER_PERCENTAGE%`.
+**Settings migrate on the first admin page load.** The thirty-odd `poll_*` rows, the older `poll_options` row and both version markers are folded into `wp_polls_options` and `wp_polls_version`; the old rows are removed once they have been read.
 
-**If your theme ships its own copy of the stylesheet,** rename it from `polls-css.css` to `wp-polls.css` or WP-Polls will stop using it. Delete `polls-css-rtl.css`; there is one stylesheet now. The poll bar rules are not in a copy made before 3.0.0, because they used to be generated by PHP — either copy the `.wp-polls-bar` rules across or override the `--wp-polls-bar-*` custom properties instead, which is the supported way.
+**The poll bar is rebuilt, and two templates are replaced.** Customised **Result Body** or **Result Body (Voted)** templates are overwritten and those changes are lost. There was no way to carry them forward: the class names and the stylesheet changed with the markup, so a customised copy of the old template has no rules left to match it. Re-apply your changes on Poll Templates, keeping the two `wp-polls-bar` elements. `%POLL_ANSWER_IMAGEWIDTH%` no longer exists; use `%POLL_ANSWER_PERCENTAGE%`.
 
-**If a custom template calls `poll_vote()`, `poll_result()` or `poll_booth()` from an inline `onclick`,** those functions no longer exist. WP-Polls converts the stock templates on upgrade and puts a warning in wp-admin naming any it could not convert; replace the handler with `data-poll-id="%POLL_ID%"` and `data-poll-action="vote"` (or `result` / `booth`).
+**If your theme ships its own copy of the stylesheet**, rename it from `polls-css.css` to `wp-polls.css` or it will stop being used. Delete `polls-css-rtl.css`; there is one stylesheet now. The poll bar rules are absent from any copy made before 3.0.0, because they used to be generated by PHP — either copy the `.wp-polls-bar` rules across, or override the `--wp-polls-bar-*` custom properties, which is the supported way.
 
-**If your own code names a WP-Polls class,** every one is prefixed `WP_Polls_` now, and `Polls_Core` is plain `WP_Polls`. The template tags (`get_poll()`, `vote_poll()`, `display_polls_archive_link()`, `in_pollarchive()` and the `get_poll*` counters), both shortcodes and all thirty-odd `wp_polls_*` filters and actions are unchanged, so a theme that only uses those needs no edits.
+**If a custom template calls `poll_vote()`, `poll_result()` or `poll_booth()` from an inline `onclick`,** those functions no longer exist. The stock templates are converted on upgrade and a warning in wp-admin names any that could not be converted; replace the handler with `data-poll-id="%POLL_ID%"` and `data-poll-action="vote"` (or `result` / `booth`).
 
-**If you set "Header That Contains The IP",** check it is a header your proxy always overwrites. WP-Polls now reads only the first address in it, so votes recorded against a forged chain no longer count as separate voters. Sites that left it blank are unaffected and their vote logs still match.
+**Classes are prefixed `WP_Polls_`**, and `Polls_Core` is plain `WP_Polls`. The template tags — `get_poll()`, `vote_poll()`, `display_polls_archive_link()`, `in_pollarchive()` and the `get_poll*` counters — both shortcodes, and all thirty-odd `wp_polls_*` filters and actions are unchanged.
 
-**If your scripts referenced `pollsL10n` or `pollsAdminL10n`,** they are `wpPollsL10n` and `wpPollsAdminL10n`.
+**If you set "Header That Contains The IP",** check it is a header your proxy always overwrites. WP-Polls reads only the first address in it now, so votes recorded against a forged chain no longer count as separate voters. Sites that left it blank are unaffected and their vote logs still match.
+
+**`pollsL10n` and `pollsAdminL10n` are now `wpPollsL10n` and `wpPollsAdminL10n`.**
