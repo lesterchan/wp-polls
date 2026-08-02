@@ -147,10 +147,10 @@ class WP_Polls_Options {
 	 * shape, which held the whole nested array - and removed afterwards, so it
 	 * is listed here rather than in the map.
 	 *
-	 * stats_display is the shared, unprefixed row seven plugins used to write
-	 * their WP-Stats toggle into. Each of them now owns its own copy of the
-	 * setting, and each removes the shared row, which is what the cross-plugin
-	 * contract asks for.
+	 * Every row here belongs to WP-Polls, which is what makes it safe for
+	 * WP_Polls_Install::option_names() to drive uninstall from the same list the
+	 * migration cleans up. The shared row is deliberately not among them --
+	 * legacy_shared_rows() below says why.
 	 *
 	 * @return array
 	 */
@@ -160,8 +160,31 @@ class WP_Polls_Options {
 			self::LEGACY_OPTION,
 			self::LEGACY_VERSION,
 			self::LEGACY_DB_VERSION,
-			self::LEGACY_STATS_DISPLAY,
 		);
+	}
+
+	/**
+	 * The unprefixed row this plugin shared with WP-Stats and five others.
+	 *
+	 * It was never any one plugin's to own: whichever of the seven saved the
+	 * WP-Stats screen last wrote the whole row. Each plugin keeps its own copy of
+	 * the toggle now, so the migration folds this in and deletes it -- and, unlike
+	 * legacy_extra_rows(), it is deliberately kept off the uninstall list.
+	 *
+	 * §13.2 draws that line and this is the mirror half of it: the migration
+	 * deletes the shared row because it has folded it in, and uninstall must leave
+	 * it alone because up to six siblings that have not upgraded yet are still
+	 * reading it. Removing WP-Polls from a site was taking the WP-Stats block
+	 * settings of the other six with it, silently.
+	 *
+	 * Keeping the two lists apart is the fix, rather than dropping the row from
+	 * the migration: it still has to be deleted once it has been folded in, or the
+	 * fold runs again on the next request.
+	 *
+	 * @return array
+	 */
+	public static function legacy_shared_rows() {
+		return array( self::LEGACY_STATS_DISPLAY );
 	}
 
 	/**
@@ -465,6 +488,12 @@ class WP_Polls_Options {
 			delete_option( $legacy );
 		}
 		foreach ( self::legacy_extra_rows() as $legacy ) {
+			delete_option( $legacy );
+		}
+
+		// Deleted here, where it has just been folded in, and nowhere else -- see
+		// legacy_shared_rows(). Uninstall must not touch it.
+		foreach ( self::legacy_shared_rows() as $legacy ) {
 			delete_option( $legacy );
 		}
 	}

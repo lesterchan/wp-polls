@@ -26,26 +26,27 @@ At ~6,900 lines of `includes/` it is one of the three heaviest plugins.
 * `wp_polls_version` — from `poll_version` and `poll_db_version`.
 * One of the seven WP-Stats plugins (§13).
 
-## Known release blocker
+## The shared WP-Stats row, and why there are two legacy lists
 
-**`uninstall.php` deletes the shared `stats_display` row, taking it from the
-other six WP-Stats plugins.** `LEGACY_STATS_DISPLAY`
-(`includes/class-wp-polls-options.php:73`) is returned by `legacy_extra_rows()`
-(`:163`), which `WP_Polls_Install::option_names()` merges and `uninstall_site()`
-deletes. §13.2 says the migration deletes the shared rows and uninstall leaves
-them alone — the single-list design that keeps migration and uninstall honest is
-exactly what causes this.
+`legacy_extra_rows()` holds the rows WP-Polls owns; `legacy_shared_rows()` holds
+`stats_display`, which it never did. Both are deleted by the migration, and only
+the first is on `WP_Polls_Install::option_names()`, which drives uninstall.
 
-**Fixing it is a two-file change.** `tests/test-uninstall.php:130-132`
-(`test_every_row_the_plugin_owns_is_on_the_uninstall_list`) currently *requires*
-every `legacy_extra_rows()` entry to be on the uninstall list, so the test moves
-with the code. wp-downloadmanager has the same defect; wp-postratings documents
-the correct arrangement at
-`includes/class-wp-postratings-options.php:73-89`.
+That split is the fix for a release blocker: one list did both jobs, so
+uninstalling WP-Polls deleted a row the other six WP-Stats plugins were still
+reading and silently reconfigured every one of them. §13.2 draws the line —
+the migration deletes a shared row because it has folded it in, uninstall leaves
+it alone. **Do not merge the two lists back together**, however tempting the
+single-source-of-truth argument looks: it is the argument that caused this.
+wp-postratings documents the same arrangement at
+`includes/class-wp-postratings-options.php:73-89`, and wp-downloadmanager had
+the identical defect on both shared rows.
 
-`_standards/RESUME.md` also records that wp-polls (with wp-stats) is missing the
-"Update all seven WP-Stats plugins together" line the other five carry — two
-family tests fail on it, left failing deliberately.
+Pinned by `test_the_shared_stats_row_is_not_on_the_uninstall_list` (the contract)
+and `test_uninstall_leaves_the_shared_stats_row_alone` (the behaviour). The
+mirror test, `test_every_row_the_plugin_owns_is_on_the_uninstall_list`, walks
+`legacy_extra_rows()` and is what stops a row the plugin *does* own drifting off
+the list.
 
 ## Traps
 

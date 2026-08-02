@@ -135,6 +135,62 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * And the row the plugin does not own stays off it.
+	 *
+	 * The stats_display row was shared with WP-Stats and five others, and up to
+	 * six of them may not have upgraded yet and be reading it still. §13.2 splits
+	 * the two jobs: the migration deletes the shared row because it has folded it
+	 * in, and uninstall leaves it alone. Removing WP-Polls was reconfiguring the
+	 * WP-Stats blocks of every sibling on the site, with nothing said anywhere.
+	 *
+	 * The assertion is deliberately the mirror of the one above rather than a
+	 * second reading of the same list: the defect was that one list did both
+	 * jobs, so a test that only walks that list cannot see it.
+	 *
+	 * @return void
+	 */
+	public function test_the_shared_stats_row_is_not_on_the_uninstall_list() {
+		$names = WP_Polls_Install::option_names();
+
+		foreach ( WP_Polls_Options::legacy_shared_rows() as $shared ) {
+			$this->assertNotContains(
+				$shared,
+				$names,
+				$shared . ' is read by six sibling plugins and is not this one\'s to delete.'
+			);
+		}
+	}
+
+	/**
+	 * Deleting the plugin leaves the siblings' shared row where it was.
+	 *
+	 * The list above is the contract; this is the behaviour, run through the
+	 * uninstaller itself so the two cannot drift.
+	 *
+	 * @return void
+	 */
+	public function test_uninstall_leaves_the_shared_stats_row_alone() {
+		update_option(
+			'stats_display',
+			array(
+				'polls'      => 1,
+				'useronline' => 1,
+			)
+		);
+
+		$this->run_uninstall();
+
+		$this->assertSame(
+			array(
+				'polls'      => 1,
+				'useronline' => 1,
+			),
+			get_option( 'stats_display' ),
+			'Uninstalling WP-Polls must not touch a row its siblings are still reading.'
+		);
+	}
+
+	/**
 	 * The uninstall entry point declares no global function, so it cannot collide.
 	 *
 	 * Every plugin's uninstall.php is loaded into the same request when several
