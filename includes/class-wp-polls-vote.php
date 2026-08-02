@@ -176,7 +176,7 @@ class WP_Polls_Vote {
 		$header = (string) WP_Polls_Options::get( 'ip_header', '' );
 
 		/**
-		 * Filters whether the usual proxy headers may be trusted.
+		 * Filters whether HTTP_X_FORWARDED_FOR may be trusted.
 		 *
 		 * Lets the decision be made per request -- trusting the header only when
 		 * the request actually arrives from a known load balancer, say -- rather

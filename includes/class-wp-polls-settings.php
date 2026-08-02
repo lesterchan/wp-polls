@@ -393,7 +393,7 @@ class WP_Polls_Settings {
 			array(
 				'label_for'   => 'poll_ip_header',
 				'path'        => 'ip_header',
-				'placeholder' => 'REMOTE_ADDR',
+				'placeholder' => 'HTTP_X_FORWARDED_FOR',
 				'description' => array( __CLASS__, 'describe_ip_header' ),
 			)
 		);
@@ -971,7 +971,7 @@ class WP_Polls_Settings {
 		echo esc_html__( 'Leave this blank unless the site is behind a reverse proxy or CDN. Blank means the address the web server saw is used.', 'wp-polls' ) . '<br />';
 		printf(
 			/* translators: 1: an example header name, 2: the WP_POLLS_TRUST_PROXY constant, 3: the wp_polls_trust_proxy filter, all in code spans. */
-			esc_html__( 'Example: %1$s. You can also opt in with the %2$s constant or the %3$s filter, which trust the usual proxy headers instead of one you name.', 'wp-polls' ),
+			esc_html__( 'Example: %1$s. You can also opt in with the %2$s constant or the %3$s filter, which trust that header instead of one you name.', 'wp-polls' ),
 			'<code>HTTP_X_FORWARDED_FOR</code>',
 			'<code>WP_POLLS_TRUST_PROXY</code>',
 			'<code>wp_polls_trust_proxy</code>'
