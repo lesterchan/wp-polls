@@ -147,7 +147,7 @@ In the admin side just call the custom variable like so and the variable has bee
 ## Frequently Asked Questions
 
 ### Everyone can vote as many times as they like
-Check **Settings → Header That Contains The IP**. If it names a header such as
+Check **Settings -> Header That Contains The IP**. If it names a header such as
 `HTTP_X_FORWARDED_FOR`, make sure the proxy in front of WordPress always overwrites
 that header. Anything a visitor can set themselves can be changed on every request,
 and WP-Polls has no way to tell a real proxy from a forged header.
@@ -160,7 +160,7 @@ If you are not behind a proxy, leave the setting blank.
 
 ### Every voter is logged with the same IP, or the wrong one
 WordPress is behind a proxy or a CDN and every request reaches it from the proxy's
-address. Name the header your proxy sets under **Settings → Header That Contains
+address. Name the header your proxy sets under **Settings -> Header That Contains
 The IP** — `HTTP_CF_CONNECTING_IP` for Cloudflare — or, to trust the usual set of
 proxy headers without naming one, add this to `wp-config.php`:
 
@@ -309,8 +309,8 @@ be. That class no longer exists, so the old snippet colours nothing.
 * CHANGED: Added the `WP_POLLS_TRUST_PROXY` constant and the `wp_polls_trust_proxy` filter, matching WP-Email and WP-UserOnline, so sites behind Cloudflare or a load balancer can opt in to the usual proxy headers without naming one on the settings screen. Proxy headers are still ignored unless you opt in.
 * CHANGED: Reformatted to the WordPress Coding Standards. Fifteen translatable strings gained numbered placeholders (`%1$s`), which changes their msgid, so those strings need retranslating.
 * BREAKING: The settings row is named `wp_polls_options` rather than `poll_options`, and the two version markers `poll_version` and `poll_db_version` collapse into one `wp_polls_version` row holding `plugin` and `db`. All three old rows are folded in and removed on upgrade.
-* BREAKING: Poll Options and Poll Templates are two tabs of one **Polls → Settings** screen instead of two menu entries. Their URLs change from `admin.php?page=wp-polls/polls-options.php` and `…/polls-templates.php` to `admin.php?page=wp-polls-settings&tab=options` and `&tab=templates`, and Manage Polls and Add Poll move to `admin.php?page=wp-polls` and `?page=wp-polls-add`.
-* BREAKING: WP-Polls no longer reads or writes WP-Stats' shared `stats_display` row. Whether the polls block appears on the WP-Stats page is now a WP-Polls setting, under **WP-Polls → Settings → WP-Stats**, and WP-Polls contributes its block through the `wp_stats_sections` filter. Update all seven WP-Stats plugins together.
+* BREAKING: Poll Options and Poll Templates are two tabs of one **Polls -> Settings** screen instead of two menu entries. Their URLs change from `admin.php?page=wp-polls/polls-options.php` and `…/polls-templates.php` to `admin.php?page=wp-polls-settings&tab=options` and `&tab=templates`, and Manage Polls and Add Poll move to `admin.php?page=wp-polls` and `?page=wp-polls-add`.
+* BREAKING: WP-Polls no longer reads or writes WP-Stats' shared `stats_display` row. Whether the polls block appears on the WP-Stats page is now a WP-Polls setting, under **WP-Polls -> Settings -> WP-Stats**, and WP-Polls contributes its block through the `wp_stats_sections` filter. Update all seven WP-Stats plugins together.
 * BREAKING: Every class is prefixed `WP_Polls_`: `Polls_Options` is `WP_Polls_Options`, `Polls_Display` is `WP_Polls_Display`, `Polls_Vote` is `WP_Polls_Vote`, `Polls_Settings` is `WP_Polls_Settings`, `Polls_Install` is `WP_Polls_Install`, `Polls_Widget` is `WP_Polls_Widget`, `Polls_List_Table` is `WP_Polls_List_Table`, `Polls_Templates` is `WP_Polls_Template` and `Polls_Core` is plain `WP_Polls`. The template tags, the shortcodes and every `wp_polls_*` hook are unchanged.
 * NEW: `WP_POLLS_DB_VERSION` alongside `WP_POLLS_VERSION`, and a `wp_polls_capability` filter over the `manage_polls` check.
 * CHANGED: The plugin files are laid out the way every other plugin here is: the five loose screens move into `includes/`, the stylesheets into `css/` and the scripts into `js/`, named after the plugin. A theme overriding `polls-css.css` should rename its copy `wp-polls.css`.
