@@ -209,7 +209,7 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		preg_match_all( '/\((\d+)%/', $html, $printed );
 		preg_match_all( '/width: (\d+)%/', $html, $drawn );
 
-		$this->assertNotEmpty( $printed[1] );
+		$this->assertNotEmpty( $printed[1], 'A bar was printed at all, or the percentage comparison below is vacuous.' );
 		$this->assertSame( $printed[1], $drawn[1] );
 		// Proves the buffer actually fired, so the comparison above is not vacuous.
 		$this->assertContains( '34', $printed[1] );
@@ -245,7 +245,7 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		preg_match_all( '/\((\d+)%/', WP_Polls_Display::display_pollresult( $poll_id ), $poll );
 		preg_match_all( '/\((\d+)%/', WP_Polls_Display::polls_archive(), $archive );
 
-		$this->assertNotEmpty( $poll[1] );
+		$this->assertNotEmpty( $poll[1], 'An archive poll was printed at all, or the percentage comparison below is vacuous.' );
 		$this->assertSame( $poll[1], $archive[1] );
 		// Unbuffered by default: three answers at one vote each stay at 33.
 		$this->assertNotContains( '34', $archive[1] );

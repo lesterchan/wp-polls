@@ -105,7 +105,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 
 		$this->assertSame( 'gradient', $result['bar']['style'] );
 		$this->assertSame( '000000', $result['bar']['background'] );
-		$this->assertGreaterThanOrEqual( 1, (int) $result['bar']['height'] );
+		$this->assertGreaterThanOrEqual( 1, (int) $result['bar']['height'], 'An invalid bar height is replaced by a usable one rather than stored as zero.' );
 		$this->assertSame( 'polla_aid', $result['sort']['answers_by'] );
 	}
 
@@ -115,8 +115,8 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 	public function test_non_array_input_returns_current_option() {
 		$result = WP_Polls_Settings::sanitize( 'not an array' );
 
-		$this->assertIsArray( $result );
-		$this->assertArrayHasKey( 'templates', $result );
+		$this->assertIsArray( $result, 'A non-array posted value falls back to the current option rather than propagating.' );
+		$this->assertArrayHasKey( 'templates', $result, 'The fallback is the whole current option, templates and all.' );
 	}
 
 	/**
@@ -153,7 +153,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 		WP_Polls_Settings::register();
 
 		$registered = get_registered_settings();
-		$this->assertArrayHasKey( WP_Polls_Options::OPTION, $registered );
+		$this->assertArrayHasKey( WP_Polls_Options::OPTION, $registered, 'The settings row is registered, so its sanitise callback is attached.' );
 	}
 
 	/**
@@ -165,11 +165,11 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 	 */
 	public function test_saving_the_option_reschedules_the_cron() {
 		wp_clear_scheduled_hook( 'polls_cron' );
-		$this->assertFalse( wp_next_scheduled( 'polls_cron' ) );
+		$this->assertFalse( wp_next_scheduled( 'polls_cron' ), 'The cron is unscheduled to begin with, or the reschedule below proves nothing.' );
 
 		WP_Polls_Options::set( 'cookie_expiry', 3600 );
 
-		$this->assertNotFalse( wp_next_scheduled( 'polls_cron' ) );
+		$this->assertNotFalse( wp_next_scheduled( 'polls_cron' ), 'Saving the option reschedules the cron.' );
 	}
 
 	/**
@@ -212,7 +212,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 			$this->assertContains( 'poll_template_' . $key, $ids, $key . ' has no field on the screen' );
 		}
 
-		$this->assertCount( count( WP_Polls_Options::template_keys() ), $ids );
+		$this->assertCount( count( WP_Polls_Options::template_keys() ), $ids, 'Every template key has exactly one field, so none is unreachable or offered twice.' );
 	}
 
 	/**
@@ -231,7 +231,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 
 		WP_Polls_Settings::register();
 
-		$this->assertCount( $sections, $wp_settings_sections[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ] );
-		$this->assertCount( $fields, $wp_settings_fields[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ]['wp_polls_bar'] );
+		$this->assertCount( $sections, $wp_settings_sections[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ], 'Registering twice leaves the same number of sections rather than doubling them.' );
+		$this->assertCount( $fields, $wp_settings_fields[ WP_Polls_Settings::tab_bucket( WP_Polls_Settings::TAB_OPTIONS ) ]['wp_polls_bar'], 'Registering twice leaves the same number of fields rather than doubling them.' );
 	}
 }

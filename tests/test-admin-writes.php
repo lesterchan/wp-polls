@@ -189,7 +189,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 
 		$poll = $this->find_poll( 'Future poll' );
 
-		$this->assertNotNull( $poll );
+		$this->assertNotNull( $poll, 'The poll was created at all, or the not-yet-active assertion below is vacuous.' );
 		$this->assertSame( -1, (int) $poll->pollq_active );
 	}
 
@@ -207,7 +207,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 
 		$poll = $this->find_poll( 'Expired poll' );
 
-		$this->assertNotNull( $poll );
+		$this->assertNotNull( $poll, 'The poll was created at all, or the closed assertion below is vacuous.' );
 		$this->assertSame( 0, (int) $poll->pollq_active );
 	}
 

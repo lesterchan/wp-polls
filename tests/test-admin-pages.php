@@ -325,8 +325,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 		$html = $this->render_admin_page( 'settings' );
 
-		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_bg"[^>]*value="#aabbcc"/', $html );
-		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_border"[^>]*value="#ddeeff"/', $html );
+		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_bg"[^>]*value="#aabbcc"/', $html, 'The stored background colour renders as a colour input carrying that value.' );
+		$this->assertMatchesRegularExpression( '/<input type="color" id="poll_bar_border"[^>]*value="#ddeeff"/', $html, 'The stored border colour renders as a colour input carrying that value.' );
 	}
 
 	/**
@@ -354,7 +354,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 		$this->assertMatchesRegularExpression(
 			'/id="poll_bar_style-' . preg_quote( $style, '/' ) . '"[^>]*\schecked/',
-			$html
+			$html,
+			'The saved bar style ' . $style . ' is not the radio marked checked.'
 		);
 	}
 
@@ -486,7 +487,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		foreach ( $answers as $answer_id ) {
 			$this->assertMatchesRegularExpression(
 				'/<input[^>]*class="wp-polls-votes"[^>]*name="polla_votes-' . $answer_id . '"/',
-				$html
+				$html,
+				'The votes field for answer ' . $answer_id . ' is missing its class.'
 			);
 		}
 	}
@@ -656,7 +658,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 			// the older end of the versions this plugin supports.
 			$this->assertMatchesRegularExpression(
 				'/<h2[^>]*>' . preg_quote( $section['title'], '/' ) . '<\/h2>/',
-				$html
+				$html,
+				'The ' . $section['title'] . ' section is registered but never rendered.'
 			);
 		}
 	}

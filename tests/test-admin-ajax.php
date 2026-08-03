@@ -110,7 +110,7 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 		$nonce = wp_create_nonce( 'wp-polls_delete-poll' );
 
 		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- manage_polls is the plugin's own capability, added to the administrator role on activation.
-		$this->assertFalse( current_user_can( WP_Polls_Admin::CAPABILITY ) );
+		$this->assertFalse( current_user_can( WP_Polls_Admin::CAPABILITY ), 'The fixture user really does lack the capability, or the refusal below proves nothing.' );
 		$this->assertSame( 1, wp_verify_nonce( $nonce, 'wp-polls_delete-poll' ), 'the nonce must be valid or this proves nothing' );
 
 		$this->call_endpoint(

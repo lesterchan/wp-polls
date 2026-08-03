@@ -149,7 +149,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$defaults = WP_Polls_Options::defaults();
 		$this->assertSame( $defaults['sort']['results_by'], WP_Polls_Options::get( 'sort.results_by' ) );
-		$this->assertNotNull( WP_Polls_Options::get( 'templates.voteheader' ) );
+		$this->assertNotNull( WP_Polls_Options::get( 'templates.voteheader' ), 'A key the migration did not touch keeps its shipped default.' );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	public function test_the_current_rows_are_not_in_the_delete_list() {
 		$this->assertNotContains( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_extra_rows() );
 		$this->assertNotContains( WP_Polls_Options::VERSION, WP_Polls_Options::legacy_extra_rows() );
-		$this->assertArrayNotHasKey( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_map() );
+		$this->assertArrayNotHasKey( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_map(), 'The current settings row is on the delete list, so migrating would destroy it.' );
 	}
 
 	/**
@@ -235,7 +235,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$this->assertTrue( WP_Polls_Options::get( 'stats_display' ) );
+		$this->assertTrue( WP_Polls_Options::get( 'stats_display' ), 'The shared stats_display row is read when it holds a list, not only a scalar.' );
 	}
 
 	/**
@@ -255,7 +255,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->run_upgrade();
 
 		$this->assertTrue( WP_Polls_Options::get( 'stats_display' ), 'Absent means already migrated, not off.' );
-		$this->assertArrayHasKey( 'wp_polls', WP_Polls_WPStats::register_section( array() ) );
+		$this->assertArrayHasKey( 'wp_polls', WP_Polls_WPStats::register_section( array() ), 'A missing shared row is not an opt out; the section is still offered.' );
 	}
 
 	/**

@@ -81,10 +81,10 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'allow_to_vote', 0 );
 
 		wp_set_current_user( 0 );
-		$this->assertTrue( WP_Polls_Vote::check_allowtovote() );
+		$this->assertTrue( WP_Polls_Vote::check_allowtovote(), 'With guests only, a logged out visitor may vote.' );
 
 		wp_set_current_user( self::factory()->user->create() );
-		$this->assertFalse( WP_Polls_Vote::check_allowtovote() );
+		$this->assertFalse( WP_Polls_Vote::check_allowtovote(), 'With guests only, a logged in user may not.' );
 	}
 
 	/**
@@ -96,10 +96,10 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'allow_to_vote', 1 );
 
 		wp_set_current_user( 0 );
-		$this->assertFalse( WP_Polls_Vote::check_allowtovote() );
+		$this->assertFalse( WP_Polls_Vote::check_allowtovote(), 'With registered only, a guest may not vote.' );
 
 		wp_set_current_user( self::factory()->user->create() );
-		$this->assertTrue( WP_Polls_Vote::check_allowtovote() );
+		$this->assertTrue( WP_Polls_Vote::check_allowtovote(), 'With registered only, a logged in user may.' );
 	}
 
 	/**
@@ -111,10 +111,10 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'allow_to_vote', 2 );
 
 		wp_set_current_user( 0 );
-		$this->assertTrue( WP_Polls_Vote::check_allowtovote() );
+		$this->assertTrue( WP_Polls_Vote::check_allowtovote(), 'With everyone allowed, a guest may vote.' );
 
 		wp_set_current_user( self::factory()->user->create() );
-		$this->assertTrue( WP_Polls_Vote::check_allowtovote() );
+		$this->assertTrue( WP_Polls_Vote::check_allowtovote(), 'With everyone allowed, a logged in user may vote too.' );
 	}
 
 	// --- logging method 0: do not log ------------------------------------

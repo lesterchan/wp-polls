@@ -94,8 +94,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_acquiring_the_lock_creates_the_file() {
 		$handle = WP_Polls_Vote::polls_acquire_lock( 1 );
 
-		$this->assertIsResource( $handle );
-		$this->assertFileExists( WP_Polls_Vote::polls_lock_file( 1 ) );
+		$this->assertIsResource( $handle, 'Acquiring the lock hands back an open handle.' );
+		$this->assertFileExists( WP_Polls_Vote::polls_lock_file( 1 ), 'Acquiring the lock creates the lock file.' );
 
 		WP_Polls_Vote::polls_release_lock( $handle, 1 );
 	}
@@ -112,8 +112,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$handle = WP_Polls_Vote::polls_acquire_lock( 1 );
 		$path   = WP_Polls_Vote::polls_lock_file( 1 );
 
-		$this->assertTrue( WP_Polls_Vote::polls_release_lock( $handle, 1 ) );
-		$this->assertFileDoesNotExist( $path );
+		$this->assertTrue( WP_Polls_Vote::polls_release_lock( $handle, 1 ), 'Releasing a held lock reports success.' );
+		$this->assertFileDoesNotExist( $path, 'Releasing the lock removes the file rather than leaving it behind.' );
 	}
 
 	/**
@@ -122,8 +122,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_releasing_a_non_handle_is_refused() {
-		$this->assertFalse( WP_Polls_Vote::polls_release_lock( false, 1 ) );
-		$this->assertFalse( WP_Polls_Vote::polls_release_lock( null, 1 ) );
+		$this->assertFalse( WP_Polls_Vote::polls_release_lock( false, 1 ), 'Releasing something that is not a handle is refused rather than fatal.' );
+		$this->assertFalse( WP_Polls_Vote::polls_release_lock( null, 1 ), 'Releasing null is refused rather than fatal.' );
 	}
 
 	/**
@@ -141,7 +141,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Taking a second flock() on the lock file is the only way to simulate a concurrent voter from one process.
 		$holder = fopen( $path, 'w+' );
-		$this->assertTrue( flock( $holder, LOCK_EX | LOCK_NB ) );
+		$this->assertTrue( flock( $holder, LOCK_EX | LOCK_NB ), 'The fixture really does hold the lock, or the contention below is not contention.' );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Taking a second flock() on the lock file is the only way to simulate a concurrent voter from one process.
 		$contender = fopen( $path, 'w+' );
@@ -168,7 +168,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 
-		$this->assertFileDoesNotExist( WP_Polls_Vote::polls_lock_file( $poll_id ) );
+		$this->assertFileDoesNotExist( WP_Polls_Vote::polls_lock_file( $poll_id ), 'A completed vote leaves no lock file behind.' );
 	}
 
 	/**
@@ -228,7 +228,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 			);
 		}
 
-		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ) );
+		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ), 'Activation grants the capability to the administrator role.' );
 	}
 
 	/**
@@ -288,11 +288,11 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		// capability proves activate() ran and is undone by the transaction.
 		$role = get_role( 'administrator' );
 		$role->remove_cap( 'manage_polls' );
-		$this->assertFalse( get_role( 'administrator' )->has_cap( 'manage_polls' ) );
+		$this->assertFalse( get_role( 'administrator' )->has_cap( 'manage_polls' ), 'The capability is absent to begin with, or the grant below proves nothing.' );
 
 		WP_Polls_Install::activation( true );
 
-		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ) );
+		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ), 'Network activation on a single site still grants the capability.' );
 	}
 
 	/**
@@ -304,7 +304,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		WP_Polls_Install::activation( false );
 		WP_Polls_Install::activation( false );
 
-		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ) );
+		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ), 'Activating twice leaves the capability granted rather than doubled or lost.' );
 	}
 
 	// --- front end assets -------------------------------------------------
@@ -426,9 +426,9 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_one_stylesheet_serves_both_directions() {
 		WP_Polls::poll_scripts();
 
-		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ) );
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The one stylesheet is enqueued whichever direction the site reads.' );
 		$this->assertFalse( wp_style_is( 'wp-polls-rtl', 'enqueued' ), 'the RTL handle is back' );
-		$this->assertFileDoesNotExist( WP_POLLS_DIR . 'css/wp-polls-rtl.css' );
+		$this->assertFileDoesNotExist( WP_POLLS_DIR . 'css/wp-polls-rtl.css', 'No separate RTL stylesheet ships; the one file uses logical properties.' );
 
 		$css = file_get_contents( WP_POLLS_DIR . 'css/wp-polls.css' );
 
@@ -486,7 +486,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		WP_Polls::poll_scripts();
 
-		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'The vote script is enqueued without jQuery being pulled in.' );
 		$this->assertSame( array(), wp_scripts()->registered['wp-polls']->deps, 'jQuery is back' );
 
 		$data = wp_scripts()->get_data( 'wp-polls', 'data' );
@@ -602,11 +602,11 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		WP_Polls::cron_polls_place();
 		$first = wp_next_scheduled( 'polls_cron' );
-		$this->assertNotFalse( $first );
+		$this->assertNotFalse( $first, 'The cron was scheduled at all, or the once-only assertion below is vacuous.' );
 
 		WP_Polls::cron_polls_place();
-		$this->assertNotFalse( wp_next_scheduled( 'polls_cron' ) );
-		$this->assertCount( 1, _get_cron_array()[ wp_next_scheduled( 'polls_cron' ) ]['polls_cron'] );
+		$this->assertNotFalse( wp_next_scheduled( 'polls_cron' ), 'The cron is still scheduled after the second call.' );
+		$this->assertCount( 1, _get_cron_array()[ wp_next_scheduled( 'polls_cron' ) ]['polls_cron'], 'Scheduling twice leaves one event, not two.' );
 	}
 
 	/**
@@ -621,7 +621,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$keys     = WP_Polls_Options::template_keys();
 		$defaults = WP_Polls_Template::defaults();
 
-		$this->assertNotEmpty( $keys );
+		$this->assertNotEmpty( $keys, 'There are template keys at all, or the defaults check below is vacuous.' );
 		$this->assertSame( array(), array_diff( $keys, array_keys( $defaults ) ), 'keys with no default' );
 		$this->assertSame( array(), array_diff( array_keys( $defaults ), $keys ), 'defaults with no key' );
 
@@ -787,11 +787,11 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_upgrading_the_templates_silences_the_notice() {
 		WP_Polls_Options::set( 'templates.votefooter', '<a href="#" onclick="poll_result(%POLL_ID%); return false;">Results</a>' );
 
-		$this->assertTrue( WP_Polls_Install::templates_have_onclick() );
+		$this->assertTrue( WP_Polls_Install::templates_have_onclick(), 'The fixture templates really do carry an onclick, or the upgrade below has nothing to do.' );
 
 		WP_Polls_Install::upgrade_templates_onclick();
 
-		$this->assertFalse( WP_Polls_Install::templates_have_onclick() );
+		$this->assertFalse( WP_Polls_Install::templates_have_onclick(), 'Upgrading the templates removes the onclick that raises the notice.' );
 		$this->assertStringContainsString( 'data-poll-action="result"', WP_Polls_Options::get( 'templates.votefooter' ) );
 	}
 }

@@ -21,8 +21,8 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	 */
 	public function test_get_reads_nested_paths() {
 		$this->assertSame( 'polla_aid', WP_Polls_Options::get( 'sort.answers_by' ) );
-		$this->assertIsArray( WP_Polls_Options::get( 'templates' ) );
-		$this->assertNotEmpty( WP_Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertIsArray( WP_Polls_Options::get( 'templates' ), 'A nested path reads back the whole branch.' );
+		$this->assertNotEmpty( WP_Polls_Options::get( 'templates.votefooter' ), 'A nested path reads back a leaf value.' );
 	}
 
 	/**
@@ -120,7 +120,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::flush();
 
 		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.results_by' ) );
-		$this->assertNotEmpty( WP_Polls_Options::get( 'templates.voteheader' ) );
+		$this->assertNotEmpty( WP_Polls_Options::get( 'templates.voteheader' ), 'A key the migration did not touch keeps its shipped default.' );
 	}
 
 	/**
@@ -135,12 +135,12 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 
 		WP_Polls_Install::upgrade();
 
-		$this->assertFalse( get_option( 'poll_archive_perpage', false ) );
-		$this->assertFalse( get_option( 'poll_ans_sortby', false ) );
-		$this->assertFalse( get_option( 'poll_options', false ) );
-		$this->assertFalse( get_option( 'poll_version', false ) );
-		$this->assertFalse( get_option( 'poll_db_version', false ) );
-		$this->assertNotFalse( get_option( WP_Polls_Options::OPTION, false ) );
+		$this->assertFalse( get_option( 'poll_archive_perpage', false ), 'The migration deletes the legacy poll_archive_perpage row.' );
+		$this->assertFalse( get_option( 'poll_ans_sortby', false ), 'The migration deletes the legacy poll_ans_sortby row.' );
+		$this->assertFalse( get_option( 'poll_options', false ), 'The migration deletes the legacy poll_options row.' );
+		$this->assertFalse( get_option( 'poll_version', false ), 'The migration deletes the legacy poll_version row.' );
+		$this->assertFalse( get_option( 'poll_db_version', false ), 'The migration deletes the legacy poll_db_version row.' );
+		$this->assertNotFalse( get_option( WP_Polls_Options::OPTION, false ), 'The migration leaves the new row behind, having folded the legacy ones into it.' );
 	}
 
 	/**

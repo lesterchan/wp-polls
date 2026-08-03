@@ -192,7 +192,7 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 	public function test_widget_update_without_submit_keeps_the_old_instance() {
 		$widget = new WP_Polls_Widget();
 
-		$this->assertFalse( $widget->update( array( 'title' => 'New' ), array( 'title' => 'Old' ) ) );
+		$this->assertFalse( $widget->update( array( 'title' => 'New' ), array( 'title' => 'Old' ) ), 'A save without the submit marker is refused, so the old instance survives.' );
 	}
 
 	// --- the cron job -----------------------------------------------------
@@ -320,7 +320,7 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 	public function test_onclick_left_in_a_template_is_detected() {
 		WP_Polls_Options::set( 'templates.votefooter', '<a onclick="poll_vote(1)">Vote</a>' );
 
-		$this->assertTrue( WP_Polls_Install::templates_have_onclick() );
+		$this->assertTrue( WP_Polls_Install::templates_have_onclick(), 'An onclick left in a template is detected.' );
 	}
 
 	/**
@@ -332,7 +332,7 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'templates.votefooter', '<a data-poll-action="vote">Vote</a>' );
 		WP_Polls_Options::set( 'templates.resultfooter2', '<a data-poll-action="booth">Vote</a>' );
 
-		$this->assertFalse( WP_Polls_Install::templates_have_onclick() );
+		$this->assertFalse( WP_Polls_Install::templates_have_onclick(), 'Converted templates are not flagged.' );
 	}
 
 	/**
@@ -344,6 +344,6 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'templates.votefooter', '<a data-poll-action="vote">Vote</a>' );
 		WP_Polls_Options::set( 'templates.resultfooter2', '<a onClick="poll_booth(1)">Vote</a>' );
 
-		$this->assertTrue( WP_Polls_Install::templates_have_onclick() );
+		$this->assertTrue( WP_Polls_Install::templates_have_onclick(), 'The result footer is checked for an onclick as well as the vote body.' );
 	}
 }

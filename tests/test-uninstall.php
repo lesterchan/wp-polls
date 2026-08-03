@@ -49,7 +49,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_get_sites_lifts_the_default_limit() {
-		$this->assertMatchesRegularExpression( "/'number'\s*=>\s*0/", $this->source() );
+		$this->assertMatchesRegularExpression( "/'number'\s*=>\s*0/", $this->source(), 'uninstall.php lifts the site query cap, or a network past the default is half-uninstalled.' );
 	}
 
 	/**
@@ -58,7 +58,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_get_sites_only_asks_for_ids() {
-		$this->assertMatchesRegularExpression( "/'fields'\s*=>\s*'ids'/", $this->source() );
+		$this->assertMatchesRegularExpression( "/'fields'\s*=>\s*'ids'/", $this->source(), 'uninstall.php asks for ids only, which is what makes the unlimited query affordable.' );
 	}
 
 	/**
@@ -201,7 +201,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_uninstall_declares_no_global_function() {
-		$this->assertDoesNotMatchRegularExpression( '/^\s*function\s+/m', $this->source() );
+		$this->assertDoesNotMatchRegularExpression( '/^\s*function\s+/m', $this->source(), 'uninstall.php declares a global function, which any other plugin could collide with.' );
 		$this->assertStringContainsString( 'WP_Polls_Install::uninstall_site()', $this->source() );
 		$this->assertStringContainsString( 'public static function uninstall_site()', $this->install_source() );
 	}
