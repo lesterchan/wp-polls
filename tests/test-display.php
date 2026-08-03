@@ -19,10 +19,10 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$html    = WP_Polls_Display::display_pollvote( $poll_id );
 
-		$this->assertStringContainsString( 'id="polls-' . $poll_id . '"', $html );
-		$this->assertStringContainsString( 'data-poll-action="vote"', $html );
-		$this->assertStringContainsString( 'data-poll-id="' . $poll_id . '"', $html );
-		$this->assertStringContainsString( 'name="wp-polls-nonce"', $html );
+		$this->assertStringContainsString( 'id="polls-' . $poll_id . '"', $html, 'The form is addressable by poll id.' );
+		$this->assertStringContainsString( 'data-poll-action="vote"', $html, 'Carries the action as data.' );
+		$this->assertStringContainsString( 'data-poll-id="' . $poll_id . '"', $html, 'The poll as data.' );
+		$this->assertStringContainsString( 'name="wp-polls-nonce"', $html, 'And a nonce for the script to send back.' );
 	}
 
 	/**
@@ -31,8 +31,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 	public function test_rendered_output_has_no_inline_handlers() {
 		$poll_id = $this->make_poll();
 
-		$this->assertStringNotContainsStringIgnoringCase( 'onclick', WP_Polls_Display::display_pollvote( $poll_id ) );
-		$this->assertStringNotContainsStringIgnoringCase( 'onclick', WP_Polls_Display::display_pollresult( $poll_id ) );
+		$this->assertStringNotContainsStringIgnoringCase( 'onclick', WP_Polls_Display::display_pollvote( $poll_id ), 'The vote form carries no click handler.' );
+		$this->assertStringNotContainsStringIgnoringCase( 'onclick', WP_Polls_Display::display_pollresult( $poll_id ), 'Nor do the results.' );
 	}
 
 	/**
@@ -41,8 +41,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 	public function test_no_unreplaced_tokens_remain() {
 		$poll_id = $this->make_poll( array(), array( array( 'A', 3 ), array( 'B', 1 ) ) );
 
-		$this->assertStringNotContainsString( '%POLL_', WP_Polls_Display::display_pollvote( $poll_id ) );
-		$this->assertStringNotContainsString( '%POLL_', WP_Polls_Display::display_pollresult( $poll_id ) );
+		$this->assertStringNotContainsString( '%POLL_', WP_Polls_Display::display_pollvote( $poll_id ), 'The vote form leaves no token unreplaced.' );
+		$this->assertStringNotContainsString( '%POLL_', WP_Polls_Display::display_pollresult( $poll_id ), 'Nor do the results.' );
 	}
 
 	/**
@@ -55,8 +55,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		);
 		$html    = WP_Polls_Display::display_pollvote( $poll_id );
 
-		$this->assertStringContainsString( '<strong>btw</strong>', $html );
-		$this->assertStringNotContainsStringIgnoringCase( '<script', $html );
+		$this->assertStringContainsString( '<strong>btw</strong>', $html, 'An answer keeps the markup a site owner may use.' );
+		$this->assertStringNotContainsStringIgnoringCase( '<script', $html, 'And loses what they may not.' );
 	}
 
 	/**
@@ -77,8 +77,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll( array(), array( array( 'Emacs & "friends"', 1 ) ) );
 		$html    = WP_Polls_Display::display_pollresult( $poll_id );
 
-		$this->assertStringContainsString( 'title="Emacs &amp; &quot;friends&quot;"', $html );
-		$this->assertStringNotContainsString( '&amp;amp;', $html );
+		$this->assertStringContainsString( 'title="Emacs &amp; &quot;friends&quot;"', $html, 'An answer is escaped for the attribute it sits in.' );
+		$this->assertStringNotContainsString( '&amp;amp;', $html, 'Once, so an ampersand does not come out doubled.' );
 	}
 
 	/**
@@ -87,8 +87,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 	public function test_missing_poll_renders_the_disabled_template() {
 		$expected = WP_Polls_Options::get( 'templates.disable' );
 
-		$this->assertSame( $expected, WP_Polls_Display::display_pollvote( 999999 ) );
-		$this->assertSame( $expected, WP_Polls_Display::display_pollresult( 999999 ) );
+		$this->assertSame( $expected, WP_Polls_Display::display_pollvote( 999999 ), 'A missing poll renders the disabled template rather than an empty form.' );
+		$this->assertSame( $expected, WP_Polls_Display::display_pollresult( 999999 ), 'And the same for the results.' );
 	}
 
 	/**
@@ -118,7 +118,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 				'%POLL_ID%',
 				'%POLL_MULTIPLE_ANSWER_PERCENTAGE%',
 			),
-			$seen
+			$seen,
+			'These are the variables the votebody template may use, and no others.'
 		);
 	}
 
@@ -134,7 +135,7 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 			}
 		);
 
-		$this->assertStringContainsString( '<!--MARK-->', WP_Polls_Display::display_pollresult( $poll_id ) );
+		$this->assertStringContainsString( '<!--MARK-->', WP_Polls_Display::display_pollresult( $poll_id ), 'The result markup runs through the filter.' );
 	}
 
 	/**
@@ -144,8 +145,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll( array( 'pollq_multiple' => 2 ), array( array( 'A', 0 ), array( 'B', 0 ) ) );
 		$html    = WP_Polls_Display::display_pollvote( $poll_id );
 
-		$this->assertStringContainsString( 'type="checkbox"', $html );
-		$this->assertStringContainsString( 'poll_multiple_ans_' . $poll_id, $html );
+		$this->assertStringContainsString( 'type="checkbox"', $html, 'A multiple answer poll offers checkboxes rather than radios.' );
+		$this->assertStringContainsString( 'poll_multiple_ans_' . $poll_id, $html, 'Named for the poll they belong to.' );
 	}
 
 	// --- the result bar ---------------------------------------------------
@@ -160,9 +161,9 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll( array(), array( array( 'A', 3 ), array( 'B', 1 ) ) );
 		$html    = WP_Polls_Display::display_pollresult( $poll_id );
 
-		$this->assertStringContainsString( '<div class="wp-polls-bar" aria-hidden="true">', $html );
-		$this->assertStringContainsString( '<div class="wp-polls-bar-fill"', $html );
-		$this->assertStringNotContainsString( 'class="pollbar"', $html );
+		$this->assertStringContainsString( '<div class="wp-polls-bar" aria-hidden="true">', $html, 'The bar is a track, hidden from assistive technology.' );
+		$this->assertStringContainsString( '<div class="wp-polls-bar-fill"', $html, 'With a fill inside it.' );
+		$this->assertStringNotContainsString( 'class="pollbar"', $html, 'And the class it replaced is gone.' );
 	}
 
 	/**
@@ -175,8 +176,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll( array(), array( array( 'A', 5 ), array( 'B', 0 ) ) );
 		$html    = WP_Polls_Display::display_pollresult( $poll_id );
 
-		$this->assertStringContainsString( 'width: 100%', $html );
-		$this->assertStringNotContainsString( 'width: 99%', $html );
+		$this->assertStringContainsString( 'width: 100%', $html, 'The only answer voted for fills the bar.' );
+		$this->assertStringNotContainsString( 'width: 99%', $html, 'Rather than stopping just short of it.' );
 	}
 
 	/**
@@ -186,8 +187,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll( array(), array( array( 'A', 5 ), array( 'B', 0 ) ) );
 		$html    = WP_Polls_Display::display_pollresult( $poll_id );
 
-		$this->assertStringContainsString( 'width: 0%', $html );
-		$this->assertStringNotContainsString( 'width: 1%', $html );
+		$this->assertStringContainsString( 'width: 0%', $html, 'An answer nobody voted for has an empty bar.' );
+		$this->assertStringNotContainsString( 'width: 1%', $html, 'Rather than a sliver of one.' );
 	}
 
 	/**
@@ -210,9 +211,9 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		preg_match_all( '/width: (\d+)%/', $html, $drawn );
 
 		$this->assertNotEmpty( $printed[1], 'A bar was printed at all, or the percentage comparison below is vacuous.' );
-		$this->assertSame( $printed[1], $drawn[1] );
+		$this->assertSame( $printed[1], $drawn[1], 'The bar is drawn at the percentage printed beside it.' );
 		// Proves the buffer actually fired, so the comparison above is not vacuous.
-		$this->assertContains( '34', $printed[1] );
+		$this->assertContains( '34', $printed[1], 'Which is a real figure, so the comparison above means something.' );
 	}
 
 	/**
@@ -246,9 +247,9 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		preg_match_all( '/\((\d+)%/', WP_Polls_Display::polls_archive(), $archive );
 
 		$this->assertNotEmpty( $poll[1], 'An archive poll was printed at all, or the percentage comparison below is vacuous.' );
-		$this->assertSame( $poll[1], $archive[1] );
+		$this->assertSame( $poll[1], $archive[1], 'The archive prints the same percentages as the poll.' );
 		// Unbuffered by default: three answers at one vote each stay at 33.
-		$this->assertNotContains( '34', $archive[1] );
+		$this->assertNotContains( '34', $archive[1], 'Read from the stored totals rather than from a buffered render.' );
 	}
 
 	/**
@@ -262,8 +263,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		preg_match_all( '/\((\d+)%/', WP_Polls_Display::display_pollresult( $poll_id ), $poll );
 		preg_match_all( '/\((\d+)%/', WP_Polls_Display::polls_archive(), $archive );
 
-		$this->assertSame( $poll[1], $archive[1] );
-		$this->assertContains( '34', $archive[1] );
+		$this->assertSame( $poll[1], $archive[1], 'With the filter on the archive still matches the poll.' );
+		$this->assertContains( '34', $archive[1], 'And now it is the buffered render that produced it.' );
 	}
 
 	/**
@@ -278,8 +279,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 
 		$archive = WP_Polls_Display::polls_archive();
 
-		$this->assertStringContainsString( 'title="Emacs &amp; &quot;friends&quot;"', $archive );
-		$this->assertStringNotContainsString( '&amp;amp;', $archive );
+		$this->assertStringContainsString( 'title="Emacs &amp; &quot;friends&quot;"', $archive, 'The archive escapes an answer for the attribute it sits in.' );
+		$this->assertStringNotContainsString( '&amp;amp;', $archive, 'Once, so an ampersand does not come out doubled.' );
 	}
 
 	/**
@@ -295,8 +296,8 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 		$poll    = WP_Polls_Display::display_pollresult( $poll_id );
 		$archive = WP_Polls_Display::polls_archive();
 
-		$this->assertStringContainsString( 'width: 50%', $poll );
-		$this->assertStringContainsString( 'width: 50%', $archive );
-		$this->assertStringNotContainsString( 'width: 45%', $archive );
+		$this->assertStringContainsString( 'width: 50%', $poll, 'The poll draws its bar at this width.' );
+		$this->assertStringContainsString( 'width: 50%', $archive, 'And the archive draws it at the same one.' );
+		$this->assertStringNotContainsString( 'width: 45%', $archive, 'Rather than at a width of its own.' );
 	}
 }

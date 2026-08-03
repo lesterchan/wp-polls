@@ -45,10 +45,10 @@ class WP_Polls_Template_Tags_Test extends WP_Polls_TestCase {
 	public function test_counting_tags_return_values() {
 		$poll_id = $this->make_poll( array(), array( array( 'A', 3 ), array( 'B', 2 ) ) );
 
-		$this->assertSame( 1, get_pollquestions( false ) );
-		$this->assertSame( 2, get_pollanswers( false ) );
-		$this->assertSame( 5, get_pollvotes( false ) );
-		$this->assertSame( 5, get_pollvotes_by_id( $poll_id, false ) );
+		$this->assertSame( 1, get_pollquestions( false ), 'The question count is the polls.' );
+		$this->assertSame( 2, get_pollanswers( false ), 'The answer count is their answers.' );
+		$this->assertSame( 5, get_pollvotes( false ), 'The vote count is every vote on the site.' );
+		$this->assertSame( 5, get_pollvotes_by_id( $poll_id, false ), 'And per poll it is that poll votes.' );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class WP_Polls_Template_Tags_Test extends WP_Polls_TestCase {
 	public function test_get_poll_question() {
 		$poll_id = $this->make_poll( array( 'pollq_question' => 'Which <em>editor</em>?' ) );
 
-		$this->assertSame( 'Which <em>editor</em>?', get_poll_question( $poll_id ) );
+		$this->assertSame( 'Which <em>editor</em>?', get_poll_question( $poll_id ), 'The question comes back as it was stored, markup and all.' );
 	}
 
 	/**
@@ -67,7 +67,7 @@ class WP_Polls_Template_Tags_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$html    = get_poll( $poll_id, false );
 
-		$this->assertStringContainsString( 'id="polls-' . $poll_id . '"', $html );
+		$this->assertStringContainsString( 'id="polls-' . $poll_id . '"', $html, 'The tag renders the poll it was given.' );
 	}
 
 	/**
@@ -76,8 +76,8 @@ class WP_Polls_Template_Tags_Test extends WP_Polls_TestCase {
 	public function test_poll_shortcode() {
 		$poll_id = $this->make_poll();
 
-		$this->assertStringContainsString( 'wp-polls', do_shortcode( '[poll id="' . $poll_id . '"]' ) );
-		$this->assertStringContainsString( 'wp-polls', do_shortcode( '[poll=' . $poll_id . ']' ) );
+		$this->assertStringContainsString( 'wp-polls', do_shortcode( '[poll id="' . $poll_id . '"]' ), 'The shortcode renders a poll.' );
+		$this->assertStringContainsString( 'wp-polls', do_shortcode( '[poll=' . $poll_id . ']' ), 'And the legacy form of it does too.' );
 	}
 
 	/**
@@ -87,8 +87,8 @@ class WP_Polls_Template_Tags_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll( array(), array( array( 'A', 1 ) ) );
 		$html    = do_shortcode( '[poll id="' . $poll_id . '" type="result"]' );
 
-		$this->assertStringNotContainsString( 'data-poll-action="vote"', $html );
-		$this->assertStringContainsString( 'wp-polls-bar', $html );
+		$this->assertStringNotContainsString( 'data-poll-action="vote"', $html, 'The result type offers no voting form.' );
+		$this->assertStringContainsString( 'wp-polls-bar', $html, 'It renders the bars instead.' );
 	}
 
 	/**
@@ -97,6 +97,6 @@ class WP_Polls_Template_Tags_Test extends WP_Polls_TestCase {
 	public function test_page_polls_shortcode() {
 		$this->make_poll();
 
-		$this->assertStringContainsString( 'wp-polls-archive', do_shortcode( '[page_polls]' ) );
+		$this->assertStringContainsString( 'wp-polls-archive', do_shortcode( '[page_polls]' ), 'The archive shortcode renders the archive.' );
 	}
 }

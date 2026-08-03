@@ -88,18 +88,18 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
-		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
-		$this->assertSame( 'No polls, sorry.', WP_Polls_Options::get( 'templates.disable' ) );
-		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.answers_by' ) );
-		$this->assertSame( 'desc', WP_Polls_Options::get( 'sort.answers_order' ) );
-		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( 3, (int) WP_Polls_Options::get( 'archive.display_poll' ) );
-		$this->assertSame( 3, (int) WP_Polls_Options::get( 'close' ) );
-		$this->assertSame( 2, (int) WP_Polls_Options::get( 'check_method' ) );
-		$this->assertSame( 86400, (int) WP_Polls_Options::get( 'cookie_expiry' ) );
-		$this->assertSame( 1, (int) WP_Polls_Options::get( 'allow_to_vote' ) );
-		$this->assertSame( 2, (int) WP_Polls_Options::get( 'current_poll' ) );
-		$this->assertSame( 3, (int) WP_Polls_Options::get( 'latest_poll' ) );
+		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ), 'The customised footer template carries across.' );
+		$this->assertSame( 'No polls, sorry.', WP_Polls_Options::get( 'templates.disable' ), 'The disabled message.' );
+		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.answers_by' ), 'The answer sort column.' );
+		$this->assertSame( 'desc', WP_Polls_Options::get( 'sort.answers_order' ), 'The answer sort direction.' );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ), 'The archive page size.' );
+		$this->assertSame( 3, (int) WP_Polls_Options::get( 'archive.display_poll' ), 'The archive display type.' );
+		$this->assertSame( 3, (int) WP_Polls_Options::get( 'close' ), 'The close setting.' );
+		$this->assertSame( 2, (int) WP_Polls_Options::get( 'check_method' ), 'The check method.' );
+		$this->assertSame( 86400, (int) WP_Polls_Options::get( 'cookie_expiry' ), 'The cookie expiry.' );
+		$this->assertSame( 1, (int) WP_Polls_Options::get( 'allow_to_vote' ), 'The permission setting.' );
+		$this->assertSame( 2, (int) WP_Polls_Options::get( 'current_poll' ), 'The current poll.' );
+		$this->assertSame( 3, (int) WP_Polls_Options::get( 'latest_poll' ), 'And the latest poll.' );
 	}
 
 	/**
@@ -114,12 +114,12 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		// The fold carries poll_bar across intact and the bar upgrade then maps
 		// the style: images/default_gradient is gone, and it shaded light to
 		// dark, so it lands on the CSS gradient. The colours are untouched.
-		$this->assertSame( 'gradient', WP_Polls_Options::get( 'bar.style' ) );
-		$this->assertSame( 'ff0000', WP_Polls_Options::get( 'bar.background' ) );
-		$this->assertSame( '00ff00', WP_Polls_Options::get( 'bar.border' ) );
-		$this->assertSame( 12, (int) WP_Polls_Options::get( 'bar.height' ) );
-		$this->assertSame( 0, (int) WP_Polls_Options::get( 'ajax.loading' ) );
-		$this->assertSame( 0, (int) WP_Polls_Options::get( 'ajax.fading' ) );
+		$this->assertSame( 'gradient', WP_Polls_Options::get( 'bar.style' ), 'The bar style carries across.' );
+		$this->assertSame( 'ff0000', WP_Polls_Options::get( 'bar.background' ), 'The background colour.' );
+		$this->assertSame( '00ff00', WP_Polls_Options::get( 'bar.border' ), 'The border colour.' );
+		$this->assertSame( 12, (int) WP_Polls_Options::get( 'bar.height' ), 'The bar height.' );
+		$this->assertSame( 0, (int) WP_Polls_Options::get( 'ajax.loading' ), 'The loading toggle.' );
+		$this->assertSame( 0, (int) WP_Polls_Options::get( 'ajax.fading' ), 'And the fading toggle.' );
 	}
 
 	/**
@@ -135,7 +135,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 		$this->run_upgrade();
 
-		$this->assertSame( 'HTTP_X_FORWARDED_FOR', WP_Polls_Options::get( 'ip_header' ) );
+		$this->assertSame( 'HTTP_X_FORWARDED_FOR', WP_Polls_Options::get( 'ip_header' ), 'The header setting survives the move to the new row.' );
 	}
 
 	/**
@@ -148,7 +148,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->run_upgrade();
 
 		$defaults = WP_Polls_Options::defaults();
-		$this->assertSame( $defaults['sort']['results_by'], WP_Polls_Options::get( 'sort.results_by' ) );
+		$this->assertSame( $defaults['sort']['results_by'], WP_Polls_Options::get( 'sort.results_by' ), 'A key the legacy install never set keeps its default.' );
 		$this->assertNotNull( WP_Polls_Options::get( 'templates.voteheader' ), 'A key the migration did not touch keeps its shipped default.' );
 	}
 
@@ -182,8 +182,8 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_the_current_rows_are_not_in_the_delete_list() {
-		$this->assertNotContains( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_extra_rows() );
-		$this->assertNotContains( WP_Polls_Options::VERSION, WP_Polls_Options::legacy_extra_rows() );
+		$this->assertNotContains( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_extra_rows(), 'The options row is not on the list of rows to delete.' );
+		$this->assertNotContains( WP_Polls_Options::VERSION, WP_Polls_Options::legacy_extra_rows(), 'Nor the version row, which would take the install with it.' );
 		$this->assertArrayNotHasKey( WP_Polls_Options::OPTION, WP_Polls_Options::legacy_map(), 'The current settings row is on the delete list, so migrating would destroy it.' );
 	}
 
@@ -268,8 +268,8 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		$this->run_upgrade();
 		$this->run_upgrade();
 
-		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
-		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ), 'A second upgrade leaves the template where the first put it.' );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ), 'And the page size.' );
 	}
 
 	/**
@@ -288,8 +288,8 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		delete_option( WP_Polls_Options::VERSION );
 		$this->run_upgrade();
 
-		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ), 'A rerun with no legacy rows left keeps the page size.' );
+		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ), 'And the template.' );
 	}
 
 	/**
@@ -313,8 +313,8 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$this->assertSame( 23, (int) WP_Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( 'DEV BRANCH TEXT', WP_Polls_Options::get( 'templates.disable' ) );
+		$this->assertSame( 23, (int) WP_Polls_Options::get( 'archive.per_page' ), 'An install stamped with the new version but never migrated is still folded in.' );
+		$this->assertSame( 'DEV BRANCH TEXT', WP_Polls_Options::get( 'templates.disable' ), 'Templates and all.' );
 	}
 
 	/**
@@ -328,7 +328,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$this->assertSame( 42, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 42, (int) WP_Polls_Options::get( 'archive.per_page' ), 'An install that has already migrated is left as it stands.' );
 	}
 
 	/**
@@ -347,9 +347,9 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$footer = WP_Polls_Options::get( 'templates.votefooter' );
 
-		$this->assertStringNotContainsString( 'onclick', $footer );
-		$this->assertStringContainsString( 'data-poll-id="%POLL_ID%"', $footer );
-		$this->assertStringContainsString( 'data-poll-action="result"', $footer );
+		$this->assertStringNotContainsString( 'onclick', $footer, 'The upgrade takes the click handler out of the template.' );
+		$this->assertStringContainsString( 'data-poll-id="%POLL_ID%"', $footer, 'Replacing it with the poll as data.' );
+		$this->assertStringContainsString( 'data-poll-action="result"', $footer, 'And the action as data.' );
 	}
 
 	/**
@@ -364,7 +364,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$this->assertSame( $custom, WP_Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertSame( $custom, WP_Polls_Options::get( 'templates.votefooter' ), 'A template with no click handler is left exactly as it was.' );
 	}
 
 	// --- the poll bar -----------------------------------------------------
@@ -385,9 +385,9 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$body = WP_Polls_Options::get( 'templates.resultbody' );
 
-		$this->assertStringNotContainsString( 'class="pollbar"', $body );
-		$this->assertStringContainsString( 'class="wp-polls-bar"', $body );
-		$this->assertStringContainsString( 'class="wp-polls-bar-fill"', $body );
+		$this->assertStringNotContainsString( 'class="pollbar"', $body, 'The result template loses the class it used to draw the bar with.' );
+		$this->assertStringContainsString( 'class="wp-polls-bar"', $body, 'Gaining the track.' );
+		$this->assertStringContainsString( 'class="wp-polls-bar-fill"', $body, 'And the fill inside it.' );
 	}
 
 	/**
@@ -411,8 +411,8 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$body = WP_Polls_Options::get( 'templates.resultbody' );
 
-		$this->assertStringNotContainsString( 'MY OWN MARKUP', $body );
-		$this->assertSame( WP_Polls_Template::get_default( 'resultbody' ), $body );
+		$this->assertStringNotContainsString( 'MY OWN MARKUP', $body, 'A customised result template is not kept.' );
+		$this->assertSame( WP_Polls_Template::get_default( 'resultbody' ), $body, 'It is replaced with the new default, because the old markup cannot draw the new bar.' );
 	}
 
 	/**
@@ -439,7 +439,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$this->assertSame( $expected, WP_Polls_Options::get( 'bar.style' ) );
+		$this->assertSame( $expected, WP_Polls_Options::get( 'bar.style' ), 'A legacy bar style maps onto the style that replaced it.' );
 	}
 
 	/**
@@ -477,7 +477,7 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 
 		$this->run_upgrade();
 
-		$this->assertSame( '<li>EDITED AFTERWARDS</li>', WP_Polls_Options::get( 'templates.resultbody' ) );
+		$this->assertSame( '<li>EDITED AFTERWARDS</li>', WP_Polls_Options::get( 'templates.resultbody' ), 'The bar upgrade does not run again over a template edited since.' );
 	}
 	/**
 	 * A 3.0.0 beta row carrying the old key names is brought forward.

@@ -29,8 +29,8 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 		$html = WP_Polls_Display::polls_archive();
 
-		$this->assertStringContainsString( 'Archive poll one', $html );
-		$this->assertStringContainsString( 'Archive poll two', $html );
+		$this->assertStringContainsString( 'Archive poll one', $html, 'The archive lists a poll.' );
+		$this->assertStringContainsString( 'Archive poll two', $html, 'And another, so it is not stopping at one.' );
 	}
 
 	/**
@@ -50,8 +50,8 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 		$html = WP_Polls_Display::polls_archive();
 
-		$this->assertStringContainsString( 'Published poll', $html );
-		$this->assertStringNotContainsString( 'Scheduled poll', $html );
+		$this->assertStringContainsString( 'Published poll', $html, 'A published poll is listed.' );
+		$this->assertStringNotContainsString( 'Scheduled poll', $html, 'And one that has not opened yet is not.' );
 	}
 
 	/**
@@ -75,13 +75,13 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 		WP_Polls_Options::set( 'archive.display_poll', 1 );
 		$closed_only = WP_Polls_Display::polls_archive();
-		$this->assertStringContainsString( 'A closed poll', $closed_only );
-		$this->assertStringNotContainsString( 'An open poll', $closed_only );
+		$this->assertStringContainsString( 'A closed poll', $closed_only, 'Asked for closed polls, the closed one is listed.' );
+		$this->assertStringNotContainsString( 'An open poll', $closed_only, 'And the open one is not.' );
 
 		WP_Polls_Options::set( 'archive.display_poll', 2 );
 		$open_only = WP_Polls_Display::polls_archive();
-		$this->assertStringContainsString( 'An open poll', $open_only );
-		$this->assertStringNotContainsString( 'A closed poll', $open_only );
+		$this->assertStringContainsString( 'An open poll', $open_only, 'Asked for open polls, the open one is listed.' );
+		$this->assertStringNotContainsString( 'A closed poll', $open_only, 'And the closed one is not.' );
 	}
 
 	/**
@@ -95,7 +95,7 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 		$html = WP_Polls_Display::polls_archive();
 
-		$this->assertStringNotContainsString( '&amp;amp;', $html );
+		$this->assertStringNotContainsString( '&amp;amp;', $html, 'The archive escapes once, so an ampersand does not come out doubled.' );
 	}
 
 	// --- the widget -------------------------------------------------------
@@ -126,10 +126,10 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 		);
 		$html = ob_get_clean();
 
-		$this->assertStringContainsString( '<aside>', $html );
-		$this->assertStringContainsString( '<h2>Polls</h2>', $html );
-		$this->assertStringContainsString( 'Widget poll', $html );
-		$this->assertStringContainsString( '</aside>', $html );
+		$this->assertStringContainsString( '<aside>', $html, 'The widget renders inside the wrapper the theme gave it.' );
+		$this->assertStringContainsString( '<h2>Polls</h2>', $html, 'With its title.' );
+		$this->assertStringContainsString( 'Widget poll', $html, 'The poll it was configured with.' );
+		$this->assertStringContainsString( '</aside>', $html, 'And closes the wrapper it opened.' );
 	}
 
 	/**
@@ -158,7 +158,7 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 		);
 		$html = ob_get_clean();
 
-		$this->assertStringNotContainsString( '<h2>', $html );
+		$this->assertStringNotContainsString( '<h2>', $html, 'An empty title renders no heading at all.' );
 	}
 
 	/**
@@ -179,9 +179,9 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 			array()
 		);
 
-		$this->assertSame( 'My polls', $saved['title'] );
-		$this->assertSame( 7, $saved['poll_id'] );
-		$this->assertSame( 1, $saved['display_pollarchive'] );
+		$this->assertSame( 'My polls', $saved['title'], 'The widget stores its title.' );
+		$this->assertSame( 7, $saved['poll_id'], 'The poll id, as an integer.' );
+		$this->assertSame( 1, $saved['display_pollarchive'], 'And the archive link toggle.' );
 	}
 
 	/**
@@ -217,7 +217,8 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 		$this->assertSame(
 			0,
-			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) )
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ),
+			'Cron closes a poll whose expiry has passed.'
 		);
 	}
 
@@ -240,7 +241,8 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 		$this->assertSame(
 			1,
-			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) )
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ),
+			'And leaves a poll with no expiry open.'
 		);
 	}
 
@@ -264,7 +266,8 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 		$this->assertSame(
 			1,
-			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) )
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ),
+			'Cron opens a poll whose start time has arrived.'
 		);
 	}
 
@@ -287,7 +290,8 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 
 		$this->assertSame(
 			-1,
-			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) )
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ),
+			'And leaves one still in the future scheduled.'
 		);
 	}
 
@@ -307,7 +311,7 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'latest_poll', 0 );
 		WP_Polls::cron_polls_status();
 
-		$this->assertSame( $poll_id, (int) WP_Polls_Options::get( 'latest_poll' ) );
+		$this->assertSame( $poll_id, (int) WP_Polls_Options::get( 'latest_poll' ), 'Cron updates the latest poll to the one it opened.' );
 	}
 
 	// --- the upgrade notice ----------------------------------------------

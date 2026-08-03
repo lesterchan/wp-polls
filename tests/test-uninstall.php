@@ -202,7 +202,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 */
 	public function test_uninstall_declares_no_global_function() {
 		$this->assertDoesNotMatchRegularExpression( '/^\s*function\s+/m', $this->source(), 'uninstall.php declares a global function, which any other plugin could collide with.' );
-		$this->assertStringContainsString( 'WP_Polls_Install::uninstall_site()', $this->source() );
-		$this->assertStringContainsString( 'public static function uninstall_site()', $this->install_source() );
+		$this->assertStringContainsString( 'WP_Polls_Install::uninstall_site()', $this->source(), 'uninstall.php delegates rather than declaring a function of its own.' );
+		$this->assertStringContainsString( 'public static function uninstall_site()', $this->install_source(), 'And the method it delegates to really exists.' );
 	}
 }

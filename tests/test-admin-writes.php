@@ -114,8 +114,8 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$poll = $this->find_poll( 'Which editor?' );
 
 		$this->assertNotNull( $poll, 'the poll was not inserted' );
-		$this->assertSame( array( 'vim', 'emacs', 'nano' ), $this->answer_texts( $poll->pollq_id ) );
-		$this->assertSame( 0, (int) $poll->pollq_totalvotes );
+		$this->assertSame( array( 'vim', 'emacs', 'nano' ), $this->answer_texts( $poll->pollq_id ), 'The answers are stored, in the order they were submitted.' );
+		$this->assertSame( 0, (int) $poll->pollq_totalvotes, 'And a new poll starts with no votes.' );
 	}
 
 	/**
@@ -132,7 +132,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 			$this->add_poll_post( '   ', array( 'Yes', 'No' ) )
 		);
 
-		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->pollsq}" ) );
+		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->pollsq}" ), 'An empty question stores no poll.' );
 	}
 
 	/**
@@ -153,7 +153,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 			unset( $e );
 		}
 
-		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->pollsq}" ) );
+		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->pollsq}" ), 'And neither does a submission with no nonce.' );
 	}
 
 	/**
@@ -171,8 +171,8 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		global $wpdb;
 		$stored = $wpdb->get_var( "SELECT pollq_question FROM {$wpdb->pollsq} LIMIT 1" );
 
-		$this->assertStringContainsString( '<em>ok</em>', $stored );
-		$this->assertStringNotContainsString( '<script>', $stored );
+		$this->assertStringContainsString( '<em>ok</em>', $stored, 'A question keeps the markup a site owner may use.' );
+		$this->assertStringNotContainsString( '<script>', $stored, 'And loses what they may not.' );
 	}
 
 	/**
@@ -190,7 +190,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$poll = $this->find_poll( 'Future poll' );
 
 		$this->assertNotNull( $poll, 'The poll was created at all, or the not-yet-active assertion below is vacuous.' );
-		$this->assertSame( -1, (int) $poll->pollq_active );
+		$this->assertSame( -1, (int) $poll->pollq_active, 'A poll starting later is scheduled rather than open.' );
 	}
 
 	/**
@@ -208,7 +208,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		$poll = $this->find_poll( 'Expired poll' );
 
 		$this->assertNotNull( $poll, 'The poll was created at all, or the closed assertion below is vacuous.' );
-		$this->assertSame( 0, (int) $poll->pollq_active );
+		$this->assertSame( 0, (int) $poll->pollq_active, 'And one whose expiry has passed is closed rather than open.' );
 	}
 
 	/**
@@ -229,7 +229,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 				)
 			)
 		);
-		$this->assertSame( 2, (int) $this->find_poll( 'Multi poll' )->pollq_multiple );
+		$this->assertSame( 2, (int) $this->find_poll( 'Multi poll' )->pollq_multiple, 'A multiple answer poll stores its limit.' );
 
 		$this->render_admin_page(
 			'add',
@@ -243,7 +243,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 				)
 			)
 		);
-		$this->assertSame( 0, (int) $this->find_poll( 'Single poll' )->pollq_multiple );
+		$this->assertSame( 0, (int) $this->find_poll( 'Single poll' )->pollq_multiple, 'And a single answer poll stores zero rather than one.' );
 	}
 
 	// --- editing ----------------------------------------------------------
@@ -292,7 +292,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		global $wpdb;
 		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) );
 
-		$this->assertSame( 'Edited question', $stored );
+		$this->assertSame( 'Edited question', $stored, 'Editing a poll updates the question.' );
 	}
 
 	/**
@@ -324,7 +324,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( array( 'New A', 'New B' ), $this->answer_texts( $poll_id ) );
+		$this->assertSame( array( 'New A', 'New B' ), $this->answer_texts( $poll_id ), 'Editing replaces the existing answers in place.' );
 	}
 
 	/**
@@ -356,7 +356,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( array( 'A', 'B', 'C' ), $this->answer_texts( $poll_id ) );
+		$this->assertSame( array( 'A', 'B', 'C' ), $this->answer_texts( $poll_id ), 'And appends new ones after them.' );
 	}
 
 	/**
@@ -387,7 +387,7 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		global $wpdb;
 		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) );
 
-		$this->assertSame( 'Untouched question', $stored );
+		$this->assertSame( 'Untouched question', $stored, 'An edit with no nonce changes nothing.' );
 	}
 
 	/**
@@ -410,6 +410,6 @@ class WP_Polls_Admin_Writes_Test extends WP_Polls_TestCase {
 		global $wpdb;
 		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) );
 
-		$this->assertStringNotContainsString( '<script>', $stored );
+		$this->assertStringNotContainsString( '<script>', $stored, 'And an edited question is filtered on the way in too.' );
 	}
 }

@@ -146,7 +146,7 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 1, $this->count_rows( 'pollsq' ) );
+		$this->assertSame( 1, $this->count_rows( 'pollsq' ), 'A logged out visitor deletes nothing.' );
 	}
 
 	/**
@@ -166,7 +166,7 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 1, $this->count_rows( 'pollsq' ) );
+		$this->assertSame( 1, $this->count_rows( 'pollsq' ), 'A bad nonce deletes nothing.' );
 	}
 
 	/**
@@ -186,7 +186,7 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 1, $this->count_rows( 'pollsq' ) );
+		$this->assertSame( 1, $this->count_rows( 'pollsq' ), 'And neither does a nonce minted for another action.' );
 	}
 
 	// --- deleting a poll --------------------------------------------------
@@ -213,10 +213,10 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 0, $this->count_rows( 'pollsq' ) );
-		$this->assertSame( 0, $this->count_rows( 'pollsa' ) );
-		$this->assertSame( 0, $this->count_rows( 'pollsip' ) );
-		$this->assertStringContainsString( 'Doomed poll', $output );
+		$this->assertSame( 0, $this->count_rows( 'pollsq' ), 'Deleting a poll removes the question.' );
+		$this->assertSame( 0, $this->count_rows( 'pollsa' ), 'Its answers.' );
+		$this->assertSame( 0, $this->count_rows( 'pollsip' ), 'And its logs, so nothing is orphaned.' );
+		$this->assertStringContainsString( 'Doomed poll', $output, 'And the response names what went.' );
 	}
 
 	/**
@@ -240,7 +240,7 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 		global $wpdb;
 		$left = $wpdb->get_col( "SELECT pollq_id FROM {$wpdb->pollsq}" );
 
-		$this->assertSame( array( (string) $survivor ), $left );
+		$this->assertSame( array( (string) $survivor ), $left, 'Deleting one poll leaves the others where they were.' );
 	}
 
 	/**
@@ -268,7 +268,7 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( array( $poll_id ), $seen );
+		$this->assertSame( array( $poll_id ), $seen, 'The action fires once, with the poll that was deleted.' );
 	}
 
 	// --- deleting an answer ----------------------------------------------
@@ -301,9 +301,9 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 		$remaining = $wpdb->get_col( $wpdb->prepare( "SELECT polla_answers FROM {$wpdb->pollsa} WHERE polla_qid = %d", $poll_id ) );
 		$total     = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) );
 
-		$this->assertSame( array( 'Keep' ), $remaining );
+		$this->assertSame( array( 'Keep' ), $remaining, 'Deleting an answer leaves the others.' );
 		$this->assertSame( 4, $total, 'the deleted answer votes were not subtracted' );
-		$this->assertSame( 0, $this->count_rows( 'pollsip' ) );
+		$this->assertSame( 0, $this->count_rows( 'pollsip' ), 'And takes the log rows that pointed at it.' );
 	}
 
 	// --- opening and closing ---------------------------------------------
@@ -329,7 +329,8 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 
 		$this->assertSame(
 			0,
-			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) )
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ),
+			'Closing a poll marks it closed.'
 		);
 	}
 
@@ -354,7 +355,8 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 
 		$this->assertSame(
 			1,
-			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) )
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_active FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ),
+			'And opening one marks it open.'
 		);
 	}
 
@@ -380,8 +382,8 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 0, $this->count_rows( 'pollsip' ) );
-		$this->assertSame( 1, $this->count_rows( 'pollsq' ) );
+		$this->assertSame( 0, $this->count_rows( 'pollsip' ), 'Deleting all logs empties the log.' );
+		$this->assertSame( 1, $this->count_rows( 'pollsq' ), 'And leaves the polls themselves alone.' );
 	}
 
 	/**
@@ -402,7 +404,7 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 1, $this->count_rows( 'pollsip' ) );
+		$this->assertSame( 1, $this->count_rows( 'pollsip' ), 'Without the confirmation the log is untouched.' );
 	}
 
 	/**
@@ -431,7 +433,7 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 		global $wpdb;
 		$left = $wpdb->get_col( "SELECT pollip_qid FROM {$wpdb->pollsip}" );
 
-		$this->assertSame( array( (string) $second ), $left );
+		$this->assertSame( array( (string) $second ), $left, 'Deleting one poll logs leaves the other poll logs alone.' );
 	}
 
 	/**
@@ -450,6 +452,6 @@ class WP_Polls_Admin_Ajax_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 1, $this->count_rows( 'pollsq' ) );
+		$this->assertSame( 1, $this->count_rows( 'pollsq' ), 'An unknown action does nothing at all.' );
 	}
 }

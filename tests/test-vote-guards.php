@@ -132,7 +132,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
 		$_COOKIE[ 'voted_' . $poll_id ] = (string) $answers[0];
 
-		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'With logging off there is never a previous vote to find.' );
 	}
 
 	// --- logging method 1: cookie ----------------------------------------
@@ -147,11 +147,11 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'With no cookie there is no previous vote.' );
 
 		$_COOKIE[ 'voted_' . $poll_id ] = $answers[0] . ',' . $answers[1];
 
-		$this->assertSame( array( $answers[0], $answers[1] ), WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( $answers[0], $answers[1] ), WP_Polls_Vote::check_voted( $poll_id ), 'And with one, the answers it holds are what comes back.' );
 	}
 
 	/**
@@ -166,7 +166,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 
 		$_COOKIE[ 'voted_' . $first ] = '1';
 
-		$this->assertSame( 0, WP_Polls_Vote::check_voted( $second ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $second ), 'A cookie for one poll says nothing about another.' );
 	}
 
 	/**
@@ -180,7 +180,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 
 		$_COOKIE[ 'voted_' . $poll_id ] = '3,<script>alert(1)</script>,7';
 
-		$this->assertSame( array( 3, 0, 7 ), WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( 3, 0, 7 ), WP_Polls_Vote::check_voted( $poll_id ), 'Cookie values are cast, so nothing from a cookie reaches a query as a string.' );
 	}
 
 	// --- logging method 2: IP --------------------------------------------
@@ -195,11 +195,11 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$answers = $this->answer_ids( $poll_id );
 
-		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'With no logged vote there is no previous vote.' );
 
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
 
-		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ), 'And with one, the answer it holds is what comes back.' );
 	}
 
 	/**
@@ -216,7 +216,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.77';
 
-		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'A vote from one address says nothing about another.' );
 	}
 
 	/**
@@ -233,7 +233,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		$answers = $this->answer_ids( $poll_id );
 
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
-		$this->assertNotSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertNotSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'Inside the expiry the vote is still found.' );
 
 		// Push the logged vote back beyond the window.
 		$wpdb->update(
@@ -242,7 +242,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 			array( 'pollip_qid' => $poll_id )
 		);
 
-		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'And past it there is nothing to find.' );
 	}
 
 	// --- logging method 3: cookie then IP --------------------------------
@@ -260,7 +260,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		$_COOKIE[ 'voted_' . $poll_id ] = (string) $answers[1];
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
 
-		$this->assertSame( array( $answers[1] ), WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( $answers[1] ), WP_Polls_Vote::check_voted( $poll_id ), 'With both, the cookie is what answers.' );
 	}
 
 	/**
@@ -275,7 +275,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 
 		$this->log_vote_from_current_ip( $poll_id, $answers[0] );
 
-		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ), 'And with no cookie it falls back to the address.' );
 	}
 
 	/**
@@ -296,7 +296,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 
 		unset( $_COOKIE[ 'voted_' . $poll_id ] );
 
-		$this->assertNotSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertNotSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'Clearing the cookie still leaves the logged vote, so it is not a way round the guard.' );
 	}
 
 	// --- logging method 4: username --------------------------------------
@@ -312,7 +312,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 
 		wp_set_current_user( 0 );
 
-		$this->assertSame( 1, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 1, WP_Polls_Vote::check_voted( $poll_id ), 'Logging by username blocks a guest outright rather than letting them through.' );
 	}
 
 	/**
@@ -330,7 +330,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		wp_set_current_user( $user_id );
 		$user_ID = $user_id; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase, WordPress.WP.GlobalVariablesOverride.Prohibited -- The function reads this global.
 
-		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'A user who has not voted has no previous vote.' );
 	}
 
 	/**
@@ -354,7 +354,7 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		// Somewhere else entirely; the user is what is being matched.
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.77';
 
-		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( array( (string) $answers[0] ), WP_Polls_Vote::check_voted( $poll_id ), 'The same user is found from a new address, because the user is what is matched.' );
 	}
 
 	/**
@@ -376,6 +376,6 @@ class WP_Polls_Vote_Guards_Test extends WP_Polls_TestCase {
 		wp_set_current_user( $other );
 		$user_ID = $other; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase, WordPress.WP.GlobalVariablesOverride.Prohibited -- The function reads this global.
 
-		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ) );
+		$this->assertSame( 0, WP_Polls_Vote::check_voted( $poll_id ), 'And a different user is not blocked by a vote somebody else cast.' );
 	}
 }

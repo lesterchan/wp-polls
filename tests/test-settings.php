@@ -36,9 +36,9 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 'SENTINEL', $result['templates']['votefooter'] );
-		$this->assertSame( 'aabbcc', $result['bar']['background'] );
-		$this->assertSame( 9, (int) $result['archive']['per_page'] );
+		$this->assertSame( 'SENTINEL', $result['templates']['votefooter'], 'Saving the options tab leaves the templates alone.' );
+		$this->assertSame( 'aabbcc', $result['bar']['background'], 'While the colour it submitted is stored.' );
+		$this->assertSame( 9, (int) $result['archive']['per_page'], 'And the page size.' );
 	}
 
 	/**
@@ -53,9 +53,9 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 			array( 'templates' => array( 'disable' => 'Nothing here' ) )
 		);
 
-		$this->assertSame( 'aabbcc', $result['bar']['background'] );
-		$this->assertSame( 'HTTP_X_REAL_IP', $result['ip_header'] );
-		$this->assertSame( 'Nothing here', $result['templates']['disable'] );
+		$this->assertSame( 'aabbcc', $result['bar']['background'], 'Saving the templates tab leaves the colour alone.' );
+		$this->assertSame( 'HTTP_X_REAL_IP', $result['ip_header'], 'And the header setting.' );
+		$this->assertSame( 'Nothing here', $result['templates']['disable'], 'While the template it submitted is stored.' );
 	}
 
 	/**
@@ -67,7 +67,7 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 
 		$result = WP_Polls_Settings::sanitize( array( 'templates' => array( 'disable' => 'x' ) ) );
 
-		$this->assertSame( 'KEEP ME', $result['templates']['voteheader'] );
+		$this->assertSame( 'KEEP ME', $result['templates']['voteheader'], 'A template the submission did not mention is kept.' );
 	}
 
 	/**
@@ -103,10 +103,10 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 'gradient', $result['bar']['style'] );
-		$this->assertSame( '000000', $result['bar']['background'] );
+		$this->assertSame( 'gradient', $result['bar']['style'], 'An invalid bar style keeps the stored one.' );
+		$this->assertSame( '000000', $result['bar']['background'], 'An invalid colour falls back to black.' );
 		$this->assertGreaterThanOrEqual( 1, (int) $result['bar']['height'], 'An invalid bar height is replaced by a usable one rather than stored as zero.' );
-		$this->assertSame( 'polla_aid', $result['sort']['answers_by'] );
+		$this->assertSame( 'polla_aid', $result['sort']['answers_by'], 'And a sort column off the list falls back rather than being stored.' );
 	}
 
 	/**
@@ -131,9 +131,9 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 			'<input type="button" onclick="poll_vote(1)" data-poll-id="%POLL_ID%" data-poll-action="vote" />'
 		);
 
-		$this->assertStringNotContainsStringIgnoringCase( 'onclick', $out );
-		$this->assertStringContainsString( 'data-poll-action="vote"', $out );
-		$this->assertStringContainsString( 'data-poll-id="%POLL_ID%"', $out );
+		$this->assertStringNotContainsStringIgnoringCase( 'onclick', $out, 'The sanitiser takes out the click handler.' );
+		$this->assertStringContainsString( 'data-poll-action="vote"', $out, 'And keeps the action data attribute.' );
+		$this->assertStringContainsString( 'data-poll-id="%POLL_ID%"', $out, 'And the poll data attribute, which is what the script reads.' );
 	}
 
 	/**
@@ -142,8 +142,8 @@ class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 	public function test_template_sanitiser_strips_scripts() {
 		$out = WP_Polls_Settings::sanitize_template( 'voteheader', '<p>ok</p><script>alert(1)</script>' );
 
-		$this->assertStringNotContainsStringIgnoringCase( '<script', $out );
-		$this->assertStringContainsString( '<p>ok</p>', $out );
+		$this->assertStringNotContainsStringIgnoringCase( '<script', $out, 'The sanitiser takes out a script.' );
+		$this->assertStringContainsString( '<p>ok</p>', $out, 'And keeps the markup a site owner may use.' );
 	}
 
 	/**

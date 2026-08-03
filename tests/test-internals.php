@@ -61,10 +61,10 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$first  = WP_Polls_Vote::polls_lock_file( 1 );
 		$second = WP_Polls_Vote::polls_lock_file( 2 );
 
-		$this->assertNotSame( $first, $second );
-		$this->assertStringContainsString( 'wp-blog-' . get_current_blog_id() . '-', $first );
-		$this->assertStringContainsString( '-wp-polls-1.lock', $first );
-		$this->assertStringStartsWith( get_temp_dir(), $first );
+		$this->assertNotSame( $first, $second, 'Two polls get two lock files.' );
+		$this->assertStringContainsString( 'wp-blog-' . get_current_blog_id() . '-', $first, 'Named for the site.' );
+		$this->assertStringContainsString( '-wp-polls-1.lock', $first, 'And the poll.' );
+		$this->assertStringStartsWith( get_temp_dir(), $first, 'Written to the temporary directory rather than into the plugin.' );
 	}
 
 	/**
@@ -83,7 +83,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 			2
 		);
 
-		$this->assertSame( '/tmp/custom-9.lock', WP_Polls_Vote::polls_lock_file( 9 ) );
+		$this->assertSame( '/tmp/custom-9.lock', WP_Polls_Vote::polls_lock_file( 9 ), 'The lock file is filterable.' );
 	}
 
 	/**
@@ -191,7 +191,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 			WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0] ) );
 			$this->fail( 'the vote was not refused' );
 		} catch ( InvalidArgumentException $e ) {
-			$this->assertStringContainsString( (string) $poll_id, $e->getMessage() );
+			$this->assertStringContainsString( (string) $poll_id, $e->getMessage(), 'The failure names the poll that could not be locked.' );
 		} finally {
 			flock( $holder, LOCK_UN );
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Releasing the flock() taken above.
@@ -201,7 +201,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		global $wpdb;
 		$this->assertSame(
 			0,
-			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) )
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ),
+			'And no vote was counted.'
 		);
 	}
 
@@ -265,7 +266,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		}
 
 		$this->assertNotContains( 'wp_get_sites', $called, 'the deprecated, 100-site-capped function is still called' );
-		$this->assertContains( 'get_sites', $called );
+		$this->assertContains( 'get_sites', $called, 'The site walk goes through get_sites() instead.' );
 		$this->assertStringContainsString(
 			"get_sites( array( 'number' => 0 ) )",
 			file_get_contents( WP_POLLS_DIR . 'includes/class-wp-polls-install.php' ),
@@ -320,14 +321,14 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_sanitize_bar_color_normalises_what_the_picker_posts() {
-		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '#aabbcc' ) );
-		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( 'aabbcc' ) );
-		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '  #AABBCC  ' ) );
-		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '#abc' ) );
-		$this->assertSame( 'ffffff', WP_Polls::sanitize_bar_color( 'fff' ) );
-		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( 'zzzzzz' ) );
-		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( 'red; } body { display: none; } .x {' ) );
-		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( '' ) );
+		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '#aabbcc' ), 'The hash the colour input posts is stripped.' );
+		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( 'aabbcc' ), 'A value that already has none is left alone.' );
+		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '  #AABBCC  ' ), 'Surrounding space is trimmed and the case lowered.' );
+		$this->assertSame( 'aabbcc', WP_Polls::sanitize_bar_color( '#abc' ), 'A three digit value is expanded to six.' );
+		$this->assertSame( 'ffffff', WP_Polls::sanitize_bar_color( 'fff' ), 'With or without the hash.' );
+		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( 'zzzzzz' ), 'Something that is not a colour becomes black rather than being stored.' );
+		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( 'red; } body { display: none; } .x {' ), 'A CSS injection becomes black too.' );
+		$this->assertSame( '000000', WP_Polls::sanitize_bar_color( '' ), 'And so does nothing at all.' );
 	}
 
 	/**
@@ -349,11 +350,11 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
-		$this->assertStringContainsString( '--wp-polls-bar-height: 12px;', $css );
-		$this->assertStringContainsString( '--wp-polls-bar-background: #ff0000;', $css );
-		$this->assertStringContainsString( '--wp-polls-bar-border: #00ff00;', $css );
-		$this->assertStringContainsString( '--wp-polls-bar-image: none;', $css );
-		$this->assertStringNotContainsString( '.pollbar', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-height: 12px;', $css, 'The bar height is emitted as a custom property.' );
+		$this->assertStringContainsString( '--wp-polls-bar-background: #ff0000;', $css, 'The background colour.' );
+		$this->assertStringContainsString( '--wp-polls-bar-border: #00ff00;', $css, 'The border colour.' );
+		$this->assertStringContainsString( '--wp-polls-bar-image: none;', $css, 'And the image, which here is none.' );
+		$this->assertStringNotContainsString( '.pollbar', $css, 'None of them is written as a rule against the class it replaced.' );
 	}
 
 	/**
@@ -368,8 +369,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
-		$this->assertStringContainsString( '--wp-polls-bar-image: linear-gradient(', $css );
-		$this->assertStringNotContainsString( 'pollbg.gif', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-image: linear-gradient(', $css, 'The gradient style is drawn in CSS.' );
+		$this->assertStringNotContainsString( 'pollbg.gif', $css, 'Rather than from the image file the plugin no longer ships.' );
 	}
 
 	/**
@@ -389,7 +390,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
-		$this->assertStringContainsString( '--wp-polls-bar-background: #ff0000;', $css );
+		$this->assertStringContainsString( '--wp-polls-bar-background: #ff0000;', $css, 'And the gradient keeps the configured colour rather than a hard coded one.' );
 	}
 
 	/**
@@ -410,8 +411,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
-		$this->assertStringNotContainsString( 'display: none', $css );
-		$this->assertStringContainsString( '--wp-polls-bar-background: #000000;', $css );
+		$this->assertStringNotContainsString( 'display: none', $css, 'A CSS injection in the colour setting never reaches the stylesheet.' );
+		$this->assertStringContainsString( '--wp-polls-bar-background: #000000;', $css, 'It falls back to black instead.' );
 	}
 
 	/**
@@ -433,13 +434,13 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$css = file_get_contents( WP_POLLS_DIR . 'css/wp-polls.css' );
 
 		// A physical direction here is what would need a second file again.
-		$this->assertStringNotContainsString( 'text-align: left', $css );
-		$this->assertStringNotContainsString( 'text-align: right', $css );
-		$this->assertStringNotContainsString( 'margin-left', $css );
-		$this->assertStringNotContainsString( 'padding-right', $css );
-		$this->assertStringContainsString( 'text-align: start', $css );
-		$this->assertStringContainsString( 'margin-inline:', $css );
-		$this->assertStringContainsString( 'border-inline-end-color', $css );
+		$this->assertStringNotContainsString( 'text-align: left', $css, 'The stylesheet does not name the left edge.' );
+		$this->assertStringNotContainsString( 'text-align: right', $css, 'Nor the right.' );
+		$this->assertStringNotContainsString( 'margin-left', $css, 'Nor a left margin.' );
+		$this->assertStringNotContainsString( 'padding-right', $css, 'Nor a right padding.' );
+		$this->assertStringContainsString( 'text-align: start', $css, 'It uses the start of the line.' );
+		$this->assertStringContainsString( 'margin-inline:', $css, 'Logical margins.' );
+		$this->assertStringContainsString( 'border-inline-end-color', $css, 'And logical borders, so one stylesheet serves both directions.' );
 	}
 
 	/**
@@ -454,9 +455,9 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_the_stylesheet_inherits_typography_and_uses_no_important() {
 		$css = file_get_contents( WP_POLLS_DIR . 'css/wp-polls.css' );
 
-		$this->assertStringNotContainsString( 'font-family', $css );
-		$this->assertStringNotContainsString( 'font-size', $css );
-		$this->assertStringNotContainsString( '!important', $css );
+		$this->assertStringNotContainsString( 'font-family', $css, 'The stylesheet sets no font family.' );
+		$this->assertStringNotContainsString( 'font-size', $css, 'No font size.' );
+		$this->assertStringNotContainsString( '!important', $css, 'And nothing a theme cannot override.' );
 	}
 
 	/**
@@ -472,7 +473,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 			substr_count( $css, 'animation: none' ),
 			'every animation needs a prefers-reduced-motion counterpart'
 		);
-		$this->assertStringContainsString( 'prefers-reduced-motion: reduce', $css );
+		$this->assertStringContainsString( 'prefers-reduced-motion: reduce', $css, 'Every animation is behind the reduced motion query.' );
 	}
 
 	/**
@@ -491,7 +492,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		$data = wp_scripts()->get_data( 'wp-polls', 'data' );
 
-		$this->assertStringContainsString( 'admin-ajax.php', $data );
+		$this->assertStringContainsString( 'admin-ajax.php', $data, 'The endpoint reaches the script through localised data.' );
 
 		// The two AJAX style flags are gone. The loading indicator always shows,
 		// and the fade asks prefers-reduced-motion rather than an option.
@@ -512,11 +513,11 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_answer_sort_rejects_anything_off_the_list() {
 		WP_Polls_Options::set( 'sort.answers_by', 'polla_votes' );
 		WP_Polls_Options::set( 'sort.answers_order', 'desc' );
-		$this->assertSame( array( 'polla_votes', 'desc' ), WP_Polls_Display::get_ans_sort() );
+		$this->assertSame( array( 'polla_votes', 'desc' ), WP_Polls_Display::get_ans_sort(), 'A column on the list is honoured.' );
 
 		WP_Polls_Options::set( 'sort.answers_by', 'polla_aid; DROP TABLE wp_pollsq' );
 		WP_Polls_Options::set( 'sort.answers_order', 'desc; DROP TABLE wp_pollsq' );
-		$this->assertSame( array( 'polla_aid', 'asc' ), WP_Polls_Display::get_ans_sort() );
+		$this->assertSame( array( 'polla_aid', 'asc' ), WP_Polls_Display::get_ans_sort(), 'And one off it falls back rather than reaching ORDER BY.' );
 	}
 
 	/**
@@ -527,10 +528,10 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_result_sort_rejects_anything_off_the_list() {
 		WP_Polls_Options::set( 'sort.results_by', 'RAND()' );
 		WP_Polls_Options::set( 'sort.results_order', 'asc' );
-		$this->assertSame( array( 'RAND()', 'asc' ), WP_Polls_Display::get_ans_result_sort() );
+		$this->assertSame( array( 'RAND()', 'asc' ), WP_Polls_Display::get_ans_result_sort(), 'A result column on the list is honoured.' );
 
 		WP_Polls_Options::set( 'sort.results_by', 'nonsense' );
-		$this->assertSame( array( 'polla_aid', 'asc' ), WP_Polls_Display::get_ans_result_sort() );
+		$this->assertSame( array( 'polla_aid', 'asc' ), WP_Polls_Display::get_ans_result_sort(), 'And one off it falls back rather than reaching ORDER BY.' );
 	}
 
 	/**
@@ -541,12 +542,12 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_archive_link_paging() {
 		WP_Polls_Options::set( 'archive.url', 'https://example.com/polls/' );
 
-		$this->assertSame( 'https://example.com/polls/', WP_Polls_Display::polls_archive_link( 0 ) );
-		$this->assertSame( 'https://example.com/polls/?poll_page=2', WP_Polls_Display::polls_archive_link( 2 ) );
+		$this->assertSame( 'https://example.com/polls/', WP_Polls_Display::polls_archive_link( 0 ), 'Page zero is the archive itself, with no page argument.' );
+		$this->assertSame( 'https://example.com/polls/?poll_page=2', WP_Polls_Display::polls_archive_link( 2 ), 'A later page appends the page number.' );
 
 		WP_Polls_Options::set( 'archive.url', 'https://example.com/?page_id=9' );
 
-		$this->assertSame( 'https://example.com/?page_id=9&amp;poll_page=3', WP_Polls_Display::polls_archive_link( 3 ) );
+		$this->assertSame( 'https://example.com/?page_id=9&amp;poll_page=3', WP_Polls_Display::polls_archive_link( 3 ), 'And on a query string URL it is appended rather than starting a new one.' );
 	}
 
 	/**
@@ -580,7 +581,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( $newest, WP_Polls::polls_latest_id() );
+		$this->assertSame( $newest, WP_Polls::polls_latest_id(), 'The latest poll is the newest open one, not a closed or scheduled one.' );
 	}
 
 	/**
@@ -589,7 +590,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_latest_poll_id_with_no_polls() {
-		$this->assertSame( 0, WP_Polls::polls_latest_id() );
+		$this->assertSame( 0, WP_Polls::polls_latest_id(), 'With no polls at all there is no latest poll.' );
 	}
 
 	/**
@@ -644,7 +645,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_an_unknown_template_key_is_empty() {
-		$this->assertSame( '', WP_Polls_Template::get_default( 'no-such-template' ) );
+		$this->assertSame( '', WP_Polls_Template::get_default( 'no-such-template' ), 'An unknown template key is the empty string, not a notice.' );
 	}
 
 	/**
@@ -662,7 +663,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( '<li>vim (3)</li>', $out );
+		$this->assertSame( '<li>vim (3)</li>', $out, 'Every variable in the template is substituted.' );
 	}
 
 	/**
@@ -685,7 +686,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_the_wp_stats_section_has_a_title_a_priority_and_a_renderer() {
 		$section = WP_Polls_WPStats::register_section( array() )['wp_polls'];
 
-		$this->assertSame( array( 'title', 'priority', 'render' ), array_keys( $section ) );
+		$this->assertSame( array( 'title', 'priority', 'render' ), array_keys( $section ), 'The WP-Stats section declares exactly these three keys.' );
 		$this->assertNotEmpty( $section['title'], 'The heading is translated, not empty.' );
 		$this->assertIsInt( $section['priority'], 'The sort order is an integer.' );
 		$this->assertIsCallable( $section['render'], 'The renderer can be called.' );
@@ -699,7 +700,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_the_wp_stats_section_is_withheld_when_the_setting_is_off() {
 		WP_Polls_Options::set( 'stats_display', false );
 
-		$this->assertSame( array(), WP_Polls_WPStats::register_section( array() ) );
+		$this->assertSame( array(), WP_Polls_WPStats::register_section( array() ), 'With the setting off there is nothing to register.' );
 	}
 
 	/**
@@ -715,7 +716,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$html     = ob_get_clean();
 
 		$this->assertNull( $returned, 'render() echoes; it does not return markup.' );
-		$this->assertStringContainsString( '<li>', $html );
+		$this->assertStringContainsString( '<li>', $html, 'The renderer echoes the counts as a list.' );
 		$this->assertStringContainsString( '<strong>1</strong>', $html, 'One poll was created.' );
 		$this->assertStringContainsString( '<strong>2</strong>', $html, 'Two answers were given.' );
 		$this->assertStringContainsString( '<strong>3</strong>', $html, 'Three votes were cast.' );
@@ -739,8 +740,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		WP_Polls_Install::onclick_notice();
 		$html = ob_get_clean();
 
-		$this->assertStringContainsString( 'notice-warning', $html );
-		$this->assertStringContainsString( 'data-poll-action', $html );
+		$this->assertStringContainsString( 'notice-warning', $html, 'A template that still needs converting raises a warning.' );
+		$this->assertStringContainsString( 'data-poll-action', $html, 'Naming what it would be converted to.' );
 	}
 
 	/**
@@ -758,7 +759,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		ob_start();
 		WP_Polls_Install::onclick_notice();
 
-		$this->assertSame( '', ob_get_clean() );
+		$this->assertSame( '', ob_get_clean(), 'The notice is not shown on other screens.' );
 	}
 
 	/**
@@ -776,7 +777,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		ob_start();
 		WP_Polls_Install::onclick_notice();
 
-		$this->assertSame( '', ob_get_clean() );
+		$this->assertSame( '', ob_get_clean(), 'Nor to a user who could not act on it.' );
 	}
 
 	/**
@@ -792,6 +793,6 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		WP_Polls_Install::upgrade_templates_onclick();
 
 		$this->assertFalse( WP_Polls_Install::templates_have_onclick(), 'Upgrading the templates removes the onclick that raises the notice.' );
-		$this->assertStringContainsString( 'data-poll-action="result"', WP_Polls_Options::get( 'templates.votefooter' ) );
+		$this->assertStringContainsString( 'data-poll-action="result"', WP_Polls_Options::get( 'templates.votefooter' ), 'Once converted the template carries the data attribute, so the notice has nothing left to say.' );
 	}
 }

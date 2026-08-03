@@ -20,7 +20,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	 * Dot paths resolve through the nested array.
 	 */
 	public function test_get_reads_nested_paths() {
-		$this->assertSame( 'polla_aid', WP_Polls_Options::get( 'sort.answers_by' ) );
+		$this->assertSame( 'polla_aid', WP_Polls_Options::get( 'sort.answers_by' ), 'A dotted path reads the nested value.' );
 		$this->assertIsArray( WP_Polls_Options::get( 'templates' ), 'A nested path reads back the whole branch.' );
 		$this->assertNotEmpty( WP_Polls_Options::get( 'templates.votefooter' ), 'A nested path reads back a leaf value.' );
 	}
@@ -29,7 +29,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	 * An absent path returns the supplied default rather than null.
 	 */
 	public function test_get_returns_default_for_missing_path() {
-		$this->assertSame( 'fallback', WP_Polls_Options::get( 'nope.not.here', 'fallback' ) );
+		$this->assertSame( 'fallback', WP_Polls_Options::get( 'nope.not.here', 'fallback' ), 'A path that is not there yields the default rather than a notice.' );
 	}
 
 	/**
@@ -41,8 +41,8 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'templates.votefooter', 'CHANGED' );
 		WP_Polls_Options::flush();
 
-		$this->assertSame( 'CHANGED', WP_Polls_Options::get( 'templates.votefooter' ) );
-		$this->assertSame( $before, WP_Polls_Options::get( 'templates.votebody' ) );
+		$this->assertSame( 'CHANGED', WP_Polls_Options::get( 'templates.votefooter' ), 'Setting a leaf writes that leaf.' );
+		$this->assertSame( $before, WP_Polls_Options::get( 'templates.votebody' ), 'And leaves its sibling alone.' );
 	}
 
 	/**
@@ -95,16 +95,16 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 		WP_Polls_Install::upgrade();
 		WP_Polls_Options::flush();
 
-		$this->assertSame( '<ul>CUSTOM %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ) );
-		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.answers_by' ) );
-		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
-		$this->assertSame( 2, (int) WP_Polls_Options::get( 'check_method' ) );
+		$this->assertSame( '<ul>CUSTOM %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ), 'The customised template carries across the migration.' );
+		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.answers_by' ), 'The answer sort column.' );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ), 'The archive page size.' );
+		$this->assertSame( 2, (int) WP_Polls_Options::get( 'check_method' ), 'The check method.' );
 		// 'aqua' was an images/ directory, and those are gone, so the bar upgrade
 		// maps it onto the gradient. The height beside it is carried across
 		// untouched, which is what this test is really about.
-		$this->assertSame( 'gradient', WP_Polls_Options::get( 'bar.style' ) );
-		$this->assertSame( 12, (int) WP_Polls_Options::get( 'bar.height' ) );
-		$this->assertSame( 'HTTP_X_FORWARDED_FOR', WP_Polls_Options::get( 'ip_header' ) );
+		$this->assertSame( 'gradient', WP_Polls_Options::get( 'bar.style' ), 'The bar style.' );
+		$this->assertSame( 12, (int) WP_Polls_Options::get( 'bar.height' ), 'The bar height.' );
+		$this->assertSame( 'HTTP_X_FORWARDED_FOR', WP_Polls_Options::get( 'ip_header' ), 'And the header setting.' );
 	}
 
 	/**
@@ -119,7 +119,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 		WP_Polls_Install::upgrade();
 		WP_Polls_Options::flush();
 
-		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.results_by' ) );
+		$this->assertSame( 'polla_votes', WP_Polls_Options::get( 'sort.results_by' ), 'A key the legacy install never set keeps its default.' );
 		$this->assertNotEmpty( WP_Polls_Options::get( 'templates.voteheader' ), 'A key the migration did not touch keeps its shipped default.' );
 	}
 
@@ -161,14 +161,14 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 
 		WP_Polls_Install::upgrade();
 		WP_Polls_Options::flush();
-		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ), 'The first migration carries the value across.' );
 
 		// And with the version row missing, which is what a partial restore or
 		// a downgrade-and-re-upgrade looks like.
 		delete_option( WP_Polls_Options::VERSION );
 		WP_Polls_Install::upgrade();
 		WP_Polls_Options::flush();
-		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ), 'And a second leaves it where the first put it.' );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 		WP_Polls_Install::upgrade();
 		WP_Polls_Options::flush();
 
-		$this->assertSame( 23, (int) WP_Polls_Options::get( 'archive.per_page' ) );
+		$this->assertSame( 23, (int) WP_Polls_Options::get( 'archive.per_page' ), 'An install stamped with the current version is still folded in.' );
 	}
 
 	/**
@@ -194,6 +194,6 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 		update_option( WP_Polls_Options::OPTION, 'not an array' );
 		WP_Polls_Options::flush();
 
-		$this->assertSame( 'polla_aid', WP_Polls_Options::get( 'sort.answers_by' ) );
+		$this->assertSame( 'polla_aid', WP_Polls_Options::get( 'sort.answers_by' ), 'A row that is not an array falls back to the defaults rather than to nothing.' );
 	}
 }

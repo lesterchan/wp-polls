@@ -199,8 +199,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 		$html = $this->render_admin_page( 'manage' );
 
-		$this->assertStringContainsString( 'First poll', $html );
-		$this->assertStringContainsString( 'Second poll', $html );
+		$this->assertStringContainsString( 'First poll', $html, 'The manage screen lists a poll.' );
+		$this->assertStringContainsString( 'Second poll', $html, 'And another, so the list is not stopping at one.' );
 	}
 
 	/**
@@ -230,10 +230,10 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		);
 
 		$this->assertSame( array(), $this->admin_page_notices, implode( ' | ', $this->admin_page_notices ) );
-		$this->assertStringContainsString( 'Logged poll', $html );
-		$this->assertStringContainsString( 'There are a total of <strong>3</strong>', $html );
-		$this->assertStringContainsString( '<strong>1</strong> vote is cast by registered users', $html );
-		$this->assertStringContainsString( 'Registered Voter', $html );
+		$this->assertStringContainsString( 'Logged poll', $html, 'The logs view names the poll.' );
+		$this->assertStringContainsString( 'There are a total of <strong>3</strong>', $html, 'Totals the votes cast.' );
+		$this->assertStringContainsString( '<strong>1</strong> vote is cast by registered users', $html, 'Says how many came from registered users.' );
+		$this->assertStringContainsString( 'Registered Voter', $html, 'And names them.' );
 	}
 
 	/**
@@ -258,8 +258,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertStringContainsString( 'O&#039;Brien', $html );
-		$this->assertStringNotContainsString( "O\\'Brien", $html );
+		$this->assertStringContainsString( 'O&#039;Brien', $html, 'An apostrophe in a voter name is escaped once.' );
+		$this->assertStringNotContainsString( "O\\'Brien", $html, 'And is not left slashed as it came out of the database.' );
 	}
 
 	/**
@@ -282,9 +282,9 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		);
 
 		$this->assertSame( array(), $this->admin_page_notices, implode( ' | ', $this->admin_page_notices ) );
-		$this->assertStringContainsString( 'Editable poll', $html );
-		$this->assertStringContainsString( 'Alpha', $html );
-		$this->assertStringContainsString( 'Beta', $html );
+		$this->assertStringContainsString( 'Editable poll', $html, 'Edit mode renders the question.' );
+		$this->assertStringContainsString( 'Alpha', $html, 'The first existing answer.' );
+		$this->assertStringContainsString( 'Beta', $html, 'And the second.' );
 	}
 
 	/**
@@ -337,7 +337,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_options_stores_what_the_colour_input_posts() {
 		$saved = WP_Polls_Settings::sanitize( array( 'bar' => array( 'background' => '#123456' ) ) );
 
-		$this->assertSame( '123456', $saved['bar']['background'] );
+		$this->assertSame( '123456', $saved['bar']['background'], 'The colour is stored as the six digits the input posts, without the hash.' );
 	}
 
 	/**
@@ -367,8 +367,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_add_renders_answer_fields() {
 		$html = $this->render_admin_page( 'add' );
 
-		$this->assertStringContainsString( 'name="polla_answers[]"', $html );
-		$this->assertStringContainsString( 'name="pollq_question"', $html );
+		$this->assertStringContainsString( 'name="polla_answers[]"', $html, 'The add screen renders the answer fields.' );
+		$this->assertStringContainsString( 'name="pollq_question"', $html, 'And the question field.' );
 	}
 
 	/**
@@ -382,8 +382,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_templates_posts_to_the_right_settings_group() {
 		$html = $this->render_admin_page( 'settings', array( 'tab' => 'templates' ) );
 
-		$this->assertStringContainsString( 'action="options.php"', $html );
-		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html );
+		$this->assertStringContainsString( 'action="options.php"', $html, 'The templates screen posts to options.php, so core handles the save.' );
+		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html, 'Naming the settings group its fields are registered in.' );
 	}
 
 	/**
@@ -394,8 +394,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 	public function test_options_posts_to_the_right_settings_group() {
 		$html = $this->render_admin_page( 'settings' );
 
-		$this->assertStringContainsString( 'action="options.php"', $html );
-		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html );
+		$this->assertStringContainsString( 'action="options.php"', $html, 'The options screen posts to options.php too.' );
+		$this->assertStringContainsString( "value='" . WP_Polls_Settings::GROUP . "'", $html, 'Naming the same settings group.' );
 	}
 
 	/**
@@ -408,10 +408,10 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 		$html = $this->render_admin_page( 'manage' );
 
-		$this->assertStringContainsString( 'class="wp-list-table', $html );
-		$this->assertStringContainsString( '<tr id="poll-' . $poll_id . '"', $html );
-		$this->assertStringContainsString( 'class="row-actions"', $html );
-		$this->assertStringContainsString( 'data-poll-action="delete-poll"', $html );
+		$this->assertStringContainsString( 'class="wp-list-table', $html, 'The manage screen is a core list table.' );
+		$this->assertStringContainsString( '<tr id="poll-' . $poll_id . '"', $html, 'With a row per poll, addressable by id.' );
+		$this->assertStringContainsString( 'class="row-actions"', $html, 'Carrying the core row actions.' );
+		$this->assertStringContainsString( 'data-poll-action="delete-poll"', $html, 'Whose action is data for the script rather than an inline handler.' );
 	}
 
 	/**
@@ -434,8 +434,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		$first  = $this->render_admin_page( 'manage' );
 		$second = $this->render_admin_page( 'manage', array( 'paged' => '2' ) );
 
-		$this->assertSame( WP_Polls_List_Table::PER_PAGE, substr_count( $first, '<tr id="poll-' ) );
-		$this->assertSame( 3, substr_count( $second, '<tr id="poll-' ) );
+		$this->assertSame( WP_Polls_List_Table::PER_PAGE, substr_count( $first, '<tr id="poll-' ), 'The first page holds a full page of rows.' );
+		$this->assertSame( 3, substr_count( $second, '<tr id="poll-' ), 'And the second holds the remainder.' );
 	}
 
 	/**
@@ -456,9 +456,9 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 		$stats = WP_Polls_List_Table::stats();
 
-		$this->assertSame( WP_Polls_List_Table::PER_PAGE + 2, $stats['polls'] );
-		$this->assertSame( ( WP_Polls_List_Table::PER_PAGE + 2 ) * 2, $stats['answers'] );
-		$this->assertSame( ( WP_Polls_List_Table::PER_PAGE + 2 ) * 3, $stats['votes'] );
+		$this->assertSame( WP_Polls_List_Table::PER_PAGE + 2, $stats['polls'], 'The stats count every poll, not just the page on screen.' );
+		$this->assertSame( ( WP_Polls_List_Table::PER_PAGE + 2 ) * 2, $stats['answers'], 'Every answer.' );
+		$this->assertSame( ( WP_Polls_List_Table::PER_PAGE + 2 ) * 3, $stats['votes'], 'And every vote.' );
 	}
 
 	/**
@@ -521,7 +521,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		);
 
 		$this->assertSame( array(), $this->admin_page_notices, implode( ' | ', $this->admin_page_notices ) );
-		$this->assertStringContainsString( 'name="num_choices_sign"', $html );
+		$this->assertStringContainsString( 'name="num_choices_sign"', $html, 'A multiple answer poll gets the choice count filter.' );
 	}
 
 	/**
@@ -551,8 +551,8 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		remove_filter( 'wp_polls_log_show_log_filter', '__return_false' );
 
 		$this->assertSame( array(), $this->admin_page_notices, implode( ' | ', $this->admin_page_notices ) );
-		$this->assertStringNotContainsString( 'name="users_voted_for"', $html );
-		$this->assertStringContainsString( 'Distinctive answer', $html );
+		$this->assertStringNotContainsString( 'name="users_voted_for"', $html, 'Without the answer filter panel, which this poll has no use for.' );
+		$this->assertStringContainsString( 'Distinctive answer', $html, 'The answers are still named.' );
 	}
 
 	/**
@@ -573,7 +573,7 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		);
 
 		$this->assertSame( array(), $this->admin_page_notices, implode( ' | ', $this->admin_page_notices ) );
-		$this->assertStringContainsString( 'Null Votes', $html );
+		$this->assertStringContainsString( 'Null Votes', $html, 'A vote for no answer is labelled rather than left blank.' );
 	}
 
 	/**
@@ -674,6 +674,6 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 		$html = $this->render_admin_page( 'settings', array( 'tab' => 'templates' ) );
 
-		$this->assertStringContainsString( 'CUSTOM HEADER', $html );
+		$this->assertStringContainsString( 'CUSTOM HEADER', $html, 'The templates screen renders the stored template, not the default.' );
 	}
 }
