@@ -362,11 +362,46 @@ class WP_Polls_Options {
 	/**
 	 * Replace the whole option.
 	 *
+	 * The `add_option()` branch is belt and braces, and the reasoning is worth
+	 * writing down because it is not obvious that it is *currently* redundant.
+	 *
+	 * `WP_Polls_Settings::register()` passes a `default`, which installs a
+	 * `default_option_wp_polls_options` filter answering with the shipped
+	 * defaults for a row that does not exist -- so on an admin request an absent
+	 * row reads back as the defaults. Core anticipates exactly this: after the
+	 * value/old-value comparison, `update_option()` asks the `default_option_*`
+	 * filter what it would answer and calls `add_option()` when that is what
+	 * `$old_value` was. What it does *not* cover is the comparison above that
+	 * fallback, which returns early when the value being written is identical to
+	 * the one just read -- and an absent row reads as the defaults precisely
+	 * when a stock install is what is being saved.
+	 *
+	 * Two accidents keep this plugin out of that gap, and neither is a
+	 * guarantee. `update_option()` sanitises before it compares, and
+	 * `WP_Polls_Settings::sanitize()` does not return the defaults unchanged, so
+	 * the early return is never reached. And `wp-polls.php` calls
+	 * `WP_Polls_Install::init()` on line 71 and `WP_Polls_Settings::init()` on
+	 * line 77 -- both hooking `admin_init` at priority 10 -- so the migration
+	 * runs before the filter exists at all, on insertion order alone.
+	 *
+	 * Either could change without anything noticing: swapping two adjacent lines
+	 * in a file that does nothing but wire classes up, or a sanitiser that
+	 * becomes a no-op for already-clean input. Passing an explicit default to
+	 * `get_option()` defeats the registered one, because
+	 * `filter_default_option()` returns early when a default was passed, which
+	 * makes an absent row tellable from a defaulted one here rather than three
+	 * layers down in core. `add_option()` runs the sanitize callback exactly as
+	 * `update_option()` does, so nothing else about the write changes. §7.6.1.
+	 *
 	 * @param array $values Full option array.
 	 * @return bool
 	 */
 	public static function save( $values ) {
 		self::$cache = self::merge( self::defaults(), (array) $values );
+
+		if ( false === get_option( self::OPTION, false ) ) {
+			return add_option( self::OPTION, self::$cache );
+		}
 
 		return update_option( self::OPTION, self::$cache );
 	}

@@ -80,6 +80,103 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * A pre-3.0.0 install whose every setting is the one the plugin ships.
+	 *
+	 * The fixture at the top of this file is deliberately all-customised, and
+	 * that policy is right for "did the values carry across" -- but it cannot
+	 * see §7.6.1, because a result that differs from the defaults is written
+	 * whatever the read before it did. This is the other fixture, and the
+	 * commonest install there is: somebody who never opened the settings screen.
+	 *
+	 * Built from legacy_map() rather than typed out, so a row added to the map
+	 * is in this fixture too instead of quietly falling outside it.
+	 *
+	 * @return void
+	 */
+	private function make_stock_legacy_install() {
+		delete_option( WP_Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::VERSION );
+		WP_Polls_Options::flush();
+
+		// With no stored row and the cache dropped, get() answers with the
+		// shipped default for each path -- which is what makes each legacy row
+		// below stock rather than merely plausible.
+		foreach ( WP_Polls_Options::legacy_map() as $legacy => $path ) {
+			update_option( $legacy, WP_Polls_Options::get( $path ) );
+		}
+
+		WP_Polls_Options::flush();
+	}
+
+	/**
+	 * Run the upgrade on the far side of register_setting(), as admin_init does.
+	 *
+	 * WP_Polls_Install::init() and WP_Polls_Settings::init() both hook
+	 * admin_init at priority 10, so which of them runs first is decided by the
+	 * order of two adjacent lines in wp-polls.php. Registering first is the
+	 * harder ordering and the one this plugin does *not* currently get, so it is
+	 * the one worth pinning: it is the only arrangement under which the
+	 * default_option_wp_polls_options filter is live while the migration writes.
+	 *
+	 * @return void
+	 */
+	private function run_upgrade_on_admin_init() {
+		WP_Polls_Settings::register();
+
+		$this->run_upgrade();
+	}
+
+	/**
+	 * A stock install comes out of the migration with a row, not without one.
+	 *
+	 * This is the §7.6.1 shape: a migration whose result equals the shipped
+	 * defaults, run with register_setting()'s `default` in force so that an
+	 * absent row reads back as those same defaults. WP-Polls survives it, and
+	 * the reason is worth pinning rather than trusting -- core's update_option()
+	 * falls back to add_option() when the default_option filter is what
+	 * answered, and WP_Polls_Options::save() now takes that decision itself
+	 * instead of relying on it.
+	 *
+	 * Asserted on the raw row rather than through get(), which merges over the
+	 * defaults and so cannot tell a write that happened from one that did not.
+	 *
+	 * @return void
+	 */
+	public function test_a_stock_install_still_gets_its_row_written() {
+		$this->make_stock_legacy_install();
+
+		$this->assertFalse( get_option( WP_Polls_Options::OPTION, false ), 'The fixture is only pre-migration if the consolidated row is genuinely absent.' );
+
+		$this->run_upgrade_on_admin_init();
+
+		$this->assertIsArray( get_option( WP_Polls_Options::OPTION, false ), 'The migration must write the consolidated row even when its result equals the shipped defaults.' );
+	}
+
+	/**
+	 * And the legacy rows it deleted are not deleted for nothing.
+	 *
+	 * The row existing is half the claim; the other half is that the settings it
+	 * holds are the ones the plugin then acts on, rather than the defaults it
+	 * happens to resemble.
+	 *
+	 * @return void
+	 */
+	public function test_a_stock_install_keeps_its_settings_through_the_migration() {
+		$this->make_stock_legacy_install();
+		$this->run_upgrade_on_admin_init();
+
+		$stored = get_option( WP_Polls_Options::OPTION, false );
+
+		$this->assertIsArray( $stored, 'The migration must write the consolidated row.' );
+		$this->assertArrayHasKey( 'templates', $stored, 'The written row is the whole nested structure, not a fragment of it.' );
+		$this->assertSame( WP_Polls_Options::defaults()['check_method'], WP_Polls_Options::get( 'check_method' ), 'A stock setting survives the fold rather than being lost with the legacy row.' );
+
+		foreach ( array_keys( WP_Polls_Options::legacy_map() ) as $legacy ) {
+			$this->assertFalse( get_option( $legacy, false ), sprintf( 'The legacy row %s must not survive the migration.', $legacy ) );
+		}
+	}
+
+	/**
 	 * Every scalar setting survives the fold.
 	 *
 	 * @return void
