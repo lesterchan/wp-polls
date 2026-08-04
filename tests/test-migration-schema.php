@@ -32,7 +32,7 @@
 /**
  * Table-level migration tests.
  */
-class Test_Migration_Schema extends WP_UnitTestCase {
+class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 
 	/**
 	 * Rebuild a pristine 3.0.0 install, because the rollback cannot.
