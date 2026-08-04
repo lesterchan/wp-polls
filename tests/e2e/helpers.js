@@ -202,6 +202,150 @@ function runPollsCron() {
 }
 
 /**
+ * The settings row as the database holds it, with no defaults merged in.
+ *
+ * WP_Polls_Options::all() merges over the defaults, so it answers identically
+ * for a row holding the defaults and for no row at all -- which is what a
+ * migration that read, deleted and never wrote leaves behind, and the whole of
+ * §7.6.1. Ask the database when the question is "was it written".
+ *
+ * @return {Object|false} The stored array, or false when there is no row.
+ */
+function rawOptions() {
+	return JSON.parse(
+		wpEval( "echo '<<<' . wp_json_encode( get_option( WP_Polls_Options::OPTION ) ) . '>>>';" ),
+	);
+}
+
+/**
+ * The defaults the running code would fall back to.
+ *
+ * Asked of the install rather than transcribed: the archive URL is built from
+ * the site's own site_url() and every template comes from WP_Polls_Template.
+ *
+ * @return {Object} The default settings.
+ */
+function defaultOptions() {
+	return JSON.parse(
+		wpEval( "echo '<<<' . wp_json_encode( WP_Polls_Options::defaults() ) . '>>>';" ),
+	);
+}
+
+/**
+ * Put the install back into the shape a pre-3.0.0 site is in.
+ *
+ * The prefixed rows go away and whichever unprefixed ones the caller names take
+ * their place, because that is what the migration has to meet: thirty-odd rows
+ * named poll_*, no markers, and nothing else.
+ *
+ * @param {Object} rows Legacy option name => value, stored exactly as given.
+ * @return {void}
+ */
+function installLegacyRows( rows ) {
+	const data = Buffer.from( JSON.stringify( rows ), 'utf8' ).toString( 'base64' );
+
+	wpEval(
+		`delete_option( WP_Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::VERSION );
+		foreach ( array_merge(
+			array_keys( WP_Polls_Options::legacy_map() ),
+			WP_Polls_Options::legacy_extra_rows(),
+			WP_Polls_Options::legacy_shared_rows()
+		) as $row ) {
+			delete_option( $row );
+		}
+		foreach ( json_decode( base64_decode( '${ data }' ), true ) as $name => $value ) {
+			update_option( $name, $value );
+		}
+		WP_Polls_Options::flush();
+		echo '<<<done>>>';`,
+	);
+}
+
+/**
+ * Which pre-3.0.0 rows are still in the database.
+ *
+ * Read through the plugin's own three lists rather than a set typed out here,
+ * so a row that is added to the migration and forgotten by the cleanup -- or
+ * the other way round -- shows up as a failure instead of going unnoticed.
+ *
+ * @return {string[]} The legacy rows that survive.
+ */
+function survivingLegacyRows() {
+	return JSON.parse(
+		wpEval(
+			`$names = array_merge(
+				array_keys( WP_Polls_Options::legacy_map() ),
+				WP_Polls_Options::legacy_extra_rows(),
+				WP_Polls_Options::legacy_shared_rows()
+			);
+			$alive = array();
+			foreach ( array_unique( $names ) as $name ) {
+				if ( false !== get_option( $name, false ) ) {
+					$alive[] = $name;
+				}
+			}
+			echo '<<<' . wp_json_encode( array_values( $alive ) ) . '>>>';`,
+		),
+	);
+}
+
+/**
+ * The upgrade markers, as the database holds them.
+ *
+ * @return {Object|false} The stored array, or false when there is no row.
+ */
+function versionRow() {
+	return JSON.parse(
+		wpEval( "echo '<<<' . wp_json_encode( get_option( WP_Polls_Options::VERSION ) ) . '>>>';" ),
+	);
+}
+
+/**
+ * Stamp the upgrade markers.
+ *
+ * @param {Object} versions The two markers.
+ * @return {void}
+ */
+function setVersionRow( versions ) {
+	const data = Buffer.from( JSON.stringify( versions ), 'utf8' ).toString( 'base64' );
+
+	wpEval(
+		`update_option( WP_Polls_Options::VERSION, json_decode( base64_decode( '${ data }' ), true ) );
+		echo '<<<done>>>';`,
+	);
+}
+
+/**
+ * The version numbers the running code expects to find stamped.
+ *
+ * @return {{plugin: string, db: string}} The two markers.
+ */
+function runningVersions() {
+	return JSON.parse(
+		wpEval(
+			`echo '<<<' . wp_json_encode( array(
+				'plugin' => WP_POLLS_VERSION,
+				'db'     => WP_POLLS_DB_VERSION,
+			) ) . '>>>';`,
+		),
+	);
+}
+
+/**
+ * Put every setting back to what a fresh install has.
+ *
+ * @return {void}
+ */
+function resetOptions() {
+	wpEval(
+		`WP_Polls_Options::save( WP_Polls_Options::defaults() );
+		WP_Polls_Options::flush();
+		echo '<<<done>>>';`,
+	);
+}
+
+/**
  * Open the settings screen, on whichever tab.
  *
  * @param {import('@playwright/test').Page} page Page under test.
@@ -381,17 +525,25 @@ module.exports = {
 	configure,
 	createPoll,
 	createPollPost,
+	defaultOptions,
 	deleteAllPolls,
 	expectResults,
+	installLegacyRows,
 	markPage,
 	openSettings,
 	pageWasNotReloaded,
 	poll,
 	pollAnswers,
 	pollColumn,
+	rawOptions,
+	resetOptions,
 	runPollsCron,
+	runningVersions,
 	saveSettings,
+	setVersionRow,
+	survivingLegacyRows,
 	uniqueQuestion,
+	versionRow,
 	vote,
 	wpEval,
 };
