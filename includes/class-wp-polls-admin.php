@@ -22,6 +22,25 @@ class WP_Polls_Admin {
 	/**
 	 * Capability every screen and every write path checks, before the filter.
 	 *
+	 * Deliberately not manage_options. WP-Polls has shipped its own capability
+	 * for years, and it exists so a site can hand the polls to somebody without
+	 * handing over the rest of wp-admin. Removing it would leave such a site two
+	 * choices, both worse: stop delegating, or grant manage_options and open
+	 * every settings screen on the installation.
+	 *
+	 * **It gates the Settings tab as well as the data screens, which §2.7 asks
+	 * to be argued rather than assumed.** The argument is that these settings
+	 * govern exactly the data the capability already covers -- what a poll looks
+	 * like, how votes are checked, how long a voter is remembered. Somebody
+	 * trusted to add and close polls but not to set the default poll template is
+	 * a distinction with nothing behind it. wp-dbmanager is the other side of
+	 * the same clause and reaches the opposite arrangement for a good reason:
+	 * its settings screen sets the mysqldump path, so it gates *higher* than
+	 * manage_options rather than lower.
+	 *
+	 * Granting and revoking both go through capability(), never this constant --
+	 * see WP_Polls_Install::add_capability() for what that stops.
+	 *
 	 * @var string
 	 */
 	const CAPABILITY = 'manage_polls';
