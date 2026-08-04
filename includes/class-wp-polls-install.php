@@ -276,12 +276,66 @@ class WP_Polls_Install {
 	 *
 	 * @return void
 	 */
+	/**
+	 * Grant the administrator role the capability the screens actually check.
+	 *
+	 * `WP_Polls_Admin::capability()`, not the `manage_polls` constant behind it.
+	 * The screens gate on the filtered value, so granting the raw constant while
+	 * checking the filtered one means a site that filters `wp_polls_capability`
+	 * hands its administrator a capability nothing looks at and gates every
+	 * polls screen on one nobody holds -- the owner is locked out of their own
+	 * plugin, with nothing in any log to say why.
+	 *
+	 * Two places deciding one fact and only one of them told. wp-postratings
+	 * has done it this way since 2.0.0 and says the same thing in its own
+	 * remove_capability().
+	 *
+	 * @return void
+	 */
+	private static function add_capability() {
+		$role = get_role( 'administrator' );
+
+		// Null when the role has been removed, which is a fatal rather than a
+		// missing capability if it is not checked.
+		if ( $role instanceof WP_Role ) {
+			$role->add_cap( WP_Polls_Admin::capability() );
+		}
+	}
+
+	/**
+	 * Take the capability back off the administrator role.
+	 *
+	 * The same expression add_capability() grants, filter and all: removing the
+	 * constant while granting the filtered value would leave a site that uses
+	 * `wp_polls_capability` with a capability nothing takes back.
+	 *
+	 * @return void
+	 */
+	private static function remove_capability() {
+		$role = get_role( 'administrator' );
+
+		if ( $role instanceof WP_Role ) {
+			$role->remove_cap( WP_Polls_Admin::capability() );
+		}
+	}
+
+	/**
+	 * Remove every option row, the capability, and the three tables.
+	 *
+	 * Before 3.0.0 the table drop was called from inside the loop over option
+	 * names, so it ran once per option rather than once per site - 36 times
+	 * over, issuing three DROP TABLE statements each.
+	 *
+	 * @return void
+	 */
 	public static function uninstall_site() {
 		global $wpdb;
 
 		foreach ( self::option_names() as $option_name ) {
 			delete_option( $option_name );
 		}
+
+		self::remove_capability();
 
 		// $wpdb->prefix rather than the registered $wpdb->pollsq: uninstall.php
 		// does not load the main plugin file, so nothing has registered the
@@ -459,12 +513,7 @@ class WP_Polls_Install {
 			$wpdb->query( "ALTER TABLE $wpdb->pollsq MODIFY COLUMN pollq_expiry int(10) NOT NULL default '0';" );
 		}
 
-		// Set 'manage_polls' Capabilities To Administrator.
-		$role = get_role( 'administrator' );
-		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- manage_polls is this plugin's own capability, and these two lines are what create it.
-		if ( ! $role->has_cap( 'manage_polls' ) ) {
-			$role->add_cap( 'manage_polls' );
-		}
+		self::add_capability();
 
 		// Run any outstanding version upgrades and record the current version.
 		// Called here as well as on 'admin_init' so that network activation

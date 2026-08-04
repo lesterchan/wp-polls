@@ -233,6 +233,46 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * Activation grants the capability the screens actually check.
+	 *
+	 * The test above passes whether or not this holds, because unfiltered the
+	 * two are the same string. This is the one that can tell them apart.
+	 *
+	 * Every polls screen gates on `WP_Polls_Admin::capability()`, which is the
+	 * `manage_polls` constant passed through `wp_polls_capability`. Activation
+	 * used to grant the raw constant, so a site that filtered the capability got
+	 * screens gated on the filtered value and an administrator holding the
+	 * unfiltered one: locked out of its own plugin, with nothing in any log to
+	 * say why. Two places deciding one fact and only one of them told.
+	 *
+	 * @return void
+	 */
+	public function test_activation_grants_the_capability_the_screens_check() {
+		$filtered = 'manage_polls_delegated';
+
+		add_filter(
+			'wp_polls_capability',
+			static function () use ( $filtered ) {
+				return $filtered;
+			}
+		);
+
+		$role = get_role( 'administrator' );
+		$role->remove_cap( $filtered );
+
+		WP_Polls_Install::activation( false );
+
+		$role = get_role( 'administrator' );
+
+		$this->assertTrue(
+			$role->has_cap( $filtered ),
+			'Activation must grant the capability the screens check, not the constant behind it.'
+		);
+
+		$role->remove_cap( $filtered );
+	}
+
+	/**
 	 * Network activation walks every site, and walks all of them.
 	 *
 	 * This used to call wp_get_sites(), which has been deprecated since
