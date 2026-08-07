@@ -104,6 +104,31 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 <?php endif; ?>
 ```
 
+### WP-CLI
+```
+wp polls list
+wp polls list --status=open
+wp polls get 3
+wp polls open 3
+wp polls close 3
+wp polls delete 3 --yes
+```
+
+`wp polls list --status=open --format=ids | xargs -n1 wp polls close` closes every open poll one at a time.
+
+### REST API
+```
+GET  /wp-json/polls/v1/poll/<id>
+GET  /wp-json/polls/v1/poll/<id>/result
+POST /wp-json/polls/v1/poll/<id>/vote
+```
+
+Reading is public, because a poll is public. Voting takes the same `poll_<id>-nonce` the rendered voting form already carries, passed as a `nonce` parameter, and is subject to the same eligibility and repeat-vote settings as voting through the page.
+
+Each response carries the rendered markup as well as the numbers, because your templates decide what a poll looks like and a client that rebuilt the markup itself would ignore them.
+
+**These routes are an addition.** The `admin-ajax.php` `polls` action is unchanged and still supported.
+
 ### Translating the template
 
 The plugin templates can be translated via template variables.
@@ -251,6 +276,8 @@ be. That class no longer exists, so the old snippet colours nothing.
 
 ## Changelog
 ### 3.0.0
+* NEW: A `wp polls` WP-CLI command — `list`, `get`, `open`, `close` and `delete`.
+* NEW: A `polls/v1` REST API for reading a poll, reading its result and voting. The `admin-ajax.php` `polls` action is unchanged and still supported.
 * BREAKING: Requires WordPress 6.8 and PHP 8.2, up from 6.0 and 7.4.
 * BREAKING: The scripts no longer define any global JavaScript functions. `poll_vote()`, `poll_result()`, `poll_booth()` and the admin equivalents are now private, so custom templates or themes that called them directly must move to `data-poll-id` / `data-poll-action` attributes. WP-Polls converts the stock templates for you on upgrade and warns in wp-admin about any it could not convert.
 * CHANGED: Options, templates, settings, the widget and the install/upgrade routine moved into classes under `includes/`. The documented extension points are unchanged: every `wp_polls_*` filter and action, both the `[poll]` and `[page_polls]` shortcodes, and the template tags keep their exact names and signatures.
