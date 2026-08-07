@@ -22,6 +22,24 @@ class WP_Polls_Widget extends WP_Widget {
 	}
 
 	/**
+	 * The settings a stored instance is filled out against.
+	 *
+	 * Read by both widget() and form() so the two cannot disagree about what an
+	 * unset key means. The title matches the widget's own name, because a
+	 * sidebar with no heading above a poll reads as part of whatever sits above
+	 * it.
+	 *
+	 * @return array
+	 */
+	private function defaults() {
+		return array(
+			'title'               => __( 'Polls', 'wp-polls' ),
+			'poll_id'             => 0,
+			'display_pollarchive' => 1,
+		);
+	}
+
+	/**
 	 * Display Widget.
 	 *
 	 * @param mixed $args     Value.
@@ -30,6 +48,13 @@ class WP_Polls_Widget extends WP_Widget {
 	 * @return mixed
 	 */
 	public function widget( $args, $instance ) {
+		// An instance is not guaranteed to hold every key. the_widget() renders
+		// this class with whatever array the caller passed and nothing else, and
+		// a sidebar can carry an instance stored before a setting existed --
+		// reading a key straight out of it printed "Undefined array key" into
+		// the middle of the page.
+		$instance = wp_parse_args( (array) $instance, $this->defaults() );
+
 		$title               = apply_filters( 'widget_title', esc_attr( $instance['title'] ) );
 		$poll_id             = (int) $instance['poll_id'];
 		$display_pollarchive = (int) $instance['display_pollarchive'];
@@ -72,14 +97,7 @@ class WP_Polls_Widget extends WP_Widget {
 	 */
 	public function form( $instance ) {
 		global $wpdb;
-		$instance            = wp_parse_args(
-			(array) $instance,
-			array(
-				'title'               => __( 'Polls', 'wp-polls' ),
-				'poll_id'             => 0,
-				'display_pollarchive' => 1,
-			)
-		);
+		$instance            = wp_parse_args( (array) $instance, $this->defaults() );
 		$title               = esc_attr( $instance['title'] );
 		$poll_id             = (int) $instance['poll_id'];
 		$display_pollarchive = (int) $instance['display_pollarchive'];

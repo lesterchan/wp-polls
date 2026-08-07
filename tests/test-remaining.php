@@ -195,6 +195,75 @@ class WP_Polls_Remaining_Test extends WP_Polls_TestCase {
 		$this->assertFalse( $widget->update( array( 'title' => 'New' ), array( 'title' => 'Old' ) ), 'A save without the submit marker is refused, so the old instance survives.' );
 	}
 
+	/**
+	 * An instance missing every key renders without raising a PHP warning.
+	 *
+	 * Core's the_widget() renders a widget with whatever array the caller passed
+	 * and nothing else, and a sidebar can still hold an instance stored before a
+	 * setting existed. Reading a key straight out of that printed
+	 * "Undefined array key" into the middle of the page, so this asserts on the
+	 * warning rather than on the markup: the visible damage was the notice.
+	 *
+	 * @return void
+	 */
+	public function test_widget_renders_a_partial_instance_without_a_warning() {
+		$this->make_poll( array( 'pollq_question' => 'Partial instance poll' ) );
+
+		$widget  = new WP_Polls_Widget();
+		$raised  = array();
+		$capture = function ( $errno, $errstr ) use ( &$raised ) {
+			$raised[] = $errstr;
+
+			return true;
+		};
+
+		set_error_handler( $capture );
+
+		ob_start();
+		$widget->widget(
+			array(
+				'before_widget' => '<aside>',
+				'after_widget'  => '</aside>',
+				'before_title'  => '<h2>',
+				'after_title'   => '</h2>',
+			),
+			array()
+		);
+		$html = ob_get_clean();
+
+		restore_error_handler();
+
+		$this->assertSame( array(), $raised, 'Rendering an instance with no keys raises no PHP warning.' );
+		$this->assertStringContainsString( '<aside>', $html, 'And the widget still renders.' );
+	}
+
+	/**
+	 * A missing key falls back to the same default the form offers.
+	 *
+	 * @return void
+	 */
+	public function test_widget_falls_back_to_the_form_defaults() {
+		$poll_id = $this->make_poll( array( 'pollq_question' => 'Default poll' ) );
+		WP_Polls_Options::set( 'latest_poll', $poll_id );
+
+		$widget = new WP_Polls_Widget();
+
+		ob_start();
+		$widget->widget(
+			array(
+				'before_widget' => '<aside>',
+				'after_widget'  => '</aside>',
+				'before_title'  => '<h2>',
+				'after_title'   => '</h2>',
+			),
+			array()
+		);
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( '<h2>Polls</h2>', $html, 'An absent title falls back to the widget name, as the form does.' );
+		$this->assertStringContainsString( 'Default poll', $html, 'An absent poll id falls back to the latest poll, as the form does.' );
+	}
+
 	// --- the cron job -----------------------------------------------------
 
 	/**
