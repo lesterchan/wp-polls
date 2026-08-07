@@ -172,6 +172,35 @@ function pollAnswers( pollId ) {
 }
 
 /**
+ * Every answer of one poll as a row, rather than only its text.
+ *
+ * pollAnswers() returns the texts, which is what a spec asserting on what a
+ * visitor reads wants. Anything voting through an API needs the id to vote for
+ * and the count to check afterwards, and reading those two out of separate
+ * wpEval calls would be two full WordPress requests for one question.
+ *
+ * @param {number} pollId Poll to read.
+ * @return {Array<{id: number, text: string, votes: number}>} Rows in insertion order.
+ */
+function pollAnswerRows( pollId ) {
+	return JSON.parse(
+		wpEval(
+			`global $wpdb;
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT polla_aid, polla_answers, polla_votes FROM {$wpdb->pollsa} WHERE polla_qid = %d ORDER BY polla_aid ASC", ${ pollId } ) );
+			$out = array();
+			foreach ( $rows as $row ) {
+				$out[] = array(
+					'id'    => (int) $row->polla_aid,
+					'text'  => $row->polla_answers,
+					'votes' => (int) $row->polla_votes,
+				);
+			}
+			echo '<<<' . wp_json_encode( $out ) . '>>>';`,
+		),
+	);
+}
+
+/**
  * Empty all three tables.
  *
  * A poll log outlives the poll it belongs to unless something says otherwise,
@@ -533,6 +562,7 @@ module.exports = {
 	openSettings,
 	pageWasNotReloaded,
 	poll,
+	pollAnswerRows,
 	pollAnswers,
 	pollColumn,
 	rawOptions,
