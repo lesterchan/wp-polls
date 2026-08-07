@@ -59,6 +59,7 @@ define( 'WP_POLLS_URL', plugin_dir_url( __FILE__ ) );
 // accessor are both reached before any action fires.
 require_once __DIR__ . '/includes/class-wp-polls-template.php';
 require_once __DIR__ . '/includes/class-wp-polls-options.php';
+require_once __DIR__ . '/includes/class-wp-polls-poll.php';
 require_once __DIR__ . '/includes/class-wp-polls-settings.php';
 require_once __DIR__ . '/includes/class-wp-polls-widget.php';
 require_once __DIR__ . '/includes/class-wp-polls-install.php';

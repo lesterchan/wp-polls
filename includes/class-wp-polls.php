@@ -23,6 +23,28 @@ class WP_Polls {
 		add_action( 'polls_cron', array( __CLASS__, 'cron_polls_status' ) );
 		add_shortcode( 'page_polls', array( __CLASS__, 'poll_page_shortcode' ) );
 		add_shortcode( 'poll', array( __CLASS__, 'poll_shortcode' ) );
+
+		self::register_command();
+	}
+
+	/**
+	 * Register the WP-CLI command.
+	 *
+	 * The class file is required here rather than at plugin load because it
+	 * extends WP_CLI_Command, which only exists when WP-CLI is the one running
+	 * WordPress. Requiring it unconditionally is a fatal error on every web
+	 * request.
+	 *
+	 * @return void
+	 */
+	public static function register_command() {
+		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+			return;
+		}
+
+		require_once WP_POLLS_DIR . 'includes/class-wp-polls-command.php';
+
+		WP_CLI::add_command( 'polls', 'WP_Polls_Command' );
 	}
 
 	// Function: Enqueue Polls JavaScripts/CSS.

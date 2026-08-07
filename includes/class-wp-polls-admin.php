@@ -559,22 +559,9 @@ class WP_Polls_Admin {
 					case __( 'Open Poll', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_open-poll' );
 						$pollq_id       = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
-						$pollq_question = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d", $pollq_id ) );
-						$open_poll      = $wpdb->update(
-							$wpdb->pollsq,
-							array(
-								'pollq_active' => 1,
-							),
-							array(
-								'pollq_id' => $pollq_id,
-							),
-							array(
-								'%d',
-							),
-							array(
-								'%d',
-							)
-						);
+						$poll           = WP_Polls_Poll::get( $pollq_id );
+						$pollq_question = $poll ? $poll->pollq_question : '';
+						$open_poll      = WP_Polls_Poll::open( $pollq_id );
 						if ( $open_poll ) {
 							/* translators: %s: value. */
 							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Is Now Opened', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
@@ -587,22 +574,9 @@ class WP_Polls_Admin {
 					case __( 'Close Poll', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_close-poll' );
 						$pollq_id       = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
-						$pollq_question = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d", $pollq_id ) );
-						$close_poll     = $wpdb->update(
-							$wpdb->pollsq,
-							array(
-								'pollq_active' => 0,
-							),
-							array(
-								'pollq_id' => $pollq_id,
-							),
-							array(
-								'%d',
-							),
-							array(
-								'%d',
-							)
-						);
+						$poll           = WP_Polls_Poll::get( $pollq_id );
+						$pollq_question = $poll ? $poll->pollq_question : '';
+						$close_poll     = WP_Polls_Poll::close( $pollq_id );
 						if ( $close_poll ) {
 							/* translators: %s: value. */
 							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Is Now Closed', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
@@ -614,12 +588,17 @@ class WP_Polls_Admin {
 					// Delete Poll.
 					case __( 'Delete Poll', 'wp-polls' ):
 						check_ajax_referer( 'wp-polls_delete-poll' );
-						$pollq_id                = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
-						$pollq_question          = $wpdb->get_var( $wpdb->prepare( "SELECT pollq_question FROM $wpdb->pollsq WHERE pollq_id = %d", $pollq_id ) );
-						$delete_poll_question    = $wpdb->delete( $wpdb->pollsq, array( 'pollq_id' => $pollq_id ), array( '%d' ) );
-						$delete_poll_answers     = $wpdb->delete( $wpdb->pollsa, array( 'polla_qid' => $pollq_id ), array( '%d' ) );
-						$delete_poll_ip          = $wpdb->delete( $wpdb->pollsip, array( 'pollip_qid' => $pollq_id ), array( '%d' ) );
-						$poll_option_lastestpoll = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'poll_latestpoll'" );
+						$pollq_id       = isset( $_POST['pollq_id'] ) ? (int) $_POST['pollq_id'] : 0;
+						$poll           = WP_Polls_Poll::get( $pollq_id );
+						$pollq_question = $poll ? $poll->pollq_question : '';
+						// Deleting the answers and the vote log, recomputing the
+						// stored latest-poll id and firing wp_polls_delete_poll all
+						// happen inside delete(). Three of the four results this
+						// used to collect were assigned and never read, one of them
+						// a query for `poll_latestpoll` -- a row the 3.0.0 migration
+						// folded into the options array and deleted, so it had been
+						// reading nothing for a whole major version.
+						$delete_poll_question = WP_Polls_Poll::delete( $pollq_id );
 						if ( ! $delete_poll_question ) {
 							/* translators: %s: value. */
 							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Deleting Poll \'%s\' Question', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
@@ -628,17 +607,6 @@ class WP_Polls_Admin {
 							/* translators: %s: value. */
 							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Deleted Successfully', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
-
-						// Update Lastest Poll ID To Poll Options.
-						WP_Polls_Options::set( 'latest_poll', WP_Polls::polls_latest_id() );
-						/**
-					 * Fires after a poll and its answers and logs have been deleted.
-					 *
-					 * @since 2.70.0
-					 *
-					 * @param int $pollq_id Poll that was deleted.
-					 */
-						do_action( 'wp_polls_delete_poll', $pollq_id );
 						break;
 				}
 				wp_die( '', '', array( 'response' => null ) );
