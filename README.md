@@ -242,15 +242,12 @@ be. That class no longer exists, so the old snippet colours nothing.
 
 ## Screenshots
 
-1. Admin - Add Poll
-2. Admin - Manage Polls
-3. Admin - Settings
-4. Admin - Templates
-5. Admin - Poll Widget
-6. Poll - Single Poll Answer
-7. Poll - Mutiple Poll Answers
-8. Poll - Results
-9. Poll - Archive
+1. Polls -> Manage Polls, every poll with its voters, its dates and whether it is open
+2. Add Poll: the question, its answers, when it closes, and how many answers a voter may pick
+3. Poll Settings: the bar, the sort order, who may vote, and how a repeat vote is spotted
+4. The Templates tab, holding the markup of the poll, of its results and of the archive
+5. A poll in a post, waiting for a vote
+6. The polls archive, every poll with what people said
 
 ## Changelog
 ### 3.0.0
