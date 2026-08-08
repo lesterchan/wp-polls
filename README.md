@@ -12,7 +12,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Adds an AJAX poll system to your WordPress blog. You can also easily add a poll into your WordPress's blog post/page.
 
 ## Description
-WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
+WP-Polls adds a poll to your site: a question, its answers, and a result bar that replaces the voting form once a visitor has voted, without a page reload. A poll can go in a post with a shortcode or a block, in a sidebar with the widget, or anywhere in your theme with a template tag.
+
+A poll can accept one answer or several, close on a date you set, and be shown as a form or as its result. The markup of every part of it is a template you can edit, and the bars are styled with CSS custom properties your theme can override.
 
 ### Donations
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
