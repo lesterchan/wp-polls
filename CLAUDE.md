@@ -103,6 +103,40 @@ the list.
   wrong reason. The real defect was that it silently activated on only the first
   100 sites (commits `5a7e9ec`, `9101059`).
 
+## The blocks
+
+`wp-polls/poll` and `wp-polls/page-polls`, registered by `WP_Polls_Blocks` from
+the metadata `bin/build` compiles out of `src/` into `build/`. **`build/` is
+generated and gitignored; a checkout that has never been built registers no
+blocks**, which `register()` handles by skipping rather than fatalling, so the
+shortcodes keep working. `bin/test.sh` and `bin/test-e2e.sh` both build first.
+
+**The blocks wrap the shortcodes and never replace them.** `[poll]`, `[poll=1]`
+and `[page_polls]` stay registered and supported; a post holding one needs no
+editing. Both entry points meet at `WP_Polls_Display::render_poll( $id, $type )`
+and **neither calls the other** -- the block does not run `do_shortcode()`, and
+routing it through one would make it inherit shortcode parsing it cannot
+produce and break it the day anybody unregisters the shortcode.
+
+**The feed guard lives in the shared renderer, not in the shortcode.** A dynamic
+block renders in a feed too, so a guard left in `poll_shortcode()` would put a
+voting form in somebody's RSS reader. The positional `[poll=1]` parsing stays in
+the shortcode, being syntax a block has no way to express.
+
+**The block name keeps the `wp-` prefix where the command and the namespace drop
+it.** `<!-- wp:wp-polls/poll -->` is written into `post_content` and stays there
+for the life of the post, so a collision would render another plugin's block
+inside published posts -- damage in the database rather than in a shell session.
+
+**`block_editor_styles()` exists because the editor draws the front end's markup
+with none of its styles.** `.wp-polls-loading` is hidden by a stylesheet rule
+rather than an attribute, so without this every poll in the editor carries a
+permanent "Loading ...". Styles only, never the script: the front-end script
+attaches vote handlers, and a preview that can be voted in casts real votes from
+the editor. Guarded on `is_admin()` because `enqueue_block_assets` fires on the
+front end too, where `poll_scripts()` has already run -- and
+`wp_add_inline_style()` appends, so twice would emit the bar variables twice.
+
 ## WP-CLI and REST
 
 `wp polls list|get|open|close|delete`, and `polls/v1` with three routes: read a
