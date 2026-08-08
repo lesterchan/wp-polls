@@ -53,7 +53,7 @@ test.describe( 'The blocks', () => {
 			await editor.canvas.locator( 'body' ).waitFor();
 
 			const names = await page.evaluate( () =>
-				window.wp.blocks.getBlockTypes().map( ( type ) => type.name )
+				window.wp.blocks.getBlockTypes().map( ( type ) => type.name ),
 			);
 
 			// If the build did not run, or index.asset.php named a dependency
@@ -82,7 +82,7 @@ test.describe( 'The blocks', () => {
 			// Seeing the poll here is what proves the block earns no REST route
 			// of its own.
 			await expect(
-				editor.canvas.locator( `#polls-${ pollId }` )
+				editor.canvas.locator( `#polls-${ pollId }` ),
 			).toBeVisible();
 		} );
 	} );

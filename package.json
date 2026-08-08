@@ -4,7 +4,7 @@
 	"description": "Dev tooling for WP-Polls. Excluded from the SVN deploy; never ships to users.",
 	"license": "GPL-2.0-or-later",
 	"scripts": {
-		"build": "wp-scripts build",
+		"build": "bin/build",
 		"start": "wp-scripts start",
 		"lint:js": "eslint .",
 		"lint:js:fix": "eslint . --fix",
