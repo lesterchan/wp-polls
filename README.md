@@ -20,6 +20,13 @@ A poll can accept one answer or several, close on a date you set, and be shown a
 I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
 
 
+## Installation
+
+1. Install and activate the plugin.
+1. Create your first poll at `WP-Admin -> Polls -> Add Poll`.
+1. Show it: type `[poll]` into a post, add the **Poll** block, add the **Polls** widget to a sidebar, or call `get_poll()` from your theme. Usage below covers all four.
+1. Templates, the bar, who may vote and how a repeat vote is spotted are all at `WP-Admin -> Polls -> Settings`.
+
 ## Usage
 
 ### Showing A Poll From A Theme
