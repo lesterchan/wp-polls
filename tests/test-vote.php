@@ -190,6 +190,59 @@ class WP_Polls_Vote_Test extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * The cap was enforced in the browser and nowhere else: js/wp-polls.js
+	 * counts the ticked boxes, and pollq_multiple did not appear in
+	 * class-wp-polls-vote.php at all. So one request could vote for every answer
+	 * of a single-choice poll -- each polla_votes gaining one and
+	 * pollq_totalvotes gaining N while pollq_totalvoters gained one, which puts
+	 * the percentages and %POLL_MOST_ANSWER% permanently wrong.
+	 */
+	public function test_a_single_choice_poll_refuses_more_than_one_answer() {
+		global $wpdb;
+
+		$poll_id = $this->make_poll(
+			array( 'pollq_multiple' => 0 ),
+			array( array( 'A', 0 ), array( 'B', 0 ), array( 'C', 0 ) )
+		);
+		$answers = $this->answer_ids( $poll_id );
+
+		$this->expectException( InvalidArgumentException::class );
+
+		try {
+			WP_Polls_Vote::vote_poll_process( $poll_id, $answers );
+		} finally {
+			$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ), 'And nothing is recorded on the way out.' );
+			$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->pollsip} WHERE pollip_qid = %d", $poll_id ) ), 'Not even a log row.' );
+		}
+	}
+
+	public function test_a_multiple_answer_poll_refuses_more_than_its_maximum() {
+		$poll_id = $this->make_poll(
+			array( 'pollq_multiple' => 2 ),
+			array( array( 'A', 0 ), array( 'B', 0 ), array( 'C', 0 ) )
+		);
+		$answers = $this->answer_ids( $poll_id );
+
+		$this->expectException( InvalidArgumentException::class );
+
+		WP_Polls_Vote::vote_poll_process( $poll_id, $answers );
+	}
+
+	public function test_a_vote_within_the_maximum_is_still_accepted() {
+		global $wpdb;
+
+		$poll_id = $this->make_poll(
+			array( 'pollq_multiple' => 2 ),
+			array( array( 'A', 0 ), array( 'B', 0 ), array( 'C', 0 ) )
+		);
+		$answers = $this->answer_ids( $poll_id );
+
+		WP_Polls_Vote::vote_poll_process( $poll_id, array( $answers[0], $answers[1] ) );
+
+		$this->assertSame( 2, (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_totalvotes FROM {$wpdb->pollsq} WHERE pollq_id = %d", $poll_id ) ), 'Voting up to the maximum works exactly as it did.' );
+	}
+
+	/**
 	 * The stored IP is hashed, never the address itself.
 	 */
 	public function test_logged_ip_is_hashed() {

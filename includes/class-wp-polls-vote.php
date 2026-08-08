@@ -416,6 +416,45 @@ class WP_Polls_Vote {
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'Invalid Answer to Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
+		/*
+		 * How many answers the poll allows, checked on the server.
+		 *
+		 * It was checked in the browser and nowhere else: js/wp-polls.js counts
+		 * the ticked boxes against poll_multiple_ans_<id> and refuses, and
+		 * nothing here consulted pollq_multiple at all -- the column does not
+		 * appear in this file. So one request could vote for *every* answer of a
+		 * single-choice poll: each polla_votes gained one and pollq_totalvotes
+		 * gained N while pollq_totalvoters gained one, which puts the
+		 * percentages, %POLL_MOST_ANSWER% and %POLL_LEAST_ANSWER% permanently
+		 * wrong. The repeat-vote check bounds it to one inflated ballot per
+		 * eligible voter, which is why this is integrity rather than stuffing.
+		 *
+		 * Zero is single choice rather than unlimited -- the same reading
+		 * WP_Polls_Display gives it when it resolves %POLL_MULTIPLE_ANS_MAX%,
+		 * and the same one js/wp-polls.js gives it when it decides between
+		 * counting ticked boxes and letting a radio group speak for itself.
+		 */
+		$poll_multiple = (int) $wpdb->get_var( $wpdb->prepare( "SELECT pollq_multiple FROM $wpdb->pollsq WHERE pollq_id = %d", $poll_id ) );
+		$max_answers   = $poll_multiple > 0 ? $poll_multiple : 1;
+
+		if ( count( $poll_aid_array ) > $max_answers ) {
+			throw new InvalidArgumentException(
+				esc_html(
+					sprintf(
+						/* translators: 1: maximum number of answers, 2: poll id. */
+						_n(
+							'Maximum %1$s answer allowed for Poll ID #%2$s',
+							'Maximum %1$s answers allowed for Poll ID #%2$s',
+							$max_answers,
+							'wp-polls'
+						),
+						number_format_i18n( $max_answers ),
+						$poll_id
+					)
+				)
+			);
+		}
+
 		if ( ! self::check_allowtovote() ) {
 			/* translators: %s: value. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'User is not allowed to vote for Poll ID #%s', 'wp-polls' ), $poll_id ) ) );

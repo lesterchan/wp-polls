@@ -299,6 +299,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 
 ## Changelog
 ### 3.0.0
+* FIXED: The limit on how many answers a vote may select was enforced in the browser and nowhere else, so one crafted request could vote for every answer of a single-choice poll — each answer gaining a vote and the poll's total gaining several, while the voter count went up by one. That leaves the percentages, `%POLL_MOST_ANSWER%` and `%POLL_LEAST_ANSWER%` permanently wrong. The maximum is checked on the server now, on both the AJAX and REST paths
 * NEW: A `wp polls` WP-CLI command — `list`, `get`, `open`, `close` and `delete`.
 * NEW: A `polls/v1` REST API for reading a poll, reading its result and voting. The `admin-ajax.php` `polls` action is unchanged and still supported.
 * NEW: Two editor blocks, **Poll** and **Polls Archive**, both under Widgets. They render on the server through the same code the shortcodes use, so a block and a shortcode showing the same poll produce the same markup. The `[poll]`, `[poll=2]` and `[page_polls]` shortcodes are unchanged and still supported — nothing needs converting, and posts already containing them keep working.
