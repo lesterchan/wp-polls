@@ -278,7 +278,7 @@ class WP_Polls_REST_API_Test extends WP_Polls_TestCase {
 
 		$second = $vote();
 
-		$this->assertSame( 400, $second->get_status(), 'The second is refused.' );
+		$this->assertSame( 403, $second->get_status(), 'The second is refused.' );
 		$this->assertSame( 1, (int) WP_Polls_Poll::answers( $poll_id )[0]->polla_votes, 'And the count did not move again.' );
 	}
 
@@ -299,7 +299,7 @@ class WP_Polls_REST_API_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 400, $response->get_status(), 'Voting for nothing is refused.' );
+		$this->assertSame( 403, $response->get_status(), 'Voting for nothing is refused.' );
 		$this->assertSame( 0, (int) WP_Polls_Poll::get( $poll_id )->pollq_totalvoters, 'And records no voter.' );
 	}
 
@@ -321,7 +321,7 @@ class WP_Polls_REST_API_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		$this->assertSame( 400, $response->get_status(), 'A closed poll refuses the vote.' );
+		$this->assertSame( 403, $response->get_status(), 'A closed poll refuses the vote.' );
 		$this->assertSame( 0, (int) WP_Polls_Poll::answers( $poll_id )[0]->polla_votes, 'And records nothing.' );
 	}
 

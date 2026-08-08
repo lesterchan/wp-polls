@@ -236,10 +236,15 @@ class WP_Polls_API {
 			// vote_poll_process() throws for every refusal a voter can cause --
 			// closed poll, already voted, nothing selected, too many selected --
 			// and its messages are already escaped plain text.
+			//
+			// 403 rather than 400: the request is well formed and understood,
+			// and the plugin is declining to act on it. 400 is kept for the
+			// REST layer's own parameter validation, and 404 for a poll that is
+			// not there.
 			return new WP_Error(
 				'wp_polls_vote_refused',
 				$e->getMessage(),
-				array( 'status' => 400 )
+				array( 'status' => 403 )
 			);
 		}
 
