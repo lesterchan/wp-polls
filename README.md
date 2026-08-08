@@ -127,6 +127,8 @@ Reading is public, because a poll is public. Voting takes the same `poll_<id>-no
 
 Each response carries the rendered markup as well as the numbers, because your templates decide what a poll looks like and a client that rebuilt the markup itself would ignore them.
 
+**A refusal answers 403**, not 400 — a closed poll, a vote already cast, a bad nonce, nothing selected. 400 is kept for a parameter this plugin never had a chance to look at, and a poll that does not exist is 404. So a 403 means the request was understood and the answer is no, and sending it again differently will not help.
+
 **These routes are an addition.** The `admin-ajax.php` `polls` action is unchanged and still supported.
 
 ### Translating the template
