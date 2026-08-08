@@ -84,6 +84,15 @@ test.describe( 'The blocks', () => {
 			await expect(
 				editor.canvas.locator( `#polls-${ pollId }` ),
 			).toBeVisible();
+
+			// "Loading ..." is the AJAX placeholder, and it is hidden by a
+			// stylesheet rule rather than by an attribute -- so an editor that
+			// does not enqueue the front-end stylesheet shows it permanently
+			// under every poll. It did, until enqueue_block_assets was wired
+			// up, and a screenshot was the only thing that noticed.
+			await expect(
+				editor.canvas.locator( `#polls-${ pollId }-loading` ),
+			).toBeHidden();
 		} );
 	} );
 

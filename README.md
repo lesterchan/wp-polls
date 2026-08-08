@@ -286,6 +286,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 4. The Templates tab, holding the markup of the poll, of its results and of the archive
 5. A poll in a post, waiting for a vote
 6. The polls archive, every poll with what people said
+7. The Poll block in the editor: the preview is the real poll, and the sidebar picks which poll and whether to show the voting form or the result
 
 ## Changelog
 ### 3.0.0

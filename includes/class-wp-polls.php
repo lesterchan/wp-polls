@@ -19,6 +19,7 @@ class WP_Polls {
 	 */
 	public static function init() {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'poll_scripts' ) );
+		add_action( 'enqueue_block_assets', array( __CLASS__, 'block_editor_styles' ) );
 		add_action( 'widgets_init', array( __CLASS__, 'widget_polls_init' ) );
 		add_action( 'polls_cron', array( __CLASS__, 'cron_polls_status' ) );
 		add_shortcode( 'page_polls', array( __CLASS__, 'poll_page_shortcode' ) );
@@ -55,6 +56,59 @@ class WP_Polls {
 	 * @return mixed
 	 */
 	public static function poll_scripts() {
+		self::poll_styles();
+
+		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'js/wp-polls.js', array(), WP_POLLS_VERSION, true );
+		wp_localize_script(
+			'wp-polls',
+			'wpPollsL10n',
+			array(
+				'ajax_url'      => admin_url( 'admin-ajax.php' ),
+				'text_wait'     => __( 'Your last request is still being processed. Please wait a while ...', 'wp-polls' ),
+				'text_valid'    => __( 'Please choose a valid poll answer.', 'wp-polls' ),
+				'text_multiple' => __( 'Maximum number of choices allowed: ', 'wp-polls' ),
+			)
+		);
+	}
+
+	/**
+	 * Enqueue the stylesheet in the block editor, and only there.
+	 *
+	 * A block's preview is server-rendered, so the editor draws the same markup
+	 * the front end draws -- but without this it draws it with none of the
+	 * styles, and the most visible consequence is the AJAX loading placeholder.
+	 * `.wp-polls-loading` is hidden by a stylesheet rule rather than by an
+	 * attribute, so with no stylesheet the editor shows a permanent
+	 * "Loading ..." under every poll.
+	 *
+	 * The styles only, never the script: the front-end script attaches vote
+	 * handlers, and a preview that can be voted in casts real votes from the
+	 * editor.
+	 *
+	 * Guarded on is_admin() because `enqueue_block_assets` fires on the front
+	 * end too, where poll_scripts() has already done this on
+	 * `wp_enqueue_scripts` -- and wp_add_inline_style() appends rather than
+	 * replaces, so running twice would emit the bar's custom properties twice.
+	 *
+	 * @return void
+	 */
+	public static function block_editor_styles() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		self::poll_styles();
+	}
+
+	/**
+	 * Register and enqueue the stylesheet, with the bar's custom properties.
+	 *
+	 * Split out of poll_scripts() so the block editor can have the styles
+	 * without the script.
+	 *
+	 * @return void
+	 */
+	public static function poll_styles() {
 		if ( file_exists( get_stylesheet_directory() . '/wp-polls.css' ) ) {
 			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/wp-polls.css', array(), WP_POLLS_VERSION );
 		} else {
@@ -76,17 +130,6 @@ class WP_Polls {
 		$pollbar_css .= "\t" . '--wp-polls-bar-image: ' . self::bar_image( $pollbar['style'] ) . ';' . "\n";
 		$pollbar_css .= '}' . "\n";
 		wp_add_inline_style( 'wp-polls', $pollbar_css );
-		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'js/wp-polls.js', array(), WP_POLLS_VERSION, true );
-		wp_localize_script(
-			'wp-polls',
-			'wpPollsL10n',
-			array(
-				'ajax_url'      => admin_url( 'admin-ajax.php' ),
-				'text_wait'     => __( 'Your last request is still being processed. Please wait a while ...', 'wp-polls' ),
-				'text_valid'    => __( 'Please choose a valid poll answer.', 'wp-polls' ),
-				'text_multiple' => __( 'Maximum number of choices allowed: ', 'wp-polls' ),
-			)
-		);
 	}
 
 	// Function: Short Code For Inserting Polls Archive Into Page.
