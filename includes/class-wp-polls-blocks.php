@@ -5,6 +5,8 @@
  * @package WP-Polls
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Registers the plugin's blocks and renders them.
  *
