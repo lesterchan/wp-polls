@@ -61,6 +61,7 @@ require_once __DIR__ . '/includes/class-wp-polls-template.php';
 require_once __DIR__ . '/includes/class-wp-polls-options.php';
 require_once __DIR__ . '/includes/class-wp-polls-poll.php';
 require_once __DIR__ . '/includes/class-wp-polls-api.php';
+require_once __DIR__ . '/includes/class-wp-polls-blocks.php';
 require_once __DIR__ . '/includes/class-wp-polls-settings.php';
 require_once __DIR__ . '/includes/class-wp-polls-widget.php';
 require_once __DIR__ . '/includes/class-wp-polls-install.php';
@@ -78,6 +79,7 @@ WP_Polls_Admin::init();
 WP_Polls_WPStats::init();
 WP_Polls::init();
 WP_Polls_Settings::init();
+WP_Polls_Blocks::init();
 
 
 // Polls Table Name

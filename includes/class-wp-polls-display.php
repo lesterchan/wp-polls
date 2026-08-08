@@ -990,6 +990,48 @@ class WP_Polls_Display {
 	}
 
 	/**
+	 * Render one poll, as a voting form or as its result.
+	 *
+	 * The renderer the `[poll]` shortcode and the `wp-polls/poll` block share.
+	 * Neither calls the other: the shortcode parses shortcode attributes, the
+	 * block gets typed attributes from block.json, and both then arrive here
+	 * with an id and a type. That is the whole of what they have in common, and
+	 * keeping it in one place is what stops the two entry points drifting into
+	 * rendering different markup for the same poll.
+	 *
+	 * The feed guard belongs here rather than in either caller because a
+	 * dynamic block renders in a feed too, so a guard living in the shortcode
+	 * would leave the block emitting a voting form into somebody's RSS reader.
+	 *
+	 * An unrecognised type renders nothing, which is what the shortcode did
+	 * before this method existed. The block cannot reach that branch -- its
+	 * `type` attribute is an enum of the two -- but `[poll type="banana"]` can,
+	 * and it stays as it was.
+	 *
+	 * @param int    $id   Poll id. Zero means whichever poll is current.
+	 * @param string $type Either 'vote' or 'result'.
+	 *
+	 * @return string Rendered markup, or an empty string.
+	 */
+	public static function render_poll( $id, $type = 'vote' ) {
+		if ( is_feed() ) {
+			return __( 'Note: There is a poll embedded within this post, please visit the site to participate in this post\'s poll.', 'wp-polls' );
+		}
+
+		$id = (int) $id;
+
+		if ( 'vote' === $type ) {
+			return self::get_poll( $id, false );
+		}
+
+		if ( 'result' === $type ) {
+			return self::display_pollresult( $id );
+		}
+
+		return '';
+	}
+
+	/**
 	 * Get Poll.
 	 *
 	 * @param mixed $temp_poll_id Optional.

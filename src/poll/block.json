@@ -1,0 +1,29 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wp-polls/poll",
+	"version": "3.0.0",
+	"title": "Poll",
+	"category": "widgets",
+	"icon": "chart-bar",
+	"description": "A poll, as a voting form or as its result.",
+	"keywords": [ "poll", "vote", "survey" ],
+	"textdomain": "wp-polls",
+	"attributes": {
+		"id": {
+			"type": "number",
+			"default": 0
+		},
+		"type": {
+			"type": "string",
+			"enum": [ "vote", "result" ],
+			"default": "vote"
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": true,
+		"reusable": false
+	},
+	"editorScript": "file:./index.js"
+}

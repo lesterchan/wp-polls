@@ -40,6 +40,17 @@ I spent most of my free time creating, updating, maintaining and supporting thes
 * To embed a random poll in your post, use `[poll id="-2"]`
 * To embed a specific poll's result in your post, use `[poll id="2" type="result"]` where 2 is your poll id.
 
+### Showing A Poll In A Block
+
+Two blocks are available in the editor, under **Widgets**:
+
+* **Poll** — one poll, as its voting form or as its result. Set **Poll ID** in the sidebar, or leave it at zero for the current poll, which is what an empty `[poll]` does. **Show** chooses between the voting form and the result.
+* **Polls Archive** — every poll with its results, the same listing `[page_polls]` produces.
+
+Both render on the server, so the block preview in the editor is the real poll rather than an approximation, and changing a poll updates every post showing it without re-saving anything.
+
+**The shortcodes still work and are not going anywhere.** `[poll]`, `[poll=2]` and `[page_polls]` behave exactly as they always have, and a post already containing one needs no change. The blocks call the same code the shortcodes call, so the two render identically — use whichever suits the post.
+
 ### Showing A Poll In A Widget
 1. Go to `WP-Admin -> Appearance -> Widgets`.
 2. Add the **Polls** widget to a widget area. On block themes the widget is under the *Legacy Widget* block, or in `Appearance -> Editor` if your theme has no widget areas at all.
@@ -280,6 +291,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 ### 3.0.0
 * NEW: A `wp polls` WP-CLI command — `list`, `get`, `open`, `close` and `delete`.
 * NEW: A `polls/v1` REST API for reading a poll, reading its result and voting. The `admin-ajax.php` `polls` action is unchanged and still supported.
+* NEW: Two editor blocks, **Poll** and **Polls Archive**, both under Widgets. They render on the server through the same code the shortcodes use, so a block and a shortcode showing the same poll produce the same markup. The `[poll]`, `[poll=2]` and `[page_polls]` shortcodes are unchanged and still supported — nothing needs converting, and posts already containing them keep working.
 * BREAKING: Requires WordPress 6.8 and PHP 8.2, up from 6.0 and 7.4.
 * BREAKING: The scripts no longer define any global JavaScript functions. `poll_vote()`, `poll_result()`, `poll_booth()` and the admin equivalents are now private, so custom templates or themes that called them directly must move to `data-poll-id` / `data-poll-action` attributes. WP-Polls converts the stock templates for you on upgrade and warns in wp-admin about any it could not convert.
 * CHANGED: Options, templates, settings, the widget and the install/upgrade routine moved into classes under `includes/`. The documented extension points are unchanged: every `wp_polls_*` filter and action, both the `[poll]` and `[page_polls]` shortcodes, and the template tags keep their exact names and signatures.

@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wp-polls/page-polls",
+	"version": "3.0.0",
+	"title": "Polls Archive",
+	"category": "widgets",
+	"icon": "chart-bar",
+	"description": "Every poll, with its results, as an archive.",
+	"keywords": [ "polls", "archive", "results" ],
+	"textdomain": "wp-polls",
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"editorScript": "file:./index.js"
+}

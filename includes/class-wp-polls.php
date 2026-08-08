@@ -122,22 +122,18 @@ class WP_Polls {
 			),
 			$atts
 		);
-		if ( ! is_feed() ) {
-			$id = (int) $attributes['id'];
 
-			// To maintain backward compatibility with [poll=1]. Props @tz-ua.
-			if ( ! $id && isset( $atts[0] ) ) {
-				$id = (int) trim( $atts[0], '="\'' );
-			}
+		$id = (int) $attributes['id'];
 
-			if ( 'vote' === $attributes['type'] ) {
-				return WP_Polls_Display::get_poll( $id, false );
-			} elseif ( 'result' === $attributes['type'] ) {
-				return WP_Polls_Display::display_pollresult( $id );
-			}
-		} else {
-			return __( 'Note: There is a poll embedded within this post, please visit the site to participate in this post\'s poll.', 'wp-polls' );
+		// To maintain backward compatibility with [poll=1]. Props @tz-ua.
+		//
+		// This stays here rather than moving into the shared renderer: it is
+		// shortcode syntax, and a block has no positional attribute to parse.
+		if ( ! $id && isset( $atts[0] ) ) {
+			$id = (int) trim( $atts[0], '="\'' );
 		}
+
+		return WP_Polls_Display::render_poll( $id, $attributes['type'] );
 	}
 
 	/**
