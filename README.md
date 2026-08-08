@@ -65,7 +65,7 @@ Both render on the server, so the block preview in the editor is the real poll r
 5. Type `[page_polls]` in the post's content area.
 6. Click 'Publish'.
 
-* If you ARE NOT using nice permalinks, you need to go to `WP-Admin -> Polls -> Settings -> Poll Options` and under `Poll Archive -> Polls Archive URL`, you need to fill in the URL to the Polls Archive Page you created above.
+* If you ARE NOT using nice permalinks, go to `WP-Admin -> Polls -> Settings` and fill in `Poll Archive URL`, under the `Archive` heading, with the URL of the Polls Archive page you created above.
 
 ### To Display Total Polls
 
