@@ -103,6 +103,29 @@ the list.
   wrong reason. The real defect was that it silently activated on only the first
   100 sites (commits `5a7e9ec`, `9101059`).
 
+## WP-CLI and REST
+
+`wp polls list|get|open|close|delete`, and `polls/v1` with three routes: read a
+poll, read its result, vote.
+
+**Both go through `WP_Polls_Poll`, and that class exists for a reason.** The
+admin handler used to interleave its `$wpdb` calls with the notice markup
+announcing them, so a second caller could only copy the queries -- and three
+copies of "delete a poll" is three chances to forget that deleting one also
+clears its answers, its vote log and the stored latest-poll id. Every method
+there returns data or a boolean and prints nothing, because the three callers
+disagree about what to say: a notice div, a `WP_CLI::success()` line, a JSON
+body.
+
+**The `admin-ajax.php` `polls` action is still registered and still supported.**
+A theme or a cached script may be calling it, so the routes were added beside it
+rather than in place of it. A test asserts the action survives; if it ever
+stops, the routes have become a replacement and somebody's site has broken.
+
+**Voting over REST takes the same `poll_<id>-nonce` the rendered form carries**,
+as a `nonce` parameter, and runs the same eligibility and repeat-vote checks.
+Reading is public, because a poll is public.
+
 ## Migrations, and why they are tested through a browser
 
 `WP_Polls_Install::upgrade()` hangs off `admin_init`, because activation hooks
