@@ -66,7 +66,7 @@ class WP_Polls {
 				'ajax_url'      => admin_url( 'admin-ajax.php' ),
 				'text_wait'     => __( 'Your last request is still being processed. Please wait a while ...', 'wp-polls' ),
 				'text_valid'    => __( 'Please choose a valid poll answer.', 'wp-polls' ),
-				'text_multiple' => __( 'Maximum number of choices allowed: ', 'wp-polls' ),
+				'text_multiple' => __( 'Maximum number of choices allowed:', 'wp-polls' ),
 			)
 		);
 	}

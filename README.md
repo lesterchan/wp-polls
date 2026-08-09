@@ -370,6 +370,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 * CHANGED: The two inline `<script>` blocks the settings screens carried - the poll bar preview and the Restore Default Template buttons - moved into `js/wp-polls-admin.js`.
 * FIXED: `current_time( 'timestamp' )`, which WordPress deprecated, is replaced by `WP_Polls::now()`. Poll times are still stored as site-local, so nothing shifts.
 * NOTE: Every filter and action WP-Polls fires now carries a docblock recording what it is passed and which release introduced it.
+* FIXED: The "maximum number of choices allowed" alert ended in a trailing space inside the translated string, and the script added a space of its own -- so the number was preceded by two. The space belongs to the script, which is the same in every language
 
 ## Upgrade Notice
 
