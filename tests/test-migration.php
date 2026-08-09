@@ -280,11 +280,12 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 	/**
 	 * The retired AJAX style row is named here rather than left to the list.
 	 *
-	 * test_legacy_rows_are_deleted() walks legacy_extra_rows(), so a row missing
-	 * from that list loses its own assertion along with its deletion and the
-	 * suite stays green. poll_ajax_style was missing from it, and being
-	 * autoloaded it would have been read on every request of every upgraded site
-	 * forever. Naming it is what makes its absence from the list a failure.
+	 * The list-driven test above walks legacy_extra_rows(), so a row missing from
+	 * that list loses its own assertion along with its deletion and the suite
+	 * stays green. That is how poll_ajax_style came to be documented as dropped
+	 * while nothing deleted it -- and being autoloaded, it would have been read
+	 * on every request of every upgraded site for good. Naming the row here is
+	 * what turns its absence from the list into a failure.
 	 *
 	 * @return void
 	 */
