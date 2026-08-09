@@ -66,13 +66,13 @@ class WP_Polls_Display {
 		$poll_question_id          = (int) $poll_question->pollq_id;
 		$poll_question_totalvotes  = (int) $poll_question->pollq_totalvotes;
 		$poll_question_totalvoters = (int) $poll_question->pollq_totalvoters;
-		/* translators: 1: value, 2: value. */
+		/* translators: 1: The site's date format, 2: the site's time format. */
 		$poll_start_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_question->pollq_timestamp ) );
 		$poll_expiry     = trim( $poll_question->pollq_expiry );
 		if ( empty( $poll_expiry ) ) {
 			$poll_end_date = __( 'No Expiry', 'wp-polls' );
 		} else {
-			/* translators: 1: value, 2: value. */
+			/* translators: 1: The site's date format, 2: the site's time format. */
 			$poll_end_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_expiry ) );
 		}
 		$poll_multiple_ans = (int) $poll_question->pollq_multiple;
@@ -298,13 +298,13 @@ class WP_Polls_Display {
 		$poll_question_totalvotes  = (int) $poll_question->pollq_totalvotes;
 		$poll_question_totalvoters = (int) $poll_question->pollq_totalvoters;
 		$poll_question_active      = (int) $poll_question->pollq_active;
-		/* translators: 1: value, 2: value. */
+		/* translators: 1: The site's date format, 2: the site's time format. */
 		$poll_start_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_question->pollq_timestamp ) );
 		$poll_expiry     = trim( $poll_question->pollq_expiry );
 		if ( empty( $poll_expiry ) ) {
 			$poll_end_date = __( 'No Expiry', 'wp-polls' );
 		} else {
-			/* translators: 1: value, 2: value. */
+			/* translators: 1: The site's date format, 2: the site's time format. */
 			$poll_end_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $poll_expiry ) );
 		}
 		$poll_multiple_ans  = (int) $poll_question->pollq_multiple;
@@ -720,12 +720,12 @@ class WP_Polls_Display {
 			// Is The Poll Total Votes 0?
 			$poll_totalvotes_zero  = $polls_question['totalvotes'] <= 0;
 			$poll_totalvoters_zero = $polls_question['totalvoters'] <= 0;
-			/* translators: 1: value, 2: value. */
+			/* translators: 1: The site's date format, 2: the site's time format. */
 			$poll_start_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $polls_question['start'] ) );
 			if ( empty( $polls_question['end'] ) ) {
 				$poll_end_date = __( 'No Expiry', 'wp-polls' );
 			} else {
-				/* translators: 1: value, 2: value. */
+				/* translators: 1: The site's date format, 2: the site's time format. */
 				$poll_end_date = mysql2date( sprintf( __( '%1$s @ %2$s', 'wp-polls' ), get_option( 'date_format' ), get_option( 'time_format' ) ), gmdate( 'Y-m-d H:i:s', $polls_question['end'] ) );
 			}
 			// Archive Poll Header.
@@ -889,7 +889,7 @@ class WP_Polls_Display {
 			} else {
 				$pollsarchive_output_archive .= '<div class="wp-polls wp-polls-paging">' . "\n";
 			}
-			/* translators: 1: value, 2: value. */
+			/* translators: 1: The current page number, 2: the total number of pages. */
 			$pollsarchive_output_archive .= '<span class="pages">&#8201;' . sprintf( __( 'Page %1$s of %2$s', 'wp-polls' ), esc_html( number_format_i18n( $page ) ), esc_html( number_format_i18n( $max_page ) ) ) . '&#8201;</span>';
 			if ( $start_page >= 2 && $pages_to_show < $max_page ) {
 				$pollsarchive_output_archive .= '<a href="' . self::polls_archive_link( 1 ) . '" title="' . __( '&laquo; First', 'wp-polls' ) . '">&#8201;' . __( '&laquo; First', 'wp-polls' ) . '&#8201;</a>';

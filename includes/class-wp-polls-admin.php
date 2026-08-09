@@ -508,10 +508,10 @@ class WP_Polls_Admin {
 						if ( isset( $_POST['delete_logs_yes'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['delete_logs_yes'] ) ) ) {
 							$delete_logs = $wpdb->delete( $wpdb->pollsip, array( 'pollip_qid' => $pollq_id ), array( '%d' ) );
 							if ( $delete_logs ) {
-								/* translators: %s: value. */
+								/* translators: %s: The poll question. */
 								echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'All Logs For \'%s\' Has Been Deleted.', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 							} else {
-								/* translators: %s: value. */
+								/* translators: %s: The poll question. */
 								echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'An Error Has Occurred While Deleting All Logs For \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 							}
 						}
@@ -548,10 +548,10 @@ class WP_Polls_Admin {
 							)
 						);
 						if ( $delete_polla_answers ) {
-							/* translators: %s: value. */
+							/* translators: %s: The poll answer. */
 							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll Answer \'%s\' Deleted Successfully.', 'wp-polls' ), $polla_answers ) . '</p></div>' );
 						} else {
-							/* translators: %s: value. */
+							/* translators: %s: The poll answer. */
 							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Deleting Poll Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p></div>' );
 						}
 						break;
@@ -563,10 +563,10 @@ class WP_Polls_Admin {
 						$pollq_question = $poll ? $poll->pollq_question : '';
 						$open_poll      = WP_Polls_Poll::open( $pollq_id );
 						if ( $open_poll ) {
-							/* translators: %s: value. */
+							/* translators: %s: The poll question. */
 							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Is Now Opened', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						} else {
-							/* translators: %s: value. */
+							/* translators: %s: The poll question. */
 							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error Opening Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
 						break;
@@ -578,10 +578,10 @@ class WP_Polls_Admin {
 						$pollq_question = $poll ? $poll->pollq_question : '';
 						$close_poll     = WP_Polls_Poll::close( $pollq_id );
 						if ( $close_poll ) {
-							/* translators: %s: value. */
+							/* translators: %s: The poll question. */
 							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Is Now Closed', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						} else {
-							/* translators: %s: value. */
+							/* translators: %s: The poll question. */
 							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error Closing Poll \'%s\'', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
 						break;
@@ -600,11 +600,11 @@ class WP_Polls_Admin {
 						// reading nothing for a whole major version.
 						$delete_poll_question = WP_Polls_Poll::delete( $pollq_id );
 						if ( ! $delete_poll_question ) {
-							/* translators: %s: value. */
+							/* translators: %s: The poll question. */
 							echo wp_kses_post( '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Deleting Poll \'%s\' Question', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
 						if ( empty( $text ) ) {
-							/* translators: %s: value. */
+							/* translators: %s: The poll question. */
 							echo wp_kses_post( '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Deleted Successfully', 'wp-polls' ), wp_kses_post( removeslashes( $pollq_question ) ) ) . '</p></div>' );
 						}
 						break;

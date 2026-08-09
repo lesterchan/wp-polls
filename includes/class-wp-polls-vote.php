@@ -404,7 +404,7 @@ class WP_Polls_Vote {
 		// Acquire lock.
 		$fp_lock = self::polls_acquire_lock( $poll_id );
 		if ( false === $fp_lock ) {
-			/* translators: %s: value. */
+			/* translators: %s: The poll ID. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'Unable to obtain lock for Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
@@ -412,7 +412,7 @@ class WP_Polls_Vote {
 		$is_real    = count( array_intersect( $poll_aid_array, $polla_aids ) ) === count( $poll_aid_array );
 
 		if ( ! $is_real ) {
-			/* translators: %s: value. */
+			/* translators: %s: The poll ID. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'Invalid Answer to Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
@@ -456,30 +456,30 @@ class WP_Polls_Vote {
 		}
 
 		if ( ! self::check_allowtovote() ) {
-			/* translators: %s: value. */
+			/* translators: %s: The poll ID. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'User is not allowed to vote for Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		if ( empty( $poll_aid_array ) ) {
-			/* translators: %s: value. */
+			/* translators: %s: The poll ID. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'No answers given for Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		if ( 0 === $poll_id ) {
-			/* translators: %s: value. */
+			/* translators: %s: The poll ID. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'Invalid Poll ID. Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		$is_poll_open = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->pollsq WHERE pollq_id = %d AND pollq_active = 1", $poll_id ) );
 
 		if ( 0 === $is_poll_open ) {
-			/* translators: %s: value. */
+			/* translators: %s: The poll ID. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'Poll ID #%s is closed', 'wp-polls' ), $poll_id ) ) );
 		}
 
 		$check_voted = self::check_voted( $poll_id );
 		if ( ! empty( $check_voted ) ) {
-			/* translators: %s: value. */
+			/* translators: %s: The poll ID. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'You Had Already Voted For This Poll. Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 
@@ -548,7 +548,7 @@ class WP_Polls_Vote {
 			)
 		);
 		if ( ! $vote_q ) {
-			/* translators: %s: value. */
+			/* translators: %s: The poll ID. */
 			throw new InvalidArgumentException( esc_html( sprintf( __( 'Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls' ), $poll_id ) ) );
 		}
 

@@ -103,7 +103,7 @@ class WP_Polls_Screen_Add {
 							)
 						);
 						if ( ! $add_poll_question ) {
-							/* translators: %s: value. */
+							/* translators: %s: The poll question. */
 							$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll \'%s\'.', 'wp-polls' ), $pollq_question ) . '</p></div>';
 						}
 						// Add Poll Answers.
@@ -126,7 +126,7 @@ class WP_Polls_Screen_Add {
 									)
 								);
 								if ( ! $add_poll_answers ) {
-									/* translators: %s: value. */
+									/* translators: %s: The poll answer. */
 									$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer ) . '</p></div>';
 								}
 							} else {
@@ -139,10 +139,10 @@ class WP_Polls_Screen_Add {
 						// If poll starts in the future use the correct poll ID.
 						$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 						if ( empty( $text ) ) {
-							/* translators: 1: value, 2: value, 3: value, 4: value. */
+							/* translators: 1: The poll question, 2: the new poll's ID, 3: a readonly input holding the shortcode, 4: URL of the Manage Polls screen. */
 							$text = '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p></div>';
 						} elseif ( $add_poll_question ) {
-							/* translators: 1: value, 2: value, 3: value, 4: value. */
+							/* translators: 1: The poll question, 2: the new poll's ID, 3: a readonly input holding the shortcode, 4: URL of the Manage Polls screen. */
 							$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p></div>';
 						}
 						/**

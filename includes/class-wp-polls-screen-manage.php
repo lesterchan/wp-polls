@@ -129,7 +129,7 @@ class WP_Polls_Screen_Manage {
 						)
 					);
 					if ( ! $edit_poll_question ) {
-						/* translators: %s: value. */
+						/* translators: %s: The poll question. */
 						$text = '<div class="notice notice-info inline"><p>' . sprintf( __( 'No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 					}
 					// Update Polls' Answers.
@@ -162,15 +162,15 @@ class WP_Polls_Screen_Manage {
 								)
 							);
 							if ( ! $edit_poll_answer ) {
-								/* translators: %s: value. */
+								/* translators: %s: The poll answer. */
 								$text .= '<div class="notice notice-info inline"><p>' . sprintf( __( 'No Changes Had Been Made To Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p></div>';
 							} else {
-								/* translators: %s: value. */
+								/* translators: %s: The poll answer. */
 								$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll\'s Answer \'%s\' Edited Successfully.', 'wp-polls' ), $polla_answers ) . '</p></div>';
 							}
 						}
 					} else {
-						/* translators: %s: value. */
+						/* translators: %s: The poll question. */
 						$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Invalid Poll \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 					}
 					// Add Poll Answers (If Needed).
@@ -196,10 +196,10 @@ class WP_Polls_Screen_Manage {
 									)
 								);
 								if ( ! $add_poll_answers ) {
-									/* translators: %s: value. */
+									/* translators: %s: The poll answer. */
 									$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer_new ) . '</p></div>';
 								} else {
-									/* translators: %s: value. */
+									/* translators: %s: The poll answer. */
 									$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll\'s Answer \'%s\' Added Successfully.', 'wp-polls' ), $polla_answer_new ) . '</p></div>';
 								}
 							}
@@ -207,7 +207,7 @@ class WP_Polls_Screen_Manage {
 						}
 					}
 					if ( empty( $text ) ) {
-						/* translators: %s: value. */
+						/* translators: %s: The poll question. */
 						$text = '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Edited Successfully.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 					}
 					// Update Lastest Poll ID To Poll Options.
