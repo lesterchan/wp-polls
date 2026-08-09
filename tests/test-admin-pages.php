@@ -709,7 +709,13 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 		WP_Polls_Admin::messages( '<div class="notice notice-success inline"><p>Added. <input type="text" value=\'[poll id="7"]\' readonly="readonly" size="10" /></p></div>' );
 		$html = ob_get_clean();
 
-		$this->assertStringContainsString( '[poll id=&quot;7&quot;]', $html, 'The shortcode reaches the screen.' );
+		// Decoded before it is read, because the two WordPress versions this
+		// plugin supports quote the attribute differently: 6.8's wp_kses()
+		// leaves the single-quoted value alone, and later ones rewrite it to
+		// double quotes and encode the shortcode's own quotes to &quot;. Both
+		// hand the same shortcode to the browser, so asserting on either
+		// spelling pins the wrong thing and fails on the other version.
+		$this->assertStringContainsString( '[poll id="7"]', html_entity_decode( $html, ENT_QUOTES, 'UTF-8' ), 'The shortcode reaches the screen.' );
 		$this->assertStringContainsString( '<input', $html, 'It is still the readonly input the message describes.' );
 	}
 }
