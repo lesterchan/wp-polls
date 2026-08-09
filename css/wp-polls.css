@@ -154,11 +154,13 @@
 
 /* The vote button. Both colours are properties rather than fixed values, and
    both fall back to something derived from the text colour, so the button is
-   still visible on a theme that paints a dark background. */
+   still visible on a theme that paints a dark background. The padding replaces
+   the three literal spaces the template's value attribute used to carry. */
 .wp-polls .Buttons {
 	border: 1px solid var(--wp-polls-border, currentColor);
 	background-color: var(--wp-polls-surface, transparent);
 	color: inherit;
+	padding: var(--wp-polls-button-padding, 0.25em 1.25em);
 }
 
 /* Polls archive paging. currentColor throughout: the page decides what colour

@@ -32,7 +32,7 @@ class WP_Polls_Template {
 			'votebody'                => '<li><input type="%POLL_CHECKBOX_RADIO%" id="poll-answer-%POLL_ANSWER_ID%" name="poll_%POLL_ID%" value="%POLL_ANSWER_ID%" /> <label for="poll-answer-%POLL_ANSWER_ID%">%POLL_ANSWER%</label></li>',
 
 			'votefooter'              => '</ul>' .
-				'<p style="text-align: center;"><input type="button" name="vote" value="   ' . __( 'Vote', 'wp-polls' ) . '   " class="Buttons" data-poll-id="%POLL_ID%" data-poll-action="vote" /></p>' .
+				'<p style="text-align: center;"><input type="button" name="vote" value="' . __( 'Vote', 'wp-polls' ) . '" class="Buttons" data-poll-id="%POLL_ID%" data-poll-action="vote" /></p>' .
 				'<p style="text-align: center;"><a href="#ViewPollResults" data-poll-id="%POLL_ID%" data-poll-action="result" title="' . __( 'View Results Of This Poll', 'wp-polls' ) . '">' . __( 'View Results', 'wp-polls' ) . '</a></p>' .
 				'</div>',
 
