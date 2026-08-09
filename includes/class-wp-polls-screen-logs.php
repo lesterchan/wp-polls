@@ -171,11 +171,7 @@ class WP_Polls_Screen_Logs {
 <div class="wrap">
 	<h1><?php esc_html_e( 'Poll\'s Logs', 'wp-polls' ); ?></h1>
 		<?php
-		if ( ! empty( $text ) ) {
-			echo wp_kses_post( '<div id="message" class="notice notice-success is-dismissible">' . removeslashes( $text ) . '</div>' );
-		} else {
-			echo '<div id="message" class="notice notice-success hidden"></div>';
-		}
+		WP_Polls_Admin::messages( $text );
 		?>
 	<h2><?php echo wp_kses_post( $poll_question ); ?></h2>
 	<p>

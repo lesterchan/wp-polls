@@ -104,7 +104,7 @@ class WP_Polls_Screen_Add {
 						);
 						if ( ! $add_poll_question ) {
 							/* translators: %s: The poll question. */
-							$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll \'%s\'.', 'wp-polls' ), $pollq_question ) . '</p></div>';
+							$text .= '<div class="notice notice-error inline is-dismissible"><p>' . sprintf( __( 'Error In Adding Poll \'%s\'.', 'wp-polls' ), $pollq_question ) . '</p></div>';
 						}
 						// Add Poll Answers.
 						$polla_answers = isset( $_POST['polla_answers'] ) ? array_map( 'trim', array_map( 'wp_kses_post', wp_unslash( (array) $_POST['polla_answers'] ) ) ) : array();
@@ -127,10 +127,10 @@ class WP_Polls_Screen_Add {
 								);
 								if ( ! $add_poll_answers ) {
 									/* translators: %s: The poll answer. */
-									$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer ) . '</p></div>';
+									$text .= '<div class="notice notice-error inline is-dismissible"><p>' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer ) . '</p></div>';
 								}
 							} else {
-								$text .= '<div class="notice notice-error inline"><p>' . __( 'Poll\'s Answer is empty.', 'wp-polls' ) . '</p></div>';
+								$text .= '<div class="notice notice-error inline is-dismissible"><p>' . __( 'Poll\'s Answer is empty.', 'wp-polls' ) . '</p></div>';
 							}
 						}
 						// Update Lastest Poll ID To Poll Options.
@@ -140,10 +140,10 @@ class WP_Polls_Screen_Add {
 						$latest_pollid = ( $latest_pollid < $polla_qid ) ? $polla_qid : $latest_pollid;
 						if ( empty( $text ) ) {
 							/* translators: 1: The poll question, 2: the new poll's ID, 3: a readonly input holding the shortcode, 4: URL of the Manage Polls screen. */
-							$text = '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p></div>';
+							$text = '<div class="notice notice-success inline is-dismissible"><p>' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p></div>';
 						} elseif ( $add_poll_question ) {
 							/* translators: 1: The poll question, 2: the new poll's ID, 3: a readonly input holding the shortcode, 4: URL of the Manage Polls screen. */
-							$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p></div>';
+							$text .= '<div class="notice notice-success inline is-dismissible"><p>' . sprintf( __( 'Poll \'%1$s\' (ID: %2$s) added successfully, but there are some errors with the Poll\'s Answers. Embed this poll with the shortcode: %3$s or go back to <a href="%4$s">Manage Polls</a>', 'wp-polls' ), $pollq_question, $latest_pollid, '<input type="text" value=\'[poll id="' . $latest_pollid . '"]\' readonly="readonly" size="10" />', $base_page ) . '</p></div>';
 						}
 						/**
 					 * Fires after a poll has been created.
@@ -155,7 +155,7 @@ class WP_Polls_Screen_Add {
 						do_action( 'wp_polls_add_poll', $latest_pollid );
 						WP_Polls::cron_polls_place();
 					} else {
-						$text .= '<div class="notice notice-error inline"><p>' . __( 'Poll Question is empty.', 'wp-polls' ) . '</p></div>';
+						$text .= '<div class="notice notice-error inline is-dismissible"><p>' . __( 'Poll Question is empty.', 'wp-polls' ) . '</p></div>';
 					}
 					break;
 			}
@@ -167,9 +167,7 @@ class WP_Polls_Screen_Add {
 <div class="wrap">
 	<h1><?php esc_html_e( 'Add Poll', 'wp-polls' ); ?></h1>
 		<?php
-		if ( ! empty( $text ) ) {
-			echo wp_kses_post( '<div id="message" class="notice notice-success is-dismissible">' . removeslashes( $text ) . '</div>' );
-		}
+		WP_Polls_Admin::messages( $text );
 		?>
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=wp-polls-add' ) ); ?>">
 		<?php wp_nonce_field( 'wp-polls_add-poll' ); ?>

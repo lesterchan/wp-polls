@@ -67,11 +67,9 @@ async function addPoll( page, question, answers ) {
 
 	// The screen does not redirect: it stays on Add Poll and prints a notice
 	// with the new poll's id and a link back to Manage Polls. The notice is the
-	// confirmation, so that is what the wait is on.
-	//
-	// The inner notice specifically. The screen prints its message inside a
-	// #message wrapper that carries the same notice-success class, so the bare
-	// class matches two nested elements and Playwright refuses the ambiguity.
+	// confirmation, so that is what the wait is on. It sits inside the bare
+	// #message container the admin JavaScript writes into, and is the only
+	// element on the screen carrying a notice class.
 	await expect( page.locator( '.notice-success.inline' ) ).toContainText( 'added successfully' );
 }
 

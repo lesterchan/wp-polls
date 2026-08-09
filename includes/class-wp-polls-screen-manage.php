@@ -130,7 +130,7 @@ class WP_Polls_Screen_Manage {
 					);
 					if ( ! $edit_poll_question ) {
 						/* translators: %s: The poll question. */
-						$text = '<div class="notice notice-info inline"><p>' . sprintf( __( 'No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
+						$text = '<div class="notice notice-info inline is-dismissible"><p>' . sprintf( __( 'No Changes Had Been Made To Poll\'s Question \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 					}
 					// Update Polls' Answers.
 					$polla_aids     = array();
@@ -163,15 +163,15 @@ class WP_Polls_Screen_Manage {
 							);
 							if ( ! $edit_poll_answer ) {
 								/* translators: %s: The poll answer. */
-								$text .= '<div class="notice notice-info inline"><p>' . sprintf( __( 'No Changes Had Been Made To Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p></div>';
+								$text .= '<div class="notice notice-info inline is-dismissible"><p>' . sprintf( __( 'No Changes Had Been Made To Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answers ) . '</p></div>';
 							} else {
 								/* translators: %s: The poll answer. */
-								$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll\'s Answer \'%s\' Edited Successfully.', 'wp-polls' ), $polla_answers ) . '</p></div>';
+								$text .= '<div class="notice notice-success inline is-dismissible"><p>' . sprintf( __( 'Poll\'s Answer \'%s\' Edited Successfully.', 'wp-polls' ), $polla_answers ) . '</p></div>';
 							}
 						}
 					} else {
 						/* translators: %s: The poll question. */
-						$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Invalid Poll \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
+						$text .= '<div class="notice notice-error inline is-dismissible"><p>' . sprintf( __( 'Invalid Poll \'%s\'.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 					}
 					// Add Poll Answers (If Needed).
 					$polla_answers_new = isset( $_POST['polla_answers_new'] ) ? array_map( 'trim', array_map( 'wp_kses_post', wp_unslash( (array) $_POST['polla_answers_new'] ) ) ) : array();
@@ -197,10 +197,10 @@ class WP_Polls_Screen_Manage {
 								);
 								if ( ! $add_poll_answers ) {
 									/* translators: %s: The poll answer. */
-									$text .= '<div class="notice notice-error inline"><p>' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer_new ) . '</p></div>';
+									$text .= '<div class="notice notice-error inline is-dismissible"><p>' . sprintf( __( 'Error In Adding Poll\'s Answer \'%s\'.', 'wp-polls' ), $polla_answer_new ) . '</p></div>';
 								} else {
 									/* translators: %s: The poll answer. */
-									$text .= '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll\'s Answer \'%s\' Added Successfully.', 'wp-polls' ), $polla_answer_new ) . '</p></div>';
+									$text .= '<div class="notice notice-success inline is-dismissible"><p>' . sprintf( __( 'Poll\'s Answer \'%s\' Added Successfully.', 'wp-polls' ), $polla_answer_new ) . '</p></div>';
 								}
 							}
 							++$i;
@@ -208,7 +208,7 @@ class WP_Polls_Screen_Manage {
 					}
 					if ( empty( $text ) ) {
 						/* translators: %s: The poll question. */
-						$text = '<div class="notice notice-success inline"><p>' . sprintf( __( 'Poll \'%s\' Edited Successfully.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
+						$text = '<div class="notice notice-success inline is-dismissible"><p>' . sprintf( __( 'Poll \'%s\' Edited Successfully.', 'wp-polls' ), removeslashes( $pollq_question ) ) . '</p></div>';
 					}
 					// Update Lastest Poll ID To Poll Options.
 					$latest_pollid     = WP_Polls::polls_latest_id();
@@ -248,11 +248,7 @@ class WP_Polls_Screen_Manage {
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Edit Poll', 'wp-polls' ); ?></h1>
 				<?php
-				if ( ! empty( $text ) ) {
-					echo wp_kses_post( '<div id="message" class="notice notice-success is-dismissible">' . removeslashes( $text ) . '</div>' );
-				} else {
-					echo '<div id="message" class="notice notice-success hidden"></div>';
-				}
+				WP_Polls_Admin::messages( $text );
 				?>
 			<form method="post" action="<?php echo esc_url( WP_Polls_List_Table::page_url( array( 'mode' => 'edit' ), $poll_id ) ); ?>">
 				<?php wp_nonce_field( 'wp-polls_edit-poll' ); ?>
@@ -424,7 +420,7 @@ class WP_Polls_Screen_Manage {
 			<hr class="wp-header-end" />
 
 			<!-- Where the AJAX actions report what they did. -->
-			<div id="message" class="notice notice-success hidden"></div>
+				<?php WP_Polls_Admin::messages( '' ); ?>
 
 				<?php $poll_list->display(); ?>
 

@@ -676,4 +676,40 @@ class WP_Polls_Admin_Pages_Test extends WP_Polls_TestCase {
 
 		$this->assertStringContainsString( 'CUSTOM HEADER', $html, 'The templates screen renders the stored template, not the default.' );
 	}
+
+	/**
+	 * The message box is a bare container, not a notice of its own.
+	 *
+	 * Everything put in it is already a notice carrying its own colour, so a
+	 * notice class here draws a second bar down the left of the first one and
+	 * paints an error message inside a green box.
+	 *
+	 * @return void
+	 */
+	public function test_the_message_box_is_not_itself_a_notice() {
+		ob_start();
+		WP_Polls_Admin::messages( '<div class="notice notice-error inline"><p>Nope.</p></div>' );
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'notice notice-error inline', $html, 'The message it was given survives.' );
+		$this->assertStringNotContainsString( '<div id="message" class="notice', $html, 'The container carries no notice class of its own.' );
+	}
+
+	/**
+	 * The shortcode a new poll reports survives the message box.
+	 *
+	 * It is offered in a readonly input, and wp_kses_post() strips input
+	 * outright — which left "Embed this poll with the shortcode:" followed by
+	 * nothing at all on the screen that exists to hand it over.
+	 *
+	 * @return void
+	 */
+	public function test_the_message_box_keeps_the_shortcode_input() {
+		ob_start();
+		WP_Polls_Admin::messages( '<div class="notice notice-success inline"><p>Added. <input type="text" value=\'[poll id="7"]\' readonly="readonly" size="10" /></p></div>' );
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( '[poll id=&quot;7&quot;]', $html, 'The shortcode reaches the screen.' );
+		$this->assertStringContainsString( '<input', $html, 'It is still the readonly input the message describes.' );
+	}
 }

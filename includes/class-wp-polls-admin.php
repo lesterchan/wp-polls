@@ -191,6 +191,40 @@ class WP_Polls_Admin {
 		WP_Polls_Screen_Settings::render();
 	}
 
+	/**
+	 * Print the status messages a screen collected, inside the box the admin
+	 * JavaScript writes its own responses into.
+	 *
+	 * The box is a bare container on purpose. Everything that goes in it is
+	 * already a `.notice` carrying its own success or error colour, so making
+	 * the container a notice as well draws a second bar down the left of the
+	 * first one - and paints an error message inside a green box.
+	 *
+	 * @param string $text Concatenated notice markup, empty when there is
+	 *                     nothing to report yet.
+	 * @return void
+	 */
+	public static function messages( $text ) {
+		$text = (string) $text;
+
+		// The new-poll message offers its shortcode in a readonly input, which
+		// wp_kses_post() strips: input is not a tag posts are allowed to use.
+		$allowed          = wp_kses_allowed_html( 'post' );
+		$allowed['input'] = array(
+			'type'     => true,
+			'value'    => true,
+			'readonly' => true,
+			'size'     => true,
+			'class'    => true,
+		);
+
+		printf(
+			'<div id="message" class="%1$s">%2$s</div>',
+			esc_attr( '' === $text ? 'hidden' : '' ),
+			wp_kses( removeslashes( $text ), $allowed )
+		);
+	}
+
 	// Function: Enqueue Polls Stylesheets/JavaScripts In WP-Admin.
 
 	/**
