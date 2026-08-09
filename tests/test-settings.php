@@ -18,6 +18,36 @@
 class WP_Polls_Settings_Test extends WP_Polls_TestCase {
 
 	/**
+	 * The token list is a field hint: after the control, description class,
+	 * sentence case.
+	 *
+	 * This screen already had the placement right; the capitalised "Allowed
+	 * Variables:" was its one deviation from the shared shape, and it was found
+	 * by a checker sweep rather than by eye -- a survey done by grepping for the
+	 * lowercase form missed both plugins that capitalised it.
+	 */
+	public function test_the_token_list_follows_the_field_it_describes() {
+		ob_start();
+		WP_Polls_Settings::field_template(
+			array(
+				'key'       => 'voteheader',
+				'label_for' => 'wp-polls-template-voteheader',
+				'variables' => array( '%POLL_QUESTION%', '%POLL_TOTALVOTES%' ),
+			)
+		);
+		$html = (string) ob_get_clean();
+
+		$field = strpos( $html, '</textarea>' );
+		$hint  = strpos( $html, 'Allowed variables:' );
+
+		$this->assertNotFalse( $hint, 'The tokens are listed.' );
+		$this->assertStringNotContainsString( 'Allowed Variables:', $html, 'In sentence case.' );
+		$this->assertGreaterThan( $field, $hint, 'After the control.' );
+		$this->assertStringContainsString( 'class="description"', substr( $html, $field, $hint - $field + 40 ), 'In a description paragraph.' );
+		$this->assertStringContainsString( '<code>%POLL_QUESTION%</code>', $html, 'With the tokens as literal code spans.' );
+	}
+
+	/**
 	 * Saving the Options screen must not disturb the templates.
 	 */
 	public function test_options_save_preserves_templates() {

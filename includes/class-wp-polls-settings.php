@@ -953,7 +953,7 @@ class WP_Polls_Settings {
 		}
 
 		// $tokens is either an escaped string or escaped tokens in code spans.
-		echo '<p class="description">' . esc_html__( 'Allowed Variables:', 'wp-polls' ) . ' ' . $tokens . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The tokens are escaped above, either as a string or inside code spans.
+		echo '<p class="description">' . esc_html__( 'Allowed variables:', 'wp-polls' ) . ' ' . $tokens . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The tokens are escaped above, either as a string or inside code spans.
 
 		printf(
 			'<p><button type="button" class="button" data-poll-action="restore-template" data-poll-template="%1$s">%2$s</button></p>',
