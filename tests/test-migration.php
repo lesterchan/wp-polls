@@ -41,6 +41,10 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		'poll_currentpoll'         => 2,
 		'poll_latestpoll'          => 3,
 		'poll_archive_show'        => 1,
+		'poll_ajax_style'          => array(
+			'loading' => 0,
+			'fading'  => 1,
+		),
 	);
 
 	/**
@@ -271,6 +275,28 @@ class WP_Polls_Migration_Test extends WP_Polls_TestCase {
 		}
 
 		$this->assertSame( array(), $leftover, 'rows left behind: ' . implode( ', ', $leftover ) );
+	}
+
+	/**
+	 * The retired AJAX style row is named here rather than left to the list.
+	 *
+	 * test_legacy_rows_are_deleted() walks legacy_extra_rows(), so a row missing
+	 * from that list loses its own assertion along with its deletion and the
+	 * suite stays green. poll_ajax_style was missing from it, and being
+	 * autoloaded it would have been read on every request of every upgraded site
+	 * forever. Naming it is what makes its absence from the list a failure.
+	 *
+	 * @return void
+	 */
+	public function test_the_retired_ajax_style_row_is_deleted() {
+		$this->make_legacy_install();
+
+		$this->assertNotFalse( get_option( 'poll_ajax_style', false ), 'The fixture has to write the row for its deletion to mean anything.' );
+
+		$this->run_upgrade();
+
+		$this->assertFalse( get_option( 'poll_ajax_style', false ), 'poll_ajax_style carries nothing forward and must not survive the migration.' );
+		$this->assertContains( 'poll_ajax_style', WP_Polls_Options::legacy_extra_rows(), 'And it belongs on the list uninstall is driven from.' );
 	}
 
 	/**

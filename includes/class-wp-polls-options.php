@@ -140,9 +140,13 @@ class WP_Polls_Options {
 	/**
 	 * Legacy rows that carry no value forward but must still be cleaned up.
 	 *
-	 * The poll_archive_show row was already dead before 3.0.0. poll_version and
-	 * poll_db_version are the two markers that collapse into the single
-	 * wp_polls_version row. poll_options is read by the migration - both the
+	 * The poll_archive_show row was already dead before 3.0.0. poll_ajax_style is
+	 * the setting 3.0.0 retired outright - the loading indicator always shows and
+	 * the fade follows prefers-reduced-motion - so it carries nothing forward and
+	 * is listed here rather than in the map. It is autoloaded, so leaving it would
+	 * put a row nothing reads into every request on every site, for good.
+	 * poll_version and poll_db_version are the two markers that collapse into the
+	 * single wp_polls_version row. poll_options is read by the migration - both the
 	 * pre-3.0.0 shape, which held only ip_header, and the unreleased 3.0.0
 	 * shape, which held the whole nested array - and removed afterwards, so it
 	 * is listed here rather than in the map.
@@ -157,6 +161,7 @@ class WP_Polls_Options {
 	public static function legacy_extra_rows() {
 		return array(
 			'poll_archive_show',
+			'poll_ajax_style',
 			self::LEGACY_OPTION,
 			self::LEGACY_VERSION,
 			self::LEGACY_DB_VERSION,
