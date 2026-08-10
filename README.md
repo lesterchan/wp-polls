@@ -303,7 +303,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 * NEW: A `wp polls` WP-CLI command — `list`, `get`, `open`, `close` and `delete`.
 * NEW: A `polls/v1` REST API for reading a poll, reading its result and voting. The `admin-ajax.php` `polls` action is unchanged and still supported.
 * NEW: Two editor blocks, **Poll** and **Polls Archive**, both under Widgets. They render on the server through the same code the shortcodes use, so a block and a shortcode showing the same poll produce the same markup. The `[poll]`, `[poll=2]` and `[page_polls]` shortcodes are unchanged and still supported — nothing needs converting, and posts already containing them keep working.
-* BREAKING: Requires WordPress 6.8 and PHP 8.2, up from 6.0 and 7.4.
+* BREAKING: Requires WordPress 6.8 and PHP 8.2.
 * BREAKING: The scripts no longer define any global JavaScript functions. `poll_vote()`, `poll_result()`, `poll_booth()` and the admin equivalents are now private, so custom templates or themes that called them directly must move to `data-poll-id` / `data-poll-action` attributes. WP-Polls converts the stock templates for you on upgrade and warns in wp-admin about any it could not convert.
 * CHANGED: Options, templates, settings, the widget and the install/upgrade routine moved into classes under `includes/`. The documented extension points are unchanged: every `wp_polls_*` filter and action, both the `[poll]` and `[page_polls]` shortcodes, and the template tags keep their exact names and signatures.
 * CHANGED: The thirty-odd separate `wp_options` rows are now a single `wp_polls_options` row holding a nested array. Your settings are migrated automatically on upgrade; the old rows are removed once they have been folded in.
