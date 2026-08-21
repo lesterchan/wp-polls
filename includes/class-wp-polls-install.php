@@ -39,11 +39,17 @@ class WP_Polls_Install {
 			// so the old call raised a deprecation notice rather than failing
 			// outright — and silently activated on only the first 100 sites,
 			// because that is its default limit. get_sites() returns WP_Site
-			// objects rather than arrays, and 'number' => 0 lifts the limit.
-			$ms_sites = get_sites( array( 'number' => 0 ) );
+			// objects rather than arrays, and 'number' => 0 lifts the limit;
+			// 'fields' => 'ids' skips hydrating objects the loop never reads.
+			$ms_site_ids = get_sites(
+				array(
+					'fields' => 'ids',
+					'number' => 0,
+				)
+			);
 
-			foreach ( $ms_sites as $ms_site ) {
-				switch_to_blog( (int) $ms_site->blog_id );
+			foreach ( $ms_site_ids as $ms_site_id ) {
+				switch_to_blog( (int) $ms_site_id );
 				self::activate();
 				restore_current_blog();
 			}
