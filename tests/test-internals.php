@@ -307,11 +307,12 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		$this->assertNotContains( 'wp_get_sites', $called, 'the deprecated, 100-site-capped function is still called' );
 		$this->assertContains( 'get_sites', $called, 'The site walk goes through get_sites() instead.' );
-		$this->assertStringContainsString(
-			"get_sites( array( 'number' => 0 ) )",
-			file_get_contents( WP_POLLS_DIR . 'includes/class-wp-polls-install.php' ),
-			'the hundred site default limit is no longer lifted'
-		);
+		// The arguments, not the call's layout: the query moved to a multi-line
+		// array when 'fields' => 'ids' joined it.
+		$source = (string) file_get_contents( WP_POLLS_DIR . 'includes/class-wp-polls-install.php' );
+
+		$this->assertStringContainsString( "'number' => 0", $source, 'the hundred site default limit is no longer lifted' );
+		$this->assertStringContainsString( "'fields' => 'ids'", $source, 'The walk hydrates whole site objects to read one column.' );
 	}
 
 	/**
