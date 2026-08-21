@@ -25,13 +25,13 @@ require_once $_tests_dir . '/includes/functions.php';
 /**
  * Load the plugin under test before WordPress finishes booting.
  */
-function wp_polls_manually_load_plugin() {
+function _wp_polls_manually_load_plugin() {
 	require dirname( __DIR__ ) . '/wp-polls.php';
 	// register_activation_hook() never fires in the test environment, so the
 	// tables and the option row have to be created by hand.
 	WP_Polls_Install::activate();
 }
-tests_add_filter( 'muplugins_loaded', 'wp_polls_manually_load_plugin' );
+tests_add_filter( 'muplugins_loaded', '_wp_polls_manually_load_plugin' );
 
 require $_tests_dir . '/includes/bootstrap.php';
 
