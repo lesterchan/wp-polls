@@ -13,14 +13,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Function: Get Poll Question Based On Poll ID.
 if ( ! function_exists( 'get_poll_question' ) ) {
 	/**
-	 * Get poll question.
+	 * Template tag: the question of one poll.
 	 *
-	 * @param mixed $poll_id Value.
+	 * @param int $poll_id Poll ID.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	function get_poll_question( $poll_id ) {
 		global $wpdb;
@@ -30,14 +29,13 @@ if ( ! function_exists( 'get_poll_question' ) ) {
 	}
 }
 
-// Function: Get Poll Total Questions.
 if ( ! function_exists( 'get_pollquestions' ) ) {
 	/**
-	 * Get pollquestions.
+	 * Template tag: how many polls there are.
 	 *
-	 * @param mixed $display Optional.
+	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return int|void
 	 */
 	function get_pollquestions( $display = true ) {
 		global $wpdb;
@@ -50,14 +48,13 @@ if ( ! function_exists( 'get_pollquestions' ) ) {
 	}
 }
 
-// Function: Get Poll Total Answers.
 if ( ! function_exists( 'get_pollanswers' ) ) {
 	/**
-	 * Get pollanswers.
+	 * Template tag: how many poll answers there are, across every poll.
 	 *
-	 * @param mixed $display Optional.
+	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return int|void
 	 */
 	function get_pollanswers( $display = true ) {
 		global $wpdb;
@@ -70,14 +67,13 @@ if ( ! function_exists( 'get_pollanswers' ) ) {
 	}
 }
 
-// Function: Get Poll Total Votes.
 if ( ! function_exists( 'get_pollvotes' ) ) {
 	/**
-	 * Get pollvotes.
+	 * Template tag: how many votes have been cast, across every poll.
 	 *
-	 * @param mixed $display Optional.
+	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return int|void
 	 */
 	function get_pollvotes( $display = true ) {
 		global $wpdb;
@@ -90,15 +86,14 @@ if ( ! function_exists( 'get_pollvotes' ) ) {
 	}
 }
 
-// Function: Get Poll Votes Based on Poll ID.
 if ( ! function_exists( 'get_pollvotes_by_id' ) ) {
 	/**
-	 * Get pollvotes by id.
+	 * Template tag: how many votes one poll has received.
 	 *
-	 * @param mixed $poll_id Value.
-	 * @param mixed $display Optional.
+	 * @param int  $poll_id Poll ID.
+	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return int|void
 	 */
 	function get_pollvotes_by_id( $poll_id, $display = true ) {
 		global $wpdb;
@@ -112,14 +107,13 @@ if ( ! function_exists( 'get_pollvotes_by_id' ) ) {
 	}
 }
 
-// Function: Get Poll Total Voters.
 if ( ! function_exists( 'get_pollvoters' ) ) {
 	/**
-	 * Get pollvoters.
+	 * Template tag: how many voters have taken part, across every poll.
 	 *
-	 * @param mixed $display Optional.
+	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return int|void
 	 */
 	function get_pollvoters( $display = true ) {
 		global $wpdb;
@@ -132,16 +126,15 @@ if ( ! function_exists( 'get_pollvoters' ) ) {
 	}
 }
 
-// Function: Get Poll Time Based on Poll ID and Date Format.
 if ( ! function_exists( 'get_polltime' ) ) {
 	/**
-	 * Get polltime.
+	 * Template tag: when one poll was created.
 	 *
-	 * @param mixed $poll_id     Value.
-	 * @param mixed $date_format Optional.
-	 * @param mixed $display     Optional.
+	 * @param int    $poll_id     Poll ID.
+	 * @param string $date_format PHP date format for the answer.
+	 * @param bool   $display     Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return string|void
 	 */
 	function get_polltime( $poll_id, $date_format = 'd/m/Y', $display = true ) {
 		global $wpdb;
@@ -158,11 +151,12 @@ if ( ! function_exists( 'get_polltime' ) ) {
 
 if ( ! function_exists( 'removeslashes' ) ) {
 	/**
-	 * Removeslashes.
+	 * Strip every backslash a stored value accumulated, however many times it
+	 * was slashed on the way in.
 	 *
-	 * @param mixed $text Value.
+	 * @param string $text Stored text.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	function removeslashes( $text ) {
 		$text = implode( '', explode( '\\', $text ) );
@@ -170,76 +164,53 @@ if ( ! function_exists( 'removeslashes' ) ) {
 	}
 }
 
-/**
- * Template tag: render a poll.
- *
- * @param int  $poll_id Poll ID. 0 for the current poll, -1 to disable, -2 for random.
- * @param bool $display Echo when true, return when false.
- * @return string|void
- */
 if ( ! function_exists( 'get_poll' ) ) {
 	/**
-	 * Get poll.
+	 * Template tag: render a poll.
 	 *
-	 * @param mixed $poll_id Optional.
-	 * @param mixed $display Optional.
+	 * @param int  $poll_id Poll ID. 0 for the current poll, -1 to disable, -2 for random.
+	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return string|void
 	 */
 	function get_poll( $poll_id = 0, $display = true ) {
 		return WP_Polls_Display::get_poll( $poll_id, $display );
 	}
 }
 
-/**
- * Template tag: render the link to the polls archive.
- *
- * @param bool $display Echo when true, return when false.
- * @return string|void
- */
 if ( ! function_exists( 'display_polls_archive_link' ) ) {
 	/**
-	 * Display polls archive link.
+	 * Template tag: render the link to the polls archive.
 	 *
-	 * @param mixed $display Optional.
+	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return string|void
 	 */
 	function display_polls_archive_link( $display = true ) {
 		return WP_Polls_Display::display_polls_archive_link( $display );
 	}
 }
 
-/**
- * Template tag: are we on the polls archive page?
- *
- * @return bool
- */
 if ( ! function_exists( 'in_pollarchive' ) ) {
 	/**
-	 * In pollarchive.
+	 * Template tag: are we on the polls archive page?
 	 *
-	 * @return mixed
+	 * @return bool
 	 */
 	function in_pollarchive() {
 		return WP_Polls_Display::in_pollarchive();
 	}
 }
 
-/**
- * The AJAX vote endpoint.
- *
- * Kept as a global function because the documented theme snippet guards on
- * function_exists( 'vote_poll' ); removing it would silently hide every poll
- * in every theme using that snippet.
- *
- * @return void
- */
 if ( ! function_exists( 'vote_poll' ) ) {
 	/**
-	 * Vote poll.
+	 * The AJAX vote endpoint.
 	 *
-	 * @return mixed
+	 * Kept as a global function because the documented theme snippet guards on
+	 * function_exists( 'vote_poll' ); removing it would silently hide every
+	 * poll in every theme using that snippet.
+	 *
+	 * @return void
 	 */
 	function vote_poll() {
 		WP_Polls_Vote::ajax_vote();

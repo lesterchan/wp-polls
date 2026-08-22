@@ -54,25 +54,26 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Poll template vote markup.
+	 * Fill a poll template's placeholders in.
 	 *
-	 * @param mixed $template  Value.
-	 * @param mixed $poll      Value.
-	 * @param mixed $variables Value.
+	 * @param string $template  Template with %POLL_*% placeholders.
+	 * @param object $poll      Poll row the values come from.
+	 * @param array  $variables Placeholder => value map.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function poll_template_vote_markup( $template, $poll, $variables ) {
 		return str_replace( array_keys( $variables ), array_values( $variables ), $template );
 	}
 
 	/**
-	 * Display Voting Form.
+	 * Render the voting form for one poll.
 	 *
-	 * @param mixed $poll_id         Value.
-	 * @param mixed $display_loading Optional.
+	 * @param int  $poll_id         Poll to render.
+	 * @param bool $display_loading Optional. Whether to emit the AJAX loading
+	 *                              placeholder.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function display_pollvote( $poll_id, $display_loading = true ) {
 		self::request_assets();
@@ -278,13 +279,14 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Display Results Form.
+	 * Render the results of one poll.
 	 *
-	 * @param mixed $poll_id         Value.
-	 * @param mixed $user_voted      Optional.
-	 * @param bool  $display_loading Whether to emit the AJAX loading placeholder.
+	 * @param int       $poll_id         Poll to render.
+	 * @param array|int $user_voted      Optional. Answer ids this visitor
+	 *                                   chose, or 0 for none.
+	 * @param bool      $display_loading Whether to emit the AJAX loading placeholder.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function display_pollresult( $poll_id, $user_voted = array(), $display_loading = true ) {
 		self::request_assets();
@@ -578,11 +580,11 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Polls Archive Link.
+	 * The URL of one page of the polls archive.
 	 *
-	 * @param mixed $page Value.
+	 * @param int $page Page number, 0 for the archive's own address.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function polls_archive_link( $page ) {
 		$polls_archive_url = WP_Polls_Options::get( 'archive.url' );
@@ -597,11 +599,11 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Displays Polls Archive Link.
+	 * Render the link to the polls archive.
 	 *
-	 * @param mixed $display Optional.
+	 * @param bool $display Optional. Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return string|void
 	 */
 	public static function display_polls_archive_link( $display = true ) {
 		$template_pollarchivelink = removeslashes( WP_Polls_Options::get( 'templates.pollarchivelink' ) );
@@ -615,9 +617,9 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Display Polls Archive.
+	 * Render the polls archive.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function polls_archive() {
 		self::request_assets();
@@ -961,9 +963,9 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Check If In Poll Archive Page.
+	 * Whether the current request is the polls archive page.
 	 *
-	 * @return mixed
+	 * @return bool
 	 */
 	public static function in_pollarchive() {
 		$poll_archive_url       = WP_Polls_Options::get( 'archive.url' );
@@ -981,9 +983,9 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Polls get ans sort.
+	 * The configured answer sort, validated to a column and a direction.
 	 *
-	 * @return mixed
+	 * @return array The order-by column and 'asc' or 'desc'.
 	 */
 	public static function get_ans_sort() {
 		$order_by = WP_Polls_Options::get( 'sort.answers_by' );
@@ -1002,9 +1004,9 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Polls get ans result sort.
+	 * The configured result sort, validated to a column and a direction.
 	 *
-	 * @return mixed
+	 * @return array The order-by column and 'asc' or 'desc'.
 	 */
 	public static function get_ans_result_sort() {
 		$order_by = WP_Polls_Options::get( 'sort.results_by' );
@@ -1065,12 +1067,13 @@ class WP_Polls_Display {
 	}
 
 	/**
-	 * Get Poll.
+	 * Render a poll, resolving which one and which face of it to show.
 	 *
-	 * @param mixed $temp_poll_id Optional.
-	 * @param mixed $display      Optional.
+	 * @param int  $temp_poll_id Optional. Poll ID. 0 for the current poll,
+	 *                           -1 to disable, -2 for random.
+	 * @param bool $display      Optional. Echo when true, return when false.
 	 *
-	 * @return mixed
+	 * @return string|void
 	 */
 	public static function get_poll( $temp_poll_id = 0, $display = true ) {
 		global $wpdb, $polls_loaded;

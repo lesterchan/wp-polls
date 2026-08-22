@@ -18,14 +18,15 @@ class WP_Polls_Vote {
 	 * @return void
 	 */
 	public static function init() {
+		// Legacy action name: pages cached with the old script must keep posting somewhere.
 		add_action( 'wp_ajax_polls', array( __CLASS__, 'ajax_vote' ) );
 		add_action( 'wp_ajax_nopriv_polls', array( __CLASS__, 'ajax_vote' ) );
 	}
 
 	/**
-	 * Check Who Is Allow To Vote.
+	 * Whether the current visitor is in the group allowed to vote.
 	 *
-	 * @return mixed
+	 * @return bool
 	 */
 	public static function check_allowtovote() {
 		global $user_ID;
@@ -47,11 +48,12 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Check voted by cookie or IP.
+	 * Run whichever repeat-vote check the site is set to.
 	 *
-	 * @param mixed $poll_id Value.
+	 * @param int $poll_id Poll being checked.
 	 *
-	 * @return mixed
+	 * @return int|array Zero when no earlier vote is found, otherwise the
+	 *                   voted answer ids.
 	 */
 	public static function check_voted( $poll_id ) {
 		$check_method = (int) WP_Polls_Options::get( 'check_method' );
@@ -79,11 +81,11 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Check Voted By Cookie.
+	 * The earlier vote the per-poll cookie remembers, if any.
 	 *
-	 * @param mixed $poll_id Value.
+	 * @param int $poll_id Poll being checked.
 	 *
-	 * @return mixed
+	 * @return int|array Zero without a cookie, otherwise the voted answer ids.
 	 */
 	public static function check_voted_cookie( $poll_id ) {
 		$get_voted_aids = 0;
@@ -95,11 +97,11 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Check Voted By IP.
+	 * The earlier vote the log holds for this visitor's address, if any.
 	 *
-	 * @param mixed $poll_id Value.
+	 * @param int $poll_id Poll being checked.
 	 *
-	 * @return mixed
+	 * @return int|array Zero without a logged vote, otherwise the voted answer ids.
 	 */
 	public static function check_voted_ip( $poll_id ) {
 		global $wpdb;
@@ -118,11 +120,14 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Check Voted By Username.
+	 * The earlier vote the log holds for this user, if any.
 	 *
-	 * @param mixed $poll_id Value.
+	 * A guest cannot pass a username check, so one always reads as having voted.
 	 *
-	 * @return mixed
+	 * @param int $poll_id Poll being checked.
+	 *
+	 * @return int|array Zero without a logged vote, 1 for a guest, otherwise
+	 *                   the voted answer ids.
 	 */
 	public static function check_voted_username( $poll_id ) {
 		global $wpdb, $user_ID;
@@ -146,12 +151,12 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Check Voted To Get Voted Answer.
+	 * The answer ids this visitor already voted for, cookie first.
 	 *
-	 * @param mixed $poll_id   Value.
-	 * @param mixed $polls_ips Value.
+	 * @param int       $poll_id   Poll being checked.
+	 * @param int|array $polls_ips What the log-based check answered.
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public static function check_voted_multiple( $poll_id, $polls_ips ) {
 		if ( ! empty( $_COOKIE[ "voted_$poll_id" ] ) ) {
@@ -164,9 +169,9 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Get IP Address.
+	 * The visitor's address, read from a proxy header only where one is trusted.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function poll_get_raw_ipaddress() {
 		// REMOTE_ADDR is absent under WP-CLI and cron, where this is still reached
@@ -263,9 +268,9 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Poll get ipaddress.
+	 * The voter identity a vote is recorded against.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function poll_get_ipaddress() {
 		/**
@@ -282,9 +287,9 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Poll get hostname.
+	 * The anonymised host name recorded beside a vote.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function poll_get_hostname() {
 		$ip = self::poll_get_raw_ipaddress();
@@ -317,11 +322,12 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Polls acquire lock.
+	 * Take the advisory lock guarding one poll's tally.
 	 *
-	 * @param mixed $poll_id Value.
+	 * @param int $poll_id Poll being voted on.
 	 *
-	 * @return mixed
+	 * @return resource|false The held lock handle, or false when another
+	 *                        request holds it.
 	 */
 	public static function polls_acquire_lock( $poll_id ) {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- An flock() advisory lock; WP_Filesystem abstracts over FTP and SSH and has no locking primitive.
@@ -339,12 +345,12 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Polls release lock.
+	 * Release the advisory lock and remove its file.
 	 *
-	 * @param mixed $fp      Value.
-	 * @param mixed $poll_id Value.
+	 * @param resource|false $fp      What polls_acquire_lock() answered.
+	 * @param int            $poll_id Poll that was voted on.
 	 *
-	 * @return mixed
+	 * @return bool Whether there was a held lock to release.
 	 */
 	public static function polls_release_lock( $fp, $poll_id ) {
 		if ( is_resource( $fp ) ) {
@@ -361,11 +367,11 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Polls lock file.
+	 * Path of the lock file guarding one poll's tally.
 	 *
-	 * @param mixed $poll_id Value.
+	 * @param int $poll_id Poll being voted on.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function polls_lock_file( $poll_id ) {
 		/**
@@ -380,12 +386,12 @@ class WP_Polls_Vote {
 	}
 
 	/**
-	 * Vote poll process.
+	 * Record one vote, every guard included, and answer with the results markup.
 	 *
-	 * @param mixed $poll_id        Value.
-	 * @param mixed $poll_aid_array Optional.
+	 * @param int   $poll_id        Poll being voted on.
+	 * @param array $poll_aid_array Optional. Answer ids the visitor chose.
 	 *
-	 * @return mixed
+	 * @return string The rendered poll result.
 	 *
 	 * @throws InvalidArgumentException When the poll lock cannot be acquired, when an
 	 *                                  answer id does not belong to the poll, or when
@@ -618,12 +624,10 @@ class WP_Polls_Vote {
 		return WP_Polls_Display::display_pollresult( $poll_id, $poll_aid_array, false );
 	}
 
-	// Function: Vote Poll.
-
 	/**
-	 * Vote poll.
+	 * Serve the public polls AJAX endpoint: a vote, the results or the form.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function ajax_vote() {
 		global $wpdb, $user_identity, $user_ID;

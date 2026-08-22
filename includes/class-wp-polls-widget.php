@@ -37,12 +37,12 @@ class WP_Polls_Widget extends WP_Widget {
 	}
 
 	/**
-	 * Display Widget.
+	 * Render the widget.
 	 *
-	 * @param mixed $args     Value.
-	 * @param mixed $instance Value.
+	 * @param array $args     Sidebar markup arguments.
+	 * @param array $instance Stored widget settings.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		// An instance is not guaranteed to hold every key. the_widget() renders
@@ -67,12 +67,12 @@ class WP_Polls_Widget extends WP_Widget {
 	}
 
 	/**
-	 * When Widget Control Form Is Posted.
+	 * Sanitise a posted control form into the instance that is stored.
 	 *
-	 * @param mixed $new_instance Value.
-	 * @param mixed $old_instance Value.
+	 * @param array $new_instance What the control form posted.
+	 * @param array $old_instance The settings as they stand.
 	 *
-	 * @return mixed
+	 * @return array|false The instance to store, or false to keep the old one.
 	 */
 	public function update( $new_instance, $old_instance ) {
 		if ( ! isset( $new_instance['submit'] ) ) {
@@ -86,11 +86,11 @@ class WP_Polls_Widget extends WP_Widget {
 	}
 
 	/**
-	 * DIsplay Widget Control Form.
+	 * Render the control form.
 	 *
-	 * @param mixed $instance Value.
+	 * @param array $instance Stored widget settings.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public function form( $instance ) {
 		global $wpdb;

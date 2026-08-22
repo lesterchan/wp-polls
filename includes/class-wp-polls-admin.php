@@ -121,12 +121,10 @@ class WP_Polls_Admin {
 		return array_map( array( __CLASS__, 'hook_suffix' ), self::page_slugs() );
 	}
 
-	// Function: Poll Administration Menu.
-
 	/**
-	 * Poll menu.
+	 * Register the top level menu and its three screens.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function add_page() {
 		$capability = self::capability();
@@ -225,14 +223,12 @@ class WP_Polls_Admin {
 		);
 	}
 
-	// Function: Enqueue Polls Stylesheets/JavaScripts In WP-Admin.
-
 	/**
-	 * Poll scripts admin.
+	 * Enqueue the admin assets, on this plugin's screens only.
 	 *
-	 * @param mixed $hook_suffix Value.
+	 * @param string $hook_suffix Hook suffix of the screen being loaded.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function enqueue( $hook_suffix ) {
 		if ( in_array( $hook_suffix, self::admin_pages(), true ) ) {
@@ -319,12 +315,10 @@ class WP_Polls_Admin {
 		return $css;
 	}
 
-	// Function: Displays Polls Footer In WP-Admin.
-
 	/**
-	 * Poll footer admin.
+	 * Add the Poll button to the Classic Editor's text toolbar.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function poll_footer_admin() {
 		?>
@@ -342,12 +336,10 @@ class WP_Polls_Admin {
 		<?php
 	}
 
-	// Function: Add Quick Tag For Poll In TinyMCE >= WordPress 2.5.
-
 	/**
-	 * Poll tinymce addbuttons.
+	 * Hook the TinyMCE button up for users with the rich editor on.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function poll_tinymce_addbuttons() {
 		if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pages' ) ) {
@@ -361,11 +353,11 @@ class WP_Polls_Admin {
 	}
 
 	/**
-	 * Poll tinymce registerbutton.
+	 * Append the polls button to the TinyMCE toolbar.
 	 *
-	 * @param mixed $buttons Value.
+	 * @param array $buttons Toolbar button ids.
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public static function poll_tinymce_registerbutton( $buttons ) {
 		array_push( $buttons, 'separator', 'polls' );
@@ -373,11 +365,11 @@ class WP_Polls_Admin {
 	}
 
 	/**
-	 * Poll tinymce addplugin.
+	 * Register the TinyMCE plugin script behind the button.
 	 *
-	 * @param mixed $plugin_array Value.
+	 * @param array $plugin_array TinyMCE plugin scripts, keyed by plugin id.
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public static function poll_tinymce_addplugin( $plugin_array ) {
 		if ( WP_DEBUG ) {
@@ -389,11 +381,11 @@ class WP_Polls_Admin {
 	}
 
 	/**
-	 * Poll tinymce translation.
+	 * Translate the TinyMCE plugin's strings.
 	 *
-	 * @param mixed $mce_translation Value.
+	 * @param array $mce_translation Editor strings, keyed by the English text.
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public static function poll_tinymce_translation( $mce_translation ) {
 		$mce_translation['Enter Poll ID']                  = esc_js( __( 'Enter Poll ID', 'wp-polls' ) );
@@ -404,14 +396,14 @@ class WP_Polls_Admin {
 	}
 
 	/**
-	 * Edit Timestamp Options.
+	 * Render the six date and time selects the poll screens edit a timestamp with.
 	 *
-	 * @param mixed  $poll_timestamp Value.
+	 * @param int    $poll_timestamp Site-local timestamp the selects start from.
 	 * @param string $fieldname      Optional. Name prefix for the six selects.
 	 * @param bool   $hidden         Optional. Whether the group starts hidden,
 	 *                               which the checkbox beside it then toggles.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function poll_timestamp( $poll_timestamp, $fieldname = 'pollq_timestamp', $hidden = false ) {
 		global $month;
@@ -489,12 +481,10 @@ class WP_Polls_Admin {
 		echo '</div>' . "\n";
 	}
 
-	// Function: Manage Polls.
-
 	/**
-	 * Manage poll.
+	 * Serve the polls-admin AJAX endpoint behind the Manage Polls buttons.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function ajax_manage() {
 		global $wpdb;

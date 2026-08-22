@@ -94,8 +94,6 @@ class WP_Polls {
 		WP_CLI::add_command( 'polls', 'WP_Polls_Command' );
 	}
 
-	// Function: Enqueue Polls JavaScripts/CSS.
-
 	/**
 	 * Enqueue the front end assets, where the head can already see a poll coming.
 	 *
@@ -250,8 +248,6 @@ class WP_Polls {
 		wp_add_inline_style( 'wp-polls', $pollbar_css );
 	}
 
-	// Function: Short Code For Inserting Polls Archive Into Page.
-
 	/**
 	 * Poll page shortcode.
 	 *
@@ -266,14 +262,12 @@ class WP_Polls {
 		return WP_Polls_Display::polls_archive();
 	}
 
-	// Function: Short Code For Inserting Polls Into Posts.
-
 	/**
 	 * Poll shortcode.
 	 *
-	 * @param mixed $atts Value.
+	 * @param array|string $atts Shortcode attributes.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public static function poll_shortcode( $atts ) {
 		$attributes = shortcode_atts(
@@ -298,9 +292,9 @@ class WP_Polls {
 	}
 
 	/**
-	 * Place Cron.
+	 * Schedule the hourly job that opens and closes polls on time.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function cron_polls_place() {
 		wp_clear_scheduled_hook( 'polls_cron' );
@@ -309,12 +303,10 @@ class WP_Polls {
 		}
 	}
 
-	// Funcion: Check All Polls Status To Check If It Expires.
-
 	/**
-	 * Cron polls status.
+	 * Close expired polls and open scheduled ones, hourly.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function cron_polls_status() {
 		global $wpdb;
@@ -346,9 +338,9 @@ class WP_Polls {
 	}
 
 	/**
-	 * Get Latest Poll ID.
+	 * The id of the most recently opened poll.
 	 *
-	 * @return mixed
+	 * @return int
 	 */
 	public static function polls_latest_id() {
 		global $wpdb;
@@ -356,13 +348,10 @@ class WP_Polls {
 		return (int) $poll_id;
 	}
 
-	// Class: WP-Polls Widget
-	// Function: Init WP-Polls Widget.
-
 	/**
-	 * Widget polls init.
+	 * Register the Polls widget.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function register_widget() {
 		register_widget( 'WP_Polls_Widget' );
@@ -377,7 +366,7 @@ class WP_Polls {
 	 * <input type="color"> will show, so a value carried over from 2.x has to be
 	 * expanded before the field can display it.
 	 *
-	 * @param mixed $color Value.
+	 * @param string $color Colour as stored or posted, with or without the '#'.
 	 *
 	 * @return string Six hex digits, without a leading '#'.
 	 */
@@ -406,7 +395,7 @@ class WP_Polls {
 	 * Background setting. The gradient is a translucent overlay rather than a
 	 * fixed pair of colours, so it now shades whatever colour is configured.
 	 *
-	 * @param mixed $style Stored bar style.
+	 * @param string $style Stored bar style.
 	 *
 	 * @return string A CSS background-image value.
 	 */

@@ -21,24 +21,19 @@ class WP_Polls_Install {
 		add_action( 'admin_notices', array( __CLASS__, 'onclick_notice' ) );
 	}
 
-	// Function: Activate Plugin.
-
 	/**
-	 * Activation.
+	 * Activation hook: install every site the activation covers.
 	 *
-	 * @param mixed $network_wide Value.
+	 * @param bool $network_wide Whether the plugin is being activated network-wide.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function activate( $network_wide = false ) {
 		if ( is_multisite() && $network_wide ) {
-			// get_sites(), not the wp_get_sites() this used to call. That one has
-			// been deprecated since WP 4.6 and still ships in ms-deprecated.php,
-			// so the old call raised a deprecation notice rather than failing
-			// outright — and silently activated on only the first 100 sites,
-			// because that is its default limit. get_sites() returns WP_Site
-			// objects rather than arrays, and 'number' => 0 lifts the limit;
-			// 'fields' => 'ids' skips hydrating objects the loop never reads.
+			// get_sites(), not the wp_get_sites() this used to call: deprecated
+			// since WP 4.6, it still ships in ms-deprecated.php, so it raised a
+			// notice rather than failing outright while capped at 100 sites.
+			// 'number' => 0 lifts WP_Site_Query's default cap of 100, which would otherwise skip every site past the hundredth while reporting success.
 			$ms_site_ids = get_sites(
 				array(
 					'fields' => 'ids',
@@ -46,6 +41,7 @@ class WP_Polls_Install {
 				)
 			);
 
+			// Inside the loop: switch_to_blog() pushes onto a stack, so restoring once after the loop unwinds it by exactly one.
 			foreach ( $ms_site_ids as $ms_site_id ) {
 				switch_to_blog( (int) $ms_site_id );
 				self::install();
@@ -141,7 +137,7 @@ class WP_Polls_Install {
 	}
 
 	/**
-	 * Function: Move The Stored Poll Bar Onto The 3.0.0 Markup And Styles.
+	 * Move the stored poll bar onto the 3.0.0 markup and styles.
 	 *
 	 * The two result templates are replaced outright rather than patched, and
 	 * customised copies are not spared. The markup, the class names and the
@@ -151,7 +147,7 @@ class WP_Polls_Install {
 	 * had customised these gets the stock bar back and re-applies their changes;
 	 * the changelog and the upgrade notice both say so.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function upgrade_poll_bar() {
 		foreach ( array( 'resultbody', 'resultbody2' ) as $key ) {
@@ -177,9 +173,10 @@ class WP_Polls_Install {
 	}
 
 	/**
-	 * Function: Convert Inline onclick Handlers In The Footer Templates To data-poll-* Attributes.
+	 * Convert inline onclick handlers in the footer templates to data-poll-*
+	 * attributes.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function upgrade_templates_onclick() {
 		foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
@@ -202,16 +199,15 @@ class WP_Polls_Install {
 		}
 	}
 
-	// Function: Warn When A Poll Template Still Relies On An Inline onclick Handler
-	// Since 3.0.0 the scripts export nothing, so an onclick left behind by a
-	// customised template no longer calls anything at all. The upgrade converts
-	// the stock templates automatically; this covers the ones too customised to
-	// convert, which would otherwise fail silently on the front end.
-
 	/**
-	 * Onclick notice.
+	 * Warn when a poll template still relies on an inline onclick handler.
 	 *
-	 * @return mixed
+	 * Since 3.0.0 the scripts export nothing, so an onclick left behind by a
+	 * customised template no longer calls anything at all. The upgrade converts
+	 * the stock templates automatically; this covers the ones too customised to
+	 * convert, which would otherwise fail silently on the front end.
+	 *
+	 * @return void
 	 */
 	public static function onclick_notice() {
 		global $hook_suffix;
@@ -236,9 +232,9 @@ class WP_Polls_Install {
 	}
 
 	/**
-	 * Check Whether Any Poll Template Still Contains An Inline onclick Handler.
+	 * Whether any poll template still contains an inline onclick handler.
 	 *
-	 * @return mixed
+	 * @return bool
 	 */
 	public static function templates_have_onclick() {
 		foreach ( array( 'votefooter', 'resultfooter2' ) as $key ) {
@@ -272,15 +268,6 @@ class WP_Polls_Install {
 		);
 	}
 
-	/**
-	 * Remove every option row and drop the three tables for the current site.
-	 *
-	 * Before 3.0.0 the table drop was called from inside the loop over option
-	 * names, so it ran once per option rather than once per site - 36 times
-	 * over, issuing three DROP TABLE statements each.
-	 *
-	 * @return void
-	 */
 	/**
 	 * Grant the administrator role the capability the screens actually check.
 	 *
@@ -385,16 +372,16 @@ class WP_Polls_Install {
 	}
 
 	/**
-	 * Activate.
+	 * Install one site: the tables, the sample poll, the options, the
+	 * capability and the cron job.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public static function install() {
 		global $wpdb;
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-		// Create Poll Tables (3 Tables).
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$create_table            = array();
@@ -450,11 +437,10 @@ class WP_Polls_Install {
 				}
 			}
 		}
-		// Check Whether It is Install Or Upgrade.
+		// A fresh install gets the sample poll; a reactivation already has
+		// rows and must not gain a duplicate.
 		$first_poll = $wpdb->get_var( "SELECT pollq_id FROM $wpdb->pollsq LIMIT 1" );
-		// If Install, Insert 1st Poll Question With 5 Poll Answers.
 		if ( empty( $first_poll ) ) {
-			// Insert Poll Question (1 Record).
 			$insert_pollq = $wpdb->insert(
 				$wpdb->pollsq,
 				array(
@@ -464,7 +450,6 @@ class WP_Polls_Install {
 				array( '%s', '%s' )
 			);
 			if ( $insert_pollq ) {
-				// Insert Poll Answers  (5 Records).
 				$wpdb->insert(
 					$wpdb->pollsa,
 					array(
@@ -519,7 +504,8 @@ class WP_Polls_Install {
 			$wpdb->query( "UPDATE $wpdb->pollsq SET pollq_totalvoters = pollq_totalvotes" );
 		}
 
-		// Index.
+		// The explicit index work the dbDelta gate above points at: bring the
+		// vote log's indexes up to date whatever schema the site started on.
 		$index    = $wpdb->get_results( "SHOW INDEX FROM $wpdb->pollsip;" );
 		$key_name = array();
 		if ( count( $index ) > 0 ) {
@@ -536,12 +522,13 @@ class WP_Polls_Install {
 		if ( ! in_array( 'pollip_ip_qid_aid', $key_name, true ) ) {
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid_aid (pollip_ip, pollip_qid, pollip_aid);" );
 		}
-		// No longer needed index.
+		// Superseded by pollip_ip_qid_aid, which covers the same lookups.
 		if ( in_array( 'pollip_ip_qid', $key_name, true ) ) {
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip DROP INDEX pollip_ip_qid;" );
 		}
 
-		// Change column datatype for wp_pollsip.
+		// Very old installs stored these columns as varchar(10); the DESCRIBE
+		// detects that shape so the widening runs exactly once.
 		$col_pollip_qid = $wpdb->get_row( "DESCRIBE $wpdb->pollsip pollip_qid" );
 		if ( 'varchar(10)' === $col_pollip_qid->Type ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Column name returned by DESCRIBE.
 			$wpdb->query( "ALTER TABLE $wpdb->pollsip MODIFY COLUMN pollip_qid int(10) NOT NULL default '0';" );

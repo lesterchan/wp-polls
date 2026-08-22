@@ -325,7 +325,8 @@ class WP_Polls_Options {
 	 *
 	 * @param string $path    Dot separated path.
 	 * @param mixed  $fallback Returned when the path is absent.
-	 * @return mixed
+	 * @return mixed The stored value, or the fallback. Genuinely mixed: the
+	 *               structure holds strings, numbers, booleans and arrays.
 	 */
 	public static function get( $path, $fallback = null ) {
 		$value = self::all();
