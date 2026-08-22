@@ -51,7 +51,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 		delete_option( WP_Polls_Options::VERSION );
 		WP_Polls_Options::flush();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 
 		// Make the rebuild durable before the parent rolls back. See the file
 		// docblock for why skipping this poisons the next test file.
@@ -309,7 +309,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 		update_option( 'poll_cookielog_expiry', 604800 );
 		$this->forget_the_upgrade();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 
 		$after = array(
 			'pollsq'  => $wpdb->get_results( "SELECT * FROM {$wpdb->pollsq} ORDER BY pollq_id", ARRAY_A ),
@@ -329,7 +329,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 		$this->populate_legacy_data();
 		$this->forget_the_upgrade();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 
 		// The default "How Is My Site?" poll is for empty installs only. This
 		// fixture already has a poll by that name; a second one appearing means
@@ -346,7 +346,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 		$this->populate_legacy_data();
 		$this->forget_the_upgrade();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 
 		$names = $this->pollsip_index_names();
 
@@ -384,7 +384,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 		$this->populate_legacy_data();
 		$this->forget_the_upgrade();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 
 		$poll_id = (int) $wpdb->get_var( "SELECT pollq_id FROM {$wpdb->pollsq} WHERE pollq_active = 1 LIMIT 1" );
 		$answer  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT polla_aid FROM {$wpdb->pollsa} WHERE polla_qid = %d ORDER BY polla_aid LIMIT 1", $poll_id ) );
@@ -465,7 +465,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 
 		$this->forget_the_upgrade();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 
 		$qid_type = $wpdb->get_row( "DESCRIBE {$wpdb->pollsip} pollip_qid" )->Type;
 		$this->assertStringStartsWith( 'int', $qid_type, 'pollip_qid was not converted from varchar' );
@@ -528,7 +528,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 
 		$this->forget_the_upgrade();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 
 		$this->assertSame(
 			array( '7', '4' ),
@@ -563,7 +563,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 
 		$this->forget_the_upgrade();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 
 		$this->assertSame(
 			array( '6', '0' ),
@@ -579,13 +579,13 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 		$this->populate_legacy_data();
 		$this->forget_the_upgrade();
 
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 		$first = $wpdb->get_results( "SELECT * FROM {$wpdb->pollsq} ORDER BY pollq_id", ARRAY_A );
 
 		// Users deactivate and reactivate plugins to "fix" things constantly.
 		// The second activation meets a fully migrated install and must be a
 		// bystander.
-		WP_Polls_Install::activate();
+		WP_Polls_Install::install();
 		$second = $wpdb->get_results( "SELECT * FROM {$wpdb->pollsq} ORDER BY pollq_id", ARRAY_A );
 
 		$this->assertSame( $first, $second, 'a second activation changed poll rows' );

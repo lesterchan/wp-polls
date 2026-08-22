@@ -18,7 +18,7 @@ class WP_Polls_Install {
 	 * @return void
 	 */
 	public static function init() {
-		register_activation_hook( WP_POLLS_MAIN_FILE, array( __CLASS__, 'activation' ) );
+		register_activation_hook( WP_POLLS_MAIN_FILE, array( __CLASS__, 'activate' ) );
 		add_action( 'admin_init', array( __CLASS__, 'upgrade' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'onclick_notice' ) );
 	}
@@ -32,7 +32,7 @@ class WP_Polls_Install {
 	 *
 	 * @return mixed
 	 */
-	public static function activation( $network_wide ) {
+	public static function activate( $network_wide = false ) {
 		if ( is_multisite() && $network_wide ) {
 			// get_sites(), not the wp_get_sites() this used to call. That one has
 			// been deprecated since WP 4.6 and still ships in ms-deprecated.php,
@@ -50,11 +50,11 @@ class WP_Polls_Install {
 
 			foreach ( $ms_site_ids as $ms_site_id ) {
 				switch_to_blog( (int) $ms_site_id );
-				self::activate();
+				self::install();
 				restore_current_blog();
 			}
 		} else {
-			self::activate();
+			self::install();
 		}
 	}
 
@@ -88,7 +88,7 @@ class WP_Polls_Install {
 		// when there is nothing left to fold in.
 		$stored = get_option( WP_Polls_Options::OPTION, array() );
 		if ( $is_pre_3 || ! is_array( $stored ) || ! isset( $stored['templates'] ) ) {
-			WP_Polls_Options::migrate_from_legacy_rows();
+			WP_Polls_Options::migrate_legacy_rows();
 		}
 
 		// Version 3.0.0: the poll bar became a track holding a fill, styled from
@@ -107,7 +107,7 @@ class WP_Polls_Install {
 		if ( WP_POLLS_VERSION !== $markers['plugin'] || WP_POLLS_DB_VERSION !== $markers['db'] ) {
 			// Both markers in one write, at the end, so a half finished upgrade
 			// never records itself as complete.
-			WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
+			WP_Polls_Options::update_markers();
 		}
 	}
 
@@ -358,7 +358,7 @@ class WP_Polls_Install {
 	 *
 	 * @return mixed
 	 */
-	public static function activate() {
+	public static function install() {
 		global $wpdb;
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';

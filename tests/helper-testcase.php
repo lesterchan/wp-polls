@@ -34,7 +34,7 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 		// Both markers up to date, so a test that does not care about upgrading
 		// starts from a fully migrated install rather than one the next call to
 		// WP_Polls_Install::upgrade() would migrate underneath it.
-		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
+		WP_Polls_Options::update_markers();
 
 		$this->reset_statics();
 	}

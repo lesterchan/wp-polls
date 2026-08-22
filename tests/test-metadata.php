@@ -103,7 +103,7 @@ class WP_Polls_Metadata_Test extends Plugin_Metadata_TestCase {
 	 */
 	protected function seed_option_rows() {
 		WP_Polls_Options::save( WP_Polls_Options::defaults() );
-		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
+		WP_Polls_Options::update_markers();
 	}
 
 	/**
@@ -112,7 +112,7 @@ class WP_Polls_Metadata_Test extends Plugin_Metadata_TestCase {
 	 * @return void
 	 */
 	protected function write_version_row() {
-		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
+		WP_Polls_Options::update_markers();
 	}
 
 	/**
@@ -147,8 +147,8 @@ class WP_Polls_Metadata_Test extends Plugin_Metadata_TestCase {
 	protected function register_plugin_assets() {
 		$GLOBALS['post'] = get_post( self::factory()->post->create( array( 'post_content' => '[poll]' ) ) );
 
-		WP_Polls::poll_scripts();
-		WP_Polls_Admin::poll_scripts_admin( WP_Polls_Admin::hook_suffix( WP_Polls_Admin::PAGE ) );
+		WP_Polls::scripts();
+		WP_Polls_Admin::enqueue( WP_Polls_Admin::hook_suffix( WP_Polls_Admin::PAGE ) );
 	}
 
 	/**

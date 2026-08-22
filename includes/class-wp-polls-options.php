@@ -241,18 +241,17 @@ class WP_Polls_Options {
 	 * Record both markers in one write.
 	 *
 	 * Together rather than one at a time, so a half finished upgrade never
-	 * records itself as complete.
+	 * records itself as complete. Always the two constants: the only thing
+	 * ever recorded is "this install is now current".
 	 *
-	 * @param string $plugin Plugin version just brought up to date.
-	 * @param string $db     Schema version just brought up to date.
 	 * @return bool
 	 */
-	public static function save_markers( $plugin, $db ) {
+	public static function update_markers() {
 		return update_option(
 			self::VERSION,
 			array(
-				'plugin' => (string) $plugin,
-				'db'     => (string) $db,
+				'plugin' => WP_POLLS_VERSION,
+				'db'     => WP_POLLS_DB_VERSION,
 			)
 		);
 	}
@@ -448,7 +447,7 @@ class WP_Polls_Options {
 	 *
 	 * @return void
 	 */
-	public static function migrate_from_legacy_rows() {
+	public static function migrate_legacy_rows() {
 		// Start from whatever is already stored, not from the defaults. The
 		// version gate is the primary guard, but it is not sufficient on its
 		// own: an install whose marker row is missing while wp_polls_options

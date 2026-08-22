@@ -18,8 +18,8 @@ class WP_Polls_Vote {
 	 * @return void
 	 */
 	public static function init() {
-		add_action( 'wp_ajax_polls', array( __CLASS__, 'vote_poll' ) );
-		add_action( 'wp_ajax_nopriv_polls', array( __CLASS__, 'vote_poll' ) );
+		add_action( 'wp_ajax_polls', array( __CLASS__, 'ajax_vote' ) );
+		add_action( 'wp_ajax_nopriv_polls', array( __CLASS__, 'ajax_vote' ) );
 	}
 
 	/**
@@ -625,7 +625,7 @@ class WP_Polls_Vote {
 	 *
 	 * @return mixed
 	 */
-	public static function vote_poll() {
+	public static function ajax_vote() {
 		global $wpdb, $user_identity, $user_ID;
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The endpoint calls check_ajax_referer() above before reaching this switch.

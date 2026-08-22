@@ -51,13 +51,13 @@ class WP_Polls_Admin {
 	 * @return void
 	 */
 	public static function init() {
-		add_action( 'admin_menu', array( __CLASS__, 'poll_menu' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'poll_scripts_admin' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'add_page' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue' ) );
 		foreach ( array( 'post-new.php', 'post.php', 'page-new.php', 'page.php' ) as $screen ) {
 			add_action( 'admin_footer-' . $screen, array( __CLASS__, 'poll_footer_admin' ) );
 		}
 		add_action( 'init', array( __CLASS__, 'poll_tinymce_addbuttons' ) );
-		add_action( 'wp_ajax_polls-admin', array( __CLASS__, 'manage_poll' ) );
+		add_action( 'wp_ajax_polls-admin', array( __CLASS__, 'ajax_manage' ) );
 	}
 
 	/**
@@ -128,7 +128,7 @@ class WP_Polls_Admin {
 	 *
 	 * @return mixed
 	 */
-	public static function poll_menu() {
+	public static function add_page() {
 		$capability = self::capability();
 		$menu_title = self::menu_title();
 
@@ -234,7 +234,7 @@ class WP_Polls_Admin {
 	 *
 	 * @return mixed
 	 */
-	public static function poll_scripts_admin( $hook_suffix ) {
+	public static function enqueue( $hook_suffix ) {
 		if ( in_array( $hook_suffix, self::admin_pages(), true ) ) {
 			wp_enqueue_style( 'wp-polls-admin', WP_POLLS_URL . 'css/wp-polls-admin.css', array(), WP_POLLS_VERSION );
 			// The Settings tab previews the bar using the real front end
@@ -496,7 +496,7 @@ class WP_Polls_Admin {
 	 *
 	 * @return mixed
 	 */
-	public static function manage_poll() {
+	public static function ajax_manage() {
 		global $wpdb;
 
 		// Every branch below is an administrative action. The per-action nonces are

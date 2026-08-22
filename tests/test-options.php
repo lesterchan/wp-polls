@@ -178,7 +178,7 @@ class WP_Polls_Options_Test extends WP_Polls_TestCase {
 	public function test_migration_handles_install_stamped_with_current_version() {
 		delete_option( WP_Polls_Options::OPTION );
 		WP_Polls_Options::flush();
-		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
+		WP_Polls_Options::update_markers();
 		update_option( 'poll_archive_perpage', 23 );
 
 		WP_Polls_Install::upgrade();

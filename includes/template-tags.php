@@ -242,6 +242,6 @@ if ( ! function_exists( 'vote_poll' ) ) {
 	 * @return mixed
 	 */
 	function vote_poll() {
-		WP_Polls_Vote::vote_poll();
+		WP_Polls_Vote::ajax_vote();
 	}
 }

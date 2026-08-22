@@ -18,7 +18,7 @@
  * correct against a default-valued fixture.
  *
  * @covers WP_Polls_Install::upgrade
- * @covers WP_Polls_Options::migrate_from_legacy_rows
+ * @covers WP_Polls_Options::migrate_legacy_rows
  */
 class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 
@@ -430,7 +430,15 @@ class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 		$this->make_legacy_install();
 
 		delete_option( WP_Polls_Options::OPTION );
-		WP_Polls_Options::save_markers( '3.0.0', WP_POLLS_DB_VERSION );
+		// Written raw: update_markers() only ever stamps the current version,
+		// and this fixture needs the stale 3.0.0 stamp the dev branch left.
+		update_option(
+			WP_Polls_Options::VERSION,
+			array(
+				'plugin' => '3.0.0',
+				'db'     => WP_POLLS_DB_VERSION,
+			)
+		);
 		update_option( 'poll_archive_perpage', 23 );
 		update_option( 'poll_template_disable', 'DEV BRANCH TEXT' );
 		WP_Polls_Options::flush();
@@ -448,7 +456,7 @@ class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 	 */
 	public function test_already_migrated_install_is_untouched() {
 		WP_Polls_Options::set( 'archive.per_page', 42 );
-		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
+		WP_Polls_Options::update_markers();
 
 		$this->run_upgrade();
 
@@ -624,7 +632,7 @@ class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 			)
 		);
 
-		WP_Polls_Options::migrate_from_legacy_rows();
+		WP_Polls_Options::migrate_legacy_rows();
 		WP_Polls_Options::flush();
 
 		$this->assertSame( 4, (int) WP_Polls_Options::get( 'check_method' ), 'the beta key was not carried into check_method' );

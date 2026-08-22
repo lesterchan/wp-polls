@@ -11,8 +11,8 @@
  * @covers WP_Polls_Vote::polls_acquire_lock
  * @covers WP_Polls_Vote::polls_release_lock
  * @covers WP_Polls_Vote::polls_lock_file
- * @covers WP_Polls_Install::activation
- * @covers WP_Polls::poll_scripts
+ * @covers WP_Polls_Install::activate
+ * @covers WP_Polls::scripts
  */
 class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
@@ -218,7 +218,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 
 		get_role( 'administrator' )->remove_cap( 'manage_polls' );
 
-		WP_Polls_Install::activation( false );
+		WP_Polls_Install::activate( false );
 
 		foreach ( array( 'pollsq', 'pollsa', 'pollsip' ) as $table ) {
 			$name = $wpdb->$table;
@@ -260,7 +260,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$role = get_role( 'administrator' );
 		$role->remove_cap( $filtered );
 
-		WP_Polls_Install::activation( false );
+		WP_Polls_Install::activate( false );
 
 		$role = get_role( 'administrator' );
 
@@ -332,7 +332,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$role->remove_cap( 'manage_polls' );
 		$this->assertFalse( get_role( 'administrator' )->has_cap( 'manage_polls' ), 'The capability is absent to begin with, or the grant below proves nothing.' );
 
-		WP_Polls_Install::activation( true );
+		WP_Polls_Install::activate( true );
 
 		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ), 'Network activation on a single site still grants the capability.' );
 	}
@@ -343,8 +343,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_activation_is_idempotent() {
-		WP_Polls_Install::activation( false );
-		WP_Polls_Install::activation( false );
+		WP_Polls_Install::activate( false );
+		WP_Polls_Install::activate( false );
 
 		$this->assertTrue( get_role( 'administrator' )->has_cap( 'manage_polls' ), 'Activating twice leaves the capability granted rather than doubled or lost.' );
 	}
@@ -381,14 +381,14 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_poll_scripts_emits_the_bar_custom_properties() {
+	public function test_scripts_emits_the_bar_custom_properties() {
 		WP_Polls_Options::set( 'bar.style', 'flat' );
 		WP_Polls_Options::set( 'bar.height', 12 );
 		WP_Polls_Options::set( 'bar.background', 'ff0000' );
 		WP_Polls_Options::set( 'bar.border', '00ff00' );
 		$this->shape_a_poll_page( '[poll]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
@@ -404,11 +404,11 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_poll_scripts_emits_the_gradient_without_an_image() {
+	public function test_scripts_emits_the_gradient_without_an_image() {
 		WP_Polls_Options::set( 'bar.style', 'gradient' );
 		$this->shape_a_poll_page( '[poll]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
@@ -430,7 +430,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'bar.background', 'ff0000' );
 		$this->shape_a_poll_page( '[poll]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
@@ -446,13 +446,13 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_poll_scripts_sanitises_the_bar_colours() {
+	public function test_scripts_sanitises_the_bar_colours() {
 		WP_Polls_Options::set( 'bar.style', 'flat' );
 		WP_Polls_Options::set( 'bar.background', 'red; } body { display: none; } .x {' );
 		WP_Polls_Options::set( 'bar.height', 8 );
 		$this->shape_a_poll_page( '[poll]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
 
@@ -472,7 +472,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_one_stylesheet_serves_both_directions() {
 		$this->shape_a_poll_page( '[poll]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The one stylesheet is enqueued whichever direction the site reads.' );
 		$this->assertFalse( wp_style_is( 'wp-polls-rtl', 'enqueued' ), 'the RTL handle is back' );
@@ -528,12 +528,12 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_poll_scripts_localises_without_jquery() {
+	public function test_scripts_localises_without_jquery() {
 		WP_Polls_Options::set( 'ajax.loading', 1 );
 		WP_Polls_Options::set( 'ajax.fading', 0 );
 		$this->shape_a_poll_page( '[poll]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'The vote script is enqueued without jQuery being pulled in.' );
 		$this->assertSame( array(), wp_scripts()->registered['wp-polls']->deps, 'jQuery is back' );
@@ -560,7 +560,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_a_page_without_a_poll_gets_neither_asset() {
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 		WP_Polls::footer_scripts();
 
 		$this->assertFalse( wp_style_is( 'wp-polls', 'enqueued' ), 'A page showing no poll still carries the stylesheet.' );
@@ -575,7 +575,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_a_post_holding_the_poll_shortcode_enqueues_both_assets() {
 		$this->shape_a_poll_page( '[poll]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The poll shortcode is a reason to load the stylesheet.' );
 		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'And the vote script.' );
@@ -589,7 +589,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_a_post_holding_the_archive_shortcode_enqueues_both_assets() {
 		$this->shape_a_poll_page( '[page_polls]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The archive shortcode is a reason to load the stylesheet.' );
 		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'And the vote script: View Results on an archived poll votes over AJAX.' );
@@ -606,7 +606,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_a_post_holding_a_poll_block_enqueues_both_assets() {
 		$this->shape_a_poll_page( '<!-- wp:wp-polls/poll {"id":1} /-->' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The Poll block is a reason to load the stylesheet.' );
 		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'And the vote script.' );
@@ -615,7 +615,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$GLOBALS['wp_styles']  = null;
 		$this->shape_a_poll_page( '<!-- wp:wp-polls/page-polls /-->' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The Polls Archive block is a reason to load the stylesheet.' );
 		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'And the vote script.' );
@@ -635,7 +635,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		WP_Polls_Options::set( 'latest_poll', $poll_id );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 
 		$this->assertFalse( wp_style_is( 'wp-polls', 'enqueued' ), 'The head pass enqueued before anything rendered a poll.' );
 
@@ -694,7 +694,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		$poll_id = $this->make_poll();
 		$this->shape_a_poll_page( '[poll]' );
 
-		WP_Polls::poll_scripts();
+		WP_Polls::scripts();
 		WP_Polls_Display::get_poll( $poll_id, false );
 		WP_Polls::footer_scripts();
 

@@ -353,7 +353,7 @@ class WP_Polls_REST_API_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_the_ajax_endpoint_is_still_registered() {
-		$this->assertNotFalse( has_action( 'wp_ajax_polls', array( 'WP_Polls_Vote', 'vote_poll' ) ), 'The logged-in AJAX action survives the REST routes.' );
-		$this->assertNotFalse( has_action( 'wp_ajax_nopriv_polls', array( 'WP_Polls_Vote', 'vote_poll' ) ), 'And so does the logged-out one.' );
+		$this->assertNotFalse( has_action( 'wp_ajax_polls', array( 'WP_Polls_Vote', 'ajax_vote' ) ), 'The logged-in AJAX action survives the REST routes.' );
+		$this->assertNotFalse( has_action( 'wp_ajax_nopriv_polls', array( 'WP_Polls_Vote', 'ajax_vote' ) ), 'And so does the logged-out one.' );
 	}
 }

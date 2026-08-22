@@ -18,11 +18,11 @@ class WP_Polls {
 	 * @return void
 	 */
 	public static function init() {
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'poll_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'scripts' ) );
 		// Priority 10, ahead of core printing footer scripts and late styles at 20.
 		add_action( 'wp_footer', array( __CLASS__, 'footer_scripts' ) );
 		add_action( 'enqueue_block_assets', array( __CLASS__, 'block_editor_styles' ) );
-		add_action( 'widgets_init', array( __CLASS__, 'widget_polls_init' ) );
+		add_action( 'widgets_init', array( __CLASS__, 'register_widget' ) );
 		add_action( 'polls_cron', array( __CLASS__, 'cron_polls_status' ) );
 		add_shortcode( 'page_polls', array( __CLASS__, 'poll_page_shortcode' ) );
 		add_shortcode( 'poll', array( __CLASS__, 'poll_shortcode' ) );
@@ -63,7 +63,7 @@ class WP_Polls {
 	 *
 	 * @return void
 	 */
-	public static function poll_scripts() {
+	public static function scripts() {
 		if ( ! self::needs_assets() ) {
 			return;
 		}
@@ -124,7 +124,7 @@ class WP_Polls {
 			return;
 		}
 
-		self::poll_styles();
+		self::styles();
 
 		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'js/wp-polls.js', array(), WP_POLLS_VERSION, true );
 		wp_localize_script(
@@ -165,18 +165,18 @@ class WP_Polls {
 			return;
 		}
 
-		self::poll_styles();
+		self::styles();
 	}
 
 	/**
 	 * Register and enqueue the stylesheet, with the bar's custom properties.
 	 *
-	 * Split out of poll_scripts() so the block editor can have the styles
+	 * Split out of scripts() so the block editor can have the styles
 	 * without the script.
 	 *
 	 * @return void
 	 */
-	public static function poll_styles() {
+	public static function styles() {
 		if ( file_exists( get_stylesheet_directory() . '/wp-polls.css' ) ) {
 			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/wp-polls.css', array(), WP_POLLS_VERSION );
 		} else {
@@ -315,7 +315,7 @@ class WP_Polls {
 	 *
 	 * @return mixed
 	 */
-	public static function widget_polls_init() {
+	public static function register_widget() {
 		register_widget( 'WP_Polls_Widget' );
 	}
 

@@ -13,7 +13,7 @@
  *
  * @group ms-required
  *
- * @covers WP_Polls_Install::activation
+ * @covers WP_Polls_Install::activate
  */
 class WP_Polls_Multisite_Test extends WP_Polls_TestCase {
 
@@ -70,7 +70,7 @@ class WP_Polls_Multisite_Test extends WP_Polls_TestCase {
 
 		$site_ids = $this->seed_network( 2 );
 
-		WP_Polls_Install::activation( true );
+		WP_Polls_Install::activate( true );
 
 		foreach ( $site_ids as $blog_id ) {
 			switch_to_blog( $blog_id );
@@ -98,7 +98,7 @@ class WP_Polls_Multisite_Test extends WP_Polls_TestCase {
 		$site_ids = $this->seed_network( 1 );
 		$other    = $site_ids[0];
 
-		WP_Polls_Install::activation( false );
+		WP_Polls_Install::activate( false );
 
 		switch_to_blog( $other );
 		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->pollsq ) );
@@ -127,7 +127,7 @@ class WP_Polls_Multisite_Test extends WP_Polls_TestCase {
 			}
 		);
 
-		WP_Polls_Install::activation( true );
+		WP_Polls_Install::activate( true );
 
 		$this->assertNotEmpty( $captured, 'Activation never queried the site list.' );
 		$this->assertSame( 0, (int) $captured[0]['number'], 'get_sites() was left at its default cap of 100 sites.' );
@@ -147,7 +147,7 @@ class WP_Polls_Multisite_Test extends WP_Polls_TestCase {
 		$original = get_current_blog_id();
 		$this->seed_network( 2 );
 
-		WP_Polls_Install::activation( true );
+		WP_Polls_Install::activate( true );
 
 		$this->assertFalse( ms_is_switched(), 'The blog stack was left switched.' );
 		$this->assertSame( $original, get_current_blog_id(), 'The original site is no longer current.' );

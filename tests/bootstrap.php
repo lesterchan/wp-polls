@@ -29,7 +29,7 @@ function _wp_polls_manually_load_plugin() {
 	require dirname( __DIR__ ) . '/wp-polls.php';
 	// register_activation_hook() never fires in the test environment, so the
 	// tables and the option row have to be created by hand.
-	WP_Polls_Install::activate();
+	WP_Polls_Install::install();
 }
 tests_add_filter( 'muplugins_loaded', '_wp_polls_manually_load_plugin' );
 
