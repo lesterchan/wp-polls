@@ -234,7 +234,7 @@ The **Result Body** and **Result Body (Voted)** templates are rewritten to that 
 on upgrade, *including customised ones*. There was no way to keep them: the class names
 and the stylesheet changed with the markup, so a customised copy of the old template
 would have rendered a bar with no rules left to match it. Re-apply your changes on
-**Poll Templates**, keeping the two `wp-polls-bar` elements.
+the **Templates** tab, keeping the two `wp-polls-bar` elements.
 
 If you re-add a bar by hand, use `%POLL_ANSWER_PERCENTAGE%` for the width.
 `%POLL_ANSWER_IMAGEWIDTH%` was removed in 3.0.0 and is no longer substituted, so a
@@ -310,7 +310,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 * FIXED: XSS in the Poll Templates screen. Inline `onclick` handlers are replaced by `data-poll-action` / `data-poll-id` attributes and `onclick` is no longer an allowed attribute in poll templates.
 * FIXED: On multisite, uninstall called `restore_current_blog()` once after the loop rather than once per site. `switch_to_blog()` pushes onto a stack, so the stack was left unwound by every site but the first.
 * FIXED: On uninstall the three poll tables were dropped from inside the loop over option rows, so the drop ran 36 times per site and issued three `DROP TABLE` statements each instead of three in total.
-* CHANGED: Uninstall asks `get_sites()` for IDs only rather than hydrating a `WP_Site` object per site, and its table-dropping helper is now prefixed `wp_polls_uninstall_site()` instead of occupying the unprefixed global name `plugin_uninstalled()`.
+* CHANGED: Uninstall asks `get_sites()` for IDs only rather than hydrating a `WP_Site` object per site, and the table-dropping work now lives on `WP_Polls_Install::uninstall_site()` instead of occupying the unprefixed global name `plugin_uninstalled()`.
 * FIXED: Network activating on multisite was a fatal error. The activation routine called `wp_get_sites()`, which WordPress removed in 5.1.
 * FIXED: On multisite the three poll tables were not registered with `$wpdb`, so any query made inside `switch_to_blog()` read and wrote the wrong site's polls.
 * FIXED: Adding or removing a poll answer in wp-admin no longer breaks. It called jQuery's `.size()`, which was removed in jQuery 3.
@@ -326,7 +326,7 @@ be. That class no longer exists, so the old snippet colours nothing.
 * FIXED: Activation looked for `wp-admin/upgrade-functions.php`, which WordPress removed in 2.x, and stopped with an error message if it found neither that nor the current file.
 * FIXED: Poll Options could offer a poll bar style that saving then rejected, reverting it while still reporting "Settings saved." The screen and the sanitiser now build the list of available styles the same way.
 * FIXED: Every stylesheet, script and image URL was built from a hardcoded `wp-polls/` path, so renaming the plugin directory left WP-Polls loading none of its own assets. All paths now come from the plugin file itself.
-* CHANGED: Poll Options and Poll Templates now use the WordPress Settings API instead of hand-rolled form handling. Every row on both screens is registered with `add_settings_section()` and `add_settings_field()` and rendered by `do_settings_sections()`, so the screens look and behave like the rest of wp-admin and neither one writes any table markup of its own.
+* CHANGED: The Settings and Templates tabs now use the WordPress Settings API instead of hand-rolled form handling. Every row on both tabs is registered with `add_settings_section()` and `add_settings_field()` and rendered by `do_settings_sections()`, so the screens look and behave like the rest of wp-admin and neither one writes any table markup of its own.
 * CHANGED: Poll Bar Background and Poll Bar Border are colour pickers now - the browser's own colour input, the same control WP-Postratings uses - rather than six character text fields with a `#` printed beside them and a swatch kept in step by JavaScript. The bar preview follows the colour as it is picked. The setting is still stored as the six digits without the `#`, so a theme or filter reading it sees what it always did; a three digit value left over from 2.x is expanded to six on the way out, because a colour input will not display `#abc`.
 * CHANGED: Manage Polls is now a `WP_List_Table`, so it paginates at 20 polls a page, sorts on ID, Total Voters and Start Date, and puts Edit, Logs and Delete in hover row actions instead of three columns of links. The poll the site is currently showing is still highlighted.
 * CHANGED: Add Poll, Edit Poll and Poll Logs are built out of the standard wp-admin furniture - `form-table` rows with real labels, `submit_button()`, `notice` messages, and one `h1` per screen - rather than tables laid out with `width`, `valign` and `align` attributes. The Cancel buttons are links back to Manage Polls instead of a `history.go(-1)` that could not be middle-clicked or opened in a new tab.

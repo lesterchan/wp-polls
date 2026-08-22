@@ -2,7 +2,7 @@
 /**
  * The one WP-Polls settings screen.
  *
- * Poll Options and Poll Templates are two tabs of it rather than two submenu
+ * Settings and Templates are two tabs of it rather than two submenu
  * entries: they are one setting, posted by one form, and the standard allows a
  * plugin's settings exactly one page. Every row on both tabs is declared in
  * WP_Polls_Settings as a section and a field, so all this screen does is draw
