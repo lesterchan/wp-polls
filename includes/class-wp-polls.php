@@ -1,6 +1,7 @@
 <?php
 /**
- * Front end wiring: assets, shortcodes and the scheduled poll-closing job.
+ * The bootstrap, plus the front end: assets, shortcodes and the scheduled
+ * poll-closing job.
  *
  * @package WP-Polls
  */
@@ -8,16 +9,28 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Boots the front end side of the plugin.
+ * Boots the plugin and owns the front end hooks.
  */
 class WP_Polls {
 
 	/**
-	 * Hook registration.
+	 * Boot the plugin: the tables, the hooks and every component.
+	 *
+	 * Called once from wp-polls.php, at file load, which is what lets the
+	 * activation hook below be registered here.
 	 *
 	 * @return void
 	 */
 	public static function init() {
+		self::register_table();
+
+		// Must be registered at file-load time, which is when this runs.
+		register_activation_hook( WP_POLLS_MAIN_FILE, array( 'WP_Polls_Install', 'activate' ) );
+		// On init rather than admin_init, so an automatic background update --
+		// a cron request, not an admin one -- is migrated as soon as it serves
+		// anything at all rather than when somebody next logs in.
+		add_action( 'init', array( 'WP_Polls_Install', 'upgrade' ), 5 );
+
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'scripts' ) );
 		// Priority 10, ahead of core printing footer scripts and late styles at 20.
 		add_action( 'wp_footer', array( __CLASS__, 'footer_scripts' ) );
@@ -27,7 +40,38 @@ class WP_Polls {
 		add_shortcode( 'page_polls', array( __CLASS__, 'poll_page_shortcode' ) );
 		add_shortcode( 'poll', array( __CLASS__, 'poll_shortcode' ) );
 
+		WP_Polls_Install::init();
+		WP_Polls_Vote::init();
+		WP_Polls_Display::init();
+		WP_Polls_Admin::init();
+		WP_Polls_WPStats::init();
+		WP_Polls_Settings::init();
+		WP_Polls_Blocks::init();
+
+		new WP_Polls_API();
+
 		self::register_command();
+	}
+
+	/**
+	 * Register the three poll tables with $wpdb.
+	 *
+	 * The tables[] entry is what makes the names survive switch_to_blog():
+	 * wpdb::set_blog_id() rebuilds every registered table name against the new
+	 * prefix, while a bare assignment keeps pointing at the site that happened
+	 * to be current when this file loaded.
+	 *
+	 * @return void
+	 */
+	private static function register_table() {
+		global $wpdb;
+
+		foreach ( array( 'pollsq', 'pollsa', 'pollsip' ) as $poll_table ) {
+			if ( ! in_array( $poll_table, $wpdb->tables, true ) ) {
+				$wpdb->tables[] = $poll_table;
+			}
+			$wpdb->$poll_table = $wpdb->prefix . $poll_table;
+		}
 	}
 
 	/**
@@ -177,8 +221,13 @@ class WP_Polls {
 	 * @return void
 	 */
 	public static function styles() {
+		// The theme may override the stylesheet with its own wp-polls.css: the
+		// child theme is looked in first, then the parent, then the plugin's
+		// copy -- so a child theme inherits its parent's override.
 		if ( file_exists( get_stylesheet_directory() . '/wp-polls.css' ) ) {
 			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/wp-polls.css', array(), WP_POLLS_VERSION );
+		} elseif ( file_exists( get_template_directory() . '/wp-polls.css' ) ) {
+			wp_enqueue_style( 'wp-polls', get_template_directory_uri() . '/wp-polls.css', array(), WP_POLLS_VERSION );
 		} else {
 			wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'css/wp-polls.css', array(), WP_POLLS_VERSION );
 		}

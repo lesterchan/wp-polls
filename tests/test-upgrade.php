@@ -74,7 +74,7 @@ class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * Run the upgrade the way admin_init does.
+	 * Run the upgrade the way the init hook does.
 	 *
 	 * @return void
 	 */
@@ -113,18 +113,18 @@ class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 	}
 
 	/**
-	 * Run the upgrade on the far side of register_setting(), as admin_init does.
+	 * Run the upgrade on the far side of register_setting().
 	 *
-	 * WP_Polls_Install::init() and WP_Polls_Settings::init() both hook
-	 * admin_init at priority 10, so which of them runs first is decided by the
-	 * order of two adjacent lines in wp-polls.php. Registering first is the
-	 * harder ordering and the one this plugin does *not* currently get, so it is
-	 * the one worth pinning: it is the only arrangement under which the
-	 * default_option_wp_polls_options filter is live while the migration writes.
+	 * The upgrade runs on init at priority 5 and WP_Polls_Settings::register()
+	 * on admin_init, so in production the migration always goes first.
+	 * Registering first is the harder ordering and the one this plugin never
+	 * gets, so it is the one worth pinning: it is the only arrangement under
+	 * which the default_option_wp_polls_options filter is live while the
+	 * migration writes.
 	 *
 	 * @return void
 	 */
-	private function run_upgrade_on_admin_init() {
+	private function run_upgrade_after_register_setting() {
 		WP_Polls_Settings::register();
 
 		$this->run_upgrade();
@@ -151,7 +151,7 @@ class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 
 		$this->assertFalse( get_option( WP_Polls_Options::OPTION, false ), 'The fixture is only pre-migration if the consolidated row is genuinely absent.' );
 
-		$this->run_upgrade_on_admin_init();
+		$this->run_upgrade_after_register_setting();
 
 		$this->assertIsArray( get_option( WP_Polls_Options::OPTION, false ), 'The migration must write the consolidated row even when its result equals the shipped defaults.' );
 	}
@@ -167,7 +167,7 @@ class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 	 */
 	public function test_a_stock_install_keeps_its_settings_through_the_migration() {
 		$this->make_stock_legacy_install();
-		$this->run_upgrade_on_admin_init();
+		$this->run_upgrade_after_register_setting();
 
 		$stored = get_option( WP_Polls_Options::OPTION, false );
 

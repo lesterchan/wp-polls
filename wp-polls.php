@@ -55,41 +55,19 @@ define( 'WP_POLLS_URL', plugin_dir_url( __FILE__ ) );
 
 // Classes. Required at file load because the activation hook and the option
 // accessor are both reached before any action fires.
-require_once __DIR__ . '/includes/class-wp-polls-template.php';
-require_once __DIR__ . '/includes/class-wp-polls-options.php';
-require_once __DIR__ . '/includes/class-wp-polls-poll.php';
-require_once __DIR__ . '/includes/class-wp-polls-api.php';
-require_once __DIR__ . '/includes/class-wp-polls-blocks.php';
-require_once __DIR__ . '/includes/class-wp-polls-settings.php';
-require_once __DIR__ . '/includes/class-wp-polls-widget.php';
-require_once __DIR__ . '/includes/class-wp-polls-install.php';
-require_once __DIR__ . '/includes/class-wp-polls-vote.php';
-require_once __DIR__ . '/includes/class-wp-polls-display.php';
-require_once __DIR__ . '/includes/class-wp-polls-admin.php';
-require_once __DIR__ . '/includes/class-wp-polls-wpstats.php';
-require_once __DIR__ . '/includes/class-wp-polls.php';
-require_once __DIR__ . '/includes/template-tags.php';
-new WP_Polls_API();
-WP_Polls_Install::init();
-WP_Polls_Vote::init();
-WP_Polls_Display::init();
-WP_Polls_Admin::init();
-WP_Polls_WPStats::init();
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-template.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-options.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-poll.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-api.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-blocks.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-settings.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-widget.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-install.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-vote.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-display.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-admin.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls-wpstats.php';
+require_once WP_POLLS_DIR . 'includes/class-wp-polls.php';
+require_once WP_POLLS_DIR . 'includes/template-tags.php';
+
 WP_Polls::init();
-WP_Polls_Settings::init();
-WP_Polls_Blocks::init();
-
-
-// Polls Table Name
-// Registering the names in $wpdb->tables is what makes them survive
-// switch_to_blog(): wpdb::set_blog_id() rebuilds every registered table name
-// against the new prefix. A bare assignment keeps pointing at the site that
-// happened to be current when this file loaded.
-global $wpdb;
-foreach ( array( 'pollsq', 'pollsa', 'pollsip' ) as $poll_table ) {
-	if ( ! in_array( $poll_table, $wpdb->tables, true ) ) {
-		$wpdb->tables[] = $poll_table;
-	}
-	$wpdb->$poll_table = $wpdb->prefix . $poll_table;
-}
-unset( $poll_table );

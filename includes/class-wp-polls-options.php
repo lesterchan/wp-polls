@@ -383,13 +383,13 @@ class WP_Polls_Options {
 	 * Two accidents keep this plugin out of that gap, and neither is a
 	 * guarantee. `update_option()` sanitises before it compares, and
 	 * `WP_Polls_Settings::sanitize()` does not return the defaults unchanged, so
-	 * the early return is never reached. And `wp-polls.php` calls
-	 * `WP_Polls_Install::init()` on line 71 and `WP_Polls_Settings::init()` on
-	 * line 77 -- both hooking `admin_init` at priority 10 -- so the migration
-	 * runs before the filter exists at all, on insertion order alone.
+	 * the early return is never reached. And the upgrade runs on `init` at
+	 * priority 5 while `WP_Polls_Settings::register()` waits for `admin_init`,
+	 * so the migration runs before the filter exists at all, on hook order
+	 * alone.
 	 *
-	 * Either could change without anything noticing: swapping two adjacent lines
-	 * in a file that does nothing but wire classes up, or a sanitiser that
+	 * Either could change without anything noticing: a hook moved in the
+	 * bootstrap that does nothing but wire classes up, or a sanitiser that
 	 * becomes a no-op for already-clean input. Passing an explicit default to
 	 * `get_option()` defeats the registered one, because
 	 * `filter_default_option()` returns early when a default was passed, which

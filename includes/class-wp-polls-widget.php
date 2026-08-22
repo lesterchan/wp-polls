@@ -13,12 +13,9 @@ defined( 'ABSPATH' ) || exit;
 class WP_Polls_Widget extends WP_Widget {
 	/**
 	 * Constructor.
-	 *
-	 * @return mixed
 	 */
 	public function __construct() {
-		$widget_ops = array( 'description' => __( 'WP-Polls polls', 'wp-polls' ) );
-		parent::__construct( 'polls-widget', __( 'Polls', 'wp-polls' ), $widget_ops );
+		parent::__construct( 'polls-widget', __( 'Polls', 'wp-polls' ), array( 'description' => __( 'WP-Polls polls', 'wp-polls' ) ) );
 	}
 
 	/**

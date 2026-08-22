@@ -56,15 +56,15 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 	/**
 	 * Run the uninstaller's option work, repeatably.
 	 *
-	 * Deliberately not a require of uninstall.php. That file calls
-	 * WP_Polls_Install::uninstall_site(), which drops the three poll tables -
-	 * DDL, so MySQL commits it and it survives the transaction the rest of the
-	 * suite is wrapped in. One test would then take the tables away from every
-	 * test after it. The deletions are performed here instead, over the same
-	 * WP_Polls_Install::option_names() list the uninstaller loops over, so a row
-	 * missing from that list still fails the shared uninstall test. That
-	 * uninstall.php itself calls into this list, once per site on a network, is
-	 * asserted against the source in test-uninstall.php.
+	 * Deliberately not a require of uninstall.php. That file delegates to
+	 * WP_Polls_Install::uninstall(), which drops the three poll tables per
+	 * site - DDL, so MySQL commits it and it survives the transaction the rest
+	 * of the suite is wrapped in. One test would then take the tables away from
+	 * every test after it. The deletions are performed here instead, over the
+	 * same WP_Polls_Install::option_names() list the uninstaller loops over, so
+	 * a row missing from that list still fails the shared uninstall test. That
+	 * the uninstaller works this list once per site on a network is asserted
+	 * against the source in test-uninstall.php.
 	 *
 	 * @return void
 	 */

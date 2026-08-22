@@ -18,8 +18,6 @@ class WP_Polls_Install {
 	 * @return void
 	 */
 	public static function init() {
-		register_activation_hook( WP_POLLS_MAIN_FILE, array( __CLASS__, 'activate' ) );
-		add_action( 'admin_init', array( __CLASS__, 'upgrade' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'onclick_notice' ) );
 	}
 
@@ -58,14 +56,15 @@ class WP_Polls_Install {
 		}
 	}
 
-	// Function: Run Version Specific Upgrades
-	// Plugin updates do not fire the activation hook, so the stored version is
-	// checked on every admin request and the outstanding upgrades are run once.
-
 	/**
-	 * Upgrade.
+	 * Run the outstanding version gated upgrades, once.
 	 *
-	 * @return mixed
+	 * Activation does not fire on a plugin update, which is the single most
+	 * common reason a migration never runs. The stored markers are therefore
+	 * checked on every request, on `init` at priority 5, and anything they say
+	 * is outstanding runs before the rest of the plugin reads the options.
+	 *
+	 * @return void
 	 */
 	public static function upgrade() {
 		$markers = WP_Polls_Options::markers();
@@ -326,6 +325,38 @@ class WP_Polls_Install {
 	}
 
 	/**
+	 * Uninstall the plugin: every site on a network, or just the one.
+	 *
+	 * The whole job is delegated here by uninstall.php, so the loop over sites
+	 * lives beside the per-site work it drives and both are reachable from the
+	 * test suite.
+	 *
+	 * @return void
+	 */
+	public static function uninstall() {
+		if ( ! is_multisite() ) {
+			self::uninstall_site();
+
+			return;
+		}
+
+		// 'number' => 0 lifts WP_Site_Query's default cap of 100, which would otherwise skip every site past the hundredth while reporting success.
+		$site_ids = get_sites(
+			array(
+				'fields' => 'ids',
+				'number' => 0,
+			)
+		);
+
+		// Inside the loop: switch_to_blog() pushes onto a stack, so restoring once after the loop unwinds it by exactly one.
+		foreach ( $site_ids as $site_id ) {
+			switch_to_blog( (int) $site_id );
+			self::uninstall_site();
+			restore_current_blog();
+		}
+	}
+
+	/**
 	 * Remove every option row, the capability, and the three tables.
 	 *
 	 * Before 3.0.0 the table drop was called from inside the loop over option
@@ -522,8 +553,8 @@ class WP_Polls_Install {
 		self::add_capability();
 
 		// Run any outstanding version upgrades and record the current version.
-		// Called here as well as on 'admin_init' so that network activation
-		// upgrades every site while it is switched to.
+		// Called here as well as on 'init' so that network activation upgrades
+		// every site while it is switched to.
 		self::upgrade();
 
 		WP_Polls::cron_polls_place();

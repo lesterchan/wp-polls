@@ -267,27 +267,47 @@ function defaultOptions() {
  * their place, because that is what the migration has to meet: thirty-odd rows
  * named poll_*, no markers, and nothing else.
  *
+ * The pre-migration state comes back from the same PHP process that seeds it,
+ * and that is the only place it can be observed from. The upgrade runs on
+ * `init`, which fires when WP-CLI boots WordPress too -- so any later wpEval
+ * would fold the fixture in during its own boot, before the code it was asked
+ * to run could look at anything.
+ *
  * @param {Object} rows Legacy option name => value, stored exactly as given.
- * @return {void}
+ * @return {Object} The seeded state: `surviving` legacy row names, the raw
+ *                  `options` row and the `versions` row (both false).
  */
 function installLegacyRows( rows ) {
 	const data = Buffer.from( JSON.stringify( rows ), 'utf8' ).toString( 'base64' );
 
-	wpEval(
-		`delete_option( WP_Polls_Options::OPTION );
-		delete_option( WP_Polls_Options::VERSION );
-		foreach ( array_merge(
+	return JSON.parse(
+		wpEval(
+			`$names = array_merge(
 			array_keys( WP_Polls_Options::legacy_map() ),
 			WP_Polls_Options::legacy_extra_rows(),
 			WP_Polls_Options::legacy_shared_rows()
-		) as $row ) {
+		);
+		delete_option( WP_Polls_Options::OPTION );
+		delete_option( WP_Polls_Options::VERSION );
+		foreach ( $names as $row ) {
 			delete_option( $row );
 		}
 		foreach ( json_decode( base64_decode( '${ data }' ), true ) as $name => $value ) {
 			update_option( $name, $value );
 		}
 		WP_Polls_Options::flush();
-		echo '<<<done>>>';`,
+		$alive = array();
+		foreach ( array_unique( $names ) as $name ) {
+			if ( false !== get_option( $name, false ) ) {
+				$alive[] = $name;
+			}
+		}
+		echo '<<<' . wp_json_encode( array(
+			'surviving' => array_values( $alive ),
+			'options'   => get_option( WP_Polls_Options::OPTION ),
+			'versions'  => get_option( WP_Polls_Options::VERSION ),
+		) ) . '>>>';`,
+		),
 	);
 }
 

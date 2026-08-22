@@ -363,7 +363,7 @@ class WP_Polls_Migration_Schema_Test extends WP_Polls_TestCase {
 		$this->forget_the_upgrade();
 
 		// Updating through the plugins screen never fires the activation hook.
-		// admin_init runs upgrade() alone, and that path on its own must leave
+		// The init hook runs upgrade() alone, and that path on its own must leave
 		// a working install.
 		WP_Polls_Install::upgrade();
 

@@ -174,8 +174,10 @@ Reading is public, because a poll is public.
 
 ## Migrations, and why they are tested through a browser
 
-`WP_Polls_Install::upgrade()` hangs off `admin_init`, because activation hooks
-do not fire on a plugin update — the usual reason a migration never runs at all.
+`WP_Polls_Install::upgrade()` hangs off `init` at priority 5, because activation
+hooks do not fire on a plugin update — the usual reason a migration never runs
+at all — and because an automatic background update runs on cron, which never
+fires an admin hook.
 Three separate things happen on that path and `tests/e2e/upgrade.spec.js` covers
 each:
 

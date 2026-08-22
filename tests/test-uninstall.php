@@ -49,7 +49,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_get_sites_lifts_the_default_limit() {
-		$this->assertMatchesRegularExpression( "/'number'\s*=>\s*0/", $this->source(), 'uninstall.php lifts the site query cap, or a network past the default is half-uninstalled.' );
+		$this->assertMatchesRegularExpression( "/'number'\s*=>\s*0/", $this->install_source(), 'The uninstaller lifts the site query cap, or a network past the default is half-uninstalled.' );
 	}
 
 	/**
@@ -58,7 +58,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_get_sites_only_asks_for_ids() {
-		$this->assertMatchesRegularExpression( "/'fields'\s*=>\s*'ids'/", $this->source(), 'uninstall.php asks for ids only, which is what makes the unlimited query affordable.' );
+		$this->assertMatchesRegularExpression( "/'fields'\s*=>\s*'ids'/", $this->install_source(), 'The uninstaller asks for ids only, which is what makes the unlimited query affordable.' );
 	}
 
 	/**
@@ -74,7 +74,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	public function test_each_switch_to_blog_is_restored_in_the_same_scope() {
 		$this->assertMatchesRegularExpression(
 			'/switch_to_blog\(.*?\);[^{}]*restore_current_blog\(\);/s',
-			$this->source(),
+			$this->install_source(),
 			'restore_current_blog() must sit inside the foreach, beside its switch_to_blog()'
 		);
 	}
@@ -202,7 +202,7 @@ class WP_Polls_Uninstall_Test extends WP_Polls_TestCase {
 	 */
 	public function test_uninstall_declares_no_global_function() {
 		$this->assertDoesNotMatchRegularExpression( '/^\s*function\s+/m', $this->source(), 'uninstall.php declares a global function, which any other plugin could collide with.' );
-		$this->assertStringContainsString( 'WP_Polls_Install::uninstall_site()', $this->source(), 'uninstall.php delegates rather than declaring a function of its own.' );
-		$this->assertStringContainsString( 'public static function uninstall_site()', $this->install_source(), 'And the method it delegates to really exists.' );
+		$this->assertStringContainsString( 'WP_Polls_Install::uninstall()', $this->source(), 'uninstall.php delegates rather than declaring a function of its own.' );
+		$this->assertStringContainsString( 'public static function uninstall()', $this->install_source(), 'And the method it delegates to really exists.' );
 	}
 }

@@ -3,8 +3,10 @@
  *
  * Activation does not fire when a plugin is merely updated -- a site that
  * updates from the Plugins screen never calls activate() -- so upgrade() hangs
- * off admin_init. That is the hook every real upgrade goes through, and loading
- * an admin page in a browser is the only way to reach it.
+ * off init, at priority 5. That is a hook every request fires, WP-CLI's boot
+ * included, which is why the fixtures hand their pre-migration state back from
+ * the process that seeds them: any later CLI call migrates the site on its way
+ * in. Loading an admin page in a browser is the request these specs let do it.
  *
  * Three separate things happen on that path and none of them can be seen from
  * PHPUnit alone:
@@ -96,14 +98,14 @@ test.describe( 'The pre-3.0.0 upgrade', () => {
 	test( 'the scattered rows fold into one, every old row goes, and the markers are stamped', async ( {
 		page,
 	} ) => {
-		installLegacyRows( legacyInstall() );
+		const seeded = installLegacyRows( legacyInstall() );
 
 		// The fixture really is a pre-3.0.0 install: old rows present, new ones
 		// absent. Without this the assertions below could be describing a site
 		// that was already migrated, and would pass with the fold-in deleted.
-		expect( survivingLegacyRows() ).toContain( 'poll_close' );
-		expect( rawOptions() ).toBe( false );
-		expect( versionRow() ).toBe( false );
+		expect( seeded.surviving ).toContain( 'poll_close' );
+		expect( seeded.options ).toBe( false );
+		expect( seeded.versions ).toBe( false );
 
 		await page.goto( DASHBOARD_URL );
 
@@ -149,7 +151,7 @@ test.describe( 'The pre-3.0.0 upgrade', () => {
 		// customised fixture in this file is blind to. save() tells an absent
 		// row from a defaulted one by passing an explicit default to
 		// get_option() and add_option()ing it; this is what that is for.
-		installLegacyRows( {
+		const seeded = installLegacyRows( {
 			poll_close: defaults.close,
 			poll_archive_perpage: defaults.archive.per_page,
 			poll_archive_url: defaults.archive.url,
@@ -158,7 +160,7 @@ test.describe( 'The pre-3.0.0 upgrade', () => {
 			poll_db_version: '1.2',
 		} );
 
-		expect( rawOptions() ).toBe( false );
+		expect( seeded.options ).toBe( false );
 
 		await page.goto( DASHBOARD_URL );
 
@@ -190,9 +192,9 @@ test.describe( 'The pre-3.0.0 upgrade', () => {
 		// A sibling upgraded first and took the row with it. Reading that as a
 		// deliberate opt-out would take the polls block off the WP-Stats page of
 		// any site that updated a sibling first, with nothing to say why.
-		installLegacyRows( legacyInstall() );
+		const seeded = installLegacyRows( legacyInstall() );
 
-		expect( survivingLegacyRows() ).not.toContain( 'stats_display' );
+		expect( seeded.surviving ).not.toContain( 'stats_display' );
 
 		await page.goto( DASHBOARD_URL );
 
