@@ -137,12 +137,16 @@ class WP_Polls_Metadata_Test extends Plugin_Metadata_TestCase {
 	/**
 	 * Register the front-end and admin assets.
 	 *
-	 * The admin half needs the hook suffix of the plugin's own screen, or it
-	 * returns without registering anything.
+	 * The front end assets only load where a poll shows, so the request is put
+	 * into that shape first or nothing is registered and the assertions run
+	 * against an empty list. The admin half needs the hook suffix of the
+	 * plugin's own screen, or it returns without registering anything.
 	 *
 	 * @return void
 	 */
 	protected function register_plugin_assets() {
+		$GLOBALS['post'] = get_post( self::factory()->post->create( array( 'post_content' => '[poll]' ) ) );
+
 		WP_Polls::poll_scripts();
 		WP_Polls_Admin::poll_scripts_admin( WP_Polls_Admin::hook_suffix( WP_Polls_Admin::PAGE ) );
 	}

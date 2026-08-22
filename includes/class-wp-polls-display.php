@@ -13,6 +13,36 @@ defined( 'ABSPATH' ) || exit;
 class WP_Polls_Display {
 
 	/**
+	 * Whether anything on this request has rendered poll markup.
+	 *
+	 * @var bool
+	 */
+	private static $needs_assets = false;
+
+	/**
+	 * Whether the front end assets should be enqueued.
+	 *
+	 * @return bool
+	 */
+	public static function needs_assets() {
+		return self::$needs_assets;
+	}
+
+	/**
+	 * Ask for the front end assets on this request.
+	 *
+	 * Every render path calls this -- the voting form, the results, the archive
+	 * -- so poll markup produced later than `wp_enqueue_scripts`, by a template
+	 * tag or a loop page the head pass could not inspect, still gets the
+	 * stylesheet and the vote script from the footer.
+	 *
+	 * @return void
+	 */
+	public static function request_assets() {
+		self::$needs_assets = true;
+	}
+
+	/**
 	 * Hook registration.
 	 *
 	 * @return void
@@ -45,6 +75,7 @@ class WP_Polls_Display {
 	 * @return mixed
 	 */
 	public static function display_pollvote( $poll_id, $display_loading = true ) {
+		self::request_assets();
 		/**
 		 * Fires before a voting form is assembled.
 		 *
@@ -256,6 +287,7 @@ class WP_Polls_Display {
 	 * @return mixed
 	 */
 	public static function display_pollresult( $poll_id, $user_voted = array(), $display_loading = true ) {
+		self::request_assets();
 		global $wpdb;
 		/**
 		 * Fires before a poll's results are assembled.
@@ -588,6 +620,7 @@ class WP_Polls_Display {
 	 * @return mixed
 	 */
 	public static function polls_archive() {
+		self::request_assets();
 		/**
 		 * Fires before the polls archive is assembled.
 		 *

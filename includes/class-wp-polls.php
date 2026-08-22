@@ -19,6 +19,8 @@ class WP_Polls {
 	 */
 	public static function init() {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'poll_scripts' ) );
+		// Priority 10, ahead of core printing footer scripts and late styles at 20.
+		add_action( 'wp_footer', array( __CLASS__, 'footer_scripts' ) );
 		add_action( 'enqueue_block_assets', array( __CLASS__, 'block_editor_styles' ) );
 		add_action( 'widgets_init', array( __CLASS__, 'widget_polls_init' ) );
 		add_action( 'polls_cron', array( __CLASS__, 'cron_polls_status' ) );
@@ -51,11 +53,77 @@ class WP_Polls {
 	// Function: Enqueue Polls JavaScripts/CSS.
 
 	/**
-	 * Poll scripts.
+	 * Enqueue the front end assets, where the head can already see a poll coming.
 	 *
-	 * @return mixed
+	 * A page showing no poll carries neither the stylesheet nor the script. The
+	 * shapes visible this early are the active widget and a shortcode or block
+	 * in the current post; anything rendering later than the head -- a template
+	 * tag, a poll in a loop page -- asks via WP_Polls_Display::request_assets()
+	 * and footer_scripts() picks it up.
+	 *
+	 * @return void
 	 */
 	public static function poll_scripts() {
+		if ( ! self::needs_assets() ) {
+			return;
+		}
+
+		self::enqueue_assets();
+	}
+
+	/**
+	 * Whether the current request is already known to render a poll.
+	 *
+	 * @return bool
+	 */
+	protected static function needs_assets() {
+		if ( is_active_widget( false, false, 'polls-widget', true ) ) {
+			return true;
+		}
+
+		$post = get_post();
+
+		if ( ! $post instanceof WP_Post ) {
+			return false;
+		}
+
+		return has_shortcode( $post->post_content, 'poll' )
+			|| has_shortcode( $post->post_content, 'page_polls' )
+			|| has_block( 'wp-polls/poll', $post )
+			|| has_block( 'wp-polls/page-polls', $post );
+	}
+
+	/**
+	 * Enqueue late, for a poll the head could not see coming.
+	 *
+	 * Runs at `wp_footer` priority 10, before core prints footer scripts and
+	 * late styles at 20, so both assets still make it onto the page.
+	 *
+	 * @return void
+	 */
+	public static function footer_scripts() {
+		if ( ! WP_Polls_Display::needs_assets() ) {
+			return;
+		}
+
+		self::enqueue_assets();
+	}
+
+	/**
+	 * The stylesheet with its inline custom properties, and the script with its
+	 * strings and the AJAX endpoint.
+	 *
+	 * Guarded on the style handle because both passes can run on one request,
+	 * and wp_add_inline_style() appends rather than replaces -- a second pass
+	 * would emit the bar's custom properties twice.
+	 *
+	 * @return void
+	 */
+	protected static function enqueue_assets() {
+		if ( wp_style_is( 'wp-polls', 'enqueued' ) ) {
+			return;
+		}
+
 		self::poll_styles();
 
 		wp_enqueue_script( 'wp-polls', WP_POLLS_URL . 'js/wp-polls.js', array(), WP_POLLS_VERSION, true );
@@ -86,9 +154,9 @@ class WP_Polls {
 	 * editor.
 	 *
 	 * Guarded on is_admin() because `enqueue_block_assets` fires on the front
-	 * end too, where poll_scripts() has already done this on
-	 * `wp_enqueue_scripts` -- and wp_add_inline_style() appends rather than
-	 * replaces, so running twice would emit the bar's custom properties twice.
+	 * end too, where the conditional enqueue owns the decision -- and
+	 * wp_add_inline_style() appends rather than replaces, so running here as
+	 * well would emit the bar's custom properties twice.
 	 *
 	 * @return void
 	 */
@@ -115,8 +183,9 @@ class WP_Polls {
 			wp_enqueue_style( 'wp-polls', WP_POLLS_URL . 'css/wp-polls.css', array(), WP_POLLS_VERSION );
 		}
 		$pollbar = WP_Polls_Options::get( 'bar' );
-		// This lands in an inline <style> block on every front end page, so never
-		// trust the stored values even though only 'manage_polls' can set them.
+		// This lands in an inline <style> block on every page that shows a poll,
+		// so never trust the stored values even though only 'manage_polls' can
+		// set them.
 		$pollbar_height     = (int) $pollbar['height'];
 		$pollbar_background = self::sanitize_bar_color( $pollbar['background'] );
 		$pollbar_border     = self::sanitize_bar_color( $pollbar['border'] );

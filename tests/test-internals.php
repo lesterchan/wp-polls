@@ -386,6 +386,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'bar.height', 12 );
 		WP_Polls_Options::set( 'bar.background', 'ff0000' );
 		WP_Polls_Options::set( 'bar.border', '00ff00' );
+		$this->shape_a_poll_page( '[poll]' );
 
 		WP_Polls::poll_scripts();
 
@@ -405,6 +406,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 */
 	public function test_poll_scripts_emits_the_gradient_without_an_image() {
 		WP_Polls_Options::set( 'bar.style', 'gradient' );
+		$this->shape_a_poll_page( '[poll]' );
 
 		WP_Polls::poll_scripts();
 
@@ -426,6 +428,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_the_gradient_keeps_the_configured_colour() {
 		WP_Polls_Options::set( 'bar.style', 'gradient' );
 		WP_Polls_Options::set( 'bar.background', 'ff0000' );
+		$this->shape_a_poll_page( '[poll]' );
 
 		WP_Polls::poll_scripts();
 
@@ -447,6 +450,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		WP_Polls_Options::set( 'bar.style', 'flat' );
 		WP_Polls_Options::set( 'bar.background', 'red; } body { display: none; } .x {' );
 		WP_Polls_Options::set( 'bar.height', 8 );
+		$this->shape_a_poll_page( '[poll]' );
 
 		WP_Polls::poll_scripts();
 
@@ -466,6 +470,8 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	 * @return void
 	 */
 	public function test_one_stylesheet_serves_both_directions() {
+		$this->shape_a_poll_page( '[poll]' );
+
 		WP_Polls::poll_scripts();
 
 		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The one stylesheet is enqueued whichever direction the site reads.' );
@@ -525,6 +531,7 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	public function test_poll_scripts_localises_without_jquery() {
 		WP_Polls_Options::set( 'ajax.loading', 1 );
 		WP_Polls_Options::set( 'ajax.fading', 0 );
+		$this->shape_a_poll_page( '[poll]' );
 
 		WP_Polls::poll_scripts();
 
@@ -539,6 +546,175 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 		// and the fade asks prefers-reduced-motion rather than an option.
 		$this->assertStringNotContainsString( 'show_loading', $data, 'the AJAX style flags are back' );
 		$this->assertStringNotContainsString( 'show_fading', $data, 'the AJAX style flags are back' );
+	}
+
+	// --- conditional loading ----------------------------------------------
+
+	/**
+	 * A page showing no poll carries neither asset.
+	 *
+	 * Both passes run -- the head enqueue and the footer catch-up -- and with
+	 * no widget, no shortcode, no block and nothing rendered, neither may
+	 * enqueue anything.
+	 *
+	 * @return void
+	 */
+	public function test_a_page_without_a_poll_gets_neither_asset() {
+		WP_Polls::poll_scripts();
+		WP_Polls::footer_scripts();
+
+		$this->assertFalse( wp_style_is( 'wp-polls', 'enqueued' ), 'A page showing no poll still carries the stylesheet.' );
+		$this->assertFalse( wp_script_is( 'wp-polls', 'enqueued' ), 'A page showing no poll still carries the vote script.' );
+	}
+
+	/**
+	 * A post holding the poll shortcode gets both assets from the head.
+	 *
+	 * @return void
+	 */
+	public function test_a_post_holding_the_poll_shortcode_enqueues_both_assets() {
+		$this->shape_a_poll_page( '[poll]' );
+
+		WP_Polls::poll_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The poll shortcode is a reason to load the stylesheet.' );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'And the vote script.' );
+	}
+
+	/**
+	 * A post holding the archive shortcode gets both assets from the head.
+	 *
+	 * @return void
+	 */
+	public function test_a_post_holding_the_archive_shortcode_enqueues_both_assets() {
+		$this->shape_a_poll_page( '[page_polls]' );
+
+		WP_Polls::poll_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The archive shortcode is a reason to load the stylesheet.' );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'And the vote script: View Results on an archived poll votes over AJAX.' );
+	}
+
+	/**
+	 * A post holding either block gets both assets from the head.
+	 *
+	 * The check reads the block comment delimiters out of post_content, so this
+	 * holds on a checkout that has never built the blocks too.
+	 *
+	 * @return void
+	 */
+	public function test_a_post_holding_a_poll_block_enqueues_both_assets() {
+		$this->shape_a_poll_page( '<!-- wp:wp-polls/poll {"id":1} /-->' );
+
+		WP_Polls::poll_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The Poll block is a reason to load the stylesheet.' );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'And the vote script.' );
+
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
+		$this->shape_a_poll_page( '<!-- wp:wp-polls/page-polls /-->' );
+
+		WP_Polls::poll_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The Polls Archive block is a reason to load the stylesheet.' );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'And the vote script.' );
+	}
+
+	/**
+	 * A poll the head could not see coming is picked up by the footer pass.
+	 *
+	 * A template tag or a loop page renders after `wp_enqueue_scripts` has
+	 * fired, so the head pass sees nothing. The render itself asks for the
+	 * assets and footer_scripts() delivers them, before core prints footer
+	 * scripts and late styles at `wp_footer` priority 20.
+	 *
+	 * @return void
+	 */
+	public function test_a_poll_rendered_after_the_head_enqueues_in_the_footer() {
+		$poll_id = $this->make_poll();
+		WP_Polls_Options::set( 'latest_poll', $poll_id );
+
+		WP_Polls::poll_scripts();
+
+		$this->assertFalse( wp_style_is( 'wp-polls', 'enqueued' ), 'The head pass enqueued before anything rendered a poll.' );
+
+		WP_Polls_Display::get_poll( $poll_id, false );
+		WP_Polls::footer_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'A rendered poll did not ask for the stylesheet.' );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'A rendered poll did not ask for the vote script.' );
+	}
+
+	/**
+	 * The widget is a render path like any other.
+	 *
+	 * @return void
+	 */
+	public function test_the_widget_asks_for_the_assets() {
+		$poll_id = $this->make_poll();
+
+		ob_start();
+		the_widget( 'WP_Polls_Widget', array( 'poll_id' => $poll_id ) );
+		ob_end_clean();
+
+		WP_Polls::footer_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'A rendered widget did not ask for the stylesheet.' );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'A rendered widget did not ask for the vote script.' );
+	}
+
+	/**
+	 * The archive rendered outside the shortcode is a render path too.
+	 *
+	 * A dedicated archive page reached through `?poll_page=` renders through
+	 * polls_archive() directly.
+	 *
+	 * @return void
+	 */
+	public function test_the_archive_rendered_after_the_head_enqueues_in_the_footer() {
+		$this->make_poll();
+
+		WP_Polls_Display::polls_archive();
+		WP_Polls::footer_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'A rendered archive did not ask for the stylesheet.' );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'A rendered archive did not ask for the vote script.' );
+	}
+
+	/**
+	 * Both passes running on one request emits the custom properties once.
+	 *
+	 * Inline style data appends rather than replaces, so an unguarded second
+	 * pass would emit the bar's custom properties twice.
+	 *
+	 * @return void
+	 */
+	public function test_the_footer_pass_does_not_double_the_inline_style() {
+		$poll_id = $this->make_poll();
+		$this->shape_a_poll_page( '[poll]' );
+
+		WP_Polls::poll_scripts();
+		WP_Polls_Display::get_poll( $poll_id, false );
+		WP_Polls::footer_scripts();
+
+		$css = implode( '', (array) wp_styles()->get_data( 'wp-polls', 'after' ) );
+
+		$this->assertSame( 1, substr_count( $css, '--wp-polls-bar-height' ), 'The footer pass emitted the bar custom properties a second time.' );
+	}
+
+	/**
+	 * Put the request into the shape of a singular page carrying a poll.
+	 *
+	 * The assets only load where a poll shows, so a test asserting on their
+	 * output first needs a post carrying one.
+	 *
+	 * @param string $content What the post carries.
+	 *
+	 * @return void
+	 */
+	private function shape_a_poll_page( $content ) {
+		$GLOBALS['post'] = get_post( self::factory()->post->create( array( 'post_content' => $content ) ) );
 	}
 
 	// --- small helpers ----------------------------------------------------

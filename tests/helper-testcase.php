@@ -35,6 +35,22 @@ abstract class WP_Polls_TestCase extends WP_UnitTestCase {
 		// starts from a fully migrated install rather than one the next call to
 		// WP_Polls_Install::upgrade() would migrate underneath it.
 		WP_Polls_Options::save_markers( WP_POLLS_VERSION, WP_POLLS_DB_VERSION );
+
+		$this->reset_statics();
+	}
+
+	/**
+	 * Forget that anything asked for the front end assets.
+	 *
+	 * The flag is request-scoped by design and correct in production; the test
+	 * process lives for the whole suite, so without this a poll rendered by
+	 * one test would enqueue assets for every test after it.
+	 *
+	 * @return void
+	 */
+	protected function reset_statics() {
+		$property = new ReflectionProperty( 'WP_Polls_Display', 'needs_assets' );
+		$property->setValue( null, false );
 	}
 
 	/**

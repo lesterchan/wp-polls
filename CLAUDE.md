@@ -134,8 +134,20 @@ rather than an attribute, so without this every poll in the editor carries a
 permanent "Loading ...". Styles only, never the script: the front-end script
 attaches vote handlers, and a preview that can be voted in casts real votes from
 the editor. Guarded on `is_admin()` because `enqueue_block_assets` fires on the
-front end too, where `poll_scripts()` has already run -- and
+front end too, where the conditional enqueue owns the decision -- and
 `wp_add_inline_style()` appends, so twice would emit the bar variables twice.
+
+**The front end assets are conditional, in two passes.** On
+`wp_enqueue_scripts` the enqueue asks whether the request is already known to
+show a poll -- the active widget, or a shortcode or block in the current post
+-- and puts both assets in the head. Everything else is caught late: every
+render path (`display_pollvote()`, `display_pollresult()`, `polls_archive()`)
+calls `WP_Polls_Display::request_assets()`, and a `wp_footer` hook at priority
+10 enqueues before core prints footer scripts and late styles at 20. The
+enqueue is guarded on the style handle because both passes can run on one
+request and the inline bar variables must be emitted once. A bare page carries
+neither asset, and any new render path must call `request_assets()` or its
+markup arrives unstyled with nothing listening to its buttons.
 
 ## WP-CLI and REST
 

@@ -259,6 +259,7 @@ override these instead, which is the supported way now:
 * It is because of rounding issues. To make it always round up to 100%, the last poll's answer will get the remainding percentage added to it. To enable this feature, add this to your theme's functions.php: `add_filter( 'wp_polls_round_percentage', '__return_true' );`
 
 ### How Does WP-Polls Load CSS?
+* The stylesheet and the voting script load only on pages that show a poll, a polls archive or the poll widget; a page without one carries neither.
 * WP-Polls will load `wp-polls.css` from your theme's directory if it exists.
 * If it does not exist, it loads the `css/wp-polls.css` that ships with WP-Polls.
 * This will allow you to upgrade WP-Polls without worrying about overwriting your polls styles that you have created.
