@@ -36,9 +36,7 @@
 
 
 // Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 
 // Versions. WP_POLLS_VERSION is the plugin's own; WP_POLLS_DB_VERSION is the

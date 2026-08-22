@@ -8,9 +8,7 @@
  * @package WP-Polls
  */
 
-if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-	exit();
-}
+defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 require_once __DIR__ . '/includes/class-wp-polls-template.php';
 require_once __DIR__ . '/includes/class-wp-polls-options.php';
