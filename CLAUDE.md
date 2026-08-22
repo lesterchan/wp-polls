@@ -195,7 +195,7 @@ something untrue of every install.
 `bin/test-e2e.sh` the Playwright suite. **Run them rather than trusting a note
 about their last result** — CI is the authority, and this file cannot be.
 
-`test-migration.php` and `test-migration-schema.php` are separate on purpose —
+`test-upgrade.php` and `test-migration-schema.php` are separate on purpose —
 the option fold-in and the table work fail differently. `test-vote-guards.php`
 covers the five `check_method` branches.
 

@@ -2,7 +2,7 @@
 /**
  * The upgrade at the table level: real legacy schemas, populated, upgraded.
  *
- * Where test-migration.php proves the option rows are folded in correctly,
+ * Where test-upgrade.php proves the option rows are folded in correctly,
  * this file proves the other half of "upgrading will not break": the three tables of a
  * genuinely old install -- built from the CREATE TABLE statements those
  * versions shipped, not from what 3.0.0 would like them to have been -- come
@@ -24,7 +24,7 @@
  * parent's ROLLBACK undoes the cleanup itself, and the test's leftover legacy
  * rows (made durable by the DDL in the next test's fixture) leak into
  * whichever file runs after this one. That is not a hypothetical: it cost the
- * beta-key test in test-migration.php its expected check_method.
+ * beta-key test in test-upgrade.php its expected check_method.
  *
  * @package WP-Polls
  */

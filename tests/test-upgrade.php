@@ -20,7 +20,7 @@
  * @covers WP_Polls_Install::upgrade
  * @covers WP_Polls_Options::migrate_from_legacy_rows
  */
-class WP_Polls_Migration_Test extends WP_Polls_TestCase {
+class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 
 	/**
 	 * A 3.0.0 install's worth of scattered rows, none of them default.
