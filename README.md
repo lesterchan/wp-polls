@@ -4,7 +4,7 @@ Donate link: https://lesterchan.net/site/donation/
 Tags: poll, polls, vote, ajax, survey  
 Requires at least: 6.8  
 Tested up to: 7.1  
-Stable tag: 3.0.0  
+Stable tag: 3.0.1  
 Requires PHP: 8.2  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -299,6 +299,9 @@ be. That class no longer exists, so the old snippet colours nothing.
 7. The Poll block in the editor: the preview is the real poll, and the sidebar picks which poll and whether to show the voting form or the result
 
 ## Changelog
+### 3.0.1
+* CHANGED: The stylesheet, the voting script and the inline poll bar styles load only on pages that show a poll, a polls archive or the poll widget; every other page sheds all three. If a caching or optimisation plugin combines assets per page, its combined file now differs between pages with and without a poll — that is this change, not a fault, and its cache can simply be regenerated.
+
 ### 3.0.0
 * FIXED: The limit on how many answers a vote may select was enforced in the browser and nowhere else, so one crafted request could vote for every answer of a single-choice poll — each answer gaining a vote and the poll's total gaining several, while the voter count went up by one. That leaves the percentages, `%POLL_MOST_ANSWER%` and `%POLL_LEAST_ANSWER%` permanently wrong. The maximum is checked on the server now, on both the AJAX and REST paths
 * NEW: A `wp polls` WP-CLI command — `list`, `get`, `open`, `close` and `delete`.

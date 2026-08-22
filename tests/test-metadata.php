@@ -26,7 +26,7 @@ class WP_Polls_Metadata_Test extends Plugin_Metadata_TestCase {
 	 * @return string
 	 */
 	protected function expected_version() {
-		return '3.0.0';
+		return '3.0.1';
 	}
 
 	/**
