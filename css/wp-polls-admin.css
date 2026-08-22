@@ -1,5 +1,5 @@
 /* Poll Options poll bar swatches and preview. Both render the front end markup
-   under polls-css.css; these rules only size them and undo the inline display
+   under wp-polls.css; these rules only size them and undo the inline display
    the swatches are forced into by sitting inside a <label>, whose content model
    allows phrasing content only. */
 #wp-polls-pollbar {
