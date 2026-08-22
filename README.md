@@ -301,6 +301,8 @@ be. That class no longer exists, so the old snippet colours nothing.
 ## Changelog
 ### 3.0.1
 * CHANGED: The stylesheet, the voting script and the inline poll bar styles load only on pages that show a poll, a polls archive or the poll widget; every other page sheds all three. If a caching or optimisation plugin combines assets per page, its combined file now differs between pages with and without a poll — that is this change, not a fault, and its cache can simply be regenerated.
+* NEW: A Settings link on the plugin's row on the Plugins screen.
+* CHANGED: Upgrade routines run on `init` rather than `admin_init`, so a site updated in the background — by automatic updates or WP-CLI — is migrated on its next request of any kind instead of waiting for somebody to open wp-admin.
 
 ### 3.0.0
 * FIXED: The limit on how many answers a vote may select was enforced in the browser and nowhere else, so one crafted request could vote for every answer of a single-choice poll — each answer gaining a vote and the poll's total gaining several, while the voter count went up by one. That leaves the percentages, `%POLL_MOST_ANSWER%` and `%POLL_LEAST_ANSWER%` permanently wrong. The maximum is checked on the server now, on both the AJAX and REST paths
