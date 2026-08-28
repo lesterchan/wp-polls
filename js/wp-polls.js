@@ -16,10 +16,8 @@
 	/**
 	 * Whether the visitor has asked for less movement.
 	 *
-	 * The fade is an inline transition, so a stylesheet media query cannot
-	 * reach it the way it reaches the spinner and the result bars -- an inline
-	 * style wins. Read here instead, and read on every call rather than once at
-	 * load, because the setting can change while the page is open.
+	 * The fade is an inline transition, which a stylesheet media query cannot
+	 * reach. Read on every call, since the setting can change while open.
 	 *
 	 * @return {boolean} True when motion should be skipped.
 	 */
@@ -62,9 +60,8 @@
 	}
 
 	// Make Sure A Poll Is Fully Visible
-	// Only ever clears opacity, never animates towards it. Fading a poll *in*
-	// would have to start it at zero opacity, and browsers freeze animations in
-	// background tabs, which would leave the poll invisible until it is looked at.
+	// Only clears opacity, never animates to it: starting at zero would leave
+	// the poll invisible in a background tab, where animations freeze.
 	function show( element ) {
 		if ( element ) {
 			element.style.transition = '';

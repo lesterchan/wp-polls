@@ -1,7 +1,5 @@
-/* Poll Options poll bar swatches and preview. Both render the front end markup
-   under wp-polls.css; these rules only size them and undo the inline display
-   the swatches are forced into by sitting inside a <label>, whose content model
-   allows phrasing content only. */
+/* Swatches and preview render the front end markup; these rules size them and
+   undo the inline display a <label> forces on its contents. */
 #wp-polls-pollbar {
 	width: 200px;
 }
@@ -9,10 +7,8 @@
 	display: inline-block;
 	width: 160px;
 	vertical-align: middle;
-	/* Deliberately not the configured height. These swatches exist to tell the
-	   two styles apart, and at the 8px default the gradient is a single band of
-	   shading nobody can see. The preview under the colour fields is the one
-	   that shows the real height. */
+	/* Not the configured height: at the 8px default the gradient is one
+	   invisible band. The preview below shows the real height. */
 	--wp-polls-bar-height: 24px;
 	--wp-polls-bar-radius: 4px;
 }
@@ -20,23 +16,18 @@
 .wp-polls-swatch .wp-polls-bar-fill {
 	display: block;
 }
-/* Both of these are showing a bar, not measuring one, so the fill is always
-   the full width. The front end sets it inline from the answer's percentage;
-   here it belongs in the stylesheet. */
+/* Showing a bar, not measuring one, so the fill is always full width. */
 #wp-polls-pollbar .wp-polls-bar-fill,
 .wp-polls-swatch .wp-polls-bar-fill {
 	width: 100%;
 }
-/* Add Poll and Edit Poll. The answers are a real table - a numbered row per
-   answer - so they keep a widefat table rather than moving into the form-table
-   the rest of both screens uses. Sizing lives here rather than in width and
-   align attributes on every cell, which is also what lets the vote column
-   follow the text direction on its own. */
+/* The answers are a real table, so they keep widefat rather than form-table.
+   Sizing here, not in per-cell attributes, so the vote column can follow the
+   text direction. */
 .wp-polls-answers th {
 	width: 20%;
 }
-/* The answer field and its Delete button share a row: the field takes what is
-   left after the button rather than the full width .large-text would give it. */
+/* The field takes what is left beside its Delete button. */
 .wp-polls-answers .wp-polls-answer-text {
 	display: flex;
 	gap: 8px;

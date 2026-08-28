@@ -21,9 +21,8 @@
  * poll still renders if the inline block carrying the settings is filtered out.
  */
 
-/* Poll answers. The list markers are cleared because a poll is a form, not
-   prose, and themes commonly style li::before in a way that lands in the
-   middle of an answer. */
+/* Markers cleared: a poll is a form, not prose, and a theme's li::before
+   lands in the middle of an answer. */
 .wp-polls ul,
 .wp-polls-ul,
 .wp-polls-ans ul {
@@ -49,19 +48,8 @@
 	display: inline;
 }
 
-/* The controls themselves are the theme's business.
- *
- * This rule used to reset display, border, padding and margin on every input
- * inside a poll, which breaks any theme that draws its own radio -- and the
- * bundled ones all do. With appearance: none an input is a non-replaced inline
- * box, and width and height do not apply to those, so display: inline threw
- * away the size the theme had set; border: 0 then erased the ring it drew the
- * circle with. Twenty Twenty-One's 25px circles came out as 6px slivers,
- * stretched to the line height.
- *
- * Nothing here needed that reset. The vote button carries its own border and
- * background a few rules down, and the list chrome is neutralised above. All
- * the poll actually wants is a gap between a control and the words next to it. */
+/* The controls are the theme's business: all a poll wants is a gap beside the
+   words. Resetting display or border here erases the radio a theme drew. */
 .wp-polls input[type="radio"],
 .wp-polls input[type="checkbox"] {
 	margin-inline-end: 0.4em;
@@ -126,15 +114,12 @@
 	border-radius: inherit;
 	background-color: var(--wp-polls-bar-background, #d8e1eb);
 	background-image: var(--wp-polls-bar-image, none);
-	/* The width arrives inline, so there is no state change for a transition to
-	   pick up. Scaling in from zero animates the same thing without needing to
-	   know the target width in the stylesheet. */
+	/* The width arrives inline, so there is no state change to transition;
+	   scaling from zero needs no target width here. */
 	transform-origin: left center;
 	animation: wp-polls-bar-grow 0.45s ease-out;
 }
-/* transform-origin has no logical keywords - the property predates them and
-   Transforms Level 2 still only takes left/right - so this one direction rule
-   is written out rather than avoided. */
+/* transform-origin takes no logical keywords, so RTL is written out. */
 [dir="rtl"] .wp-polls .wp-polls-bar-fill {
 	transform-origin: right center;
 }
@@ -152,10 +137,8 @@
 	}
 }
 
-/* The vote button. Both colours are properties rather than fixed values, and
-   both fall back to something derived from the text colour, so the button is
-   still visible on a theme that paints a dark background. The padding replaces
-   the three literal spaces the template's value attribute used to carry. */
+/* Both colours fall back to something derived from the text colour, so the
+   button stays visible on a dark theme. */
 .wp-polls .Buttons {
 	border: 1px solid var(--wp-polls-border, currentColor);
 	background-color: var(--wp-polls-surface, transparent);
