@@ -13,6 +13,16 @@ defined( 'ABSPATH' ) || exit;
 class WP_Polls_Install {
 
 	/**
+	 * Row held for the duration of an upgrade, so only one request runs it.
+	 */
+	const UPGRADE_LOCK = 'wp_polls_upgrade_lock';
+
+	/**
+	 * How long a held lock is believed before it is treated as abandoned.
+	 */
+	const UPGRADE_LOCK_TIMEOUT = 300;
+
+	/**
 	 * Hook registration.
 	 *
 	 * @return void
@@ -63,6 +73,77 @@ class WP_Polls_Install {
 	 * @return void
 	 */
 	public static function upgrade() {
+		// Nothing owed is the case on every request but a handful in an install's
+		// life, and it must stay a read: the lock below costs two writes.
+		if ( ! self::is_behind() ) {
+			return;
+		}
+
+		// Running on init means running on front-end requests, so a busy site can
+		// have two of these in the migration at once -- and the fold is a
+		// read-modify-write of one row. The loser of that race writes the values
+		// it read before the winner saved, over the top of the winner's, and by
+		// then the legacy rows it would have read them back from are deleted.
+		if ( ! self::lock() ) {
+			return;
+		}
+
+		// Re-read behind the lock: the request that held it may have finished the
+		// whole upgrade between the check above and the lock coming free.
+		WP_Polls_Options::flush();
+		$steps = self::outstanding();
+
+		if ( ! in_array( true, $steps, true ) ) {
+			self::unlock();
+
+			return;
+		}
+
+		// Version 3.0.0: fold the ~30 scattered option rows into a single one.
+		// Must run before anything else that touches templates, so there is only
+		// one place they live by the time the later steps read them.
+		if ( $steps['legacy_rows'] ) {
+			WP_Polls_Options::migrate_legacy_rows();
+		}
+
+		// Version 3.0.0: the poll bar became a track holding a fill, styled from
+		// CSS custom properties.
+		if ( $steps['poll_bar'] ) {
+			self::upgrade_poll_bar();
+		}
+
+		// Version 3.0.0: Inline onclick handlers were replaced by data-poll-* attributes.
+		if ( $steps['onclick'] ) {
+			self::upgrade_templates_onclick();
+		}
+
+		if ( $steps['markers'] ) {
+			// Both markers in one write, at the end, so a half finished upgrade
+			// never records itself as complete.
+			WP_Polls_Options::update_markers();
+		}
+
+		self::unlock();
+	}
+
+	/**
+	 * Whether this install still owes any upgrade step.
+	 *
+	 * @return bool
+	 */
+	protected static function is_behind() {
+		return in_array( true, self::outstanding(), true );
+	}
+
+	/**
+	 * Which upgrade steps this install still owes, keyed by step.
+	 *
+	 * Every gate is derived in one place and read twice -- once before the lock
+	 * and once behind it -- so the two answers cannot be computed differently.
+	 *
+	 * @return array<string,bool>
+	 */
+	protected static function outstanding() {
 		$markers = WP_Polls_Options::markers();
 
 		// An install that has not run this yet has no marker row at all, so the
@@ -70,40 +151,56 @@ class WP_Polls_Install {
 		// ran. Read through to it once; the migration deletes it.
 		$installed_version = '' !== $markers['plugin'] ? $markers['plugin'] : (string) get_option( WP_Polls_Options::LEGACY_VERSION, '' );
 		$is_pre_3          = '' === $installed_version || version_compare( $installed_version, '3.0.0', '<' );
+		$stored            = get_option( WP_Polls_Options::OPTION, array() );
 
-		// Version 3.0.0: fold the ~30 scattered option rows into a single one.
-		// Must run before anything else that touches templates, so there is only
-		// one place they live by the time the later steps read them.
-		//
-		// Gated on the stored shape as well as the version. 3.0.0 spent a while
-		// unreleased on the development branch, so an install can be stamped
-		// 3.0.0 and still hold the scattered rows; a version-only gate would
-		// skip it and quietly drop that site to defaults. Checking for the
-		// nested 'templates' key catches those, and the migration is a no-op
-		// when there is nothing left to fold in.
-		$stored = get_option( WP_Polls_Options::OPTION, array() );
-		if ( $is_pre_3 || ! is_array( $stored ) || ! isset( $stored['templates'] ) ) {
-			WP_Polls_Options::migrate_legacy_rows();
+		return array(
+			// Gated on the stored shape as well as the version. 3.0.0 spent a
+			// while unreleased on the development branch, so an install can be
+			// stamped 3.0.0 and still hold the scattered rows; a version-only
+			// gate would skip it and quietly drop that site to defaults.
+			'legacy_rows' => $is_pre_3 || ! is_array( $stored ) || ! isset( $stored['templates'] ),
+			// Gated on the stored shape too, for the same reason: a development
+			// install can be stamped 3.0.0 and still hold the old bar.
+			'poll_bar'    => $is_pre_3 || self::needs_poll_bar_upgrade( $stored ),
+			'onclick'     => $is_pre_3,
+			'markers'     => WP_POLLS_VERSION !== $markers['plugin'] || WP_POLLS_DB_VERSION !== $markers['db'],
+		);
+	}
+
+	/**
+	 * Take the upgrade lock for this site.
+	 *
+	 * The atomic half is add_option(): the options table has a unique key on
+	 * option_name, so a second request's INSERT fails rather than overwriting,
+	 * and only one caller is told it succeeded. wp_cache_add() would not do --
+	 * with no persistent object cache it succeeds in every request, and a site
+	 * with no object cache is exactly the one at risk.
+	 *
+	 * @return bool Whether this request now holds the lock.
+	 */
+	protected static function lock() {
+		$held = get_option( self::UPGRADE_LOCK, false );
+
+		if ( false !== $held ) {
+			// A request that died mid-upgrade must not stop every later one from
+			// ever finishing it.
+			if ( ( time() - (int) $held ) < self::UPGRADE_LOCK_TIMEOUT ) {
+				return false;
+			}
+
+			delete_option( self::UPGRADE_LOCK );
 		}
 
-		// Version 3.0.0: the poll bar became a track holding a fill, styled from
-		// CSS custom properties. Gated on the stored shape as well as the version
-		// for the same reason the migration above is - a development install can
-		// be stamped 3.0.0 and still hold the old bar.
-		if ( $is_pre_3 || self::needs_poll_bar_upgrade( $stored ) ) {
-			self::upgrade_poll_bar();
-		}
+		return add_option( self::UPGRADE_LOCK, time(), '', false );
+	}
 
-		// Version 3.0.0: Inline onclick handlers were replaced by data-poll-* attributes.
-		if ( $is_pre_3 ) {
-			self::upgrade_templates_onclick();
-		}
-
-		if ( WP_POLLS_VERSION !== $markers['plugin'] || WP_POLLS_DB_VERSION !== $markers['db'] ) {
-			// Both markers in one write, at the end, so a half finished upgrade
-			// never records itself as complete.
-			WP_Polls_Options::update_markers();
-		}
+	/**
+	 * Release the upgrade lock.
+	 *
+	 * @return void
+	 */
+	protected static function unlock() {
+		delete_option( self::UPGRADE_LOCK );
 	}
 
 	/**
@@ -264,7 +361,10 @@ class WP_Polls_Install {
 			array( WP_Polls_Options::OPTION, WP_Polls_Options::VERSION ),
 			array_keys( WP_Polls_Options::legacy_map() ),
 			WP_Polls_Options::legacy_extra_rows(),
-			array( 'widget_polls', 'widget_polls-widget' )
+			// The lock is the upgrade's own bookkeeping and is absent on a site
+			// that finished one, but a site uninstalling part way through an
+			// interrupted upgrade would otherwise keep it.
+			array( self::UPGRADE_LOCK, 'widget_polls', 'widget_polls-widget' )
 		);
 	}
 

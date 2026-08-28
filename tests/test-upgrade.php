@@ -642,4 +642,72 @@ class WP_Polls_Upgrade_Test extends WP_Polls_TestCase {
 		$this->assertArrayNotHasKey( 'logging_method', $all, 'the old key survived the migration' );
 		$this->assertArrayNotHasKey( 'ajax', $all, 'the AJAX style key survived the migration' );
 	}
+
+	/**
+	 * A second request does not migrate while another one holds the lock.
+	 *
+	 * The fold is a read-modify-write of a single row, and since the upgrade
+	 * moved to init two front-end requests can be inside it at once. The loser
+	 * of that race would write the values it read before the winner saved --
+	 * over the top of the winner's -- and the legacy rows it would have read
+	 * them back from are deleted by then. The lock is what stops it starting.
+	 */
+	public function test_a_request_does_not_migrate_while_another_holds_the_lock() {
+		$this->make_legacy_install();
+
+		add_option( WP_Polls_Install::UPGRADE_LOCK, time(), '', false );
+
+		$this->run_upgrade();
+
+		$this->assertFalse( get_option( WP_Polls_Options::OPTION, false ), 'the row is left to whoever holds the lock' );
+		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', get_option( 'poll_template_votefooter' ), 'and no legacy row is folded in under them' );
+	}
+
+	/**
+	 * A lock left behind by a request that died is taken back.
+	 *
+	 * Otherwise one fatal during the migration would stop every later request
+	 * from ever finishing it, and the site would stay half-upgraded for good.
+	 */
+	public function test_a_lock_left_by_a_dead_request_is_taken_back() {
+		$this->make_legacy_install();
+
+		add_option( WP_Polls_Install::UPGRADE_LOCK, time() - ( WP_Polls_Install::UPGRADE_LOCK_TIMEOUT + 1 ), '', false );
+
+		$this->run_upgrade();
+
+		$this->assertSame( '<ul>CUSTOM FOOTER %POLL_ID%</ul>', WP_Polls_Options::get( 'templates.votefooter' ), 'an abandoned lock is stolen rather than believed' );
+		$this->assertSame( 17, (int) WP_Polls_Options::get( 'archive.per_page' ), 'and the upgrade it was blocking runs' );
+		$this->assertFalse( get_option( WP_Polls_Install::UPGRADE_LOCK, false ), 'and the lock is released afterwards' );
+	}
+
+	/**
+	 * The lock is released whichever way the upgrade leaves.
+	 *
+	 * A lock held past the end of the request that took it is a lock nothing
+	 * releases for five minutes, so every request in that window skips an
+	 * upgrade it should have run.
+	 */
+	public function test_the_upgrade_lock_is_never_left_held() {
+		$this->make_legacy_install();
+
+		$this->run_upgrade();
+
+		$this->assertFalse( get_option( WP_Polls_Install::UPGRADE_LOCK, false ), 'the lock survived a completed upgrade' );
+
+		// And again on the path where the re-read behind the lock finds the
+		// work already done.
+		$this->run_upgrade();
+
+		$this->assertFalse( get_option( WP_Polls_Install::UPGRADE_LOCK, false ), 'the lock survived a no-op run' );
+	}
+
+	/**
+	 * Uninstall takes the lock row with it.
+	 */
+	public function test_uninstall_removes_the_upgrade_lock() {
+		add_option( WP_Polls_Install::UPGRADE_LOCK, time(), '', false );
+
+		$this->assertContains( WP_Polls_Install::UPGRADE_LOCK, WP_Polls_Install::option_names(), 'the lock is not on the list uninstall deletes' );
+	}
 }
