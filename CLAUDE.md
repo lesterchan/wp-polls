@@ -73,7 +73,9 @@ the list.
   the block permanent.** The old hint said "0 to disable", which was the opposite
   of the truth. Nothing is deleted by it either; it only sets how far back a
   check looks.
-* **`setcookie()` is guarded by `headers_sent()`**, matching wp-postratings.
+* **`setcookie()` is guarded by `headers_sent()`**, because a vote can be cast
+  on a request that has already begun sending output, where the call would warn
+  and set nothing.
 * **Only the first address in the trusted proxy header is read**, so votes
   recorded against a forged chain no longer count as separate voters. Sites that
   left the header blank are unaffected and their vote logs still match.
@@ -178,6 +180,24 @@ Reading is public, because a poll is public.
 hooks do not fire on a plugin update — the usual reason a migration never runs
 at all — and because an automatic background update runs on cron, which never
 fires an admin hook.
+
+**The upgrade takes a lock before it does anything**, because running on `init`
+means running on front-end requests: two visitors arriving together would
+otherwise both work through the same migration. Be accurate about what that
+buys, because the obvious claim is wrong — it is *not* protecting against one
+request writing stale values over another's finished migration. `get_option()`
+serves autoloaded rows out of the `alloptions` snapshot, loaded once per request
+in a single query, and every row this migration reads and writes is autoloaded,
+so each request sees a self-consistent view and any two of them compute the same
+result. What the lock buys is that the work happens once instead of twice. The
+lock is an `add_option()` row because the unique key on `option_name` is the
+only atomic thing available on a site with no persistent object cache;
+`wp_cache_add()` succeeds in every request on such a site and would protect
+nothing. An abandoned lock times out rather than stranding the site on the old
+schema for good.
+
+A current site pays nothing for it: the gate reads the version markers and
+returns before the lock is reached.
 Three separate things happen on that path and `tests/e2e/upgrade.spec.js` covers
 each:
 
