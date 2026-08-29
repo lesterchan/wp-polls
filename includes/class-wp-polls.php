@@ -101,7 +101,9 @@ class WP_Polls {
 	 * shapes visible this early are the active widget and a shortcode or block
 	 * in the current post; anything rendering later than the head -- a template
 	 * tag, a poll in a loop page -- asks via WP_Polls_Display::request_assets()
-	 * and footer_scripts() picks it up.
+	 * and footer_scripts() picks it up. A poll neither pass can reach, such as
+	 * markup fetched over AJAX into a page that shows none itself, says so
+	 * through the `wp_polls_needs_assets` filter.
 	 *
 	 * @return void
 	 */
@@ -119,6 +121,32 @@ class WP_Polls {
 	 * @return bool
 	 */
 	protected static function needs_assets() {
+		/**
+		 * Filters whether the head enqueues the front end assets.
+		 *
+		 * The shapes detected here are the ones a plugin can see before the
+		 * page is built. Something that renders a poll by another route --
+		 * markup fetched over AJAX into an already loaded page, a template
+		 * that builds its own -- is invisible to all of them, and returning
+		 * true says so.
+		 *
+		 * Returning false suppresses the head enqueue only. Any poll that
+		 * then renders still asks for the assets from the footer, so this is
+		 * not a way to keep the stylesheet off a page that shows a poll.
+		 *
+		 * @since 3.0.2
+		 *
+		 * @param bool $needs_assets Whether a poll was detected.
+		 */
+		return (bool) apply_filters( 'wp_polls_needs_assets', self::detect_poll() );
+	}
+
+	/**
+	 * Whether a poll is visible in the request before the page is built.
+	 *
+	 * @return bool
+	 */
+	protected static function detect_poll() {
 		if ( is_active_widget( false, false, 'polls-widget', true ) ) {
 			return true;
 		}

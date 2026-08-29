@@ -704,6 +704,56 @@ class WP_Polls_Internals_Test extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * A render path the detection cannot see says so through the filter.
+	 *
+	 * Poll markup fetched over AJAX into a page that itself renders no poll
+	 * reaches neither pass: the fetch has no `wp_footer`, and the page carried
+	 * no widget, shortcode or block for the head to find.
+	 *
+	 * @return void
+	 */
+	public function test_the_filter_can_ask_for_the_assets_on_a_page_holding_no_poll() {
+		add_filter( 'wp_polls_needs_assets', '__return_true' );
+
+		WP_Polls::scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The filter asked for the stylesheet and did not get it.' );
+		$this->assertTrue( wp_script_is( 'wp-polls', 'enqueued' ), 'The filter asked for the vote script and did not get it.' );
+	}
+
+	/**
+	 * The filter sees what the detection found, and can overrule it.
+	 *
+	 * Turning the head pass off is not a way to keep the assets off a page
+	 * that shows a poll: the render still asks, and the footer still delivers.
+	 *
+	 * @return void
+	 */
+	public function test_the_filter_sees_the_detected_value_and_the_footer_still_delivers() {
+		$poll_id = $this->make_poll();
+		$this->shape_a_poll_page( '[poll]' );
+
+		$seen = null;
+		add_filter(
+			'wp_polls_needs_assets',
+			function ( $needs_assets ) use ( &$seen ) {
+				$seen = $needs_assets;
+				return false;
+			}
+		);
+
+		WP_Polls::scripts();
+
+		$this->assertTrue( $seen, 'The filter was handed the detected value.' );
+		$this->assertFalse( wp_style_is( 'wp-polls', 'enqueued' ), 'The head pass enqueued over the filter.' );
+
+		WP_Polls_Display::get_poll( $poll_id, false );
+		WP_Polls::footer_scripts();
+
+		$this->assertTrue( wp_style_is( 'wp-polls', 'enqueued' ), 'The footer pass took the head filter as its own answer.' );
+	}
+
+	/**
 	 * Put the request into the shape of a singular page carrying a poll.
 	 *
 	 * The assets only load where a poll shows, so a test asserting on their
