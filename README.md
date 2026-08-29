@@ -4,7 +4,7 @@ Donate link: https://lesterchan.net/site/donation/
 Tags: poll, polls, vote, ajax, survey  
 Requires at least: 6.8  
 Tested up to: 7.1  
-Stable tag: 3.0.1  
+Stable tag: 3.0.2  
 Requires PHP: 8.2  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -320,6 +320,9 @@ be. That class no longer exists, so the old snippet colours nothing.
 7. The Poll block in the editor: the preview is the real poll, and the sidebar picks which poll and whether to show the voting form or the result
 
 ## Changelog
+### 3.0.2
+* NEW: A `wp_polls_needs_assets` filter, for code that renders a poll where WP-Polls cannot see it coming. 3.0.1 loads the stylesheet and the voting script only where it finds the poll widget, a `[poll]` or `[page_polls]` shortcode, one of the two blocks, or a poll rendering during the page itself. Poll markup fetched over `admin-ajax.php` or the REST API into a page that shows no poll of its own is none of those, and got neither file — leaving the poll unable to vote, under a "Loading ..." that never cleared. Returning true from the filter is how such a page asks for them.
+
 ### 3.0.1
 * CHANGED: The stylesheet, the voting script and the inline poll bar styles load only on pages that show a poll, a polls archive or the poll widget; every other page sheds all three. If a caching or optimisation plugin combines assets per page, its combined file now differs between pages with and without a poll — that is this change, not a fault, and its cache can simply be regenerated.
 * NEW: A Settings link on the plugin's row on the Plugins screen.
