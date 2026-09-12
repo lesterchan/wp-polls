@@ -134,7 +134,7 @@ if ( ! function_exists( 'get_polltime' ) ) {
 	 * @param string $date_format PHP date format for the answer.
 	 * @param bool   $display     Echo when true, return when false.
 	 *
-	 * @return string|void
+	 * @return ($display is true ? void : string)
 	 */
 	function get_polltime( $poll_id, $date_format = 'd/m/Y', $display = true ) {
 		global $wpdb;
@@ -171,7 +171,7 @@ if ( ! function_exists( 'get_poll' ) ) {
 	 * @param int  $poll_id Poll ID. 0 for the current poll, -1 to disable, -2 for random.
 	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return string|void
+	 * @return ($display is true ? null : string)
 	 */
 	function get_poll( $poll_id = 0, $display = true ) {
 		return WP_Polls_Display::get_poll( $poll_id, $display );
@@ -184,7 +184,7 @@ if ( ! function_exists( 'display_polls_archive_link' ) ) {
 	 *
 	 * @param bool $display Echo when true, return when false.
 	 *
-	 * @return string|void
+	 * @return ($display is true ? null : string)
 	 */
 	function display_polls_archive_link( $display = true ) {
 		return WP_Polls_Display::display_polls_archive_link( $display );

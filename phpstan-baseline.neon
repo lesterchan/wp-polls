@@ -1,0 +1,841 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_question\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Method WP_Polls_Admin\:\:admin_pages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Method WP_Polls_Admin\:\:page_slugs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Method WP_Polls_Admin\:\:poll_tinymce_addplugin\(\) has parameter \$plugin_array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Method WP_Polls_Admin\:\:poll_tinymce_addplugin\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Method WP_Polls_Admin\:\:poll_tinymce_registerbutton\(\) has parameter \$buttons with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Method WP_Polls_Admin\:\:poll_tinymce_registerbutton\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Method WP_Polls_Admin\:\:poll_tinymce_translation\(\) has parameter \$mce_translation with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Method WP_Polls_Admin\:\:poll_tinymce_translation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<0, 23\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<0, 59\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<0, 60\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<1, 12\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<1, 31\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<2000, max\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_html expects string, int\<0, 23\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_html expects string, int\<0, 59\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_html expects string, int\<0, 60\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_html expects string, int\<1, 31\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_html expects string, int\<2000, max\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Parameter \#3 \$args of function wp_die expects array\{response\?\: int, link_url\?\: string, link_text\?\: string, back_link\?\: bool, text_direction\?\: string, charset\?\: string, code\?\: string, exit\?\: bool\}\|int, array\{response\: null\} given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Variable \$text in empty\(\) is never defined\.$#'
+			identifier: empty.variable
+			count: 1
+			path: includes/class-wp-polls-admin.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_active\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/class-wp-polls-api.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_multiple\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wp-polls-api.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_question\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wp-polls-api.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_totalvoters\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wp-polls-api.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_totalvotes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wp-polls-api.php
+
+		-
+			message: '#^Method WP_Polls_API\:\:answer_ids\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-api.php
+
+		-
+			message: '#^Method WP_Polls_Blocks\:\:render_poll\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-blocks.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_active\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_id\.$#'
+			identifier: property.notFound
+			count: 4
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pollq_question\.$#'
+			identifier: property.notFound
+			count: 6
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:close\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:close\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:delete\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:delete\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:get\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:get\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:list_\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:list_\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:open\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:open\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:poll_or_die\(\) should return object but returns object\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:print_rows\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Method WP_Polls_Command\:\:print_rows\(\) has parameter \$rows with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^Parameter \#1 \$poll_id of static method WP_Polls_Poll\:\:get\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-command.php
+
+		-
+			message: '#^@param array \$user_voted does not accept actual type of parameter\: array\|int\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 2
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Method WP_Polls_Display\:\:display_pollresult\(\) has parameter \$user_voted with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Method WP_Polls_Display\:\:get_ans_result_sort\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Method WP_Polls_Display\:\:get_ans_sort\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Method WP_Polls_Display\:\:poll_template_vote_markup\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#1 \$haystack of function strpos expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#1 \$page of static method WP_Polls_Display\:\:polls_archive_link\(\) expects int, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#1 \$page of static method WP_Polls_Display\:\:polls_archive_link\(\) expects int, float\|int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, array\<int, float\|int\|string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, float\|int given\.$#'
+			identifier: argument.type
+			count: 4
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, int\|string\|false given\.$#'
+			identifier: argument.type
+			count: 6
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Parameter \#2 \$timestamp of function gmdate expects int\|null, string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between float and 9 will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between 0 and int\<min, \-1\>\|int\<1, max\> will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Variable \$page in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: includes/class-wp-polls-display.php
+
+		-
+			message: '#^Method WP_Polls_Install\:\:option_names\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-install.php
+
+		-
+			message: '#^Method WP_Polls_List_Table\:\:format_date\(\) should return string but returns int\|string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wp-polls-list-table.php
+
+		-
+			message: '#^Method WP_Polls_List_Table\:\:get_columns\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-list-table.php
+
+		-
+			message: '#^Method WP_Polls_List_Table\:\:get_sortable_columns\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-list-table.php
+
+		-
+			message: '#^Method WP_Polls_List_Table\:\:page_url\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-list-table.php
+
+		-
+			message: '#^Method WP_Polls_List_Table\:\:stats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-list-table.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:all\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:defaults\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:legacy_extra_rows\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:legacy_map\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:legacy_shared_rows\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:markers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:merge\(\) has parameter \$defaults with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:merge\(\) has parameter \$values with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:merge\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:save\(\) has parameter \$values with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Options\:\:template_keys\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Property WP_Polls_Options\:\:\$cache type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-options.php
+
+		-
+			message: '#^Method WP_Polls_Poll\:\:all\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-poll.php
+
+		-
+			message: '#^Method WP_Polls_Poll\:\:answers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-poll.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<1, 2\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: includes/class-wp-polls-screen-add.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-screen-logs.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-screen-logs.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<array\|string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-screen-logs.php
+
+		-
+			message: '#^Parameter \#1 \$key of function sanitize_key expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-screen-manage.php
+
+		-
+			message: '#^Parameter \#1 \$poll_timestamp of static method WP_Polls_Admin\:\:poll_timestamp\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-screen-manage.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 16
+			path: includes/class-wp-polls-screen-manage.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-screen-manage.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:bar_styles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:choices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:field_bar_color\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:field_current_poll\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:field_description\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:field_select\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:field_template\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:field_text\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:sanitize\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:tabs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:template_field_title\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:template_sections\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Settings\:\:template_variables\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-settings.php
+
+		-
+			message: '#^Method WP_Polls_Template\:\:defaults\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-template.php
+
+		-
+			message: '#^@param string \$hostname does not accept actual type of parameter\: string\|false\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:check_voted\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:check_voted\(\) should return array\|int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:check_voted_cookie\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:check_voted_ip\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:check_voted_multiple\(\) has parameter \$polls_ips with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:check_voted_multiple\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:check_voted_multiple\(\) should return array but returns array\|int\<min, \-1\>\|int\<1, max\>\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:check_voted_username\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Vote\:\:vote_poll_process\(\) has parameter \$poll_aid_array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Parameter \#1 \$stream of function flock expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Parameter \#1 \$stream of function ftruncate expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Parameter \#1 \$stream of function fwrite expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Parameter \#2 \$data of function fwrite expects string, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Parameter \#3 \$args of function wp_die expects array\{response\?\: int, link_url\?\: string, link_text\?\: string, back_link\?\: bool, text_direction\?\: string, charset\?\: string, code\?\: string, exit\?\: bool\}\|int, array\{response\: null\} given\.$#'
+			identifier: argument.type
+			count: 3
+			path: includes/class-wp-polls-vote.php
+
+		-
+			message: '#^Method WP_Polls_Widget\:\:defaults\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Method WP_Polls_Widget\:\:form\(\) has parameter \$instance with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Method WP_Polls_Widget\:\:update\(\) has parameter \$new_instance with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Method WP_Polls_Widget\:\:update\(\) has parameter \$old_instance with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Method WP_Polls_Widget\:\:update\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Method WP_Polls_Widget\:\:widget\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Method WP_Polls_Widget\:\:widget\(\) has parameter \$instance with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Return type \(void\) of method WP_Polls_Widget\:\:form\(\) should be compatible with return type \(string\|null\) of method WP_Widget\<array\<string, mixed\>\>\:\:form\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: includes/class-wp-polls-widget.php
+
+		-
+			message: '#^Method WP_Polls_WPStats\:\:register_section\(\) has parameter \$sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-wpstats.php
+
+		-
+			message: '#^Method WP_Polls_WPStats\:\:register_section\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls-wpstats.php
+
+		-
+			message: '#^Parameter \#1 \$number of function number_format_i18n expects float, int\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: includes/class-wp-polls-wpstats.php
+
+		-
+			message: '#^Parameter \#3 \$number of function _n expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: includes/class-wp-polls-wpstats.php
+
+		-
+			message: '#^Method WP_Polls\:\:poll_page_shortcode\(\) has parameter \$atts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls.php
+
+		-
+			message: '#^Method WP_Polls\:\:poll_shortcode\(\) has parameter \$atts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/class-wp-polls.php
+
+		-
+			message: '#^Parameter \#2 \$atts of function shortcode_atts expects array, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wp-polls.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_html expects string, int given\.$#'
+			identifier: argument.type
+			count: 5
+			path: includes/template-tags.php

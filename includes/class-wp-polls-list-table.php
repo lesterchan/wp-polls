@@ -176,7 +176,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 	/**
 	 * Whether this poll is the one the site is showing.
 	 *
-	 * @param object $item Poll row.
+	 * @param stdClass $item Poll row.
 	 * @return bool
 	 */
 	protected function is_displayed( $item ) {
@@ -194,7 +194,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 	/**
 	 * One row, carrying the id the delete script removes it by.
 	 *
-	 * @param object $item Poll row.
+	 * @param stdClass $item Poll row.
 	 * @return void
 	 */
 	public function single_row( $item ) {
@@ -208,7 +208,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 	/**
 	 * The poll id.
 	 *
-	 * @param object $item Poll row.
+	 * @param stdClass $item Poll row.
 	 * @return string
 	 */
 	public function column_pollq_id( $item ) {
@@ -218,7 +218,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 	/**
 	 * The question, plus the row actions.
 	 *
-	 * @param object $item Poll row.
+	 * @param stdClass $item Poll row.
 	 * @return string
 	 */
 	public function column_pollq_question( $item ) {
@@ -260,7 +260,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 	/**
 	 * How many people voted.
 	 *
-	 * @param object $item Poll row.
+	 * @param stdClass $item Poll row.
 	 * @return string
 	 */
 	public function column_pollq_totalvoters( $item ) {
@@ -270,7 +270,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 	/**
 	 * When the poll opened.
 	 *
-	 * @param object $item Poll row.
+	 * @param stdClass $item Poll row.
 	 * @return string
 	 */
 	public function column_pollq_timestamp( $item ) {
@@ -280,7 +280,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 	/**
 	 * When the poll closes, if it ever does.
 	 *
-	 * @param object $item Poll row.
+	 * @param stdClass $item Poll row.
 	 * @return string
 	 */
 	public function column_pollq_expiry( $item ) {
@@ -296,7 +296,7 @@ class WP_Polls_List_Table extends WP_List_Table {
 	/**
 	 * Open, closed, or not started yet.
 	 *
-	 * @param object $item Poll row.
+	 * @param stdClass $item Poll row.
 	 * @return string
 	 */
 	public function column_pollq_active( $item ) {

@@ -56,9 +56,9 @@ class WP_Polls_Display {
 	/**
 	 * Fill a poll template's placeholders in.
 	 *
-	 * @param string $template  Template with %POLL_*% placeholders.
-	 * @param object $poll      Poll row the values come from.
-	 * @param array  $variables Placeholder => value map.
+	 * @param string   $template  Template with %POLL_*% placeholders.
+	 * @param stdClass $poll      Poll row the values come from.
+	 * @param array    $variables Placeholder => value map.
 	 *
 	 * @return string
 	 */
@@ -135,7 +135,7 @@ class WP_Polls_Display {
 		 * @since 2.75.5
 		 *
 		 * @param string $template_question           Stored template.
-		 * @param object $poll_question               Poll row.
+		 * @param stdClass $poll_question               Poll row.
 		 * @param array  $template_question_variables Token => replacement.
 		 */
 		$template_question = apply_filters( 'wp_polls_template_voteheader_markup', $template_question, $poll_question, $template_question_variables );
@@ -190,7 +190,7 @@ class WP_Polls_Display {
 				 * @since 2.75.5
 				 *
 				 * @param string $template_answer           Stored template.
-				 * @param object $poll_answer               Answer row.
+				 * @param stdClass $poll_answer               Answer row.
 				 * @param array  $template_answer_variables Token => replacement.
 				 */
 				$template_answer = apply_filters( 'wp_polls_template_votebody_markup', $template_answer, $poll_answer, $template_answer_variables );
@@ -235,7 +235,7 @@ class WP_Polls_Display {
 			 * @since 2.75.5
 			 *
 			 * @param string $template_footer           Stored template.
-			 * @param object $poll_question             Poll row.
+			 * @param stdClass $poll_question             Poll row.
 			 * @param array  $template_footer_variables Token => replacement.
 			 */
 			$template_footer = apply_filters( 'wp_polls_template_votefooter_markup', $template_footer, $poll_question, $template_footer_variables );
@@ -372,7 +372,7 @@ class WP_Polls_Display {
 		 * @since 2.75.5
 		 *
 		 * @param string $template_question  Stored template.
-		 * @param object $poll_question      Poll row.
+		 * @param stdClass $poll_question      Poll row.
 		 * @param array  $template_variables Token => replacement.
 		 */
 		$template_question = apply_filters( 'wp_polls_template_resultheader_markup', $template_question, $poll_question, $template_variables );
@@ -466,7 +466,7 @@ class WP_Polls_Display {
 					 * @since 2.75.5
 					 *
 					 * @param string $template_answer    Stored template.
-					 * @param object $poll_answer        Answer row.
+					 * @param stdClass $poll_answer        Answer row.
 					 * @param array  $template_variables Token => replacement.
 					 */
 					$template_answer = apply_filters( 'wp_polls_template_resultbody2_markup', $template_answer, $poll_answer, $template_variables );
@@ -479,7 +479,7 @@ class WP_Polls_Display {
 					 * @since 2.75.5
 					 *
 					 * @param string $template_answer    Stored template.
-					 * @param object $poll_answer        Answer row.
+					 * @param stdClass $poll_answer        Answer row.
 					 * @param array  $template_variables Token => replacement.
 					 */
 					$template_answer = apply_filters( 'wp_polls_template_resultbody_markup', $template_answer, $poll_answer, $template_variables );
@@ -540,7 +540,7 @@ class WP_Polls_Display {
 				 * @since 2.75.5
 				 *
 				 * @param string $template_footer    Stored template.
-				 * @param object $poll_question      Poll row.
+				 * @param stdClass $poll_question      Poll row.
 				 * @param array  $template_variables Token => replacement.
 				 */
 				$template_footer = apply_filters( 'wp_polls_template_resultfooter_markup', $template_footer, $poll_question, $template_variables );
@@ -552,7 +552,7 @@ class WP_Polls_Display {
 				 * @since 2.75.5
 				 *
 				 * @param string $template_footer    Stored template.
-				 * @param object $poll_question      Poll row.
+				 * @param stdClass $poll_question      Poll row.
 				 * @param array  $template_variables Token => replacement.
 				 */
 				$template_footer = apply_filters( 'wp_polls_template_resultfooter2_markup', $template_footer, $poll_question, $template_variables );
@@ -603,7 +603,7 @@ class WP_Polls_Display {
 	 *
 	 * @param bool $display Optional. Echo when true, return when false.
 	 *
-	 * @return string|void
+	 * @return ($display is true ? void : string)
 	 */
 	public static function display_polls_archive_link( $display = true ) {
 		$template_pollarchivelink = removeslashes( WP_Polls_Options::get( 'templates.pollarchivelink' ) );
@@ -1073,7 +1073,7 @@ class WP_Polls_Display {
 	 *                           -1 to disable, -2 for random.
 	 * @param bool $display      Optional. Echo when true, return when false.
 	 *
-	 * @return string|void
+	 * @return ($display is true ? void : string)
 	 */
 	public static function get_poll( $temp_poll_id = 0, $display = true ) {
 		global $wpdb, $polls_loaded;
