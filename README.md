@@ -4,7 +4,7 @@ Donate link: https://lesterchan.net/site/donation/
 Tags: poll, polls, vote, ajax, survey  
 Requires at least: 6.8  
 Tested up to: 7.1  
-Stable tag: 3.0.2  
+Stable tag: 3.0.3  
 Requires PHP: 8.2  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -320,6 +320,10 @@ be. That class no longer exists, so the old snippet colours nothing.
 7. The Poll block in the editor: the preview is the real poll, and the sidebar picks which poll and whether to show the voting form or the result
 
 ## Changelog
+### 3.0.3
+* FIXED: A page that refreshes its polls from theme or plugin code could show the same poll twice. Since 3.0.0 the "Loading ..." placeholder beside each poll carried the `wp-polls` class as well as `wp-polls-loading`, so code that walks `.wp-polls` to find the polls on a page found every one twice, and the id it read off the placeholder, `polls-369-loading`, was taken as poll 369 again. The placeholder carries `wp-polls-loading` alone, as it did before 3.0.0.
+* NOTE: Custom CSS that addresses the spinner as `.wp-polls .wp-polls-spinner` no longer matches; `.wp-polls-loading .wp-polls-spinner` does.
+
 ### 3.0.2
 * NEW: A `wp_polls_needs_assets` filter, for code that renders a poll where WP-Polls cannot see it coming. 3.0.1 loads the stylesheet and the voting script only where it finds the poll widget, a `[poll]` or `[page_polls]` shortcode, one of the two blocks, or a poll rendering during the page itself. Poll markup fetched over `admin-ajax.php` or the REST API into a page that shows no poll of its own is none of those, and got neither file — leaving the poll unable to vote, under a "Loading ..." that never cleared. Returning true from the filter is how such a page asks for them.
 
