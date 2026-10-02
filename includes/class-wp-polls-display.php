@@ -267,12 +267,15 @@ class WP_Polls_Display {
 	 * beside it is the actual message - so it is hidden from assistive
 	 * technology.
 	 *
+	 * It does not carry `wp-polls`: that class marks a poll, and theme code
+	 * that walks `.wp-polls` reads a poll id out of each match.
+	 *
 	 * @param int $poll_id Poll the placeholder belongs to.
 	 * @return string
 	 */
 	public static function loading_markup( $poll_id ) {
 		return sprintf(
-			'<div id="polls-%1$d-loading" class="wp-polls wp-polls-loading"><span class="wp-polls-spinner" aria-hidden="true"></span> %2$s</div>' . "\n",
+			'<div id="polls-%1$d-loading" class="wp-polls-loading"><span class="wp-polls-spinner" aria-hidden="true"></span> %2$s</div>' . "\n",
 			(int) $poll_id,
 			esc_html__( 'Loading ...', 'wp-polls' )
 		);

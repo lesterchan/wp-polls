@@ -26,6 +26,29 @@ class WP_Polls_Display_Test extends WP_Polls_TestCase {
 	}
 
 	/**
+	 * Only the poll carries `wp-polls`; the loading placeholder beside it
+	 * does not, or a theme walking `.wp-polls` finds every poll twice.
+	 */
+	public function test_only_the_poll_carries_the_poll_class() {
+		$poll_id = $this->make_poll();
+		$outputs = array(
+			'vote form' => WP_Polls_Display::display_pollvote( $poll_id ),
+			'results'   => WP_Polls_Display::display_pollresult( $poll_id ),
+		);
+
+		foreach ( $outputs as $view => $html ) {
+			$this->assertStringContainsString( 'id="polls-' . $poll_id . '-loading"', $html, "The $view render the placeholder." );
+
+			$ids  = array();
+			$tags = new WP_HTML_Tag_Processor( $html );
+			while ( $tags->next_tag( array( 'class_name' => 'wp-polls' ) ) ) {
+				$ids[] = $tags->get_attribute( 'id' );
+			}
+			$this->assertSame( array( 'polls-' . $poll_id ), $ids, "The $view mark one element as the poll." );
+		}
+	}
+
+	/**
 	 * Inline handlers must never appear in rendered output.
 	 */
 	public function test_rendered_output_has_no_inline_handlers() {

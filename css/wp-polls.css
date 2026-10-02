@@ -72,7 +72,7 @@
    theme's colour through currentColor, scales with the surrounding font size,
    and costs no request. The ring is three-quarters of a circle - one border
    side is transparent - spun by a transform. */
-.wp-polls .wp-polls-spinner {
+.wp-polls-loading .wp-polls-spinner {
 	display: inline-block;
 	box-sizing: border-box;
 	width: 1em;
@@ -91,7 +91,7 @@
 /* Still legible, just not moving: the ring stays as a dimmed circle so the
    placeholder does not turn into an unexplained gap beside the word. */
 @media (prefers-reduced-motion: reduce) {
-	.wp-polls .wp-polls-spinner {
+	.wp-polls-loading .wp-polls-spinner {
 		animation: none;
 		border-inline-end-color: currentColor;
 		opacity: 0.4;
